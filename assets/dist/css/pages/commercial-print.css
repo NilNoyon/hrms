@@ -1,0 +1,110 @@
+body {
+    background-color: #fff !important;
+}
+.esquire-font {
+    font-family: Esquivel, sans-serif;
+    font-weight: 400;
+}
+
+.esquire-light-font {
+    font-family: Esquivel-Light, sans-serif;
+}
+.logo {
+    max-width: 10%;
+}
+
+.logo-pic {
+    max-width: 90%;
+}
+
+.logo-pica {
+    max-width: 100%;
+}
+
+.column {
+    float: left;
+    width: 15%;
+    padding: 0px;
+}
+
+.columns {
+    float: left;
+    width: 17%;
+    padding: 0px;
+}
+
+.columns_oeko {
+    float: left;
+    width: 18%;
+    margin-right: 10px;
+}
+
+/* Clear floats after image containers */
+
+.footer {
+    display: none
+}
+
+.footer-print {
+    position: fixed;
+    height: 100px;
+    bottom: 0;
+    width: 100%;
+}
+
+.logo-footer {
+    max-width: 5%;
+}
+
+@media (min-width: 20em) {
+
+    .image-left,
+    .image-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .image-left img {
+        margin-right: 1em;
+        float: left;
+        /* fallback */
+    }
+
+    .image-right img {
+        order: 1;
+        margin-left: 1em;
+        float: right;
+        /* fallback */
+    }
+
+    /* clearfix for fallback */
+    .image-left::after,
+    .image-right::after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+}
+
+@media (min-width: 30em) {
+
+    .image-left img,
+    .image-right img {
+        flex-shrink: 0;
+    }
+}
+
+@media print {
+
+    body,
+    page {
+        margin: 0;
+        box-shadow: 0;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .column {
+        width: 100%;
+    }
+}
