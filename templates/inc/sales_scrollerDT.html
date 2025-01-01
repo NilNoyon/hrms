@@ -1,0 +1,151 @@
+{% load static %}
+
+<link href="{% static 'node_modules/datatables.net-bs4/css/dataTables.bootstrap4.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/datatables.net-bs4/css/scroller.dataTables.css' %}" rel="stylesheet">
+<style>
+
+    div.dataTables_filter { 
+        float: none !important;
+        margin: 0 auto !important;
+        text-align: center !important;
+    }
+
+    div.dataTables_filter input { 
+        width: 140% !important; 
+    }
+
+    div.dts div.dataTables_scrollBody{background: transparent !important}
+
+    div.dts div.dts_loading { z-index : 1000; }
+
+</style>
+
+
+<script src="{% static 'node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js' %}"></script>
+<script src="{% static 'node_modules/datatables.net-bs4/js/scroller.dataTables.js' %}"></script>
+<!-- Filter MLC DataTable List -->
+<script>
+
+    var completedTable = null;
+    $(document).ready(function () {
+        loadDataTable({});
+    });
+
+    var company     = '';
+    var buyer  = '';
+    var start_date  = '';
+    var end_date    = ''; 
+    var search_text = '';
+
+    function loadDataTable(data){
+        if (completedTable) {
+            alert("adfsd")
+            completedTable.destroy();
+        }
+        let url = $(".mlc_sc_item_table").data("url");
+
+        completedTable = $(".mlc_sc_item_table").DataTable({
+            dom      : "<'row top'<'col-md-1 mlc_reset_btn'><'col-md-2 mlc_company'><'col-md-2 mlc_buyer'><'col-md-2 mlc_date'><'col-md-4 mlc_search_area'>>t",
+            ordering: false,
+            paging: true,
+            iDisplayLength: 25,
+            pageLength: 5,
+            autoWidth: false,
+            scrollY: '365',
+            scroller: true,
+            deferRender: true,
+            serverSide: true,
+            processing: true,
+            responsive: true,
+            ajax:{
+                type: "POST",
+                url: url,
+                data: data,
+                dataSrc: ""
+            },
+
+            initComplete:function( settings, json){
+                if( Object.keys(data).length > 0 ){
+                    if(data.company.length > 0){
+                        $("#mlc_companies").select2("destroy").val(data.company).select2()
+                    }
+                    if(data.buyer.length > 0){
+                        $("#mlc_buyies").select2("destroy").val(data.buyer).select2()
+                    } 
+
+                    multi_date = ''
+                    if(data.start_date != undefined && data.start_date != ''){
+                        s_date = data.start_date.split("-").join("/");
+                        e_date = data.end_date.split("-").join("/");
+                        multi_date = s_date + " - " + e_date;
+                        $('.mlc_multidate').val(multi_date);
+                        $('.mlc_multidate').data('daterangepicker').setStartDate(s_date);
+                        $('.mlc_multidate').data('daterangepicker').setEndDate(e_date);
+                    }else{ $('.mlc_multidate').val(multi_date); }
+
+                    $("#mlc_search_box").val(data.search_text).focus()
+                }
+            }
+        });
+
+        $(".mlc_reset").children().clone().appendTo(".dataTables_wrapper .mlc_reset_btn");
+        $(".dataTables_wrapper .mlc_reset_btn").children().show();
+
+        $(".mlc_companies").clone().appendTo(".dataTables_wrapper .mlc_company");
+        $(".dataTables_wrapper .mlc_company .mlc_companies").show();
+        $(".dataTables_wrapper .mlc_company .mlc_companies #mlc_companies").select2();
+
+        $(".mlc_buyies").clone().appendTo(".dataTables_wrapper .mlc_buyer");
+        $(".dataTables_wrapper .mlc_buyer .mlc_buyies").show();
+        $(".dataTables_wrapper .mlc_buyer .mlc_buyies #mlc_buyies").select2();
+ 
+        $(".mlc_search_box").clone().appendTo(".dataTables_wrapper .mlc_search_area");
+        $(".dataTables_wrapper .mlc_search_area .mlc_search_box").show();
+
+        $(".top").on("click", ".mlc_reset_button", function(){
+            company = buyer = start_date = end_date = search_text = '';
+            $(".mlc_multidate").val('');
+            loadDataTable({});
+        });
+
+        $("#mlc_companies").on("select2:select select2:unselecting", function(){
+            company = $(this).val();
+            setData();
+        });
+
+        $("#mlc_buyies").on("select2:select select2:unselecting", function(){
+            buyer = $(this).val();
+            setData();
+        }); 
+        // Date Range Picker
+        $(".mlc_multidate").clone().appendTo(".dataTables_wrapper .mlc_date");
+        $(".dataTables_wrapper .mlc_date .mlc_multidate").show();
+        $('.mlc_multidate').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns   : true,
+            autoUpdateInput : false,
+            locale          : {
+                cancelLabel : 'Clear',
+                format      : 'YYYY/MM/DD'
+            },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            start_date      = picker.startDate.format('YYYY-MM-DD');
+            end_date        = picker.endDate.format('YYYY-MM-DD');
+            setData();
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            start_date      = null;
+            end_date        = null;
+            setData();
+        });
+        $(".mlc_search_box").on("click", ".btn", function(){
+            search_text = $("#search_box").val();
+            setData();
+        });
+    }
+
+    function setData(){
+        data = {'company':company, 'start_date':start_date, 'end_date':end_date, 'buyer':buyer, 'search_text':search_text}
+        loadDataTable(data);
+    }
+
+</script>

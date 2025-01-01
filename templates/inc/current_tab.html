@@ -1,0 +1,31 @@
+<script>
+
+    $(document).ready(function () { 
+    
+        // Get Data
+        var currpage    = "{{request.resolver_match.view_name}}";
+        var currurl     = window.location.href;
+        var lastpage    = sessionStorage.getItem("lastpage");
+        var lasturl     = sessionStorage.getItem("last_url");
+        var taburl      = sessionStorage.getItem("tab_url");
+        
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            data_url = $(e.target).data("url");
+            taburl = window.location.origin + data_url;
+            sessionStorage.setItem("tab_url", taburl);
+        });
+
+
+        if(lastpage != null || currpage === lastpage ){
+            if(lasturl !== taburl){
+                window.location.href = taburl;
+            }
+        }
+        
+        sessionStorage.setItem("lastpage", currpage);
+        sessionStorage.setItem("last_url", currurl);
+
+    });
+    
+</script>

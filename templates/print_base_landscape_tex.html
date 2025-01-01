@@ -1,0 +1,114 @@
+
+{% load sc_filters %}
+<html lang="en"> 
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block page_title %}{% endblock %} || EBIT </title>
+        <style type="text/css">
+            body {
+                font-size: 12px !important;
+                font-weight: 100;
+                font-family: "Poppins", sans-serif;
+                position: relative;
+                min-height: 820pt;
+            }  
+            thead, tfoot { 
+                display: table-row-group 
+            }
+            .page{
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .border-right{
+                border-right:0px!important;
+            }
+                
+            .no-border-left{
+                border-left:0px!important;
+            }
+            hr {
+                margin: 15px auto 5px !important;
+                padding: 0 !important;
+            }
+
+            h6 {
+                margin: 15px 0px 0px !important;
+            }
+
+            p {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .logo {
+                left: 50%;
+                height: 45px;
+                z-index: 1;
+                border-radius: 50%;
+                background-color: #fcfcfc;
+            }
+          
+            @page {
+                size:landscape;
+                margin: 0.5in;
+                position: relative;
+
+                @frame {
+                    -pdf-frame-content: tab_content;
+                    left: 50pt;
+                    width: 920pt;
+                    top:440pt;
+                    height: 150pt;
+                }
+
+                @frame {
+                    -pdf-frame-content: sign_content;
+                    left: 50pt;
+                    width: 920pt;
+                    top: 500pt;
+                    height: 300pt;
+                }
+
+                @frame {
+                    -pdf-frame-content: last_content;
+                    width: 780pt;
+                    top: 570pt;
+                    height: 20pt; 
+                }
+
+                @frame {
+                    -pdf-frame-content: left_content;
+                    left: 35pt;
+                    width: 780pt;
+                    top: 570pt;
+                    height: 20pt;
+                }
+
+                @frame footer_frame {
+                    -pdf-frame-content: footer_content;
+                    right: 35pt;
+                    width: 780pt;
+                    top: 570pt;
+                    height: 20pt;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="card border-danger">
+            <div class="card-body" style="position:relative; ">
+
+                {% block page_content %}{% endblock%}
+                <div id="left_content" align="left" style="font-size: 8px;"> 
+                    <p> Printed by: {{user}} ({% now "d-m-y, H:i A" %})</p> 
+                </div>
+                <div id="last_content" align="center" style="font-size: 8px;"> 
+                    <p> Powered by E-BIT, Esquire Technology Limited</p> 
+                </div>
+                
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,160 @@
+<script>
+    function enforceMinMax(el) {
+        if($("#"+el.id).data('number') == "0")
+        {
+            $(el).keypress(function(e){         
+                var keyCode = e.which;         
+                /* 48-57 - (0-9)Numbers
+                46 - (.)
+                */    // Not allow special 
+                if (!((keyCode >= 48 && keyCode <= 57))) {
+                    e.preventDefault();
+                }
+              });
+        }
+        if (el.value != "") {
+            if (el.value.indexOf(".") != -1) {
+                if ((el.step.toString().split(".")[1]).length < (el.value.toString().split(".")[1]).length){
+                    let digits = (el.step.toString().split(".")[1]).length;
+                    el.value = parseFloat(el.value).toFixed(digits)
+                    if(parseFloat(el.value) > parseFloat(el.max)){ el.value = el.max; }
+                    if(parseFloat(el.value) < parseFloat(el.min)){ el.value = el.min; }
+                    toasterMsg("warning", "Maximum " + digits + " digits allowed after decimal point!", 5000);
+                }else{ 
+                    if (parseFloat(el.value) != 0 && parseFloat(el.value) < parseFloat(el.min)) {
+                        el.value = el.min;
+                        toasterMsg("warning", "This amount must be bigger than minimum value!", 5000);
+                    }
+                    else if(parseFloat(el.value) > parseFloat(el.max)){
+                        el.value = el.max;
+                        toasterMsg("warning", "This amount must be smaller than maximum value!", 5000);
+                    }
+                }
+            }
+            else if (el.value.indexOf(".") == -1 && parseFloat(el.value) == 0) { 
+                el.value = el.min ;
+                toasterMsg("warning", "This amount must be bigger than minimum value!", 5000); 
+            }
+            else if (el.value.toString().includes("-")) {
+                el.value = '';
+                toasterMsg("warning", "This amount must be positive value!", 5000);
+            }
+            else if (parseFloat(el.value) != 0 && parseFloat(el.value) < parseFloat(el.min)) {
+                el.value = el.min;
+                toasterMsg("warning", "This amount must be bigger than minimum value!", 5000);
+            }
+            else if(parseFloat(el.value) > parseFloat(el.max)){
+                el.value = el.max;
+                toasterMsg("warning", "This amount must be smaller than maximum value!", 5000);
+            }
+        }
+       
+    }
+
+    //for integer field_type = 1 & for float field_type = 2
+    function numberFieldValidation(el, decimal, field_type) { 
+        var num = $(el).val(); 
+        if (field_type == 2 && !isNaN(num) && num.toString().indexOf('.') != -1){      
+            $(el).blur(function(e){ 
+            
+                // checking input keycode
+                e = e || window.event;
+                var keyCode = e.which || e.keyCode;                  
+                if (!((keyCode >= 48 && keyCode <= 57) )  && keyCode >= 46 ) {
+                    e.preventDefault();          
+                }
+
+
+                // check min max       
+                var num = parseFloat($(el).val());
+                var parts = num.split('.');
+                if((parts[1] || 0).length < decimal) {
+                    var inputNum = num;
+                } else {
+                    var inputNum = num.toFixed(decimal);
+                }
+                $(el).val(inputNum);
+                if ( !$(el).val()=="" && parseFloat(el.min) > parseFloat(inputNum) ) { 
+                    $.toast({
+                        heading: "Invalid Input",           
+                        text: "You can't input less than its minimum value! Current input is "+el.value.toString()+" and minimum value is "+el.min.toString(),           
+                        position: 'top-right',
+                        loaderBg: '#fff',           
+                        icon: 'warning',          
+                        hideAfter: 5000,          
+                        stack: false          
+                        });
+                        el.value = el.min;          
+                }  
+                if ( !$(el).val()=="" && parseFloat(el.max) < parseFloat(num)  ) {
+                    $.toast({
+                        heading: "Invalid Input",
+                        text: "You can't exceed its maximum value! Current input is "+el.value.toString()+" and maximum value is "+el.max.toString(),
+                        position: 'top-right',
+                        loaderBg: '#fff',
+                        icon: 'warning',
+                        hideAfter: 5000,
+                        stack: false
+                        });
+                        el.value =el.max;
+                }
+            })    
+
+        }
+
+        //start integer field validation
+        if (field_type == 1){ 
+            // for integer decimal may be 1
+            $(el).blur(function(e){ 
+                var keyCode = e.which;
+                if (!(keyCode >= 48 && keyCode <= 57)){
+                    e.preventDefault();
+                    
+                }
+
+                var num = $(el).val();  
+                // check min max
+                var inputNum = Math.floor(num);
+                $(el).val(inputNum);
+                if ( !$(el).val()=="" && el.min > num ) { 
+                    $.toast({
+                        heading: "Invalid Input",           
+                        text: "You can't input less than its minimum value! Current input is "+num.toString()+" and minimum value is "+el.min.toString(),           
+                        position: 'top-right',
+                        loaderBg: '#fff',           
+                        icon: 'warning',          
+                        hideAfter: 5000,          
+                        stack: false          
+                        });
+                        el.value = el.min;          
+                }  
+                if ( !$(el).val()=="" && parseFloat(el.max) < parseFloat(num)  ) {
+                    $.toast({
+                        heading: "Invalid Input",
+                        text: "You can't exceed its maximum value! Current input is "+num.toString()+" and maximum value is "+el.max.toString(),
+                        position: 'top-right',
+                        loaderBg: '#fff',
+                        icon: 'warning',
+                        hideAfter: 5000,
+                        stack: false
+                        });
+                        el.value = el.max;
+                }
+                    //checking zero
+                if (parseFloat(num) == 0) {
+                    $.toast({
+                        heading: "Invalid Input",
+                        text: " Value must be greater than 0",
+                        position: 'top-right',
+                        loaderBg: '#fff',
+                        icon: 'warning',
+                        hideAfter: 5000,
+                        stack: false
+                    });
+                    el.value = el.min;
+                }
+            })
+        }
+    }
+
+</script>

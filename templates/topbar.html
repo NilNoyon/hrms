@@ -1,0 +1,790 @@
+{% load static %}
+{% load cache %}
+{% load data_load %}
+{% load sc_filters %}
+
+{% comment %} {% cache 500 my_menulist_key %} {% endcomment %}
+<link href="{% static 'dist/css/navbar.css' %}?v=0.1" rel="stylesheet">
+
+<style>
+    a {
+        text-decoration: none !important;
+        color:black;
+    }
+    a:hover {
+      
+        color:black;
+    }
+    .topbar .top-navbar .navbar-header {
+        background: #f8f9fa;
+    }
+    /* other menu color */
+    .show-hide li span.single:hover {
+        color: #015178 !important;
+    }
+    .show-hide li:hover i {
+        color: #8A211A;
+    }
+    .nav-item .nav-link i:hover{
+        color: white!important;
+    }
+    
+    .navbar-collapse .nav-item .nav-link i:hover{
+        color: #015178 !important;
+    }
+    .show-hide i {
+        color: white !important ;
+    }
+    /* other menu color */
+    .navbar-expand-md .navbar-nav .mega-dropdown .dropdown-menu {
+        position: absolute;
+        overflow: auto;
+        height: 95vh;
+    }
+    .navbar-expand-md .navbar-nav .mega-dropdown-profile .dropdown-menu {
+        height: 95vh;
+    }
+    nav ul li.active>ul {
+        color: #8A211A !important;
+        display: block;
+        list-style-type: none;      
+    }
+    a.font-cl span.hide-menu {
+        color: #015178!important;
+    }
+
+    .btn-outline-danger {
+        color: #8A211A !important;
+        border-color: #8A211A !important;
+    } 
+    .panel-nav {
+        padding: 18px;
+        max-height: 0;
+        overflow: auto;
+    }
+    .sidebar-nav ul li {
+        list-style: none;
+    }
+    .small-width{  
+        display:inline-block;
+        width:auto;
+    }
+    .small-width-5{  
+        flex: 0 0 18.66667%;
+        max-width: 18.66667%;
+    }
+    .small-width-4{  
+        flex: 0 0 21.66667%;
+        max-width: 21.66667%;
+    }  
+    /* more active and non-active color */
+    .nav-item .show ul li.active a.mega-a{
+        color:#015178   !important;
+    }
+    .nav-item .show ul li.active a.mega-a.active  {
+        color: #015178!important ;
+    }
+    /* eg:hr active */
+    .nav-item .show ul li.active a{
+        color: black!important;
+   
+    }
+    .nav-item .show ul li.active a{
+
+    }
+    .nav-item .show ul li.hover a{
+        background:white!important;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: .5rem;
+    }
+
+    ul.edit li.nav-item  a.nav-link i:hover{
+        color: #015178 !important;
+    }    
+
+    .nav-item .show ul.sub-mega-menu li a{
+        color: #015178 !important;
+    } 
+    
+    .nav-item .show ul.sub-mega-menu li.active a.active{
+        color: #015178 !important;
+        font-weight: 800;
+    }
+    .nav-item .show ul.sub-mega-menu li.active a.active i{
+        color:#015178 !important;
+    }
+    
+    /* inventory active and non-active color */
+    .nav-item .show ul li a.mega-link{
+        color: #015178 !important;
+    }
+    .nav-item .show ul li.active ul li.active a.mega-link{
+        color: #015178 !important ;
+    }
+  
+    /* for more active icon and text */
+   .menuIcon{
+        color:  #015178!important;
+        background: white !important ;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: .5rem;
+   }
+   .menuIcon .active{
+        color: black!important;
+        background: white !important ;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: .5rem;
+    }
+    .menuIcon .hover{
+        color: black!important;
+        background:white!important;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: .5rem;
+    }
+
+   .menuIcon i{
+        color: white!important;
+        background:#015178!important;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: .5rem;
+   }
+   /* under line */
+   .skin-red .sidebar-nav>ul>li.active>a {
+        color: #8A211A;
+        border-color: none;
+    }
+    .borderColor{
+        border-bottom-color: #8A211A!important;
+        /* border-color: #8A211A!important; */
+    }
+    .horizontal-nav .sidebar-nav #sidebarnav>li:hover>a {
+            {% comment %} border-bottom-width: 3px;  {% endcomment %}
+            border-bottom-color: white;
+    }
+
+    .horizontal-nav .sidebar-nav #sidebarnav>li.active>a {
+        border-bottom-color: #e7e8e9;
+        border-bottom-width: 0px;
+    }
+
+   .bg-gradient-fuchsia {
+        background-image: linear-gradient(310deg,#141727,#015178);
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+    }
+  
+    .bg-white {
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255/var(--tw-bg-opacity));
+    }
+    .rounded-lg {
+        border-radius: 0.5rem !important;
+    }
+    .bg-color,.custom-card{
+        background: #f8f9fa!important; 
+    }
+   
+    .menu_main {
+        width:100%;
+    }
+    .horizontal-nav .sidebar-nav #sidebarnav>li {
+        margin-bottom: 0px;
+        margin-top: 0px;      
+    }
+    .horizontal-nav .sidebar-nav #sidebarnav>li:hover>a {
+        background:white!important;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        --tw-text-opacity: 1;
+        color: rgb(52 71 103/var(--tw-text-opacity));
+        padding-top: 0.675rem;
+        padding-bottom: 0.675rem;
+        border-radius: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .sidebar-nav ul li a.active,
+    .sidebar-nav ul li a:hover {
+        background:white!important;
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        --tw-text-opacity: 1;
+        color: rgb(52 71 103/var(--tw-text-opacity));
+        padding-top: 0.675rem;
+        padding-bottom: 0.675rem;
+        border-radius: 0.5rem;
+        white-space: nowrap;
+        color: black;
+    }
+    .sidebar-nav ul li a.active {
+        font-weight: 500;
+        color: black;    
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        --tw-text-opacity: 1;
+        color: rgb(52 71 103/var(--tw-text-opacity));
+        padding-top: 0.675rem;
+        padding-bottom: 0.675rem;
+        border-radius: 0.5rem;
+        white-space: nowrap;
+    }
+  
+    .navbar-light .navbar-toggler {
+        color: rgba(0, 0, 0, 0.5);
+    }
+    .topbar .top-navbar {
+        min-height: 65px;
+        padding: 0px;
+    }
+    .shadow-soft-xl{ 
+        
+    }
+    .sidebar-nav>ul>li.active>a {
+        border-color:#141727;
+    }
+    .topbar .top-navbar .profile-pic img {
+        width: 30px;
+    
+        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: 100%;
+    }
+    .sidebar-nav>ul>li>a i {
+        color: white !important;
+        font-size: 14px;
+    }
+    html body .navbar-dark .mailbox ul li .nav-link:hover {
+        color: #015178;
+    }
+    .profile-tab li a.nav-link.active,
+    .customtab li a.nav-link.active {     
+        color: #015178;
+        {% comment %} Dark Cerulean {% endcomment %}
+    }
+    .horizontal-nav .sidebar-nav #sidebarnav>li>a {
+        color: #015178;
+        border-bottom: 0px solid transparent;
+    }
+    .skin-red .sidebar-nav ul li a.active,
+    .skin-red .sidebar-nav ul li a:hover {
+        color: #015178;
+    }
+    .skin-red .sidebar-nav>ul>li.active>a i {
+        color: #015178;
+    }
+    .skin-default-dark .sidebar-nav ul li a.active,
+    .skin-default-dark .sidebar-nav ul li a:hover {
+        color: #015178;
+    }
+
+    .skin-default-dark .sidebar-nav ul li a.active i,
+    .skin-default-dark .sidebar-nav ul li a:hover i {
+        color: #015178;
+    }
+
+    .skin-default-dark .sidebar-nav>ul>li.active>a {
+        color: #015178;
+        border-color: #8A211A !important;
+    }
+    body {
+        background-color: #f2f3f4;
+    }
+    .navbar-toggler {
+        border-radius: 0.25rem;
+    }
+    .square {
+        width: 50vw;
+        height: 50vw;
+    }
+    .relative {
+        position: relative;
+    } 
+    .top-3{
+        top:  0.2rem;
+    }
+    .top-1{
+        position:relative;
+        top: calc(50% - 17px);
+    }
+    .mrt-2 {
+        margin-top: 0.4rem !important;
+        margin-right: 0.9rem !important;
+    }
+
+    {% comment %} define in frontend,modify here {% endcomment %}
+    .sidebar-nav ul li ul {
+        padding-left: 0px;
+    }
+   
+    .center {
+        position: relative;
+        left: 35%;
+        top: 28%;
+        transform: translate(-50%, -50%);
+        transform: -webkit-translate(-50%, -50%);
+        transform: -ms-translate(-50%, -50%);
+    } 
+    li.megaMainMenu.active{
+        color:white !important;
+    }
+
+    .flex-container {
+        display: flex;
+    }
+    
+    .flex-child {
+        flex: 1;
+       
+    }  
+    
+    .flex-child:first-child {
+        margin-right: 15px;
+    } 
+
+    .sub-menu-container {
+        display: flex;  
+    }
+  
+    .sub-menu-child:first-child {
+        flex-basis: 20%;     
+    } 
+
+    .notify_list_div {
+        width: 300px;
+    }
+
+    ul.notify_list li {
+        display: block;
+        text-decoration: none;
+        padding: 9px 15px;
+        color: #e9ecef;
+    }
+    ul.notify_list li:not(:last-child) {
+        border-bottom: 1px solid #e9ecef;
+    }
+    .all_notify_list a:hover{
+        color: black;
+    }
+    .mail-contnet h6{
+        font-weight:bold;
+    }
+
+    .icon-size{
+        font-size: 14px;
+        display: inline-block;
+    }
+    .justify-center {
+        justify-content: center;
+        align-items: center;
+    }
+      .image:hover{
+          transform: rotate(15deg) scale(1.5);
+      }
+
+      .navbar-brand img { width : 60%; }
+    @media only screen and (max-width: 992px) {
+        footer{ font-size: 10px;}
+        .topbar .top-navbar .navbar-header {
+             width: 80px !important;
+        }
+        .logo{
+            width:73%!important;
+        }
+        .sidebar-nav>ul>li>a i {
+            font-size: 14px;
+        }
+    }
+    @media (max-width: 767px) {
+        .navbar-brand img { width : 100% !important; }
+        .show-hide {
+            display: none;
+        }
+        .show-hide li:hover i {
+            color: #015178!important;
+            display: block;
+        }
+        .show-hide i {
+            color: #015178 !important;
+        }
+        .sidebar-nav>ul>li>a i {
+            color: #141727 !important;
+            font-size: 14px;
+        }
+    }
+
+</style>
+<header class="topbar bg-color" style="position: fixed; width: 100%;">
+    
+    <nav class="navbar top-navbar navbar-expand-md navbar-dark rounded" id="navbar">
+      
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/dashboard">
+                {% comment %} logo image {% endcomment %}
+                <img class="" src="/assets/images/ebit-transparent.png" alt="Esquire Logo" />
+            </a>
+        </div>
+       
+          
+        <div class="navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"> <a class="nav-link nav-toggler d-block d-md-none waves-effect waves-dark"
+                        href="javascript:void(0)"><i class="ti-menu"></i></a> </li>
+                <li class="nav-item"> <a class="nav-link sidebartoggler d-none waves-effect waves-dark"
+                        href="javascript:void(0)"><i class="icon-menu"></i></a> </li>
+            </ul>
+            <div class="sidebar-nav mr-auto">
+                <ul class="menu_main navbar-nav mr-auto show-hide" id="sidebarnav">
+                    {% if request.session.is_head or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" or request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+                    <li class="nav-item py-lg-2 pr-lg-2 align-items-center vertical-align" id="helpdesk">
+                        <a class="nav-link" href="javascript:;" aria-expanded="false">
+                        <div class="flex-container">
+                            <div class="flex-child magenta pl-lg-2">
+                                <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
+                                    <i class="fas fa-handshake singlei Helpdesk icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i>                                
+                                </div>
+                            </div>            
+                            <div class="flex-child green">
+                                <div style="height:auto;" class="justify-center text-center">
+                                   <span style="margin: 0;line-height:33.59px;font-size:14px;"> Helpdesk</span>
+                                </div>
+                            </div>                           
+                        </div> 
+                      
+                        </a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a class='desk-link' href="{% url 'desk:issue_dashboard' %}">Issues</a></li>
+                            {% if request.session.hd_role == "4" or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" %}
+                            <li><a class='desk-link' href="{% url 'desk:helpdesk_report' %}">Helpdesk Report</a></li>
+                            {% endif %}
+                            <li><a class='desk-link' href="{% url 'desk:assessment_list' %}">Device Assessment</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item mr-lg-1 py-lg-2 pr-lg-2">
+                        <a class="nav-link" href="{% url 'desk:issue_dashboard' %}" aria-expanded="false">
+                            <div class="flex-container">
+                                <div class="flex-child magenta pl-lg-2">
+                                    <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
+                                        <i class="fas fa-handshake singlei Helpdesk icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i>
+                                     
+                                    </div>
+                                </div>            
+                                <div class="flex-child green">
+                                    <div style="height:auto;" class="justify-center text-center">
+                                       <span style="margin: 0;line-height:33.59px;font-size:14px;"> Helpdesk</span>
+                                    </div>
+                                </div>                           
+                            </div>                       
+                         </a>
+                    </li>
+                    {% endif %}
+                    {% regroup request.session.id|menu_list by menu__module_name as module_list %}
+                    {% for module_name in module_list|slice:"3" %}
+                    {% if forloop.last %} 
+                    <li class="nav-item dropdown mega-dropdown py-lg-2 pr-lg-1" style="position: initial;">
+                        <a class="nav-link dropdown-toggle" href="JavaScript:void(0)" aria-expanded="false" data-toggle="dropdown"
+                            aria-haspopup="true">
+                            <div class="flex-container">
+                                <div class="flex-child magenta pl-lg-2">
+                                    <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
+                                        <i class="{{module_name.list.0.menu__menu_icon}} icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i> 
+                                    </div>
+                                </div>                                     
+                                
+                                <div class="flex-child green">
+                                    <div style="height:auto;" class="justify-center text-center">
+                                        <span style="margin: 0;line-height:33.59px;font-size:14px;"> {{module_name.grouper}}</span>
+                                    </div>
+                                </div>                                      
+                            </div>
+                        </a>
+                        <div class="dropdown-menu animated bounceInDown bg-color">
+                            <ul aria-expanded="false" class="accordion mega-dropdown-menu row">
+                                {% regroup module_name.list by menu__is_sub_menu as sub_menu_list %}
+                                {% for is_sub_menu in sub_menu_list %}
+                                    {% if is_sub_menu.grouper %}
+                                        {% regroup is_sub_menu.list by menu__sub_menu_name as sub_sub_menu_list %}
+                                        {% for sub_menu_name in sub_sub_menu_list %}
+                                        <li class="col-lg-12">                       
+                                            <a class="font-cl" href="javascript:void(0)" aria-expanded="false" >
+                                                <span class="hide-menu text-capitalize" >{{sub_menu_name.grouper}}</span>
+                                            </a>
+                                            <ul class="row">
+                                                {% for data in sub_menu_name.list %}                                
+                                                    <li class="col-lg-3" style="float: left;">
+                                                        <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                                    </li>
+                                                {% endfor %}
+                                                {% for data in sub_menu_name.list|unpermitted_menu_list:request.session.id %}
+                                                    <li class="col-lg-3" style="float: left;">
+                                                        <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for data in is_sub_menu.list %}                          
+                                            <li class="col-lg-3">
+                                                <a class="mega-link" href="{{data.menu__menu_url}}">{{data.menu__menu_name}}</a>
+                                            </li>
+                                        {% endfor %}
+                                        {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
+                                            <li class="col-lg-3" style="float: left;">
+                                                <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown mega-dropdown py-lg-2 pr-lg-2" style="position: initial;">
+                        <a class="nav-link dropdown-toggle" style="width:90%"
+                                href="#" aria-expanded="false" data-toggle="dropdown"
+                                aria-haspopup="true">            
+                            <div class="flex-container">
+                                <div class="flex-child magenta  pl-lg-2">
+                                    <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center ">
+                                        <i class="{{module_name.list.0.menu__menu_icon}} icon-size  "  style="margin: 0;line-height:33.59px;font-size:14px;"></i>
+                                    </div>
+                                </div>                                        
+                                {% comment %} border {% endcomment %}
+                                <div class="flex-child green" >
+                                    <div style="height:auto;" class="justify-center text-center">
+                                        <span  style="margin: 0;line-height:33.59px;font-size:14px;"> {{module_name.grouper}}</span>
+                                    </div>
+                                </div>                                  
+                            </div>                                                                                    
+                        </a>
+                        <div class="dropdown-menu animated bounceInDown bg-color">
+                            <ul aria-expanded="false" class="accordion mega-dropdown-menu row">
+                                {% regroup module_name.list by menu__is_sub_menu as sub_menu_list %}
+                                {% for is_sub_menu in sub_menu_list %}
+                                    {% if is_sub_menu.grouper %}
+                                        {% regroup is_sub_menu.list by menu__sub_menu_name as sub_sub_menu_list %}
+                                        {% for sub_menu_name in sub_sub_menu_list %}
+                                        <li class="col-lg-12">                       
+                                            <a class="font-cl" href="javascript:void(0)" aria-expanded="false">
+                                                <span class="hide-menu text-capitalize" >{{sub_menu_name.grouper}}</span>
+                                            </a>
+                                            <ul class="row">
+                                                {% for data in sub_menu_name.list %}                                
+                                                    <li class="col-lg-3" style="float: left;">
+                                                        <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                                    </li>
+                                                {% endfor %}
+                                                {% for data in sub_menu_name.list|unpermitted_menu_list:request.session.id %}
+                                                    <li class="col-lg-3" style="float: left;">
+                                                        <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for data in is_sub_menu.list %}                          
+                                            <li class="col-lg-3">
+                                                <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                            </li>
+                                        {% endfor %}
+                                        {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
+                                            <li class="col-lg-3" style="float: left;">
+                                                <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </li>
+                    {% endif %}   
+                    {% endfor %}
+                    {% if module_list|length > 3 %}
+                    <li class="nav-item dropdown mega-dropdown pl-lg-0 pt-lg-2 ml-lg-0" style="position: initial;" id="mega" parent-id="0" li-id="12">
+                        <a class="nav-link dropdown-toggle waves-effect waves-dark ml-lg-1" href="" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false" href="JavaScript:void(0)">
+                            <div class="flex-container">
+                                <div class="flex-child magenta pl-lg-2">
+                                    <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia  rounded-lg justify-center bg-white text-center">
+                                        <i class="fas fa-angle-double-down icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i></span>  
+                                    </div>
+                                </div>                              
+                              
+                                <div class="flex-child green" >
+                                    {% comment %} border {% endcomment %}
+                                    <div style="height:auto;" class="justify-center text-center">
+                                       <span  style="margin: 0;line-height:33.59px;font-size:14px;">More</span>
+                                    </div>
+                                </div>                               
+                            </div>
+                        </a>
+                        <div class="dropdown-menu animated bounceInDown bg-color">                        
+                            <ul class="accordion mega-dropdown-menu row " parent-id="3" aria-expanded="false">
+                                {% regroup request.session.id|others_module_list by menu__module_name as module_list %}
+                                {% for module_name in module_list %}
+                                <li class="col-lg-2 megaMainMenu  text-center py-lg-2 pr-lg-2" >
+                                    <a class="waves-effect waves-dark menus text-center" style="color: #015178;padding-bottom: 0.7rem !important;padding-top: 0.7rem !important;" 
+                                        aria-expanded="false" href="JavaScript:void(0)" data-module="{{module_name.list.0.menu_id}}">
+                                        <div class="sub-menu-container">
+                                            <div class="sub-menu-child magenta pr-lg-2">
+                                                <div style="height:auto;width:2.1rem;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
+                                                    <i class="{{module_name.list.0.menu__menu_icon}} icon-size" style="margin: 0;line-height:33.59px;font-size:14px;"></i> 
+                                                </div>
+                                            </div>                                          
+                                            
+                                            <div class="flex-child green rr" >
+                                                <div style="height:auto;" class="justify-center text-left">
+                                                    <p  style="margin: 0px;line-height:33.59px;vertical-align:center" class="text-nowrap">{{module_name.grouper}}</p>
+                                                </div>
+                                            </div>                                           
+                                        </div>   
+                                    </a>                                                     
+                                </li>                                
+                                {% endfor %}                                 
+                            </ul>                      
+                            <ul class="row  mt-4 " aria-expanded="false" >
+                                {% regroup request.session.id|others_module_list by menu__module_name as module_list %}
+                                {% for module_name in module_list %}
+                                
+                                <li class="megaMenu pl-0  col-lg-12" style="float: left;">                                 
+                                    <ul class="collapse sub-mega-menu row py-3"  id="{{module_name.list.0.menu_id}}" style="min-height:40vh;">
+                                        {% regroup module_name.list by menu__is_sub_menu as sub_menu_list %}
+                                        {% for is_sub_menu in sub_menu_list %}
+                                            {% if is_sub_menu.grouper %}
+                                                {% regroup is_sub_menu.list by menu__sub_menu_name as sub_sub_menu_list %}
+                                                {% for sub_menu_name in sub_sub_menu_list %}                                          
+                                                    <li class="col-lg-12 pl-0 mt-2" style="float: left;"> 
+                                                        <a class="sub" href="Javascript:void(0)" aria-expanded="false" data-module="{{sub_menu_name.menu_id}}">
+                                                            <span class="hide-menu">{{sub_menu_name.grouper}}</span>
+                                                        </a>
+                                                        <ul class="row" id="{{sub_menu_name.menu_id}}">
+                                                            {% for data in sub_menu_name.list %}
+                                                            <li class="col-lg-3" style="float: left;">
+                                                                <a href="{{data.menu__menu_url}}" class="mega-a">{{data.menu__menu_name}}</a>
+                                                            </li>
+                                                            {% endfor %}
+                                                            {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
+                                                                <li class="col-lg-3" style="float: left;">
+                                                                    <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </li>
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for data in is_sub_menu.list %} 
+                                                    <li class="col-lg-3 pl-0" id="menu_name" style="float: left;"><a class="mega-link" href="{{data.menu__menu_url}}">{{data.menu__menu_name}}</a></li>                                           
+                                                {% endfor %}
+                                                {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
+                                                    <li class="col-lg-3" style="float: left;">
+                                                        <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </li>                                                              
+                            {% endfor %}                                 
+                            </ul>
+                        </div>                                                                                        
+                    </li>
+                    {% endif %}                  
+                </ul>
+            </div>
+            <ul class="navbar-nav my-lg-0 edit mr-lg-2">
+                <!-- <li class="nav-item">
+                    <a onclick="startListening()" class="nav-link  waves-effect waves-dark" style="padding-top: 13px">
+                        <i style="font-size: 26px !important;" class="fa fa-microphone" title="Voice Command"></i>
+                    </a >
+                </li> -->
+                <li class="nav-item">
+                    <a href="/helpdesk/phonebook" class="nav-link  waves-effect waves-dark" style="padding-top: 13px">
+                        <i style="font-size: 26px !important;" class="ti-agenda" title="Phonebook"></i>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle waves-effect waves-dark  pr-lg-3" href="" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false"> <i style="font-size: 28px !important;"
+                            class="ti-bell" title="Notification"></i>
+                        <div class="notify" style="top:-35px; right: -13px;">
+                            <span class="heartbit"></span>
+                            <span class="point badge" style="font-size: 15px; width: auto;"></span>
+                        </div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right animated notify_list_div slideInDown">
+                        <ul class="notify_list p-2">
+                            <li class="live_notify_list">
+                                <div class="drop-title font-weight-bold" style="color:black;">Notifications</div>
+                            </li>
+                            <li class="all_notify_list pb-2">
+                                <a class="nav-link text-center text-dark link" href="{% url "notifications:all_unread_list" %}"> 
+                                    <strong>Check all notifications</strong> <i class="fa fa-angle-right"></i> 
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle waves-effect waves-dark profile-pic" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img {% if request.session.photo %} src="/assets/uploads{{request.session.photo}}" {% else %} src="{% static 'images/users/user.png'%}" {% endif %} style="height: 32px; width:32px"/>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right mailbox animated slideInDown">
+                        <div class="profile-pic mt-3" style="text-align: center;">
+                            <img {% if request.session.photo %} src="/assets/uploads{{request.session.photo}}" {% else %} src="{% static 'images/users/user.png'%}" {% endif %} style="height: 60px; width:60px"/>
+                            <br><span style="padding-top: 10px; font-weight: 500;">{{request.session.name}}</span>
+                            <br><span style="padding-top: 10px;">{{request.session.employee_id}} &nbsp;&nbsp; {{request.session.company_short_name}}</span>
+                            <br><a href="/user/myProfile/" class="btn btn-rounded btn-outline-secondary mb-2 mt-3" style="line-height: 1"> Update your profile/password</a>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="https://outlook.office365.com/mail/" class="dropdown-item ml-2" target="_blank"><i class="ti-email"></i> &nbsp; Email</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="https://teams.microsoft.com/" class="dropdown-item ml-2" target="_blank"><i class="ti-comments"></i> &nbsp; Teams</a>
+                        <div class="dropdown-divider"></div>
+                        <div style="text-align: center;" class="mb-2"><a href="/logout/" style="line-height: 1;" class="btn btn-rounded btn-outline-secondary text-danger" ><i class="fa fa-power-off"></i> &nbsp; Logout</a></div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<!-- ============================================================== -->
+<!-- End Topbar header -->
+<!-- ============================================================== -->
+{% comment %} {% endcache %} {% endcomment %}

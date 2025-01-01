@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+{% load static %}
+{% load data_load %}
+{% load sc_filters %}
+{% load notifications_tags %}
+
+{% block css_links %}
+    <link href="{% static 'dist/css/pages/tab-page.css' %}?v=0.1" rel="stylesheet">
+    <link href="{% static 'dist/css/pages/floating-label.css' %}" rel="stylesheet">
+    <link href="{% static 'node_modules/select2/dist/css/select2.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'node_modules/switchery/dist/switchery.css' %}" rel="stylesheet" />
+    <link href="{% static 'node_modules/bootstrap-select/bootstrap-select.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'node_modules/datatables.net-bs4/css/dataTables.bootstrap4.css' %}" rel="stylesheet">
+    <link href="{% static 'node_modules/datatables.net-bs4/css/responsive.dataTables.min.css' %}" rel="stylesheet">
+    <link href="{% static 'node_modules/dropify/dist/css/dropify.min.css' %}" rel=" stylesheet">
+    <link href="{% static 'node_modules/dropify/dist/css/multiple.css' %}" rel=" stylesheet">
+    <link href="{% static 'node_modules/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet">
+    <style>
+        .wrapper-fixed { 
+            height: 400px; 
+            width: 100%; 
+            overflow-y: auto;
+        }
+        .fixed-thead {
+            background: #fff;
+            position: sticky;
+            top: -17px;
+            z-index: 2;
+        }
+        .grand_total_report {
+            position: sticky;
+            bottom: 0;
+            background: #f3d6d1; /* Ensure the background stands out */
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+{% endblock %}
+
+{% block page_css %}
+    <link href="{% static 'dist/css/custom.css' %}?v=1" rel="stylesheet">
+    {% block add_css %}{% endblock %}
+    <style>
+        .alert {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .alert-rounded { border-radius: 60px; }
+        button:focus { outline : none; }
+        .alert-dismissible .close {
+            padding: 0.35rem 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .footer{
+            border-top: none;
+            
+        }
+        .custom-card{
+            background-color: #f8f9fa!important;
+          
+        }
+    
+    </style>
+{% endblock %}
+
+{% block body_class %} horizontal-nav boxed skin-red fixed-layout{% endblock %}
+
+{% block body %}
+    <div class="full-page"></div>
+    {% include 'topbar.html' %}
+    <!-- ============================================================== -->
+    <!-- Main wrapper - style you can find in pages.scss -->
+    <!-- ============================================================== -->
+    <div id="main-wrapper" style="background-color:#F8F9FA">
+        {% include 'leftbar.html' %}
+        <!-- ============================================================== -->
+        <!-- Page wrapper  -->
+        <!-- ============================================================== -->
+        <div class="page-wrapper" style="padding-top: 55px; background-color: #F8F9FA;">
+            <!-- ============================================================== -->
+            <!-- Start Page Content -->
+            <!-- ============================================================== -->
+            {% variable_assign_tag request.session.id|notice_list as notices %}
+            {% if notices.count > 0 %}
+            <div class="container-fluid text-center mt-4 mb-3">
+                {% for notice in notices %}
+                <div class="alert alert-danger alert-rounded alert-dismissible d-inline-block mb-3 ml-0" style="overflow-wrap:anywhere;">
+                    {{ notice.title }} &nbsp; 
+                    {% if notice.attachment %}
+                    <a href="/assets/uploads/{{notice.attachment}}" target="_blank">
+                        <i class='icon-link'></i>
+                    </a>
+                    {% endif %}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"> 
+                        <span aria-hidden="true" class="ti-close" style="font-size: 15px;"></span> 
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+            <!-- ============================================================== -->
+            <!-- End PAge Content -->
+            <!-- ============================================================== -->
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Page wrapper  -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- footer -->
+        <!-- ============================================================== -->
+        <footer class="footer"  style="background-color: #F8F9FA;">
+            <div class="row" style="font-weight: 400;">
+                <div class="col-6">
+                    <!-- <span>Version 0.0.3</span> -->
+                    <a href="/version/" class="m-r-10 text-info">
+                        Version 2.2.5
+                    </a>
+                </div>
+                <div class="col-6 text-right ">
+                    <!-- {% now "Y" as current_year %} {% if current_year == '2020' %} {% elif current_year != '2021' %} 2021 - {% endif %} {% now 'Y' %} -->
+                    <a href="http://esquiretechnology.com/" target="_blank"><span class="text-grey esquire-light-font">&copy; Esquire Technology Ltd</span></a>
+                </div>
+            </div>
+        </footer>
+        <!-- ============================================================== -->
+        <!-- End footer -->
+        <!-- ============================================================== -->
+    </div>
+    <!-- ============================================================== -->
+    <!-- End Wrapper -->
+    <!-- ============================================================== -->
+    
+    {% if request.path != "/user/myProfile/" and not request.session.photo and request.session.employee_id != 'EKCLADV001' %} {% comment %} Last and condition added for advisor user, who get prompt to update profile, but advisor is temporary user thats why user don't have any emp id {% endcomment %}
+        <div class="modal fade" id="promotModal" tabindex="-1" role="dialog" aria-labelledby="promot" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="promot">Profile Update</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please update your profile information.
+                            <a href="/user/myProfile/" class="h4 m-r-10 text-success">
+                                click here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+
+{% block js_scripts %}
+
+{% settings_value "DOMAIN_URL" as DOMAIN_URL %}
+{% if '.com' in DOMAIN_URL %}
+<script>
+    "use strict";
+    (() => {
+        var console = (window.console = window.console || {});
+        ["assert", "clear", "count", "debug", "dir", "dirxml",
+        "error", "exception", "group", "groupCollapsed", "groupEnd",
+        "info", "log", "markTimeline", "profile", "profileEnd", "table",
+        "time", "timeEnd", "timeStamp", "trace", "warn"
+        ].forEach(method => {
+            console[method] = () => {};
+        });
+    })();
+</script>
+{% endif %}
+
+{% if request.session.id %}
+<!-- For Notification -->
+<script src="{% static '/dist/js/notify.js' %}?v=0.1" type="text/javascript"></script>
+{% register_notify_callbacks callbacks='fill_notification_list, fill_notification_badge' %}
+<!-- For Notification -->
+{% endif %}
+
+<!-- page js -->
+<script src="{% static '/dist/js/validation.min.js' %}"></script>
+<script src="{% static '/dist/js/validation-methods.min.js' %}"></script>
+<script src="{% static 'node_modules/select2/dist/js/select2.full.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'node_modules/select2/dist/js/select2_position.js' %}" type="text/javascript"></script>
+<script src="{% static 'node_modules/bootstrap-select/bootstrap-select.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'node_modules/switchery/dist/switchery.js' %}"></script>
+<script src="{% static 'node_modules/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'node_modules/datatables.net-bs4/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'node_modules/dropify/dist/js/dropify.min.js' %}"></script>
+{% comment %} <script src="{% static 'node_modules/dropify/dist/js/multiple.js' %}"></script> {% endcomment %}
+<script src="{% static 'node_modules/sweetalert2/dist/sweetalert2.all.min.js' %}"></script>
+<script src="{% static 'node_modules/sweetalert2/sweet-alert.init.js' %}"></script>
+
+<script>
+
+    // Function to sync the scroll of the tbody with the thead
+    $(".wrapper-fixed").on('scroll', function () {
+        $(".fixed-thead").css("transform", "translateY(" + parseInt($(this).scrollTop() - 1) + "px)");
+    });
+
+    $('body').on('keydown', 'input:not([type="submit"])', function(e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    {% comment %} This is for disabling Full page for resubmitting before 5 sec {% endcomment %}
+    $("body").on("click", "form button:submit", function(e){
+        e.preventDefault();
+        var form = $(this).closest("form");
+        validateForm(form);
+    })
+    function validateForm(form){
+        form.validate({
+            errorElement : 'small',
+            errorClass: 'error-label',
+            success: function(label,element) {
+                label.parent().removeClass('error');
+                label.remove(); 
+            },
+        });
+        if(form.valid()){
+            disblePagefor2sec();
+            $(form).submit();
+        }else{
+            console.log("form error!");
+        }
+    }
+    function disblePagefor2sec($button=''){
+        if($button != ''){
+            let btn_icon = '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>';
+            let btn_text = $.trim($button.text())+"ing";
+            $button.html(btn_icon + btn_text)
+            $button.attr('disabled', true);
+        }
+        $(".full-page").show();
+        setTimeout(function(){ $(".full-page").hide(); }, 2000)
+    }
+    {% comment %} This is for disabling Full page for resubmitting before 5 sec {% endcomment %}
+
+    $(function () {
+        {% comment %} responsive table {% endcomment %}
+        let table = $('.data-table').DataTable({
+            dom: "<'row top'<'col-md-6'l><'col-md-6'f>>t<'row'<'col-4'i><'col-8'p>>",
+            ordering: true,
+            paging: true,
+            pageLength: 50,
+            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            responsive: true,
+            fixedHeader: {
+                header: true,
+                headerOffset: $('.sidebar-nav').height()
+            },
+            language: {
+                paginate: {
+                    previous: "<",
+                    next: ">",
+                }
+            },
+            scrollY: '50vh',
+            drawCallback: function( settings ) {
+           
+                // Switchery
+                $('.switchery').remove(); 
+                var elems = Array.prototype.slice.call(document.querySelectorAll('.dataTable .js-switch'));
+                elems.forEach(function(html) {
+                    var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
+                });
+            }
+        });
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+
+
+        // Switchery
+        $('.switchery').remove(); 
+        var elems = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
+        elems.forEach(function(html) {
+            var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
+        });
+
+
+        // File Upload
+        $('.dropify').dropify();
+
+    });
+
+    {% comment %} For select 2 {% endcomment %}
+    function select2Custom(){
+        $eventSelect = $("body").find("select.select2");
+        $eventSelect.each(function (index, item) {
+            let title   = $(item).data("title"), tags = $(item).data("tags");
+            if(tags == undefined || tags == 'False' ){ tags = false } else { tags = true }
+            $(item).select2({ placeholder: title, allowClear: true, tags:tags });
+        });
+
+        $eventSelect.on("select2:open", function (e) {
+            $(this).parent().addClass('focused');
+            let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+            $placeholder.hide();
+        }).on("select2:close", function (e) {
+            let val = $(this).val();
+            if (val == null) {
+                $(this).parent().removeClass('focused');
+                let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                $placeholder.show();
+            }
+        }).on("select2:clearing", function (e) {
+            $(this).parent().removeClass('focused');
+            let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+            $placeholder.show();
+        });
+    }
+    select2Custom();
+
+    
+
+    {% comment %} // This is for disabling Context menu / Mouse Right clicked
+    $(window).on('keydown',function(event){
+        let clicked = false;
+        if(event.keyCode==123) {
+            msg = "F12 button"
+            clicked = true;
+        } else if(event.ctrlKey && event.shiftKey && event.keyCode==73){
+           msg = "ctrl+shift+i"
+            clicked = true;
+        } else if(event.ctrlKey && event.keyCode==73) {
+            msg = "ctrl+shift+i"
+            clicked = true;
+        } 
+        if(clicked){
+             $.toast({
+                 heading: "Warning",
+                 text: 'Sorry! '+ msg +' on website is disabled',
+                position: 'top-right',
+                loaderBg:'#fff',
+                icon: 'warning',
+                hideAfter : 3000,
+            });
+            return false;  //Prevent from ctrl+shift+i
+        }
+    });
+    $(document).on("contextmenu",function(e){
+        $.toast({
+            heading: "Warning",
+            text: 'Sorry! Right click on website is disabled',
+            position: 'top-right',
+            loaderBg:'#fff',
+            icon: 'warning',
+            hideAfter : 3000,
+        });
+        e.preventDefault();
+    });
+    // This is for disabling Context menu / Mouse Right clicked {% endcomment %}
+ 
+    $(document).ready(function () {
+        $("#promotModal").modal("show");
+        $('#users').DataTable({
+            "dom": "<'row'<'col-6 mb-4'<'options'>><'col-sm-12'f>>t<'text-center'ip>",
+            "ordering": false,
+            "paging": true,
+            "responsive": true,
+            "info": false,
+            "language": {
+                "info": "",
+                "infoEmpty": "No results available",
+                "infoFiltered": "Showing _TOTAL_ records among _MAX_"
+            }
+        });
+        
+    });
+  
+
+</script>
+
+{% block page_js %}{% endblock %}
+
+{% endblock %}

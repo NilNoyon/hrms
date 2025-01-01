@@ -1,0 +1,70 @@
+{% load static %}
+
+<link href="{% static 'node_modules/datatables.net-bs4/css/dataTables.bootstrap4.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/datatables.net-bs4/css/scroller.dataTables.css' %}" rel="stylesheet">
+<style>
+
+    div.dataTables_filter { 
+        float: none !important;
+        margin: 0 auto !important;
+        text-align: center !important;
+    }
+
+    div.dataTables_filter input { 
+        width: 140% !important; 
+    }
+
+    div.dts div.dataTables_scrollBody{background: transparent !important}
+
+    div.dts div.dts_loading { z-index : 1000; }
+
+</style>
+
+
+<script src="{% static 'node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js' %}"></script>
+<script src="{% static 'node_modules/datatables.net-bs4/js/scroller.dataTables.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+
+        
+        $('.scrollerDT').each(function(index, item){
+            let url = $(this).data("url");
+            $(this).DataTable({
+                dom: "<'row top'<'offset-md-2 col-md-6'f>>t",
+                ordering: false,
+                paging: true,
+                iDisplayLength: 25,
+                pageLength: 5,
+                autoWidth: false,
+                scrollY: '60vh',
+                scroller: {
+                    loadingIndicator: true
+                },
+                deferRender: true,
+                serverSide: true,
+                processing: true,
+                {% comment %} responsive: true, {% endcomment %}
+                ajax:{
+                    type: "POST",
+                    url: url,
+                    dataSrc: ""
+                },
+                drawCallback: function( settings ) {
+                    $('.dataTables_scrollBody').on('scroll', function (e) {
+                        $parent = $(this).parent();
+                        $parent.children('.dataTables_scrollHead').scrollLeft($parent.children('.dataTables_scrollBody').scrollLeft());
+                    }); 
+                    // Switchery
+                    var elems = Array.prototype.slice.call(document.querySelectorAll('.dataTable .js-switch'));
+                    elems.forEach(function(html) {
+                        var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
+                    });
+                }
+            });
+        })
+    });
+</script>

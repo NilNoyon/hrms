@@ -1,0 +1,67 @@
+{% load static %}
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="image-flip">
+                    <div class="mainflip flip-0">
+                        <div class="frontside">
+                            <div class="card mb-0">
+                                <div class="card-body text-center">
+                                    <p><img class=" img-fluid" id="emp_photo" src=""
+                                            alt="card image"></p>
+                                    <h5 class="card-title" id="emp_name"></h5>
+                                    <h6 class="card-title" id="emp_company"></h6>
+                                    <p class="card-text" id="emp_department"></p>
+                                    <p class="card-text" id="emp_designation"></p>
+                                    <p class="card-text m-b-5" id="emp_phone"></p>
+                                    <p class="card-text" id="emp_email"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $("body").on('click', '.user_info', function() {
+
+        $.ajax({
+            url: "{% url 'desk:getUser' %}",
+            type: "POST",
+            data: {emp_id: $(this).data('id')},
+            dataType: 'json',
+            success: function (data) {
+                if (data['photo'] != "None") $("#emp_photo").attr("src", "/assets/uploads/"+data['photo']);
+                else $("#emp_photo").attr("src", "/assets/images/users/user.png");
+                
+                $("#emp_photo").addClass("img-fluid");
+                $("#user_profile").show();
+                $("#myModalLabel").html(data['user'][0].name);
+                $("#emp_name").html(data['user'][0].name+"("+data['user'][0].employee_id+")");
+                $("#emp_company").html(data['user'][0].company__name+data['location']);
+                $("#emp_department").html(data['user'][0].department__name);
+                $("#emp_designation").html(data['user'][0].designation__name);
+                
+                $("#emp_email").html(
+                    `
+                    <a href="https://teams.microsoft.com/l/chat/0/0?users=`+data['user'][0].email+`" target="_show" style="color:blue">
+                    <img src="{% static 'icons/teams.svg' %}" alt="Teams" width="30" ></a>
+                    | <a href="mailto:`+data['user'][0].email+`" style="color:blue">`+data['user'][0].email+`</a>
+                    `
+                );
+                
+                $("#emp_phone").html(
+                    `
+                    <a href="tel:`+data['phone']+`" style="color:blue">`+data['phone']+`</a>
+                    `
+                );
+            },
+        });
+    });
+
+</script>

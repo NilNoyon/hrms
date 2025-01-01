@@ -1,0 +1,273 @@
+{% load static %}
+{% load data_load %}
+
+<style>
+    .show-hide li:hover span{
+      color: #e46a76 !important;
+    }
+    .show-hide li:hover i{
+      color: #e46a76 !important;
+    }
+    .show-hide i {color: #fff !important;}
+    .navbar-expand-md .navbar-nav .mega-dropdown .dropdown-menu {
+        position: absolute;
+        overflow: auto;
+        height: 95vh;
+    }
+    .navbar-expand-md .navbar-nav .mega-dropdown-profile .dropdown-menu {
+        height: 95vh;
+    }
+    nav ul li.active > ul {
+    display: block;
+    list-style-type: none;
+    }
+    @media (max-width: 767px) {
+        .show-hide {
+            display: none;
+        }
+        .show-hide li:hover i{
+            color: #e46a76 !important;
+            display: block;
+        }
+        .show-hide i {color: #fff !important;}
+    }
+</style>
+<header class="topbar" style="position: fixed; width: 100%;">
+    <nav class="navbar top-navbar navbar-expand-md navbar-dark" >
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/dashboard">
+                <b style="font-family: Esquivel; font-weight: 100; font-size: 24px; padding-left: 10px;">EBS</b>
+            </a>
+        </div>
+        <div class="navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"> <a class="nav-link nav-toggler d-block d-md-none waves-effect waves-dark" href="javascript:void(0)"><i class="ti-menu"></i></a> </li>
+                <li class="nav-item"> <a class="nav-link sidebartoggler d-none waves-effect waves-dark" href="javascript:void(0)"><i class="icon-menu"></i></a> </li>
+            </ul>
+            <div class="sidebar-nav mr-auto">
+            <ul class="navbar-nav mr-auto show-hide" id="sidebarnav" style="font-size: 1em !important;">
+                {% if request.session.is_head or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" or request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+                    <li class="nav-item"> 
+                        <a class="nav-link waves-effect waves-dark" style="font-size: 1em !important" href="javascript:void(0);" aria-expanded="false">
+                            <i class="fas fa-handshake"></i><span class="hide-menu"> Helpdesk
+                        </a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a href="{% url 'desk:issue_dashboard' %}">Issues</a></li>
+                            {% if request.session.hd_role == "4" or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" %}
+                                <li><a href="{% url 'desk:helpdesk_report' %}">Helpdesk Report</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'desk:assessment_list' %}">Device Assessment</a></li>
+                            <!-- <li><a href="{% url 'desk:phonebook' %}">Phonebook</a></li> -->
+                        </ul>
+                    </li>
+                {% else %}    
+                    <li class="nav-item"> 
+                        <a class="nav-link waves-effect waves-dark" style="font-size: 1em !important" href="javascript:void(0);" aria-expanded="false">
+                            <i class="fas fa-handshake"></i><span class="hide-menu"> Helpdesk
+                        </a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a href="{% url 'desk:issue_dashboard' %}">Helpdesk</a></li>
+                            <!-- <li><a href="{% url 'desk:phonebook' %}">Phonebook</a></li> -->
+                        </ul>
+                    </li>
+                {% endif %}
+                {% regroup request.session.id|menu_list by menu.module_name as module_list %}
+
+                {% for module_name in module_list|slice:"3" %}
+                    <li class="nav-item"> 
+                        <a class="nav-link waves-effect waves-dark" style="font-size: 1em !important" href="javascript:void(0);" aria-expanded="false">
+                            <i class="{{module_name.list.0.menu.menu_icon}}"></i><span class="hide-menu"> {{module_name.grouper}}
+                        </a>
+                        <ul aria-expanded="false" class="collapse">
+                        {% regroup module_name.list by menu.is_sub_menu as sub_menu_list %}
+                        {% for is_sub_menu in sub_menu_list %}
+                            {% if is_sub_menu.grouper %}
+                                {% regroup is_sub_menu.list by menu.sub_menu_name as sub_sub_menu_list %}
+                                {% for sub_menu_name in sub_sub_menu_list %}
+                                    <li>
+                                        <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><span class="hide-menu">{{sub_menu_name.grouper}}</span></a>
+                                        <ul aria-expanded="false" class="collapse">
+                                            {% for data in sub_menu_name.list %}
+                                                <li><a href="{{data.menu.menu_url}}">{{data.menu.menu_name}}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                {% for data in is_sub_menu.list %}
+                                    <li><a href="{{data.menu.menu_url}}">{{data.menu.menu_name}}</a></li>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    </li>
+                {% endfor %}
+
+                <!-- <li class="nav-item">
+                    <a class="nav-link waves-effect waves-dark" style="font-size: 1em !important" href="javascript:void(0);" aria-expanded="false">
+                        <i class="fas fa-angle-double-down"></i><span class="hide-menu"> More
+                    </a>
+                    <ul aria-expanded="false" class="collapse">
+                        {% for i in request.session.id|others_module_list %}
+                            <li><a href="#" class="sa-html">{{i}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li> -->
+                {% if module_list|length > 3 %}
+                <li class="nav-item dropdown mega-dropdown" style="position: initial;" parent-id="0" li-id="12">   
+                    <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 1em !important" href="javascript:void(0);"> <i class="fas fa-angle-double-down"></i><span class="hide-menu"> More</a>                       
+                       <div class="dropdown-menu animated bounceInDown">
+                       <ul class="accordion mega-dropdown-menu row" parent-id="3">
+                        {% regroup request.session.id|others_module_list by menu.module_name as module_list %}
+                        {% for module_name in module_list|slice:"3:" %}
+                            <li class="col-lg-3 m-b-3"  parent-id="3" li-id="13">
+                                <h4 class="m-b-20">{{module_name.grouper}}</h4>
+                                <ul class="inner" style="border-left: 1px solid #8d97ad;">
+                                {% regroup module_name.list by menu.is_sub_menu as sub_menu_list %}
+                                {% for is_sub_menu in sub_menu_list %}
+                                    {% if is_sub_menu.grouper %}
+                                        {% regroup is_sub_menu.list by menu.sub_menu_name as sub_sub_menu_list %}
+                                        {% for sub_menu_name in sub_sub_menu_list %}
+                                            <li>
+                                                <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><span class="hide-menu">{{sub_menu_name.grouper}}</span></a>
+                                                <ul aria-expanded="false" class="collapse">
+                                                    {% for data in sub_menu_name.list %}
+                                                        <li><a href="{{data.menu.menu_url}}">{{data.menu.menu_name}}</a></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for data in is_sub_menu.list %}
+                                            <li><a href="{{data.menu.menu_url}}">{{data.menu.menu_name}}</a></li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                            </li>
+                        {% endfor %}
+                       </ul>                   
+                    </div>
+                </li> 
+                {% endif %}      
+            </ul>
+            </div>
+            <ul class="navbar-nav my-lg-0 edit">
+                <li class="nav-item">
+                    <a href="/helpdesk/phonebook" class="nav-link  waves-effect waves-dark" title="Phonebook" style="padding-top: 13px">
+                        <i style="font-size: 26px !important;" class="ti-agenda"></i>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" title="Notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i style="font-size: 28px !important;" class="ti-bell"></i>
+                        <div class="notify">
+                            <span class="heartbit"></span> 
+                            <span class="point badge"></span> 
+                        </div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right mailbox animated slideInDown">
+                        <ul class="notify_list">
+                            <li class="live_notify_list">
+                                <div class="drop-title">Notifications</div>
+                            </li>
+                            <li class="all_notify_list pb-2">
+                                <a class="nav-link text-center link" href="{% url "notifications:all_unread_list" %}"> 
+                                    <strong>Check all notifications</strong> <i class="fa fa-angle-right"></i> 
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle waves-effect waves-dark profile-pic" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img {% if request.session.photo %} src="/assets/uploads{{request.session.photo}}" {% else %} src="{% static 'images/users/user.png'%}" {% endif %} style="height: 32px; width:32px"/>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right mailbox animated slideInDown">
+                        <div class="profile-pic mt-3" style="text-align: center;">
+                            <img {% if request.session.photo %} src="/assets/uploads{{request.session.photo}}" {% else %} src="{% static 'images/users/user.png'%}" {% endif %} style="height: 60px; width:60px"/>
+                            <br><span style="padding-top: 10px; font-weight: 500;">{{request.session.name}}</span>
+                            <br><span style="padding-top: 10px;">{{request.session.employee_id}} &nbsp;&nbsp; {{request.session.company_short_name}}</span>
+                            <br><a href="/user/myProfile/" class="btn btn-rounded btn-outline-secondary mb-2 mt-3" style="line-height: 1"> Update your profile/password</a>
+                        </div>
+                        <!-- <a href="/user/myProfile/" class="dropdown-item mt-2"><i class="ti-pencil-alt"></i> &nbsp; Profile / Password</a> -->
+                        <!-- text-->
+                        <div class="dropdown-divider"></div>
+                        <!-- text-->
+                        <a href="https://outlook.office365.com/mail/" class="dropdown-item ml-2" target="_blank"><i class="ti-email"></i> &nbsp; Email</a>
+                        <!-- text-->
+                        <div class="dropdown-divider"></div>
+                        <!-- text-->
+                        <a href="https://teams.microsoft.com/" class="dropdown-item ml-2" target="_blank"><i class="ti-comments"></i> &nbsp; Teams</a>
+                        <!-- text-->
+                        <div class="dropdown-divider"></div>
+                        <!-- text-->
+                        <div style="text-align: center;" class="mb-2"><a href="/logout/" style="line-height: 1;" class="btn btn-rounded btn-outline-secondary text-danger" ><i class="fa fa-power-off"></i> &nbsp; Logout</a></div>
+                        <!-- text-->
+                        <!-- <div class="dropdown-divider"></div> -->
+                        <!-- <span href="#" class="dropdown-item" style="position: absolute; bottom: 25px; text-align: center;" >
+                            <img src="/assets/images/esquire-logo.png" style="height: 20px; width:20px"/> &nbsp; {{ request.session.company_short_name }}
+                        </span> -->
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+{% block page_js %}
+<script>
+    $(".sa-html").click(function () {
+            Swal.fire({
+                title: 'Development in progress...',
+                type: 'info',
+                html:
+                    'You can view this module ' +
+                    // '<a href="//github.com">links</a> ' +
+                    'after going live',
+                showCloseButton: true,
+                showCancelButton: false,
+                focusConfirm: false,
+                confirmButtonText:
+                    '<i class="fa fa-thumbs-up"></i> OK',
+                // confirmButtonAriaLabel: 'Thumbs up, great!',
+                // cancelButtonText:
+                //     '<i class="fa fa-thumbs-down"></i>',
+                // cancelButtonAriaLabel: 'Thumbs down',
+            })
+        });
+</script>
+<script>
+    $(".sa-alert").click(function () {
+            Swal.fire({
+                title: 'Sorry...',
+                type: 'warning',
+                html:
+                    'You are not authorized ' +
+                    // '<a href="//github.com">links</a> ' +
+                    'to access',
+                showCloseButton: true,
+                showCancelButton: false,
+                focusConfirm: false,
+                confirmButtonText:
+                    '<i class="fa fa-thumbs-up"></i> OK',
+                // confirmButtonAriaLabel: 'Thumbs up, great!',
+                // cancelButtonText:
+                //     '<i class="fa fa-thumbs-down"></i>',
+                // cancelButtonAriaLabel: 'Thumbs down',
+            })
+        });
+</script>
+
+
+<script>
+    $(document).ready(function(){
+        // Show hide popover
+        $('ul').click(function () { 
+            $('li').show();
+        });
+    });
+   
+</script> 
+{% endblock %}
+<!-- ============================================================== -->
+<!-- End Topbar header -->
+<!-- ============================================================== -->

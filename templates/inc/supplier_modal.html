@@ -1,0 +1,106 @@
+<div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h4 class="text-center text-info" id="supplier_name"></h4>
+                <div class="row mt-4">
+                    <div class="col"><b class="text-info">Phone :</b> <span id="supplier_phone"></span></div>
+                    <div class="col"><b class="text-info">Email :</b> <span id="supplier_email"></span></div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col"><b class="text-info">Contact Person :</b> <span id="supplier_contact_person"></span></div>
+                    <div class="col"><b class="text-info">Contact No. :</b> <span id="supplier_contact_person_no"></span></div>
+                </div>
+                <div class="mt-2">
+                    <b class="text-info">Address :</b> <span id="supplier_address_1"></span><span id="supplier_address_2"></span><span id="supplier_country"></span>
+                </div>
+                <div class="row mt-2">
+                    <div class="col"><b class="text-info">VAT/Reg No. :</b> <span id="supplier_vat_reg"></span></div>
+                    <div class="col"><b class="text-info">License No. :</b> <span id="supplier_license"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $("body").on('click', '.supplier_info', function() {
+
+        $.ajax({
+            url: "{% url 'inventory:get_supplier_info' %}",
+            type: "POST",
+            data: {supplier_id: $(this).data('id')},
+            dataType: 'json',
+            success: function (data) {
+                console.log(data)
+                $("#supplier_name").html(data['name'])
+                console.log(data['email'].length)
+                if(data['phone'].length > 0 || data['email'].length > 0){
+                    if(data['phone'].length > 0){
+                        $("#supplier_phone").html(data['phone'])
+                        $("#supplier_phone").parent().show();
+                    }else{
+                        $("#supplier_phone").parent().hide();
+                    }
+                    if(data['email'].length > 0){
+                        $("#supplier_email").html(data['email'])
+                        $("#supplier_email").parent().show();
+                    }else{
+                        $("#supplier_email").parent().hide();
+                    }
+                    $("#supplier_email").parent().parent().show();
+                }else{
+                    $("#supplier_phone").parent().parent().hide();
+                }
+
+                if(data['contact_person'].length > 0 || data['contact_person_no'].length > 0){
+                    if(data['contact_person'].length > 0){
+                        $("#supplier_contact_person").html(data['contact_person'])
+                        $("#supplier_contact_person").parent().show();
+                    }else{
+                        $("#supplier_contact_person").parent().hide();
+                    }
+                    if(data['contact_person_no'].length > 0){
+                        $("#supplier_contact_person_no").html(data['contact_person_no'])
+                        $("#supplier_contact_person_no").parent().show();
+                    }else{
+                        $("#supplier_contact_person_no").parent().hide();
+                    }
+                    $("#supplier_contact_person_no").parent().parent().show();
+                }else{
+                    $("#supplier_contact_person_no").parent().parent().hide();
+                }
+                
+                if(data['address_1'].length > 0){
+                    $("#supplier_address_1").html(data['address_1']+" | ")
+                }
+                if(data['address_2'].length > 0){
+                    $("#supplier_address_2").html(data['address_2']+" | ")
+                }
+                if(data['country'].length > 0){
+                    $("#supplier_country").html(data['country'])
+                }
+
+                if(data['license_no'].length > 0 || data['vat_reg'].length > 0){
+                    if(data['license_no'].length > 0){
+                        $("#supplier_license").html(data['license_no'])
+                        $("#supplier_license").parent().show();
+                    }else{
+                        $("#supplier_license").parent().hide();
+                    }
+                    if(data['vat_reg'].length > 0){
+                        $("#supplier_vat_reg").html(data['vat_reg'])
+                        $("#supplier_vat_reg").parent().show();
+                    }else{
+                        $("#supplier_vat_reg").parent().hide();
+                    }
+                    $("#supplier_vat_reg").parent().parent().show();
+                }else{
+                    $("#supplier_vat_reg").parent().parent().hide();
+                }
+            },
+        });
+    });
+
+</script>

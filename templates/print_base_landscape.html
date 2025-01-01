@@ -1,0 +1,107 @@
+
+{% load sc_filters %}
+<html lang="en"> 
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block page_title %}{% endblock %} || EBIT </title>
+        <style type="text/css">
+            body {
+                font-size: 12px !important;
+                font-weight: 100;
+                font-family: "Poppins", sans-serif;
+                position: relative;
+                min-height: 820pt;
+            }           
+              
+            hr {
+                {% comment %} margin: 15px auto 5px !important; {% endcomment %}
+                padding: 0 !important;
+            }
+            .border-zero{
+                border-top:0px!important;
+                border-bottom:0px!important;
+                border-left:0px!important;
+                border-right:0px!important;
+            }
+            h6 {
+                margin: 15px 0px 0px !important;
+            }
+
+            p {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+
+            .logo {
+                left: 50%;
+                height: 45px;
+                z-index: 1;
+                border-radius: 50%;
+                background-color: #fcfcfc;
+            }
+          
+            @page {
+                size:landscape;
+                margin: 0.5in;
+                position: relative;
+
+                @frame {
+                    -pdf-frame-content: last_content;
+                    left: 320pt; width: 200pt; top: 570pt; height: 20pt;
+                }
+
+                @frame {
+                    -pdf-frame-content: left_content;
+                    left: 35pt; width: 200pt; top: 570pt; height: 20pt;
+                }
+
+                @frame footer_frame {
+                    -pdf-frame-content: footer_content;
+                    right: 35pt; width: 200pt; top: 570pt; height: 20pt;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="card border-danger">
+            <div class="card-body" style="position:relative;">
+                <table>
+                    <tr>
+                        <td style="text-align:right;padding:4px;padding-top: 0px;padding-bottom: 0px;">
+                            <img class="logo" src="{% settings_value "DOMAIN_URL" %}assets/images/esquire-logo.png" alt="Esquire Logo" />
+                        </td>
+                        <td style="text-align:left">
+                            <h1 style="text-align: center; margin-bottom: 0px; padding-bottom: 0px;">{{company.name}}</h1>
+                            <p style="text-align: center; margin-top: 0px; padding-top: 0px;">
+                                {{company.address}} <br>
+                                {% if company.phone_no or company.fax %}
+                                Contact : {{ company.phone_no }} {% if company.phone_no and company.fax %} | {% endif %} 
+                                {{ company.fax }}
+                                {% endif %}
+                            </p>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+
+                <hr/>
+
+                <h3 style="text-align: center; margin-bottom: 0px; padding-bottom: 0px;">{% block header_title %}{%endblock %}</h3>
+
+                {% block page_content %}{% endblock%}
+                <div id="left_content" align="left" style="font-size: small;"> 
+                    <p> <b>Printed by: {{user}} ( {% now 'd-M-Y h:i A' as datetime %}{{datetime|upper}} )</b></p> 
+                </div>
+                <div id="last_content" align="center" style="font-size: small;"> 
+                    <p> <b>Powered by E-BIT, Esquire Technology Limited</b></p> 
+                </div>
+                <div id="footer_content" align="right" style="font-size: small;">
+                    <b>Page <pdf:pagenumber> of <pdf:pagecount></b>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

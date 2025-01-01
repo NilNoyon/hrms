@@ -1,0 +1,203 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.ico' %}">
+    {% block page_meta %}{% endblock %}
+
+    <script src="{% static 'node_modules/jquery/jquery-3.2.1.min.js' %}"></script>
+    {# Page-specific styles #}
+    {% autoescape off %}
+    {% block css_links %}{% endblock %}
+    {% endautoescape %}
+
+    {# Global styles #}
+    {% block site_css %}
+    <link href="{% static 'node_modules/toast-master/css/jquery.toast.css' %}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'dist/css/style.css' %}?v=0.2" rel="stylesheet">
+    {% endblock %}
+
+    {# Page-specific styles #}
+    {% autoescape off %}
+    {% block page_css %}{% endblock %}
+    {% endautoescape %}
+
+    <title>{% block page_title %}{% endblock %} || EBIT</title>
+
+</head>
+
+<body class="{% block body_class %}{% endblock %}" >
+
+    {% block body %}
+    {# Page content will go here #}
+
+    <!-- Preloader - style you can find in spinners.css -->
+    <!-- ============================================================== -->
+    <div class="preloader">
+        <div class="loader">
+            <div class="loader__figure"></div>
+            <p class="loader__label">EBIT</p>
+        </div>
+    </div>
+    <!-- ============================================================== -->
+
+    {% endblock %}
+
+    {# Modal HTML #}
+    {% block modals %}{% endblock %}
+
+    {# Global javascript #}
+    {% block site_js %}
+
+    <script src="{% static 'node_modules/popper/popper.min.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'dist/js/perfect-scrollbar.jquery.min.js' %}"></script>
+    <script src="{% static 'dist/js/waves.js' %}"></script>
+    <script src="{% static 'dist/js/sidebarmenu.js' %}?ver=0.3"></script>
+    <script src="{% static 'dist/js/custom.js' %}?ver=0.4"></script>
+    <script src="{% static 'node_modules/toast-master/js/jquery.toast.js' %}"></script>
+
+    
+    <script>
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Speech recognition setup and fetchMenuUrl function
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;  // Enable interim results for real-time text updates
+        recognition.maxAlternatives = 1;
+    
+        // Start listening for a voice command
+        function startListening() {
+            Swal.fire({
+                title: "Listening...",
+                html: "<p>Please say 'OPEN' and a menu name:</p><p id='speechDisplay'></p>",  // Dynamic element to show recognized words
+                icon: 'info',
+                showCancelButton: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            recognition.start();
+        }
+    
+        // Event when a voice command is recognized
+        recognition.onresult = function(event) {
+            console.log(event.results[0][0])
+            const interimText = event.results[0][0].transcript.toLowerCase();
+            document.getElementById("speechDisplay").textContent = interimText;  // Update popup with recognized words in real-time
+    
+            if (event.results[0].isFinal) {
+                Swal.close();  // Close popup when recognition ends
+                fetchMenuUrl(interimText);  // Send recognized text directly to the backend
+            }
+        };
+    
+        // Event when speech recognition ends
+        recognition.onspeechend = function() {
+            Swal.close();  // Close popup after listening ends
+        };
+    
+        // Handle errors with a delay in closing the popup
+        recognition.onerror = function(event) {
+            Swal.fire({
+                title: "Speak Louder!",
+                text: "I didn't hear anything",
+                icon: 'info',
+                showCancelButton: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            console.error("Speech recognition error:", event.error);
+    
+            // Delay the popup close by 2 seconds (2000 milliseconds)
+            setTimeout(() => {
+                Swal.close();
+            }, 2000);
+        };
+    
+        // Function to fetch the URL for a menu name
+        function fetchMenuUrl(menuName) {
+            fetch('/get-menu-url/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // CSRF token for Django
+                },
+                body: JSON.stringify({ menu_name: menuName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.menu_url) {
+                    // Show a popup with best match and score before redirecting
+                    Swal.fire({
+                        title: `Opening "${data.best_match}"`,
+                        text: `Your command: "${menuName}" ${data.score} % matched with "${data.best_match}"`,
+                        icon: 'info',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                        
+                    })
+                        // Redirect to the menu URL after user acknowledges the popup
+                        window.location.href = data.menu_url;
+                     
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Menu not found",
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: "#e46a76"
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching menu URL:', error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Say it again with correct pronunciation.",
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: "#e46a76"
+                });
+            });
+        }
+    </script>
+    
+    
+
+    {% endblock %}
+
+    {% include 'inc/message.html' %}
+
+    {# Page javascript #}
+    {% autoescape off %}
+    {% block js_scripts %}
+    {% endblock %}
+    {% endautoescape %}
+
+</body>
+
+</html>

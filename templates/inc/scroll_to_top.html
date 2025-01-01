@@ -1,0 +1,54 @@
+<style>
+    #scroll_button {
+        display: inline-block;
+        background-color: #009C75;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        border-radius: 4px;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        border-radius: 100%;
+        transition: background-color .3s, 
+          opacity .5s, visibility .5s;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1000;
+      }
+      #scroll_button:hover {
+        cursor: pointer;
+        background-color: #333;
+      }
+      #scroll_button:active {
+        background-color: #555;
+      }
+      #scroll_button.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      #scroll_button i{
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        position: absolute;
+    }
+</style>
+
+<a id="scroll_button" href="javascript:void(0)" class="text-white">
+    <i class="ti-arrow-up"></i>
+</a>
+
+<script>
+    var btn = $('#scroll_button');
+    $(window).scroll(function() {
+        if ($(window).scrollTop() > 300) {
+            btn.addClass('show');
+        } else { btn.removeClass('show'); }
+    });
+
+    btn.on('click', function(e) {
+        e.preventDefault();
+        $('html, body').animate({scrollTop:0}, '300');
+    });
+</script>    

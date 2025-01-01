@@ -1,0 +1,110 @@
+{% load static %}
+<label class="custom-label" style="position: relative;">Terms & Conditions</label>
+<div class="row">
+    {% for t in top_tnc %}
+    <div class="col-4">
+        <div class="input-group form-group mb-2">
+            <div style="flex: 1 1 auto; width: 1%;">
+                <input style="padding-left: 10px;" type="text" class="form-control tnc" name="tnc" value="{{ t.value }}" readonly>
+                <span class="bar"></span>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-danger tnc-remove" type="button"><i class="ti-close"></i></button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="col-4 duplicateMe" style="display: none;">
+        <div class="input-group form-group mb-2">
+            <div style="flex: 1 1 auto; width: 1%;">
+                <input style="padding-left: 10px;" type="text" class="form-control tnc value" name="tnc" value="" readonly>
+                <span class="bar"></span>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-danger tnc-remove" type="button"><i class="ti-close"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="input-group form-group">
+            <div style="flex: 1 1 auto; width: 1%;">
+                <select class="form-control text-capitalize value" id="tnc_value" name="tnc">
+                    <option value="" disabled selected></option>
+                    {% for t in other_tnc %}
+                    <option value="{{ t.value }}">{{ t.value }}</option>
+                    {% endfor %}
+                </select>
+                <span class="bar"></span>
+            </div>
+            <div class="input-group-append">
+                <button class="btn btn-success tnc-add" type="button"><i class="ti-plus"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'node_modules/select2/dist/js/select2.full.min.js' %}" type="text/javascript"></script>
+<script>
+    $(".tnc").on("click", ".tnc-remove", function(){
+        $(this).parent().closest(".col-4").remove()
+    })
+
+    $("body").on("change", "#tnc_value", function(){
+        let val = $(this).val()
+        let duplicate = false
+
+        $(".tnc").each(function(index, item){
+            if(val == $(item).val()){
+                duplicate = true;
+            }
+        });
+
+        if(duplicate){
+            $.toast({
+                heading: "Warning",
+                text: 'This value of Terms & Conditions already exists!',
+                position: 'top-right',
+                loaderBg:'#fff',
+                icon: 'warning',
+                hideAfter : 2000,
+            });
+            $(this).val("").trigger("change")
+        }
+
+    })
+
+    $(".tnc").on("click", ".tnc-add", function(){
+        $value_field = $(this).parent().closest(".form-group").find(".value");
+        let val = $value_field.val()
+        if(!val){
+            $.toast({
+                heading: "Warning",
+                text: 'No selection for Terms & Conditions',
+                position: 'top-right',
+                loaderBg:'#fff',
+                icon: 'warning',
+                hideAfter : 2000,
+            });
+        }else{
+            $("#tnc_value").select2("destroy");
+            $duplicate = $(".duplicateMe").clone();
+            $duplicate.removeClass("duplicateMe").show();
+            $duplicate.find(".value").val(val);
+            $value_field.val('').trigger("change");
+            $duplicate.insertBefore(".duplicateMe");
+            tncSelect2();
+        }
+        
+    })
+    
+    function tncSelect2(){
+        $("#tnc_value").select2({
+            tags: true,
+            width: "100%",
+            allowClear: true,
+            placeholder: "Terms & Conditions"
+        });
+    }
+
+    tncSelect2();
+</script>
