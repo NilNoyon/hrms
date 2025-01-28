@@ -63,6 +63,31 @@ class Designations(models.Model):
     def title(self):
         return self.short_name if self.short_name else self.name
 
+
+class Departments(models.Model):
+    name           = models.CharField(max_length=200, unique=True)
+    short_name     = models.CharField(max_length=10, blank=True) #need to unique = true later
+    status         = models.BooleanField(default=True)
+    
+    class Meta:
+        db_table = 'departments'
+        verbose_name = "Department"
+        verbose_name_plural = "departments" 
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+    @staticmethod
+    def get_name_wise_last_department(department_text):
+        department_query = Departments.objects.filter(name=department_text.strip())
+        if department_query.exists(): department = department_query.last()
+        else: department = None
+        return department
+    
+    @property
+    def title(self):
+        return self.short_name if self.short_name else self.name
+    
 class UserRoles(models.Model):
     name           = models.CharField(max_length = 80, unique=True)
     status         = models.BooleanField(default = True)
@@ -119,11 +144,7 @@ class Users(models.Model):
         user_level = 0
         if self.role.name == "Procurer"                             : user_level = 1
         elif self.role.name == "SC Head"                            : user_level = 2
-        elif self.employee_id == "EC00002001"                       : user_level = 9
-        # elif self.employee_id == "EC00006757"                       : user_level = 9
         elif self.role.name == "Audit"                              : user_level = 3
-        elif Company.objects.filter(ceo_id=self.id).count() > 0     : user_level = 4
-        elif Company.objects.filter(md_id=self.id).count() > 0      : user_level = 5
         elif 'management' in self.role.name.lower()                 : user_level = 6
         elif 'admin' in self.role.name.lower()                      : user_level = 7
         elif 'finance' in self.role.name.lower()                    : user_level = 8
@@ -278,30 +299,6 @@ class CommonMaster(models.Model): #this common model/table will use for all smal
         cc_obj  = CurrencyConversion.objects.filter(from_currency_id=self.id, to_currency__value__exact="BDT").first()
         return cc_obj.rate if cc_obj else 1
 
-
-class Departments(models.Model):
-    name           = models.CharField(max_length=200, unique=True)
-    short_name     = models.CharField(max_length=10, blank=True) #need to unique = true later
-    status         = models.BooleanField(default=True)
-    
-    class Meta:
-        db_table = 'departments'
-        verbose_name = "Department"
-        verbose_name_plural = "departments" 
-
-    def __str__(self):
-        return '%s' % (self.name)
-
-    @staticmethod
-    def get_name_wise_last_department(department_text):
-        department_query = Departments.objects.filter(name=department_text.strip())
-        if department_query.exists(): department = department_query.last()
-        else: department = None
-        return department
-    
-    @property
-    def title(self):
-        return self.short_name if self.short_name else self.name
 
 
 class Sections(CoreAction):

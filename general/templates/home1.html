@@ -1,0 +1,446 @@
+{% extends "admin.html" %}
+{% load sc_filters %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+    {% load static %}
+    {% load data_load %}
+    <link href="{% static '/dist/css/jquerysctipttop.css' %}" rel="stylesheet" type="text/css">
+    {% comment %} <link href="{% static '/dist/css/pages/progressbar-page.css' %}" rel="stylesheet" type="text/css"> {% endcomment %}
+    <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+    <style>
+        .waves-light {margin: 20px;padding: 20px;}
+        .center {
+            text-align: center;
+            color: #8A211A !important;
+        }
+        #mainpopup h1{
+            font-family: 'Dancing Script', cursive !important;
+            font-size: 30px;
+        }
+        #mainpopup h2{
+            font-family: 'Dancing Script', cursive !important;
+            font-size: 23px;
+        }
+
+        .blockquote-wrapper {
+            display: flex;
+            height: 100vh;
+            padding: 15vh 20px 20px;
+        }
+
+        .waves-light {margin: 20px;padding: 20px;}
+
+        .container {
+            height: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .waves-light {
+            margin: 20px;
+            padding: 20px;
+        }
+
+          
+        .custom-card{
+            background-color: #f8f9fa!important;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-clip: border-box;
+            border: 0px solid transparent;
+            border-radius: 0px;
+        }
+
+
+        {% comment %} .modal {
+            background-color: white;
+        }
+        .modal-dialog {
+            margin: 2.5vh auto;
+            background-color: white;
+        }
+
+        .modal-content {
+            max-height: 83vh;
+            overflow: hidden;
+        }
+
+        .modal-body {
+            max-height: 83vh;
+            overflow: hidden;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        @keyframes float {
+            from {transform: translateY(100vh);
+            opacity: 1;}
+            to {transform: translateY(-300vh);
+            opacity: 0;}
+        }
+
+        @media (min-width: 576px){
+            .modal-dialog {
+                max-width: 100%;
+                margin: 1.75rem auto;
+            }
+        }
+        @media (max-width: 718px){
+            #left-panel {
+                display: none;
+            }
+        } {% endcomment %}
+        .bg-gradient-fuchsia{
+            background-image: linear-gradient(310deg,#141727,#015178);
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        }
+        .shadow{
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        }
+
+        .plan:hover{
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        }
+        .chart-shadow{
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+            background:#fff;
+        }
+        .rounded-lg {
+            border-radius: 0.5rem !important;
+        }
+
+        .rounded-lg-sm{
+            border-radius: 0.9rem !important;
+        }
+        .bg-white {
+            --tw-bg-opacity: 1;
+            background-color: rgb(255 255 255/var(--tw-bg-opacity));
+            border-radius: 1rem;
+            color: rgb(103 116 142);
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        }
+        
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+        .bg-gradient-fuchsia-green {
+            background-image: linear-gradient(310deg,#00c292,#00c292);
+
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+            color:#00c292 !important;
+        }
+        .flex-body{
+            display: flex;
+       
+        }
+        .flex-child-home {
+            flex:1;     
+        }  
+        
+        .flex-child-home:first-child {
+            flex-grow: 7;
+        } 
+       
+        .icon-size{
+            font-size: 14px;
+            color:white;
+            display: inline-block;
+        }
+   
+        .image-bg{
+            /* background-image:url('/assets/images/background/demo-background.jpg'); */
+            background-size: cover;
+            border-radius: 0.9rem !important;
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+          
+        }
+        .shadow-soft-xl{
+            box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        }
+      
+        .bg-gradient-dark-gray{
+            background-image: linear-gradient(310deg,#141727,#3a416f);
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            position:absolute;
+            background-size: cover;
+            color: white!important;
+        }
+        .content {
+            position: relative;
+        }
+        .content .edit {
+            position: absolute;
+            top:15px;
+            right: 15px;
+        }
+        .stuck {
+            position: absolute;
+            top: 23px;
+            right: 0px;
+            max-height: 100%;
+            overflow-y: scroll;
+            color:black;
+        }
+      
+        .stuck p {
+            margin: 10px;
+        }
+        .relative {
+            position: relative;
+        }
+        .opacity-80 {
+            opacity: .8;
+        }
+    </style>
+
+    <div class="custom-card border-danger mb-0">
+        
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 pb-3" id="left-panel">
+                    <div style="text-align: center;" class="rounded-lg">
+                        <div class="bg-white pb-3 content">
+                            <div class="d-none d-sm-block">
+                                <img {% if request.session.photo %} src="/assets/uploads{{request.session.photo}}" {% else %} src="{% static 'images/users/user.png'%}" {% endif %} style="margin: 10px;" width="120" height="120" class="img-circle"/>
+                                <h4 class="card-title m-t-4">{{request.session.name}}</h4>
+                                <span>Employee ID : {{request.session.employee_id}}</span><br>
+                                <span>{{request.session.department}}</span><br>
+                                <span>{{request.session.company}}</span><br>
+                                <span>Reporting to : {{user.reporting_to}}</span><br><br>
+                            </div>
+                            <a href="/user/myProfile/" class="text-info mt-5"><i class="ti-pencil-alt"></i> &nbsp;Update profile</a>
+                            <br><br><br>
+                            <p>You're logged in as {{request.session.role_text}}</p>
+                        </div>    
+                
+                        {% if request.session.role_text == 'Admin' or request.session.role_text == 'Super Admin' or request.session.employee_id == 'EC00007179' %}
+                        <div class="flex-body bg-white mt-3 mb-1">
+                            <div class="flex-child-home" >
+                           
+                                <div style="width:100%;margin-top:9.8px;margin-bottom:9.8px;" class="rounded-lg justify-center text-left">
+                                    {% if request.session.role_text == 'Admin' or request.session.role_text == 'Super Admin' or request.session.employee_id == 'EC00007179' %}
+                                        <a href="{% url 'logged_users' %}" class="ml-3"><span style="color:#677F95"> Currently Active Users: </span><br>
+                                            <span class="pl-3" style="color:#00000;font-size:1.3em;">{% if active_users|length > 1 %}{% endif %} {{active_users|length}}<small style="color:#82D616"> / {{total_user}}</small></span>
+                                        </a>
+                                    {% endif %}
+                                    
+                                </div>
+                            </div>
+                       
+                            <div class="flex-child-home mt-3 mr-3" style="margin-top:4px;margin-bottom:2px;margin-right:4px;">
+                                <div style="height:2.1rem;width:87.9%;" class="bg-gradient-fuchsia-green rounded-lg justify-center text-center">
+                                    <i class="fas fa-user-circle singlei Helpdesk icon-size"  style="margin-top:9.8px;margin-bottom:9.8px;"></i>
+                                </div>
+                            </div> 
+                        </div>
+                            
+                        {% endif %}
+                        <div class="shadow-soft-xl relative rounded-2xl bg-white mt-3" style="">
+                            <div class="relative overflow-hidden bg-cover rounded-xl image-bg" style="">
+                                <span class="absolute bg-center bg-cover bg-gradient-dark-gray opacity-80"></span>
+                                <div class="relative p-4" style=" color: white!important;">
+                                    <i>If You Fail to Plan, You Are Planning to Fail.</i><br>-Benjamin Franklin <br><br>
+                                    <i>The man who asks a question is a fool for a minute, the man who does not ask is a fool for life.</i><br>-Confucius
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 rounded-lg" id="right-panel">
+                    {% if not hide_bulleting_data %}
+                    <div class="my-box pr-3">
+                        <div class="progress">
+                            <div id="progrees-bar" class="progress-bar bg-success progress-bar-animated active" 
+                                style="width: 0%; height:30px; font-size: 18px;" role="progressbar" aria-valuenow="0" aria-valuemin="0">Loading...</div>
+                            </div>
+                    </div>
+                    <div id="dash-board-panel">
+                        <div class="card-header">
+                            <h5 style="text-align: center;">Plan vs Achievement as on home1<input type="text" class="singledate bg-transparent" style="border: none;padding-bottom: 10px;" value="{{ operation_bulletin_ekcl.date }}" id="efficiency_date" name="date"></h5>
+                        </div>
+                        <div hidden class="loading" id="loaderModal"></div>
+                        <div class="row pb-4 custom-card">
+                            <div class="col-md-6"><div id="ALL_unit_bulletin_day" style="width: 100%; height: 400px;"></div></div>
+                            <div class="col-md-6"><div id="ALL_unit_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div></div>
+                        </div>
+                        <div class="row">
+                            <div id="EKCLALL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            <div id="EKCLALL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div>
+                        <div class="row">
+                            <div id="EKCL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            <div id="EKCL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div>
+                        <!-- <div class="row">
+                            <div id="FIZA_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            <div id="FIZA_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div> -->
+                        <div class="row">
+                            <div id="TT_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            <div id="TT_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div>
+                        <div class="row">
+                            <div id="LESQ_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            <div id="LESQ_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div>
+                        <!-- <div class="row">
+                            <div id="Prod_FOB_pie" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div> -->
+                        <br><br>
+                        <h5 style="text-align: center;">Production Status on <input type="text" class="singledate" style="border: none;padding-bottom: 10px;" value="{{date}}" id="production_date" name="date"></h5>
+                        <div class="row">
+                            <div id="EKCL_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            <div id="LESQ_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                        </div>
+                        <div class="row">
+                            <div id="EKCL_prod_details" class="col-md-12" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                    <br>
+                    {% endif %}
+                    <div class="card rounded-lg-sm chart-shadow">
+                        <div class="rounded-lg-sm chart-shadow">
+                            <h5 class="card-title text-center mt-2">Notifications</h5>
+                            <div class="table-responsive p-3">
+                                <table class="table">
+                                    {% for n in unread_list %}
+                                    <tr>
+                                        <td class="max-texts notify_list_item" data-id="{{ n.slug }}">
+                                            <a href="{{ n.action_url }}" class="text-info" target="_blank"> {{ n.description|safe }}</a>
+                                        </td>
+                                        <td class="text-right"> {{ n.timesince }} ago</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class='text-center h4'>No New Notifications</td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>    
+                    <!-- For Quick Links --><br>
+
+                    <!-- <h5 class="card-title text-center">Quick Links</h5>
+                    <br>
+                    <div class="row">
+                    {% for data in access_list %}
+                        <div class="col-md-3" ><a style="margin: 5px !important;" class="btn waves-effect waves-light btn-rounded btn-outline-info btn-sm" href="{{data.menu.menu_url}}">{{data.menu.menu_name}}</a></div>
+                    {% endfor %}
+                    </div> -->
+                 
+                </div>
+            </div>
+        </div>
+        <!-- resulation -->
+        <!-- <div class="modal fade" id="mainpopup" tabindex="-1" role="dialog" aria-labelledby="mainpopupLabel" aria-hidden="true" data-close="9" data-open="0">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <div class="container pr-0 pl-0">
+                        <div class="blockquote-wrapper mt-2">
+                            <div class="center">
+                                <div> <span id="countdown"></span></div>
+                                <h1 class="p-5">Resolution for 2022</h1>
+                                <h1>"As the Year of Tiger"</h1> - Ehsanul Habib (MD) <br/><br>
+                                <h1>"Consume resources responsibly with purpose" </h1> - Debasish Kumar Saha (CEO)
+                            </div>
+                        </div>
+                    <div>
+                </div>
+            </div>
+        </div> -->
+        <!-- resulation -->
+    </div>
+{% endblock %}
+
+{% block page_js %}
+    {% comment %} <script type="text/javascript" src="{% static 'dist/js/jquery.countdown360.min.js' %}"></script>
+    <script>
+
+        $(document).ready(function () {
+
+            var popup = $('#mainpopup');
+            var time = $(".will-close strong");
+            var closeSeconds = $("#mainpopup").attr("data-close");
+            var openSeconds = $("#mainpopup").attr("data-open");
+            var dataSrc = $("#mainpopup").attr("data-href");
+
+            setTimeout(function (e) {
+                popup.modal('show');
+                time.html(closeSeconds);
+                setInterval(function () {
+                    time.html(closeSeconds);
+                    closeSeconds--;
+                    if (closeSeconds < 0) {
+                        popup.modal('hide');
+                    }
+                }, 1000)
+            }, openSeconds * 1000);
+
+            var countdown =  $("#countdown").countdown360({
+                radius      : 60,
+                seconds     : 10,
+                fontColor   : '#FFFFFF',
+                autostart   : false,
+                onComplete  : function () {}
+            });
+            countdown.start();
+        });
+    </script> {% endcomment %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+    <script type="text/javascript">
+        $.get("https://ipinfo.io", function(response) {
+            $.ajax({ url:"{% url 'update_ip' %}", type:"POST",
+                data: { ip:response.ip, user:"{{request.session.id}}"},
+                success: function(data){ console.log('updated'); }
+            });  
+        }, "json");
+
+        const spinner = document.getElementById("loaderModal");
+        let hide_bulleting_data = "{{hide_bulleting_data|safe}}"
+
+        function getDashBoardData(date){
+        
+            $('#dash-board-panel').empty();
+            $.ajax({
+                url : "{% url "get_dashboard_info" %}",
+                type: "POST",
+                data: { date : date},
+                dataType: 'html',
+                beforeSend: function(){
+                    $("#progrees-bar").animate({width: "40%"}, 100);
+                },
+                success: function(data){
+                    $("#progrees-bar").animate({width: "100%"}, 1000);
+                    setTimeout(function(){
+                        $('.my-box').empty();
+                        $('#dash-board-panel').html(data);
+                    }, 1200);
+                    
+                },
+                error: function(xhr, desc, err){
+                    console.log(err);
+                    spinner.setAttribute('hidden', '');
+                }
+            });
+        }
+        {% comment %} Initial data {% endcomment %}
+        if(hide_bulleting_data != 'True'){
+            let date = "{{ operation_bulletin_ekcl.date|date:'M d, Y' }}";
+            getDashBoardData(date);
+        }
+        {% comment %} Initial data {% endcomment %}
+    </script>
+{% endblock %}

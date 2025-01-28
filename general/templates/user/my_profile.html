@@ -1,0 +1,247 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}My Profile {% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 align-self-center">
+                        <h4 class="text-themecolor mb-0"> Update Profile</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                <form class="floating-labels mt-3" method="post" action="{% url 'myProfile' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% comment %} <p class="text-center font-weight-bold">Employee ID: {{ user.employee_id }}</p> {% endcomment %}
+                            <div class="form-group">
+                                <input type="file" name="photo" class="dropify" data-height="150" data-show-remove="false" {% if not user.photo %} required {% endif %}
+                                {% if user.photo %} data-default-file="/assets{{user.photo.url}}" {% else %} data-default-file="{% static 'images/users/user.png'%}" {% endif %}> 
+                            </div>
+                            <div class="form-group">
+                                <input type="file" name="signature" class="dropify" data-height="80" data-show-remove="false"
+                                  {% if user.signature %} data-default-file="/assets{{user.signature.url}}" {% endif %}> 
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="first_name" value="{{user.first_name|default_if_none:""}}" required>
+                                        <label for="first_name">First Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="last_name" value="{{user.last_name|default_if_none:""}}" required>
+                                        <label for="last_name">Last Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" value="{{ user.father_name|default_if_none:"" }}" name="father_name" required>
+                                        <span class="bar"></span>
+                                        <label for="email">Father Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="email" class="form-control" value="{{ user.email }}" name="email">
+                                        <span class="bar"></span>
+                                        <label for="email">Email</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Phone No.</label>
+                                        <input type="text" class="form-control" value="{{ user.phone_no }}" name="phone_no">
+                                        <span class="bar"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 focused">
+                                    <div class="form-group">
+                                      <input type="text" class="form-control singledate" name="date_of_birth" {% if user.date_of_birth %} value={{user.date_of_birth|date:"d/m/Y"}} {% endif %} required>
+                                      <span class="bar"></span>
+                                      <label for="date_of_birth">Date Of Birth</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="gender">Gender</label>
+                                        <select class="form-control select2" name="gender" data-title="Gender" required>
+                                            <option value="" disabled selected></option>
+                                            {% for i in gender_list %}
+                                                <option value="{{i.id}}" {% if i.id == user.gender_id %} selected {% endif %}>{{i.value}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="religion">Religion</label>
+                                        <select class="form-control select2" name="religion" data-title="Religion" required>
+                                            <option value="" disabled selected></option>
+                                            {% for i in religion_list %}
+                                                <option value="{{i.id}}" {% if i.id == user.religion_id %} selected {% endif %}>{{i.value}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="blood">Blood Group</label>
+                                        <select class="form-control select2" name="blood_group" data-title="Blood Group" required>
+                                            <option value="" disabled selected></option>
+                                            {% for i in blood_group_list %}
+                                                <option value="{{i.0}}" {% if i.0 == user.blood_group %} selected {% endif %}>{{i.1}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="maritialStatus">Maritial Status</label>
+                                        <select class="form-control custom-select text-capitalize select2" name="marital_status" data-title="Maritial Status" id="maritialStatus" required>
+                                            <option value="" disabled selected></option>
+                                            {% for i in marital_status_list %}
+                                                <option value="{{i.id}}" {% if i.id == user.marital_status_id %} selected {% endif %}>{{i.value}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="spouse" name="spouse_name" value="{{user.spouse_name|default_if_none:""}}">
+                                        <span class="bar"></span>
+                                        <label for="spouse">Spouse Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="no_of_children" name="no_of_children" value="{{user.no_of_children|default_if_none:""}}">
+                                        <span class="bar"></span>
+                                        <label for="no_of_children">Number of Children</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="nationality" id="nationality" value="{{user.nationality|default_if_none:""}}" required>
+                                        <span class="bar"></span>
+                                        <label for="nationality">Nationality </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="id_type">Id Type</label>
+                                        <select class="form-control select2" name="id_type" required>
+                                            <option value="NID" {% if user.id_type == "NID" %}selected{% endif %}>NID</option>
+                                            <option value="Passport" {% if user.id_type == "Passport" %}selected{% endif %}>Passport</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="nid_passport" id="nid_passport" value="{{user.nid_passport|default_if_none:""}}" required>
+                                        <span class="bar"></span>
+                                        <label for="nid_passport">ID Number </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row m-0">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <textarea id="permanent" name="permanent_address" class="form-control" required>{{user.permanent_address|default_if_none:""}}</textarea>
+                                <span class="bar"></span>
+                                <label for="permanent">Permanent Address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <textarea id="present" name="present_address" class="form-control" required>{{user.present_address|default_if_none:""}}</textarea>
+                                <span class="bar"></span>
+                                <label for="present">Present Address</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 ml-auto mt-2">
+                            <div class="button-group">
+                                <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger">
+            <div class="card-header pl-0">
+                <div class="row">
+                    <div class="col-md-12 align-self-center">
+                        <h4 class="text-themecolor mb-0"> Update Password</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                <form class="floating-labels mt-3" method="post" action="{% url 'changePassword' %}" >
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="old_password" id="old_password">
+                        <span class="bar"></span>
+                        <label class="form-label" for="old_password">Old Password</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="new_password1" id="new_password1">
+                        <span class="bar"></span>
+                        <label class="form-label" for="new_password1">New Password</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="new_password2" id="new_password2">
+                        <span class="bar"></span>
+                        <label class="form-label" for="new_password2">Re-Type Password</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 ml-auto mt-2">
+                            <div class="button-group">
+                                <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            // Single Date Range Picker
+            $('.singledate').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                locale: { format: 'DD/MM/YYYY' }
+            });
+        })
+    </script>
+{% endblock %}

@@ -16,7 +16,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls import include
+import os 
+from django.views.static import serve 
+from django.conf import settings
 
 urlpatterns = [
+    path('', include('general.urls')),
     path('admin/', admin.site.urls),
+    # path('fixed-asset/', include('ngoasset.urls')),
+    # path('hr/', include('hr.urls')),
 ]
+admin.site.site_header  =  "XYZ NGO Admin"  
+admin.site.site_title  =  "XYZ NGO Admin"
+admin.site.index_title  =  "XYZ NGO Admin"
+
+from django.conf.urls import (
+    handler400, handler403, handler404, handler500
+)
+
+# handler404 = "general.views.error_404"
+# handler500 = "general.views.error_500"

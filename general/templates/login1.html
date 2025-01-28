@@ -1,0 +1,83 @@
+{% extends "base.html" %} 
+{% load static %} 
+{% block page_title %} HRM Solution {% endblock %} 
+{% block page_css %}
+    <!-- page css -->
+    <link href="{% static 'dist/css/pages/login-register-lock.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #fff !important;
+        }
+        
+        .text-grey {
+            color: #162ca8;
+        }
+        
+        .esquire-font {
+            font-family: Esquivel, sans-serif;
+            font-weight: 400;
+        }
+        
+        .esquire-light-font {
+            font-family: Esquivel-Light, sans-serif;
+        }
+        
+        .form-group i {
+            font-weight: 600;
+        }
+        .required{
+            display: none;
+        }
+    </style>
+{% endblock %} 
+{% block body %}
+
+    <section id="wrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-5 offset-7">
+                    <div style="padding: 1em 0 0;" class="text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="login-register">
+            <div class="login-box card">
+                <div class="card-body" style="box-shadow: 0 1px 6px 0 rgba(255, 255, 255, 0.28);">
+                    <img class="logo" src="{% static 'images/background/login-bg.png' %}" alt="Logo">
+                    <form class="form-horizontal form-material m-t-30" id="loginform" method="POST" >
+                        {% csrf_token %}
+                        <input type="hidden" name="next_url" value="{{ request.GET.next }}" />
+                        <h4 class="text-center text-danger esquire-font m-b-30" style="color: #162ca8 !important">HRM Solution</h4>
+                        <div class="form-group m-b-20">
+                            <input type="text" class="form-control" name="employee_id"  {% if employee_id %} value="{{employee_id}}" {% endif %} id="employee_id" placeholder="ID of Employee" autofocus required>
+                        </div>
+                        <div class="form-group m-b-20">
+                            <input type="password" class="form-control" name="password" value="" id="password" placeholder="Password" required>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <div class="d-flex no-block align-items-center">
+                                    <div class="ml-auto">
+                                        <a href="/forgot-password" id="to-recover" class="text-muted"><i class="fas fa-lock m-r-5"></i> Forgot Password?</a>
+                                    </div>
+                                </div>   
+                            </div>
+                        </div>
+                        <div class="form-group text-center">
+                            <div class="col-xs-12 p-b-10">
+                                <button class="btn btn-block btn-rounded btn-block btn-info" type="submit">Login</button><br>
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="col-sm-12 text-center esquire-light-font text">
+                                <a href="#" target="_blank"><span class="text-grey esquire-light-font">&copy; Dunke Technology Gmbh</span></a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

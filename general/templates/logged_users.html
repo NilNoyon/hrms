@@ -1,0 +1,74 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Currently Active Users{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card border-danger">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6 align-self-center">
+            <h4 class="text-themecolor mb-0">Currently Active Users</h4>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="custom-color custom-height rounded-lg p-3">
+          <table id="costing-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+            <thead>
+              <tr class="text-center">
+                <th class="d-sm-table-cell">Employee ID</th>
+                <th class="d-sm-table-cell">Name</th>
+                <th class="d-md-table-cell">Company</th>
+                <th class="d-sm-table-cell">Department</th>
+                <th class="d-sm-table-cell">Role</th>
+                <th class="d-md-table-cell">Login at</th>
+                <th class="d-md-table-cell">Login IP</th>
+                <th class="d-md-table-cell">Mac Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{user_list|safe}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="myModalLabel"></h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body text-center">
+                              <p><img class=" img-fluid" id="emp_photo" src=""
+                                      alt="card image"></p>
+                              <h5 class="card-title" id="emp_name"></h5>
+                              <h6 class="card-title" id="location"></h6>
+                              <p class="card-text" id="department"></p>
+                              <p class="card-text" id="designation"></p>
+                              <p class="card-text" id="email"></p>
+                              <p class="card-text" id="phone"></p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% include 'inc/profile_modal.html' %}
+{% endblock %}
+

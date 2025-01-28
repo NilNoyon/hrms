@@ -82,7 +82,7 @@ Login register and recover password Page
 }
 
 .login-register {
-    background-image: url(/assets/images/background/layer.png);
+    background-image: url(/assets/images/background/login-bg.jpg);
     background-size: 28%;
     background-position: 80% center;
     padding: 8% 0 10%;
@@ -90,7 +90,7 @@ Login register and recover password Page
 }
 
 .forgot-pass {
-    background-image: url(/assets/images/background/layer.png);
+    background-image: url(/assets/images/background/login-bg.jpg);
     background-size: 28%;
     background-position: 80% center;
     padding: 10% 0 10%;
@@ -129,7 +129,7 @@ Login register and recover password Page
     margin-left: 10%;
     padding: 20px;
     padding-top: 30px;
-    background-color: #324A62;
+    background-color: #ffffff;
     border-radius: 10px;
 }
 

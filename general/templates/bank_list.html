@@ -1,0 +1,159 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Bank{% endblock %}
+
+{% block add_css %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 align-self-center">
+                        <h4 class="mb-1">Bank List</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body custom-color rounded-lg p-3 pt-0" style="margin-left:20px;margin-right:0px;">
+              <div class="table-responsive">
+                <table id="process-table" class="table table-border card-table table-vcenter" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th class="d-sm-table-cell">#SL.</th>
+                          <th class="d-sm-table-cell">Name</th>
+                          <th class="d-sm-table-cell">Branch</th>
+                          <th class="d-sm-table-cell">Route No</th>
+                          <th class="d-sm-table-cell">Swift Code</th>
+                          <th class="d-sm-table-cell">Foreign Bank</th>
+                          <th class="d-sm-table-cell"></th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                  {% for bank in banks %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td class="">{{ bank.name }}</td>
+                        <td class="">{{ bank.branch }}</td>
+                        <td class="text-center">{{ bank.route_no }}</td>
+                        <td class="text-center">{{ bank.swift_code }}</td>
+                        <td class="text-center">{{ bank.is_foreign|yesno|capfirst }}</td>
+                        <td class="text-center">
+                            <a class="h4 m-r-10 text-success" href="{% url 'bank_update' bank.id %}?page={{ page_number }}" class="h4 text-danger">
+                              <span class="icon"><i class="ti-pencil-alt"></i></span>
+                            </a>
+                            {% comment %} <a href="{% url 'inventory:bank_delete' bank.id %}" class="h4 text-danger">
+                              <span class="icon"><i class="ti-trash"></i></span>
+                            </a> {% endcomment %}
+                        </td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+                {% include 'inc/paginate.html' %}
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                    </div>
+                    {% if bank %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'bank_list' %}" class="btn btn-xs btn-success" title="Add New"><i class="ti-plus"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body custom-color rounded-lg p-3" style="margin-right:20px;margin-left:0px;">
+              <div class="col-12">
+                <form class="floating-labels mt-3" method="post" id="cat_form" action="{{ action_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control text-capitalize" id="name" name="name" maxlength="100" value="{{ bank.name }}" required>
+                        <span class="bar"></span>
+                        <label for="name">Name</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control text-capitalize" id="branch" name="branch" maxlength="100" value="{{ bank.branch }}" >
+                        <span class="bar"></span>
+                        <label for="branch">Branch</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control text-capitalize" id="route_no" name="route_no" maxlength="100" value="{{ bank.route_no }}" >
+                        <span class="bar"></span>
+                        <label for="route_no">Route No</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control text-uppercase" id="swift_code" name="swift_code" maxlength="20" value="{{ bank.swift_code }}" >
+                                <span class="bar"></span>
+                                <label for="swift_code">Swift Code</label>
+                            </div>    
+                        </div>
+                        
+                        <div class="col-md-6 mt-2 mb-5">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input is_foreign" name="is_foreign" type="checkbox" id="is_foreign" {% if bank.is_foreign == True %}checked{% endif %} >
+                                <label for="is_foreign">Is Foreign</label>
+                            </div>
+                        </div>
+                    </div>                 
+                    <div class="row">
+                        <div class="col-md-6"> 
+                            {% comment %} <select class="form-control text-capitalize select2" id="company"
+                                name="company" data-title="Company" multiple="multiple"> 
+                                {% for data in bank.company.all %}
+                                    <option value="{{data.id}}" selected>{{data.short_name}}</option>
+                                {% endfor %}
+                                {% for data in company_list %}
+                                    <option value="{{data.id}}" {% if bank.company in data.company.all %} selected {% endif %}>{{data.short_name}}</option>
+                                {% endfor %}
+                            </select>  {% endcomment %}
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <div class="button-group">
+                                <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                <span class="btn-label"><i class="fa fa-check"></i></span>
+                                Submit
+                                </button>
+                            </div>
+                        </div>
+                        {% comment %} <div class="col-md-6 ml-auto mt-2">
+                          <div class="button-group">
+                            <button type="reset" id="reset_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-primary">
+                              <span class="btn-label"><i class="fas fa-undo-alt"></i></span>
+                              Reset
+                            </button>
+                          </div>
+                        </div> {% endcomment %}
+                    </div>
+                </form>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block page_js %}
+    <script>
+        $("#process-table").DataTable({});
+    </script>
+
+{% endblock %}

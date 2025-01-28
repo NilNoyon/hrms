@@ -1,0 +1,148 @@
+{% load static %}
+
+<div class="reset">
+    <div class="form-group" style="display: none;">
+        <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+</div>
+
+<div class="users">
+    <div class="form-group" style="display: none;">
+        <select class="form-control text-capitalize user_field" name="user">
+            <option value="" selected>All User (Employee ID)</option>
+            {% for data in user_list %}
+                <option value="{{data.employee_id}}">{{data.name}} ({{data.employee_id}})</option>
+            {% endfor %}
+        </select>
+        <span class="bar"></span>
+    </div>
+</div>
+<div class="depts">
+    <div class="form-group" style="display: none;">
+        <select class="form-control text-capitalize dept_field" id="dept" name="dept">
+            <option value="" selected>All Department</option>
+            {% for data in dept_list %}
+                <option value="{{data.id}}">{{data.name}}</option>
+            {% endfor %}
+        </select>
+        <span class="bar"></span>
+    </div>
+</div>
+<div class="roles">
+    <div class="form-group" style="display: none;">
+        <select class="form-control text-capitalize role_field" name="role">
+            <option value="" selected>All Role</option>
+            {% for data in role_list %}
+                <option value="{{data.id}}">{{data.name}}</option>
+            {% endfor %}
+        </select>
+        <span class="bar"></span>
+    </div>
+</div>
+
+<div class="search_box" style="display: none;">
+    <div class="input-group">
+        <input type="text" class="form-control search_field" title="Designation, Company" name="search_box" placeholder="Designation, Company">
+        <div class="input-group-append">
+            <button class="search_btn btn btn-info" type="button"><i class="fa fa-search"></i></button>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    function dataTableFunc(dataTable, root, table, data){
+        if (dataTable) { dataTable.destroy(); }
+        let url = $(table).data("url");
+        dataTable = $(table).DataTable({
+            dom             : "<'row top'<'col-md-2 reset_btn'><'col-md-2 user'><'col-md-2 dept'><'col-md-2 role'><'col-md-4 search_area'>>t",
+            ordering        : false,
+            paging          : true,
+            iDisplayLength  : 25,
+            pageLength      : 5,
+            autoWidth       : false,
+            scrollY         : '365',
+            scroller        : true,
+            deferRender     : true,
+            serverSide      : true,
+            processing      : true,
+            responsive      : true,
+            ajax:{
+                type        : "POST",
+                url         : url,
+                data        : data,
+                dataSrc : '',
+            },
+            
+            initComplete:function( settings, json){
+                if( data && Object.keys(data).length > 0 ){
+                    if(data.user != null){ $(root + " .user_field").select2("destroy").val(data.user).select2(); }
+                    if(data.dept != null){ $(root + " .dept_field").select2("destroy").val(data.dept).select2(); }
+                    if(data.role != null){ $(root + " .role_field").select2("destroy").val(data.role).select2(); }               
+                    if(data.search_text.length > 0){ $(root + " .search_field").val(data.search_text) };
+                }
+                $('.dataTables_scrollBody').on('scroll', function (e) {
+                    $parent = $(this).parent();
+                    $parent.children('.dataTables_scrollHead').scrollLeft($parent.children('.dataTables_scrollBody').scrollLeft());
+                });
+            }
+        });
+
+        // Reset Filter
+        $(".reset").children().clone().appendTo(root + " .reset_btn");
+        $(root + " .reset_btn").children().show();
+        $(root).on("click", ".reset_button", function(){
+            dataTableFunc(dataTable, root, table, {});
+        });
+        
+        // User Filter
+        $(".users").children().clone().appendTo(root + " .user");
+        $(root + " .user").children().show();
+        $(root + " .user .user_field").select2();
+        $(root + " .user .user_field").on("select2:select select2:unselecting", function(){
+            setDataTable(dataTable, root, table);
+        });
+        
+
+        // Dept Filter
+        $(".depts").children().clone().appendTo(root + " .dept");
+        $(root + " .dept").children().show();
+        $(root + " .dept .dept_field").select2();
+        $(root + " .dept .dept_field").on("select2:select select2:unselecting", function(){
+            setDataTable(dataTable, root, table);
+        });
+
+        //Role Filter
+        $(".roles").children().clone().appendTo(root + " .role");
+        $(root + " .role").children().show();
+        $(root + " .role_field").select2();
+        $(root + " .role_field").on("select2:select select2:unselecting", function(){
+            setDataTable(dataTable, root, table);
+        });
+            
+        // Date Range Picker
+        
+
+        // Search Text Filter
+        $(".search_box").children().clone().appendTo(root + " .search_area");
+        $(root + " .search_area").children().show();
+        $(root + " .search_area").on("click", ".search_btn", function(){
+            setDataTable(dataTable, root, table);
+        });
+    }
+
+    function setDataTable(dataTable, root, table, start_date='', end_date=''){
+        
+        data = {
+            'user'       :   $(root + " .user_field").val(),
+            'dept'       :   $(root + " .dept_field").val(),
+            'role'         :   $(root + " .role_field").val(),
+            'search_text'   :   $(root + " .search_field").val(),
+        }
+        dataTableFunc(dataTable, root, table, data);
+
+        
+    }
+
+</script>

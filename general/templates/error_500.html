@@ -1,0 +1,191 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}{% endblock %}
+
+{% block add_css %}
+
+<style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            /* background-color: #E7FFFF; */
+        }
+        
+        h1,
+        a {
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .section {
+            padding: 1rem 0 0.5rem;
+        }
+
+        .section .error {
+          font-size:    60px;
+          letter-spacing: 1.5px;
+          text-shadow:  1px 1px 1px #ff0000, 
+                        2px 2px 1px #ff1111, 
+                        3px 3px 1px #ff2222, 
+                        4px 4px 1px #ff3434, 
+                        5px 5px 0px #ff4646, 
+                        8px 8px 6px rgb(0 0 0 / 20%);
+        }
+
+        .page {
+            margin: 2rem 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .back-home {
+            display: inline-block;
+            border: 2px solid rgb(243, 104, 104);
+            color: #222;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0.75rem 1rem 0.6rem;
+            transition: all 0.2s linear;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-home:hover {
+            background: #222;
+            color: #ddd;
+        }
+        ol, ul, dl {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        ol li {
+            margin: 0;
+        }
+        pre {
+            margin-bottom: 0px;
+        }
+        code {color:#03a9f3;font-size: 100%;}
+        table { border:0 !important; border-collapse: collapse; width:100%;}
+        tbody td, tbody th { vertical-align:top; padding:2px 3px; }
+        thead th {
+          padding:1px 6px 1px 3px; background:#fefefe; text-align:left;
+          font-weight:normal; font-size:11px; border:1px solid #ddd;
+        }
+        tbody th { width:12em; text-align:right; color:#666; padding-right:.5em; }
+        table.vars { margin:5px 10px 2px 40px; width: auto; }
+        table.vars td, table.req td { font-family:monospace; }
+        table td.code { width:100%; }
+        table td.code pre { overflow:hidden; }
+        table.source th { color:#666; }
+        table.source td { font-family:monospace; white-space:pre; border-bottom:0; }
+        .borderless td, .borderless th {
+          border: none;
+          padding: 1.5px 0.5rem;
+        }
+        code.context ol.context-line li, tr.error td { background-color: #bbb; }
+</style>
+
+{% endblock %}
+{% block content %}
+  <div class="card border-danger mb-0">
+    <div class="card-body pb-0">
+        <div class="section text-center">
+            <h1 class="error" style="color:#ff0000">{% if exception_type %}{{ exception_type }}{% else %}Report{% endif %}</h1>
+            <h3 class="mt-2 font-weight-bold">{{server_time|date:"jS F, Y - h:i A"}}</h3>
+        </div>
+        {% if unicode_hint %}
+        <div id="unicode-hint">
+            <h2>Unicode error hint</h2>
+            <p>The string that could not be encoded/decoded was: <strong>{{ unicode_hint }}</strong></p>
+        </div>
+        {% endif %}
+        {% if template_does_not_exist %}
+        <div id="template-not-exist">
+            <h2>Template-loader postmortem</h2>
+            {% if postmortem %}
+                <p class="append-bottom">Django tried loading these templates, in this order:</p>
+                {% for entry in postmortem %}
+                    <p class="postmortem-section">Using engine <code>{{ entry.backend.name }}</code>:</p>
+                    <ul>
+                        {% if entry.tried %}
+                            {% for attempt in entry.tried %}
+                                <li><code>{{ attempt.0.loader_name }}</code>: {{ attempt.0.name }} ({{ attempt.1 }})</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>This engine did not provide a list of tried templates.</li>
+                        {% endif %}
+                    </ul>
+                {% endfor %}
+            {% else %}
+                <p>No templates were found because your 'TEMPLATES' setting is not configured.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if template_info %}
+        <div class="card" style="background-color: #f6f6f6;">
+          <div class="card-body">
+            <code>{{ template_info.message|force_escape }} - In template {{ template_info.name }}, error at line <strong>{{ template_info.line }}</strong></code>
+            <div class="table-responsive">  
+              <table class="table table-sm borderless text-nowrap mt-2 source{% if template_info.top %} cut-top{% endif %}
+                    {% if template_info.bottom != template_info.total %} cut-bottom{% endif %}" style="font-size: 84.5%; border: 0px !important;">
+                {% for source_line in template_info.source_lines %}
+                  {% if source_line.0 == template_info.line %}
+                    <tr class="error"><th class="text-info">{{ source_line.0 }}</th>
+                      <td>{{ template_info.before }}<span class="specific">{{ template_info.during }}</span>{{ template_info.after }}</td>
+                    </tr>
+                  {% else %}
+                    <tr><th class="text-info">{{ source_line.0 }}</th>
+                      <td>{{ source_line.1 }}</td>
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% if frames %}
+        <div id="traceback">
+          {% for frame in frames %}
+            {% if frame.type == 'user' %}
+              <div class="card" style="background-color: #f6f6f6;">
+                <div class="card-body">
+                  {% if not frame.tb %}
+                    {% if forloop.first %}None{% else %}Traceback: None{% endif %}
+                  {% else %}
+                    <code class="fname">{{ frame.filename }}, line {{ frame.lineno }}, in {{ frame.function }}</code>
+                  {% endif %}
+                  {% if frame.context_line %}
+                    <code class="context" id="c{{ frame.id }}">
+                      {% if frame.pre_context and not is_email %}
+                        <ol start="{{ frame.pre_context_lineno }}" class="pre-context" id="pre{{ frame.id }}">
+                        {% for line in frame.pre_context %}
+                          <li ><pre>{{ line }}</pre></li>
+                        {% endfor %}
+                        </ol>
+                      {% endif %}
+                      <ol start="{{ frame.lineno }}" class="context-line">
+                        <li ><pre>{{ frame.context_line }}</pre></li>
+                      </ol>
+                      {% if frame.post_context and not is_email  %}
+                        <ol start='{{ frame.lineno|add:"1" }}' class="post-context" id="post{{ frame.id }}">
+                          {% for line in frame.post_context %}
+                          <li ><pre>{{ line }}</pre></li>
+                          {% endfor %}
+                      </ol>
+                      {% endif %}
+                    </code>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+  </div>
+{% endblock %}

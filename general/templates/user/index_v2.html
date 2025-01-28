@@ -1,0 +1,210 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Users{% endblock %}
+
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .select2-container .select2-selection--single .select2-selection__rendered,
+    .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+    .card-body {
+    padding-top: 0px !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center"><h4 class="text-themecolor mb-0">User List</h4></div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="/user/add-user/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <!-- {% if request.session.role_text not in 'FP, PD' %} 
+                    <li class="nav-item"> 
+                        <a class="nav-link {% if tab_name == 'development' %}active{% endif %}" data-toggle="tab" href="#developmentTAB">Development{% if development_count > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ development_count }}</span>{% endif %}</a> 
+                    </li>
+                {% endif %} -->
+                <!-- <li class="nav-item"> 
+                    <a class="nav-link active" data-toggle="tab" href="#pendingTAB">Pending{% if pending_count > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ pending_count }}</span>{% endif %}</a> 
+                </li> -->
+                <li class="nav-item"> 
+                    <a class="nav-link active" data-toggle="tab" href="#submittedTAB">User List{% if submitted_count > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ submitted_count }}</span>{% endif %} {% if active_count > 0 %}<span class="badge badge-success py-0 rounded-pill ml-2">{{ active_count }}</span>{% endif %}</a> 
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabcontent-border">
+                <!-- {% if request.session.role_text not in 'FP, PD' %} 
+                    <div class="tab-pane {% if tab_name == 'development' %}active{% endif %} p-20" id="developmentTAB" role="tabpanel">
+                        <table id="development-table" class="table table-striped card-table table-vcenter" data-url="{% url 'mnm:get_fabric_order_for_dataTable' 'development' %}">
+                            <thead>
+                                <tr>
+                                <th class="d-sm-table-cell">SN</th>
+                                <th class="d-sm-table-cell">Fabric Order No</th>
+                                <th class="d-sm-table-cell">Pre Cost</th>
+                                <th class="d-sm-table-cell">Order QTY</th>
+                                <th class="d-sm-table-cell">Ship Date</th>
+                                <th class="d-md-table-cell" width="5%">Style</th>
+                                <th class="d-lg-table-cell">Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>  
+                {% endif %} -->
+                <!-- <div class="tab-pane active p-20" id="pendingTAB" role="tabpanel">
+                    <table id="pending-table" class="table table-striped card-table table-vcenter" data-url="{% url 'knitting:get_knit_production_list_filter' 'pending' %}">
+                        <thead>
+                            <tr>
+                                <th class="d-sm-table-cell">##</th>
+                                <th class="d-sm-table-cell">Date</th>
+                                <th class="d-sm-table-cell">Buyer</th>
+                                <th class="d-sm-table-cell">Style No</th>
+                                <th class="d-sm-table-cell">File NO</th>
+                                <th class="d-sm-table-cell">PO NO</th>
+                                <th class="d-sm-table-cell">Order QTY</th>
+                                <th class="d-sm-table-cell">Action</th>
+                                
+                            </tr>
+                        </thead>
+                    </table>
+                </div>   -->
+                <div class="tab-pane active p-20" id="submittedTAB" role="tabpanel">
+                    <table id="submitted-table" class="table table-striped card-table table-vcenter" data-url="{% url 'get_users_for_dataTable' 'submitted' %}">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Report To</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>  
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block page_js %}
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+    {% include 'inc/scrollerDT.html' %}
+    <script>
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+        // var developmentTable = null;
+        // var pendingTable = null;
+        var submittedTable = null;
+
+        $(document).ready(function () {
+            // dataTableFunc(developmentTable, "#developmentTAB", "#development-table", {})
+            // dataTableFunc(pendingTable, "#pendingTAB", "#pending-table", {})
+            dataTableFunc(submittedTable, "#submittedTAB", "#submitted-table", {})
+        });
+
+        $('body').on('click', '.user-update-switch', function (e) {
+             var id = $(this).data('id');
+             $.ajax({
+               url: "/user/update-status/",
+               type: "POST", // http method
+               data: { id: id },
+               dataType: 'json',
+               success: function (data) {
+                 alert("Update success")
+               },
+             });
+       });
+     
+       $('body').on('click', '.resetPass', function (e)  {
+             Swal.fire({
+                 title: "Do you want to reset password?",
+                 text: "After resetting password, user needs to login with his/her default password(Employee ID).",
+                 type: 'question',
+                 showCancelButton: true,
+                 confirmButtonText: 'Yes',
+                 confirmButtonColor: "#00c292",
+                 cancelButtonText: 'No',
+                 cancelButtonColor: "#e46a76",
+                 reverseButtons: false
+             }).then((result) => {
+                 if (result.value) {
+     
+                     var id_url = "/user/password-reset";
+                     $.ajax({
+                         url: id_url,
+                         type: 'POST',
+                         dataType: 'json',
+                         async: false,
+                         data: {
+                             user_id: $(this).data('id'),
+                             csrfmiddlewaretoken: '{{ csrf_token }}'
+                         },
+                         success: function (data) {
+                         
+                             if (data["status"] == "success"){
+                                 Swal.fire({
+                                     type: 'success',
+                                     title: "Password Reset",
+                                     text: data["msg"],
+                                 });
+                             } 
+                             else if(data["status"] == "not_found"){
+                                 Swal.fire({
+                                     type: 'warning',
+                                     title: 'User Not Found',
+                                     text: data["msg"],
+                                 });
+                             } 
+                             else{
+                                 Swal.fire({
+                                   type: 'error',
+                                   title: 'Permission Required',
+                                   text: data["msg"],
+                               })
+                             } 
+                         },
+                         error: function (data) {
+                             Swal.fire({
+                             type: 'error',
+                             title: 'Something Went Wrong!',
+                             text: "",
+                         })
+                         }
+                     });
+                 } 
+             });
+     });
+     </script>
+
+    {% include 'user/datatable_user_list_filters.html' %}
+{% endblock %}

@@ -1,0 +1,866 @@
+{% load sc_filters %}
+{% load static %}
+<link href="{% static '/dist/css/jquerysctipttop.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<div class="col-md-3 card-body" style="border-right: 1px solid rgba(0, 0, 0, 0.1)" id="left-panel">
+    <div style="text-align: center;">
+        <img {% if request.session.photo %} src="/assets/uploads{{request.session.photo}}" {% else %} src="{% static 'images/users/user.png'%}" {% endif %} style="margin: 10px;" width="120" height="120" class="img-circle"/>
+        <h4 class="card-title m-t-4">{{request.session.name}}</h4>
+        <span>Employee ID : {{request.session.employee_id}}</span><br>
+        <span>{{request.session.department}}</span><br>
+        <span>{{request.session.company}}</span><br>
+        <span>Reporting to : {{user.reporting_to}}</span><br><br>
+        <a href="/user/myProfile/" class="text-info"><i class="ti-pencil-alt"></i> &nbsp;Update profile</a>
+        <br><br><br>
+        <p>You're logged in as {{request.session.role_text}}</p>
+        <br>
+        {% if request.session.role_text == 'Admin' or request.session.role_text == 'Super Admin' %}
+            <a href="{% url 'logged_users' %}" class="text-info"><i class="text-success fas fa-circle"></i> Currently Active Users: {% if active_users|length > 1 %}{% endif %} {{active_users|length}}</a>
+        {% endif %}
+        <hr><br>
+        <i>If You Fail to Plan, You Are Planning to Fail.</i><br>-Benjamin Franklin
+    </div>
+</div>
+<div class="col-md-9 card-body" id="right-panel">
+    <h5 style="text-align: center;">Plan vs Achievement as on <input type="text" class="singledate" style="border: none;padding-bottom: 10px;" value="{{ date }}" id="efficiency_date" name="date"></h5>
+    <div class="row">
+        <div id="ALL_unit_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+        <div id="ALL_unit_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+    </div>
+    <div class="row">
+        <div id="EKCLALL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+        <div id="EKCLALL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+    </div>
+    <div class="row">
+        <div id="EKCL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+        <div id="EKCL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+    </div>
+<!--    <div class="row">-->
+<!--        <div id="FIZA_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>-->
+<!--        <div id="FIZA_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>-->
+<!--    </div>-->
+    <div class="row">
+        <div id="TT_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+        <div id="TT_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+    </div>
+    <div class="row">
+        <div id="LESQ_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+        <div id="LESQ_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+    </div>
+<!--     <div class="row">-->
+<!--        <div id="Prod_FOB_pie" class="col-md-6" style="width: 100%; height: 400px;"></div>-->
+<!--    </div>-->
+    <br><br>
+    <h5 style="text-align: center;">Production Status on <input type="text" class="singledate" style="border: none;padding-bottom: 10px;" value="{{date}}" id="production_date" name="production_date"></h5>
+    <div class="row">
+        <div id="EKCL_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
+        <div id="LESQ_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
+    </div>
+    <div class="row">
+        <div id="EKCL_prod_details" class="col-md-12" style="width: 100%; height: 400px;"></div>
+    </div>
+    <br>
+    <h5 class="card-title text-center">Notifications</h5>
+    <table class="table">
+        {% for n in unread_list %}
+        <tr>
+            <td class="max-texts notify_list_item" data-id="{{ n.slug }}">
+                <a href="{{ n.action_url }}" class="text-info" target="_blank"> {{ n.description|safe }}</a>
+            </td>
+            <td class="text-right"> {{ n.timesince }} ago</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class='text-center h4'>No New Notifications</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <input type="hidden" value="{{result}}" id="production_data">
+</div>
+
+{% block page_js %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable({{result|safe}});
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "Esquire Knit Composite Ltd (Main Plant) \n Unit wise Sewing (PC)",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#5eba7d', '#379fef'],
+            };
+            var chart = new google.visualization.BarChart(document.getElementById("EKCL_prod_details"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan" , "Achievement" ],
+            ["Production FOB($)", {{ operation_bulletin_ekcl.fob_day_plan }} + {{ operation_bulletin_tt.fob_day_plan }} + {{operation_bulletin_fiza.fob_day_plan}},{{ operation_bulletin_ekcl.fob_day }}+ {{ operation_bulletin_lesq.fob_day }}+ {{ operation_bulletin_tt.fob_day }} + {{operation_bulletin_fiza.fob_day}}],
+            ["Production FOC($)", {{ operation_bulletin_ekcl.foc_day_plan }} + {{ operation_bulletin_lesq.foc_day_plan }} + {{ operation_bulletin_tt.foc_day_plan }} + {{operation_bulletin_fiza.foc_day_plan}} , {{ operation_bulletin_ekcl.foc_day }} + {{ operation_bulletin_lesq.foc_day }} + {{ operation_bulletin_tt.foc_day }} + {{operation_bulletin_fiza.foc_day}}],
+            ["Production CM($)", {{ operation_bulletin_ekcl.cm_day_plan }} + {{ operation_bulletin_lesq.cm_day_plan }} + {{ operation_bulletin_tt.cm_day_plan }} + {{operation_bulletin_fiza.cm_day_plan}}, {{ operation_bulletin_ekcl.cm_day }} + {{ operation_bulletin_lesq.cm_day }} + {{ operation_bulletin_tt.cm_day }} + {{operation_bulletin_fiza.cm_day}}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_ekcl.inspect_fob_day_plan }} + {{ operation_bulletin_lesq.inspect_fob_day_plan }} + {{ operation_bulletin_tt.inspect_fob_day_plan }} + {{operation_bulletin_fiza.inspect_fob_day_plan}}, {{ operation_bulletin_ekcl.inspect_fob_day }} + {{ operation_bulletin_lesq.inspect_fob_day }} + {{ operation_bulletin_tt.inspect_fob_day }} + {{operation_bulletin_fiza.inspect_fob_day}}],
+            ["Shipped FOB($)", {{ operation_bulletin_ekcl.ship_fob_day_plan }} + {{ operation_bulletin_lesq.ship_fob_day_plan }} + {{ operation_bulletin_tt.ship_fob_day_plan }} + {{operation_bulletin_fiza.ship_fob_day_plan}}, {{ operation_bulletin_ekcl.ship_fob_day }} + {{ operation_bulletin_lesq.ship_fob_day }} + {{ operation_bulletin_tt.ship_fob_day }} + {{operation_bulletin_fiza.ship_fob_day}}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "All Unit (Day) \n Efficiency: (P) {{ operation_bulletin_ekcl.efficiency_day_plan|add_float:operation_bulletin_lesq.efficiency_day_plan|add_float:operation_bulletin_fiza.efficiency_day_plan|add_float:operation_bulletin_tt.efficiency_day_plan|div_float:divident|floatformat:2 }}%, (A) {{ operation_bulletin_ekcl.efficiency_day|add_float:operation_bulletin_lesq.efficiency_day|add_float:operation_bulletin_fiza.efficiency_day|add_float:operation_bulletin_tt.efficiency_day|div_float:divident|floatformat:2 }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#5eba7d', '#379fef'],
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("ALL_unit_bulletin_day"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement" ],
+            ["Production FOB($)", {{ operation_bulletin_ekcl.fob_mtd_plan }} + {{ operation_bulletin_lesq.fob_mtd_plan }} + {{ operation_bulletin_tt.fob_mtd_plan }} + {{operation_bulletin_fiza.fob_mtd_plan}}, {{ operation_bulletin_ekcl.fob_mtd }} + {{ operation_bulletin_lesq.fob_mtd }} + {{ operation_bulletin_tt.fob_mtd }} + {{operation_bulletin_fiza.fob_mtd}}],
+            ["Production FOC($)", {{ operation_bulletin_ekcl.foc_mtd_plan }} + {{ operation_bulletin_lesq.foc_mtd_plan }} + {{ operation_bulletin_tt.foc_mtd_plan }} + {{operation_bulletin_fiza.foc_mtd_plan}}, {{ operation_bulletin_ekcl.foc_mtd }} + {{ operation_bulletin_lesq.foc_mtd }} + {{ operation_bulletin_tt.foc_mtd }} + {{operation_bulletin_fiza.foc_mtd}}],
+            ["Production CM($)", {{ operation_bulletin_ekcl.cm_mtd_plan }} + {{ operation_bulletin_lesq.cm_mtd_plan }} + {{ operation_bulletin_tt.cm_mtd_plan }} + {{operation_bulletin_fiza.cm_mtd_plan}}, {{ operation_bulletin_ekcl.cm_mtd }} + {{ operation_bulletin_lesq.cm_mtd }} + {{ operation_bulletin_tt.cm_mtd }} + {{operation_bulletin_fiza.cm_mtd}}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_ekcl.inspect_fob_mtd_plan }} + {{ operation_bulletin_lesq.inspect_fob_mtd_plan }} + {{ operation_bulletin_tt.inspect_fob_mtd_plan }} + {{operation_bulletin_fiza.inspect_fob_mtd_plan}}, {{ operation_bulletin_ekcl.inspect_fob_mtd }} + {{ operation_bulletin_lesq.inspect_fob_mtd }} + {{ operation_bulletin_tt.inspect_fob_mtd }} + {{operation_bulletin_fiza.inspect_fob_mtd}}],
+            ["Shipped FOB($)", {{ operation_bulletin_ekcl.ship_fob_mtd_plan }} + {{ operation_bulletin_lesq.ship_fob_mtd_plan }} + {{ operation_bulletin_tt.ship_fob_mtd_plan }} + {{operation_bulletin_fiza.ship_fob_mtd_plan}}, {{ operation_bulletin_ekcl.ship_fob_mtd }} + {{ operation_bulletin_lesq.ship_fob_mtd }} + {{ operation_bulletin_tt.ship_fob_mtd }} + {{operation_bulletin_fiza.ship_fob_mtd}}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "All Unit (MTD) \n Efficiency: (P) {{ operation_bulletin_ekcl.efficiency_mtd_plan|add_float:operation_bulletin_lesq.efficiency_mtd_plan|add_float:operation_bulletin_fiza.efficiency_mtd_plan|add_float:operation_bulletin_tt.efficiency_mtd_plan|div_float:divident|floatformat:2 }}%, (A) {{ operation_bulletin_ekcl.efficiency_mtd|add_float:operation_bulletin_lesq.efficiency_mtd|add_float:operation_bulletin_fiza.efficiency_mtd|add_float:operation_bulletin_tt.efficiency_mtd|div_float:divident|floatformat:2 }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#5eba7d', '#379fef'],
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("ALL_unit_bulletin_mtd"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement" ],
+            ["Production FOB($)", {{ operation_bulletin_ekcl.fob_day_plan }} + {{ operation_bulletin_tt.fob_day_plan }} + {{operation_bulletin_fiza.fob_day_plan}}, {{ operation_bulletin_ekcl.fob_day }} + {{ operation_bulletin_tt.fob_day }} + {{operation_bulletin_fiza.fob_day}}],
+            ["Production FOC($)", {{ operation_bulletin_ekcl.foc_day_plan }} + {{ operation_bulletin_tt.foc_day_plan }} + {{operation_bulletin_fiza.foc_day_plan}}, {{ operation_bulletin_ekcl.foc_day }} + {{ operation_bulletin_tt.foc_day }} + {{operation_bulletin_fiza.foc_day}}],
+            ["Production CM($)", {{ operation_bulletin_ekcl.cm_day_plan }} + {{ operation_bulletin_tt.cm_day_plan }} + {{operation_bulletin_fiza.cm_day_plan}}, {{ operation_bulletin_ekcl.cm_day }} + {{ operation_bulletin_tt.cm_day }} + {{operation_bulletin_fiza.cm_day}}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_ekcl.inspect_fob_day_plan }} + {{ operation_bulletin_tt.inspect_fob_day_plan }} + {{operation_bulletin_fiza.inspect_fob_day_plan}}, {{ operation_bulletin_ekcl.inspect_fob_day }} + {{ operation_bulletin_tt.inspect_fob_day }} + {{operation_bulletin_fiza.inspect_fob_day}}],
+            ["Shipped FOB($)", {{ operation_bulletin_ekcl.ship_fob_day_plan }} + {{ operation_bulletin_tt.ship_fob_day_plan }} + {{operation_bulletin_fiza.ship_fob_day_plan}}, {{ operation_bulletin_ekcl.ship_fob_day }} + {{ operation_bulletin_tt.ship_fob_day }} + {{operation_bulletin_fiza.ship_fob_day}}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "EKCL All Unit (Day) \n Efficiency: (P) {{ operation_bulletin_ekcl.efficiency_day_plan|add_float:operation_bulletin_fiza.efficiency_day_plan|add_float:operation_bulletin_tt.efficiency_day_plan|div_float:3|floatformat:2 }}%, (A) {{ operation_bulletin_ekcl.efficiency_day|add_float:operation_bulletin_fiza.efficiency_day|add_float:operation_bulletin_tt.efficiency_day|div_float:3|floatformat:2 }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#5c8a8a', '#ff8000'],
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("EKCLALL_bulletin_day"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement" ],
+            ["Production FOB($)", {{ operation_bulletin_ekcl.fob_mtd_plan }} + {{ operation_bulletin_tt.fob_mtd_plan }} + {{operation_bulletin_fiza.fob_mtd_plan}}, {{ operation_bulletin_ekcl.fob_mtd }} + {{ operation_bulletin_tt.fob_mtd }} + {{operation_bulletin_fiza.fob_mtd}}],
+            ["Production FOC($)", {{ operation_bulletin_ekcl.foc_mtd_plan }} + {{ operation_bulletin_tt.foc_mtd_plan }} + {{operation_bulletin_fiza.foc_mtd_plan}}, {{ operation_bulletin_ekcl.foc_mtd }} + {{ operation_bulletin_tt.foc_mtd }} + {{operation_bulletin_fiza.foc_mtd}}],
+            ["Production CM($)", {{ operation_bulletin_ekcl.cm_mtd_plan }} + {{ operation_bulletin_tt.cm_mtd_plan }} + {{operation_bulletin_fiza.cm_mtd_plan}}, {{ operation_bulletin_ekcl.cm_mtd }} + {{ operation_bulletin_tt.cm_mtd }} + {{operation_bulletin_fiza.cm_mtd}}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_ekcl.inspect_fob_mtd_plan }} + {{ operation_bulletin_tt.inspect_fob_mtd_plan }} + {{operation_bulletin_fiza.inspect_fob_mtd_plan}}, {{ operation_bulletin_ekcl.inspect_fob_mtd }} + {{ operation_bulletin_tt.inspect_fob_mtd }} + {{operation_bulletin_fiza.inspect_fob_mtd}}],
+            ["Shipped FOB($)", {{ operation_bulletin_ekcl.ship_fob_mtd_plan }} + {{ operation_bulletin_tt.ship_fob_mtd_plan }} + {{operation_bulletin_fiza.ship_fob_mtd_plan}}, {{ operation_bulletin_ekcl.ship_fob_mtd }} + {{ operation_bulletin_tt.ship_fob_mtd }} + {{operation_bulletin_fiza.ship_fob_mtd}}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "EKCL All Unit (MTD) \n Efficiency: (P) {{ operation_bulletin_ekcl.efficiency_mtd_plan|add_float:operation_bulletin_fiza.efficiency_mtd_plan|add_float:operation_bulletin_tt.efficiency_mtd_plan|div_float:3|floatformat:2 }}%, (A) {{ operation_bulletin_ekcl.efficiency_mtd|add_float:operation_bulletin_fiza.efficiency_mtd|add_float:operation_bulletin_tt.efficiency_mtd|div_float:3|floatformat:2 }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#5c8a8a', '#ff8000'],
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("EKCLALL_bulletin_mtd"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement" ],
+            ["Production FOB($)", {{ operation_bulletin_ekcl.fob_day_plan }}, {{ operation_bulletin_ekcl.fob_day }}],
+            ["Production FOC($)", {{ operation_bulletin_ekcl.foc_day_plan }}, {{ operation_bulletin_ekcl.foc_day }}],
+            ["Production CM($)", {{ operation_bulletin_ekcl.cm_day_plan }}, {{ operation_bulletin_ekcl.cm_day }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_ekcl.inspect_fob_day_plan }}, {{ operation_bulletin_ekcl.inspect_fob_day }}],
+            ["Shipped FOB($)", {{ operation_bulletin_ekcl.ship_fob_day_plan }}, {{ operation_bulletin_ekcl.ship_fob_day }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+                title: "EKCL Main Plant (Day) \n Efficiency: (P) {{ operation_bulletin_ekcl.efficiency_day_plan }}%, (A) {{ operation_bulletin_ekcl.efficiency_day }}%",
+                bar: {groupWidth: "50%"},
+                vAxis: { format: 'short'},
+                legend: { position: "top" },
+                annotations: {
+                    textStyle: {
+                        color: 'gray'
+                    }
+                },
+                chartArea: {width: '80%', height: '70%'},
+                colors: ['#00cccc', '#ff8080'],
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("EKCL_bulletin_day"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement" ],
+            ["Production FOB($)", {{ operation_bulletin_ekcl.fob_mtd_plan }}, {{ operation_bulletin_ekcl.fob_mtd }}],
+            ["Production FOC($)", {{ operation_bulletin_ekcl.foc_mtd_plan }}, {{ operation_bulletin_ekcl.foc_mtd }}],
+            ["Production CM($)", {{ operation_bulletin_ekcl.cm_mtd_plan }}, {{ operation_bulletin_ekcl.cm_mtd }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_ekcl.inspect_fob_mtd_plan }}, {{ operation_bulletin_ekcl.inspect_fob_mtd }}],
+            ["Shipped FOB($)", {{ operation_bulletin_ekcl.ship_fob_mtd_plan }}, {{ operation_bulletin_ekcl.ship_fob_mtd }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+                title: "EKCL Main Plant (MTD) \n Efficiency: (P) {{ operation_bulletin_ekcl.efficiency_mtd_plan }}%, (A) {{ operation_bulletin_ekcl.efficiency_mtd }}%",
+                bar: {groupWidth: "50%"},
+                vAxis: { format: 'short'},
+                legend: { position: "top" },
+                annotations: {
+                    textStyle: {
+                        color: 'gray'
+                    }
+                },
+                chartArea: {width: '80%', height: '70%'},
+                colors: ['#00cccc', '#ff8080'],
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("EKCL_bulletin_mtd"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <!--<script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement"],
+            ["Production FOB($)", {{ operation_bulletin_fiza.fob_day_plan }}, {{ operation_bulletin_fiza.fob_day }}],
+            ["Production FOC($)", {{ operation_bulletin_fiza.foc_day_plan }}, {{ operation_bulletin_fiza.foc_day }}],
+            ["Production CM($)", {{ operation_bulletin_fiza.cm_day_plan }}, {{ operation_bulletin_fiza.cm_day }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_fiza.inspect_fob_day_plan }}, {{ operation_bulletin_fiza.inspect_fob_day }}],
+            ["Shipped FOB($)", {{ operation_bulletin_fiza.ship_fob_day_plan }}, {{ operation_bulletin_fiza.ship_fob_day }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "{{ operation_bulletin_fiza.company }} (Day) \n Efficiency: (P) {{ operation_bulletin_fiza.efficiency_day_plan }}%, (A) {{ operation_bulletin_fiza.efficiency_day }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#73C6B6', '#E6B0AA']
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("FIZA_bulletin_day"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>-->
+<!--    <script type="text/javascript">-->
+<!--        google.charts.load("current", {packages:['corechart']});-->
+<!--        google.charts.setOnLoadCallback(drawChart);-->
+<!--        function drawChart() {-->
+<!--            var data = google.visualization.arrayToDataTable([-->
+<!--            ["Segment", "Plan", "Achievement"],-->
+<!--            ["Production FOB($)", {{ operation_bulletin_fiza.fob_mtd_plan }}, {{ operation_bulletin_fiza.fob_mtd }}],-->
+<!--            ["Production FOC($)", {{ operation_bulletin_fiza.foc_mtd_plan }}, {{ operation_bulletin_fiza.foc_mtd }}],-->
+<!--            ["Production CM($)", {{ operation_bulletin_fiza.cm_mtd_plan }}, {{ operation_bulletin_fiza.cm_mtd }}],-->
+<!--            ["Inspection Pass FOB($)", {{ operation_bulletin_fiza.inspect_fob_mtd_plan }}, {{ operation_bulletin_fiza.inspect_fob_mtd }}],-->
+<!--            ["Shipped FOB($)", {{ operation_bulletin_fiza.ship_fob_mtd_plan }}, {{ operation_bulletin_fiza.ship_fob_mtd }}]-->
+<!--            ]);-->
+
+<!--            var view = new google.visualization.DataView(data);-->
+<!--            view.setColumns([0, 1,-->
+<!--                            { calc: "stringify",-->
+<!--                            sourceColumn: 1,-->
+<!--                            type: "string",-->
+<!--                            role: "annotation" },-->
+<!--                            2, { calc: "stringify",-->
+<!--                                sourceColumn: 2,-->
+<!--                                type: "string",-->
+<!--                                role: "annotation" }]);-->
+
+<!--            var options = {-->
+<!--            title: "{{ operation_bulletin_fiza.company }} (MTD) \n Efficiency: (P) {{ operation_bulletin_fiza.efficiency_mtd_plan }}%, (A) {{ operation_bulletin_fiza.efficiency_mtd }}%",-->
+<!--            bar: {groupWidth: "50%"},-->
+<!--            vAxis: { format: 'short'},-->
+<!--            legend: { position: "top" },-->
+<!--            annotations: {-->
+<!--                textStyle: {-->
+<!--                    color: 'gray'-->
+<!--                }-->
+<!--            },-->
+<!--            chartArea: {width: '80%', height: '70%'},-->
+<!--            colors: ['#73C6B6', '#E6B0AA']-->
+<!--            };-->
+<!--            var chart = new google.visualization.ColumnChart(document.getElementById("FIZA_bulletin_mtd"));-->
+<!--            chart.draw(view, options);-->
+<!--            }-->
+<!--            $(window).resize(function(){-->
+<!--                drawChart();-->
+<!--            });-->
+<!--    </script>-->
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement"],
+            ["Production FOB($)", {{ operation_bulletin_tt.fob_day_plan }}, {{ operation_bulletin_tt.fob_day }}],
+            ["Production FOC($)", {{ operation_bulletin_tt.foc_day_plan }}, {{ operation_bulletin_tt.foc_day }}],
+            ["Production CM($)", {{ operation_bulletin_tt.cm_day_plan }}, {{ operation_bulletin_tt.cm_day_plan }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_tt.inspect_fob_day_plan }}, {{ operation_bulletin_tt.inspect_fob_day }}],
+            ["Shipped FOB($)", {{ operation_bulletin_tt.ship_fob_day_plan }}, {{ operation_bulletin_tt.ship_fob_day }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "{{ operation_bulletin_tt.company }} (Day) \n Efficiency: (P) {{ operation_bulletin_tt.efficiency_day_plan }}%, (A) {{ operation_bulletin_tt.efficiency_day }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#F7DC6F', '#AF7AC5']
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("TT_bulletin_day"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement"],
+            ["Production FOB($)", {{ operation_bulletin_tt.fob_mtd_plan }}, {{ operation_bulletin_tt.fob_mtd }}],
+            ["Production FOC($)", {{ operation_bulletin_tt.foc_mtd_plan }}, {{ operation_bulletin_tt.foc_mtd }}],
+            ["Production CM($)", {{ operation_bulletin_tt.cm_mtd_plan }}, {{ operation_bulletin_tt.cm_mtd }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_tt.inspect_fob_mtd_plan }}, {{ operation_bulletin_tt.inspect_fob_mtd }}],
+            ["Shipped FOB($)", {{ operation_bulletin_tt.ship_fob_mtd_plan }}, {{ operation_bulletin_tt.ship_fob_mtd }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "{{ operation_bulletin_tt.company }} (MTD) \n Efficiency: (P) {{ operation_bulletin_tt.efficiency_mtd_plan }}%, (A) {{ operation_bulletin_tt.efficiency_mtd }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#F7DC6F', '#AF7AC5']
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("TT_bulletin_mtd"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement"],
+            ["Production FOB($)", {{ operation_bulletin_lesq.fob_day_plan }}, {{ operation_bulletin_lesq.fob_day }}],
+            ["Production FOC($)", {{ operation_bulletin_lesq.foc_day_plan }}, {{ operation_bulletin_lesq.foc_day }}],
+            ["Production CM($)", {{ operation_bulletin_lesq.cm_day_plan }}, {{ operation_bulletin_lesq.cm_day }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_lesq.inspect_fob_day_plan }}, {{ operation_bulletin_lesq.inspect_fob_day }}],
+            ["Shipped FOB($)", {{ operation_bulletin_lesq.ship_fob_day_plan }}, {{ operation_bulletin_lesq.ship_fob_day }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "L'Esquire Ltd-Bhaluka and Unit 7 & 8 (Day) \n Efficiency: (P) {{ operation_bulletin_lesq.efficiency_day_plan }}%, (A) {{ operation_bulletin_lesq.efficiency_day }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#a2c0e5', '#f5b398']
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("LESQ_bulletin_day"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Plan", "Achievement"],
+            ["Production FOB($)", {{ operation_bulletin_lesq.fob_mtd_plan }}, {{ operation_bulletin_lesq.fob_mtd }}],
+            ["Production FOC($)", {{ operation_bulletin_lesq.foc_mtd_plan }}, {{ operation_bulletin_lesq.foc_mtd }}],
+            ["Production CM($)", {{ operation_bulletin_lesq.cm_mtd_plan }}, {{ operation_bulletin_lesq.cm_mtd }}],
+            ["Inspection Pass FOB($)", {{ operation_bulletin_lesq.inspect_fob_mtd_plan }}, {{ operation_bulletin_lesq.inspect_fob_mtd }}],
+            ["Shipped FOB($)", {{ operation_bulletin_lesq.ship_fob_mtd_plan }}, {{ operation_bulletin_lesq.ship_fob_mtd }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "L'Esquire Ltd-Bhaluka and Unit 7 & 8 (MTD) \n Efficiency: (P) {{ operation_bulletin_lesq.efficiency_mtd_plan }}%, (A) {{ operation_bulletin_lesq.efficiency_mtd }}%",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#a2c0e5', '#f5b398']
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById("LESQ_bulletin_mtd"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Day", "MTD" ],
+            ["Cutting (PC)", {{ day_cutting_ekcl }}, {{ mtd_cutting_ekcl }}],
+            ["Sewing (PC)", {{ day_sewing_ekcl }}, {{ mtd_sewing_ekcl }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "Esquire Knit Composite Ltd (Main Plant)",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#5eba7d', '#379fef'],
+            };
+            var chart = new google.visualization.BarChart(document.getElementById("EKCL_prod"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+    <script type="text/javascript">
+        google.charts.load("current", {packages:['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+            ["Segment", "Day", "MTD" ],
+            ["Cutting (PC)", {{ day_cutting_lesq }}, {{ mtd_cutting_lesq }}],
+            ["Sewing (PC)", {{ day_sewing_lesq }}, {{ mtd_sewing_lesq }}]
+            ]);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1,
+                            { calc: "stringify",
+                            sourceColumn: 1,
+                            type: "string",
+                            role: "annotation" },
+                            2, { calc: "stringify",
+                                sourceColumn: 2,
+                                type: "string",
+                                role: "annotation" }]);
+
+            var options = {
+            title: "L'Esquire Limited (Unit 7 & 8)",
+            bar: {groupWidth: "50%"},
+            vAxis: { format: 'short'},
+            legend: { position: "top" },
+            annotations: {
+                textStyle: {
+                    color: 'gray'
+                }
+            },
+            chartArea: {width: '80%', height: '70%'},
+            colors: ['#a2c0e5', '#f5b398'],
+            };
+            var chart = new google.visualization.BarChart(document.getElementById("LESQ_prod"));
+            chart.draw(view, options);
+            }
+            $(window).resize(function(){
+                drawChart();
+            });
+    </script>
+
+    <script type="text/javascript">
+        google.charts.load("current", {packages:["corechart"]});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Company', 'FOB'],
+            ['EKCL',     {{ operation_bulletin_ekcl.fob_mtd }}],
+            ['LESQ',      {{ operation_bulletin_lesq.fob_mtd }}],
+            ['Fiza',  {{ operation_bulletin_fiza.fob_mtd }}],
+            ['Tamanna', {{ operation_bulletin_tt.fob_mtd }}]
+        ]);
+
+        var options = {
+            title: 'Unitwise Production FOB Percentage',
+            is3D: true,
+            legend: { position: "top" },
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('Prod_FOB_pie'));
+        chart.draw(data, options);
+        }
+    </script>
+    <script>
+        $(".sa-html").click(function () {
+            Swal.fire({
+                title: 'Development in progress...',
+                type: 'info',
+                html:
+                    'You can view this module ' +
+                    // '<a href="//github.com">links</a> ' +
+                    'after going live',
+                showCloseButton: true,
+                showCancelButton: false,
+                focusConfirm: false,
+                confirmButtonText:
+                    '<i class="fa fa-thumbs-up"></i> OK',
+                // confirmButtonAriaLabel: 'Thumbs up, great!',
+                // cancelButtonText:
+                //     '<i class="fa fa-thumbs-down"></i>',
+                // cancelButtonAriaLabel: 'Thumbs down',
+            })
+        });
+        $(".sa-alert").click(function () {
+            Swal.fire({
+                title: 'Sorry...',
+                type: 'warning',
+                html:
+                    'You are not authorized ' +
+                    // '<a href="//github.com">links</a> ' +
+                    'to access',
+                showCloseButton: true,
+                showCancelButton: false,
+                focusConfirm: false,
+                confirmButtonText:
+                    '<i class="fa fa-thumbs-up"></i> OK',
+                // confirmButtonAriaLabel: 'Thumbs up, great!',
+                // cancelButtonText:
+                //     '<i class="fa fa-thumbs-down"></i>',
+                // cancelButtonAriaLabel: 'Thumbs down',
+            })
+        });
+    </script>
+    <script type="text/javascript" src="{% static 'dist/js/jquery.countdown360.min.js' %}"></script>
+    <script>
+
+        $(document).ready(function () {
+
+            var popup = $('#mainpopup');
+            var time = $(".will-close strong");
+            var closeSeconds = $("#mainpopup").attr("data-close");
+            var openSeconds = $("#mainpopup").attr("data-open");
+            var dataSrc = $("#mainpopup").attr("data-href");
+
+            setTimeout(function (e) {
+                popup.modal('show');
+                time.html(closeSeconds);
+                setInterval(function () {
+                    time.html(closeSeconds);
+                    closeSeconds--;
+                    if (closeSeconds < 0) {
+                        popup.modal('hide');
+                    }
+                }, 1000)
+            }, openSeconds * 1000);
+
+            var countdown =  $("#countdown").countdown360({
+                radius      : 60,
+                seconds     : 10,
+                fontColor   : '#FFFFFF',
+                autostart   : false,
+                onComplete  : function () {}
+            });
+            countdown.start();
+        });
+    </script>
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+    <script type="text/javascript">
+        // Single Date Range Picker
+        $('.singledate').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            locale: {
+            //   format: 'YYYY-MM-DD'
+            format: 'MMM DD, YYYY'
+            }
+        });
+
+        function getDashBoardData(date){
+                spinner.removeAttribute('hidden');
+                $('#dash-board-panel').empty();
+                $.ajax({
+                    url : "{% url "get_dashboard_info" %}",
+                    type: "POST",
+                    data: { date : date},
+                    dataType: 'html',
+                    success: function(data){
+                        $('#dash-board-panel').html(data);
+                        spinner.setAttribute('hidden', '');
+                    },
+                    error: function(xhr, desc, err){
+                        console.log(err);
+                        spinner.setAttribute('hidden', '');
+                    }
+                });
+            }
+            $('#production_date').on('change',function(){
+                let date = $('#production_date').val();
+                getDashBoardData(date);
+            });
+            $('#efficiency_date').on('change',function(){
+                let date = $('#efficiency_date').val();
+                getDashBoardData(date);
+            });
+    </script>
+{% endblock %}

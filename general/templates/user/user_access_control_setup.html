@@ -1,0 +1,331 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}User Access Control Setup{% endblock %}
+
+{% block content %}
+<style>
+    .floating-labels .custom-control-label {
+        position: relative;
+        cursor: context-menu;
+    }
+
+    .floating-labels .custom-label {
+        position: relative;
+    }
+
+    .custom-control-label {
+        padding-top: 3px !important;
+    }
+</style>
+
+
+<div class="card border-danger">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 align-self-center">
+                <h4 class="text-themecolor mb-0">User Access Control Setup</h4>
+            </div>
+            <div class="col-md-6 align-self-center text-right">
+                <div class="d-flex justify-content-end align-items-center">
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        <div class="btn-group" role="group" aria-label="First group">
+                            <a href="/user/access-control-list/" class="btn btn-sm btn-info" title="Custom Button"><i class="ti-view-list-alt"></i></a>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body custom-color rounded-lg p-3 custom-rl pt-0">
+        <div class="row floating-labels mt-3">
+            <div class="col-md">
+                <div class="form-group">
+                    <label for="company">Company</label>
+                    <select class="form-control text-capitalize select2" name="company" id="company"
+                        data-title="Company">
+                        <option value="" disabled selected></option>
+                        {% for data in company_list %}
+                        <option value="{{data.id}}">{{data.short_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select class="form-control text-capitalize select2" name="department" id="department"
+                        data-title="Department" required>
+                        <option value="" disabled selected></option>
+                        {% for data in department_list %}
+                        <option value="{{data.id}}">{{data.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-group">
+                    <label class="form-label">Designation</label>
+                    <select class="form-control text-capitalize select2" name="designation" id="designation"
+                        data-title="Designation" required>
+                        <option value="" disabled selected></option>
+                        {% for data in designation_list %}
+                        <option value="{{data.id}}">{{data.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-group">
+                    <label class="form-label" for="user_role">Role</label>
+                    <select class="form-control text-capitalize select2" id="user_role" name="user_role"
+                        data-title="Role" required>
+                        <option value="" disabled selected></option>
+                        {% for data in user_roles %}
+                        <option value="{{data.id}}">{{data.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col-md">
+                <div class="form-group">
+                    <label class="form-label" for="user">User</label>
+                    <select class="form-control text-capitalize select2 user" id="user" name="user" data-title="User">
+                        <option value="" disabled selected></option>
+                        {% for data in user_list %}
+                        <option value="{{data.id}}">{{data.name}}({{data.employee_id}})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="form-group">
+                    <button id="btnSetAccessControl" class="btn btn-success btn-block">Set Access Control</button>
+                </div>
+            </div>
+        </div>
+        <table class="table table-border floating">
+            <thead>
+                <tr>
+                    <th scope="col" width="20%" style="font-weight: 500;line-height: 23px;">Module</th>
+                    <th scope="col" width="22%">
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="checkAllMenu" class="custom-control-input">
+                            <label class="custom-control-label" for="checkAllMenu">Select All Menu</label>
+                        </div>
+                    </th>
+                    <th scope="col" width="12%">
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="checkAllView" class="custom-control-input">
+                            <label class="custom-control-label" for="checkAllView">View All</label>
+                        </div>
+                    </th>
+                    <th scope="col" width="12%">
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="checkAllInsert" class="custom-control-input">
+                            <label class="custom-control-label" for="checkAllInsert">Insert All</label>
+                        </div>
+                    </th>
+                    <th scope="col" width="12%">
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="checkAllUpdate" class="custom-control-input">
+                            <label class="custom-control-label" for="checkAllUpdate">Update All</label>
+                        </div>
+                    </th>
+                    <th scope="col" width="12%">
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="checkAllDelete" class="custom-control-input">
+                            <label class="custom-control-label" for="checkAllDelete">Delete All</label>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+        {% regroup menu_list by module_name as module_menu_list %}
+        {% for module_name in module_menu_list %}
+        <a href="#demo{{forloop.counter}}" class="btn btn-info btn-sm" style="width:100%;background: #799aa9;" data-toggle="collapse">{{module_name.grouper}}</a>
+        <div id="demo{{forloop.counter}}" class="collapse">
+            <table class="table" id="tblUserAccessControl" style="margin: 0px;">
+                <tbody>
+                    {% for data in module_name.list %}
+                    <tr>
+                        {% if forloop.first %}
+                        <th scope="row" width="20%" rowspan="{{module_name.list|length}}" style="vertical-align: middle;">
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" id="checkAllOne{{ forloop.parentloop.counter}}" class="custom-control-input allModule checkModule_{{forloop.parentloop.counter}}">
+                                <label class="custom-control-label" for="checkAllOne{{ forloop.parentloop.counter}}" onClick="check_uncheck_module_menu('{{forloop.parentloop.counter}}');">{{module_name.grouper }} </label>
+                            </div>
+                        </th>
+                        {% endif %}
+                        <td width="22%">
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" value="{{ data.pk }}" id="menuName{{forloop.parentloop.counter}}{{ forloop.counter}}" onClick="check_uncheck_menu('{{forloop.parentloop.counter}}_{{forloop.counter}}');" class="custom-control-input allMenu module_menu_{{forloop.parentloop.counter}} menu_{{forloop.parentloop.counter}}_{{forloop.counter}}  load_menu_{{data.pk}}">
+                                <label class="custom-control-label" for="menuName{{forloop.parentloop.counter}}{{ forloop.counter}}" >{{ data.menu_name }}</label>
+                            </div>
+                        </td>
+                        <td width="12%">
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" value="View" id="lblView{{forloop.parentloop.counter}}{{ forloop.counter}}" class="custom-control-input lblView view_chkbox_{{forloop.parentloop.counter}}_{{forloop.counter}} moduleView_{{forloop.parentloop.counter}} load_view_{{data.pk}}">
+                                <label class="custom-control-label" for="lblView{{forloop.parentloop.counter}}{{ forloop.counter}}">View</label>
+                            </div>
+                        </td>
+                        <td width="12%">
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" value="Insert" id="lblInsert{{forloop.parentloop.counter}}{{ forloop.counter}}" class="custom-control-input lblInsert insert_chkbox_{{forloop.parentloop.counter}}_{{forloop.counter}} moduleInsert_{{forloop.parentloop.counter}} load_insert_{{data.pk}}">
+                                <label class="custom-control-label" for="lblInsert{{forloop.parentloop.counter}}{{ forloop.counter}}">Insert</label>
+                            </div>
+                        </td>
+                        <td width="12%">
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" value="Update" id="lblUpdate{{forloop.parentloop.counter}}{{ forloop.counter}}" class="custom-control-input lblUpdate update_chkbox_{{forloop.parentloop.counter}}_{{forloop.counter}} moduleUpdate_{{forloop.parentloop.counter}} load_update_{{data.pk}}">
+                                <label class="custom-control-label" for="lblUpdate{{forloop.parentloop.counter}}{{ forloop.counter}}">Update</label>
+                            </div>
+                        </td>
+                        <td width="12%">
+                            <div class="custom-control custom-checkbox custom-control-inline">
+                                <input type="checkbox" value="Delete" id="lblDelete{{forloop.parentloop.counter}}{{ forloop.counter}}" class="custom-control-input lblDelete delete_chkbox_{{forloop.parentloop.counter}}_{{ forloop.counter}} moduleUpdate_{{forloop.parentloop.counter}} load_delete_{{data.pk}}">
+                                <label class="custom-control-label" for="lblDelete{{forloop.parentloop.counter}}{{ forloop.counter}}">Delete</label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <br>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+    {% include 'inc/scroll_to_top.html' %}
+    <script src="{% static 'dist/js/access_control.js' %}"></script>
+    <script>
+        $("#user").change(function () {
+            $('#designation,#user_role,#department').val("");
+            $("#designation,#user_role,#department").select2();
+
+            $.ajax({
+                cache: false,
+                url: "/user/access-control-load/",
+                type: "POST",
+                data: {user:$(this).val()},
+                success: function (data) {
+                    if(data["access_list"].length > 0){
+                        $(".allMenu").prop('checked', false);
+                        $(".lblView").prop('checked', false);
+                        $(".lblInsert").prop('checked', false);
+                        $(".lblUpdate").prop('checked', false);
+                        $(".lblDelete").prop('checked', false);
+                        $(".collapse").removeClass("show");
+                        for(var i=0; i<data["access_list"].length; i++){
+                            if(data["access_list"][i].view_action == true || data["access_list"][i].insert_action == true || data["access_list"][i].update_action == true || data["access_list"][i].delete_action == true){
+                                $(".load_menu_"+data["access_list"][i].menu_id).prop('checked', true);
+                                if (data["access_list"][i].view_action) $(".load_view_"+data["access_list"][i].menu_id).prop('checked', true);
+                                if (data["access_list"][i].insert_action) $(".load_insert_"+data["access_list"][i].menu_id).prop('checked', true);
+                                if (data["access_list"][i].update_action) $(".load_update_"+data["access_list"][i].menu_id).prop('checked', true);
+                                if (data["access_list"][i].delete_action) $(".load_delete_"+data["access_list"][i].menu_id).prop('checked', true);
+
+                                $(".load_menu_"+data["access_list"][i].menu_id).parent().parent().parent().parent().parent().parent().addClass("show");
+                            }
+                        }
+                    }
+                    else{
+                        $(".allMenu").prop('checked', false);
+                        $(".lblView").prop('checked', false);
+                        $(".lblInsert").prop('checked', false);
+                        $(".lblUpdate").prop('checked', false);
+                        $(".lblDelete").prop('checked', false);
+                        $(".collapse").removeClass("show");
+                    }
+                },
+                error: function (xhr, desc, err) {
+                // errorMsg(err)
+                }
+            });
+        });
+
+        $("#btnSetAccessControl").click(function () {
+        if ((($('#company').val()) || ($('#designation').val()) || ($('#department').val()) || ($('#user_role').val()) || ($('#user').val())) && ($("#tblUserAccessControl .allMenu:checked").length)) {
+            Swal.fire({
+                //title: "Do you want to set user access control?",
+                text: "Do you want to set user access control?",
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor: "#00c292",
+                cancelButtonText: 'No',
+                cancelButtonColor: "#e46a76",
+                reverseButtons: false
+            }).then((result) => {
+                if (result.value) {
+                    var user_prev_list = new Array();
+                    $("#tblUserAccessControl .allMenu:checked").each(function (i) {
+                        var menu_id = 0;
+                        var view_action = false;
+                        var insert_action = false;
+                        var update_action = false;
+                        var delete_action = false;
+                        $(this).closest('tr').find('td :checkbox:checked').each(function () {
+                            if ($(this).val() == "View") view_action = true;
+                            else if ($(this).val() == "Insert") insert_action = true;
+                            else if ($(this).val() == "Update") update_action = true;
+                            else if ($(this).val() == "Delete") delete_action = true;
+                            else menu_id = $(this).val();
+                        });
+
+                        user_prev_list[i] = {
+                            "menu_id": menu_id,
+                            "view_action": view_action,
+                            "insert_action": insert_action,
+                            "update_action": update_action,
+                            "delete_action": delete_action,
+                        }
+                    });
+
+                    var id_url = "{{request.path}}";
+                    $.ajax({
+                        url: id_url,
+                        type: 'POST',
+                        dataType: 'json',
+                        async: false,
+                        data: {
+                            'user_id': $('#user').val(),
+                            'user_role': $('#user_role').val(),
+                            'designation': $('#designation').val(),
+                            'department': $('#department').val(),
+                            'company': $('#company').val(),
+                            'user_prev_list': JSON.stringify(user_prev_list),
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function (data) {
+                                Swal.fire({
+                                type: 'success',
+                                title: 'Setup Completed',
+                                text: data,
+                            })
+                        },
+                        error: function (data) {
+                            Swal.fire({
+                            type: 'error',
+                            title: 'Something Went Wrong!',
+                            text: data,
+                        })
+                        }
+                    });
+                } 
+            });
+        }
+        else {
+            Swal.fire({
+                type: 'warning',
+                title: 'Invalid Selection',
+                text: 'Please select any option',
+            })
+            }
+        });
+    </script>
+{% endblock %}

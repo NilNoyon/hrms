@@ -1,0 +1,35 @@
+<h5 style="margin: 20px;"> <button style="color: red; border-radius: 20;" onclick="history.back()">X</button>  EBS Analytics Report</h5>
+
+<script src="https://esquireanalytics-axxfbb4f6foy-si.analytics.ocp.oraclecloud.com/public/dv/v1/embedding/standalone/embedding.js" type="application/javascript">
+</script>
+<!-- <div style="float:left; width: 45%; height: (100% — 100px); border: 1px solid black; padding: 10px;" >
+    <oracle-dv project-path="/@Catalog/users/iahmedbd@gmail.com/Process wise total"></oracle-dv>
+</div> -->
+
+<!-- <div style="float:left; width: 45%; height: (100% — 100px); border: 1px solid black; padding: 10px; margin-left:5%" > -->
+    <div style="border: 1px solid lightgray; margin: 20px; height: 70vh;">
+        <oracle-dv project-path="/@Catalog/users/sarek@esquire.com.bd/Export LC vs BBLC"></oracle-dv>
+    </div>
+<!-- </div> -->
+
+<!-- <script>
+    requirejs(['jquery', 'knockout', 'obitech-application/application', 'ojs/ojcore', 'ojs/ojknockout', 'ojs/ojcomposite', 'jet-composites/oracle-dv/loader'],
+        function($, ko, application) {
+            ko.applyBindings();
+        }
+    );
+</script> -->
+
+<script>
+    var token = "eyJ4NXQjUzI1NiI6IkYwLWtYbWdhLUVPTFMxdHZ0V1B4VnpucThBdlFYaWx1X21DQXpsWlQ5cjQiLCJ4NXQiOiIzX3dTcGNVYldrMVN3X0Zienlzckw2aGphajgiLCJraWQiOiJTSUdOSU5HX0tFWSIsImFsZyI6IlJTMjU2In0.eyJjbGllbnRfb2NpZCI6Im9jaWQxLmRvbWFpbmFwcC5vYzEuYXAtc2luZ2Fwb3JlLTEuYW1hYWFhYWEyenppNmZxYXdoa2t0cXJhcmhxbXBleG9xNXVvY3pyNzU3cm9zcTVwc3JtZWZhenFvNGphIiwidXNlcl90eiI6IkFtZXJpY2FcL0NoaWNhZ28iLCJzdWIiOiJzYXJla0Blc3F1aXJlLmNvbS5iZCIsInVzZXJfbG9jYWxlIjoiZW4iLCJzaWRsZSI6NDgwLCJ1c2VyLnRlbmFudC5uYW1lIjoiaWRjcy03OGY5YWEwODhlMzI0ODZkOTcyZDA1ODE1ZDBmOWFlNSIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS5vcmFjbGVjbG91ZC5jb21cLyIsImRvbWFpbl9ob21lIjoiYXAtc2luZ2Fwb3JlLTEiLCJjYV9vY2lkIjoib2NpZDEudGVuYW5jeS5vYzEuLmFhYWFhYWFheGlwemRkbXRhZ24zY3Fwam02aWtpc24zN3FmZHdtaTZ4NjZ4YzJ4d3kzcnVtY3ZybmZtYSIsInVzZXJfdGVuYW50bmFtZSI6ImlkY3MtNzhmOWFhMDg4ZTMyNDg2ZDk3MmQwNTgxNWQwZjlhZTUiLCJjbGllbnRfaWQiOiI2MDMzYmEwNGEzMGY0MWY3YmI5NDRkOGRkY2NiMDU4NSIsImRvbWFpbl9pZCI6Im9jaWQxLmRvbWFpbi5vYzEuLmFhYWFhYWFhbWVycXF0c2dkcmNlNmU2eHN0NnFsYnl3Mm5jeXA3aDc0cmdhNjRzeHE0Z3dtbWtwNGNzYSIsInN1Yl90eXBlIjoidXNlciIsInNjb3BlIjoidXJuOm9wYzpyZXNvdXJjZTpjb25zdW1lcjo6YWxsIiwidXNlcl9vY2lkIjoib2NpZDEudXNlci5vYzEuLmFhYWFhYWFhMmJpcHByNGlyZm9hZDdxZ3Vkbzd3anBsM21oc2h3c2YyNnMzcm11am14M3IzYnJydmR5YSIsImNsaWVudF90ZW5hbnRuYW1lIjoiaWRjcy03OGY5YWEwODhlMzI0ODZkOTcyZDA1ODE1ZDBmOWFlNSIsInJlZ2lvbl9uYW1lIjoiYXAtc2luZ2Fwb3JlLWlkY3MtMSIsInVzZXJfbGFuZyI6ImVuIiwiZXhwIjoxNjY5ODAwNDI3LCJpYXQiOjE2Njk3OTY4MjcsImNsaWVudF9ndWlkIjoiZTJmZDNkYTQ1MzQxNDY3NTg2MmJjOWVmMjA3ZTViZjUiLCJjbGllbnRfbmFtZSI6Ik9BQ1B1YmxpY1VzZXJBY2Nlc3MiLCJ0ZW5hbnQiOiJpZGNzLTc4ZjlhYTA4OGUzMjQ4NmQ5NzJkMDU4MTVkMGY5YWU1IiwianRpIjoiMGFlZjU2MjMxOGQ1NDczMjg1M2UwZjg2ZmRjOTlhMjkiLCJndHAiOiJybyIsInVzZXJfZGlzcGxheW5hbWUiOiJTeWVkIEFiZHVsIFNhcmVrIiwib3BjIjpmYWxzZSwic3ViX21hcHBpbmdhdHRyIjoidXNlck5hbWUiLCJwcmltVGVuYW50Ijp0cnVlLCJ0b2tfdHlwZSI6IkFUIiwiYXVkIjpbImh0dHBzOlwvXC9lc3F1aXJlYW5hbHl0aWNzLWF4eGZiYjRmNmZveS1zaS5hbmFseXRpY3Mub2NwLm9yYWNsZWNsb3VkLmNvbSIsImh0dHBzOlwvXC9rdzZuNG54dzRzb3plZmliZ2Nvb3hkbHVydGppcXBmcS5hbmFseXRpY3Mub2NwLm9yYWNsZWNsb3VkLmNvbSJdLCJjYV9uYW1lIjoiZXNxdWlyZXRlY2hub2xvZ3lsdGQiLCJ1c2VyX2lkIjoiMmI3M2NkYzVjNzUxNGIwOGIxNDJmMjBjYTVkZDI0MmIiLCJkb21haW4iOiJEZWZhdWx0IiwidGVuYW50X2lzcyI6Imh0dHBzOlwvXC9pZGNzLTc4ZjlhYTA4OGUzMjQ4NmQ5NzJkMDU4MTVkMGY5YWU1LmlkZW50aXR5Lm9yYWNsZWNsb3VkLmNvbTo0NDMiLCJyZXNvdXJjZV9hcHBfaWQiOiJhNTNhMmRjYTA5Njg0MjAwYTM4ZTRlMDEyZDQzYmUzMSJ9.eQ0O7OvCzNcaxLq18yFAO4IWRpZwjqbb62Ubrcj_Onk24B82viHMO2NOWHlXYleaLnFDT4XTe3Sjj645ZcEVvDQ_IKZdoaimjL5icy3k2vKucGEbGbpLJYbLqd41a2kAFBUiZXPKFW0DsW6MPLnhfmim-Rjdq_eCa5Avs6zJeC-i4pzteQ4nSiBI3Cf8wnJIxEccFWVWbOfrrWIj5wliOzHDh15IbOcTo6mjeNxtFcPDq8oQ83odFjRMR8GZh4pYT0Px6NyDjg1xS0OStelcNwxq1ypPf5K7F_EedRCc-9gaf5kdZS3tTdGBxJ0ZUgwzyQPyWtZwgQ6qyo-8OUY7ow";
+    requirejs(['jquery', 'knockout', 'obitech-application/application', 'ojs/ojcore', 'ojs/ojknockout', 'ojs/ojcomposite', 'jet-composites/oracle-dv/loader'],
+     function($, ko, application) {
+          application.setSecurityConfig("token", {tokenAuthFunction:
+             function(){
+                return token;
+             }
+          });
+          ko.applyBindings();
+       }
+    );
+</script>

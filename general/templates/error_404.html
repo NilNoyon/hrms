@@ -1,0 +1,77 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Page not found{% endblock %}
+
+{% block add_css %}
+
+<style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            /* background-color: #E7FFFF; */
+        }
+        
+        h1,
+        a {
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .section {
+            padding: 4rem 2rem;
+        }
+
+        .section .error {
+            font-size: 150px;
+            color: #ff0000;
+            text-shadow:
+            1px 1px 1px #ff0000,
+            2px 2px 1px #ff0000,
+            3px 3px 1px #ff0000,
+            4px 4px 1px #ff0000,
+            5px 5px 1px #ff0000,
+            6px 6px 1px #ff0000,
+            7px 7px 1px #ff0000,
+            8px 8px 1px #ff0000,
+            25px 25px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .page {
+            margin: 2rem 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .back-home {
+            display: inline-block;
+            border: 2px solid rgb(243, 104, 104);
+            color: #222;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0.75rem 1rem 0.6rem;
+            transition: all 0.2s linear;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-home:hover {
+            background: #222;
+            color: #ddd;
+        }
+</style>
+
+{% endblock %}
+{% block content %}
+    <div class="card mt-4 pt-0">
+        <div class="section text-center">
+            <h1 class="error" style="color:#ff0000">404</h1>
+            <h2>The Page you are looking for is not found!</h2>
+            <p class="font-weight-600">Try again with valid URL. Your requested URL is : {{ request.build_absolute_uri }}. </p>
+            <a class="back-home" href="{% url 'dashboard' %}">Back to Dashboard</a>
+        </div>
+    </div>
+{% endblock %}
