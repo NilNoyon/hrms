@@ -1,0 +1,160 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Designations{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Designations List</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Name</th>
+                                    <th>Short Name</th>
+                                    <th>Status</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dsg in object_list %}
+                                <tr>
+                                    <td class="">{{ forloop.counter }}</td>
+                                    <td>{{ dsg }}</td>
+                                    <td>{{ dsg.short_name }}</td>
+                                    <td>
+                                        <label class="mx-auto">
+                                            <input type="checkbox" data-id="{{dsg.id}}" data-type="status" {% if dsg.status %}checked{% endif %} name="status" 
+                                                class="js-switch notice-update-switch" data-color="#009efb" data-size="mini" />
+                                        </label>
+                                    </td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'designations_update' dsg.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'designations_delete' dsg.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'designations_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" data-title="Designation" id="name" name="name" value="{{ instance.name }}" required>
+                            <span class="bar"></span>
+                            <label for="name">Designation</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" data-title="Short Name" id="short_name" name="short_name" value="{{ instance.short_name }}" required>
+                            <span class="bar"></span>
+                            <label for="short_name">Short Name</label>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col">
+                                <label for="status" class="mb-2">
+                                    <input type="checkbox" id="status" name="status" class="js-switch" {% if instance.status or not instance %}checked{% endif %} data-color="#009efb" data-size="mini"/> Status
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block page_js %}
+
+<script>
+
+    $(".card-table").DataTable({});
+
+    {% comment %} Delete Designations {% endcomment %}
+
+    $('body').on('click','.delete_btn', function(e){
+
+        e.preventDefault();
+
+        Swal.fire({
+
+            text                : 'Do you want to delete this Designations from list?',
+
+            type                : 'question',
+
+            confirmButtonText   : 'Yes',
+
+            confirmButtonColor  : "#00c292",
+
+            showCancelButton    : true,
+
+            cancelButtonText    : 'No',
+
+            cancelButtonColor   : "#e46a76",
+
+            reverseButtons      : false
+
+        }).then((result) => {
+
+            if(result.value){
+
+                window.location.href = $(this).data('url')
+
+            }
+
+        });
+
+    });
+
+    {% comment %} Delete Designations {% endcomment %}
+</script>
+{% endblock %}
+

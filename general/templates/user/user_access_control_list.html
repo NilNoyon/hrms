@@ -1,0 +1,90 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}User Access Control List{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 align-self-center">
+                        <h4 class="text-themecolor mb-0">User Access Control List</h4>
+                    </div>
+                    <div class="col-md-6 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="/user/access-control-setup/" class="btn btn-sm btn-info"
+                                        title="Custom Button"><i class="ti-plus"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body custom-color rounded-lg p-3 custom-rl pt-0">
+                <form class="floating-labels" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-label" for="user">User</label>
+                                <select class="form-control text-capitalize select2 user" id="user" name="user"
+                                    data-title="User">
+                                    <option value="" disabled selected></option>
+                                    {% for data in user_list %}
+                                    <option value="{{data.id}}" {% if user_id == data.id %} selected {% endif %}>{{data.name}}({{data.employee_id}})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {% if access_list %}
+                    <table class="table table-border card-table table-vcenter data-table">
+                        <thead>
+                            <tr>
+                                <th>Module</th>
+                                <th>Menu Name </th>
+                                <th>View Action</th>
+                                <th>Insert Action</th>
+                                <th>Update Action</th>
+                                <th>Delete Action</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in access_list %}
+                            <tr id="{{data.id}}">
+                                <td>{{data.menu.module_name}}</td>
+                                <td>{{data.menu.menu_name}}</td>
+                                <td>{% if data.view_action %} Yes {% else %} No {% endif %}</td>
+                                <td>{% if data.insert_action %} Yes {% else %} No {% endif %}</td>
+                                <td>{% if data.update_action %} Yes {% else %} No {% endif %}</td>
+                                <td>{% if data.delete_action %} Yes {% else %} No {% endif %}</td>
+                                <td>
+                                    <a href="#" onclick="deletePermission('{{data.id}}')" class="h4 text-danger">
+                                        <span class="icon"><i class="ti-trash"></i></span>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+    <script src="{% static 'dist/js/access_control.js' %}"></script>
+{% endblock %}

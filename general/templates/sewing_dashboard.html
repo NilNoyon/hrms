@@ -1,0 +1,477 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Sewing Dashboard{% endblock %}
+{% block add_css %}
+<style> 
+    .app-header {
+        background-color: #edf1f5;
+    }
+    p{
+        margin-bottom:3px!important;
+        font-size:.90em!important;
+    }
+    .efficiency-table{border: 0px !important;width: 100%; font-size: 12px;}
+    .efficiency-table td{ padding:5px 10px; border:0px !important;}
+    .pr{
+        padding-right:10px;
+    }
+
+    .val{
+        color: #5470c6;
+        font-weight:bold;
+        font-size:1.2em;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card border-danger app-header mb-0">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-8 align-self-center">
+                <h4 class="text-themecolor mb-0">Sewing Dashboard</h4>
+            </div>
+            <div class="col-md-4 align-self-center text-right">
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row no-gutters">
+                            <div class="col-md-12 col-lg-6">
+                              <div class="table-responsive">
+                                <table class="efficiency-table">
+                                  <tr>
+                                    <td>Current Hour</td>
+                                    <td>:&nbsp; <span class="val"> 1</span></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Cumulative Target</td>
+                                    <td>:&nbsp; <span class="val"> 144</span></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Inspected</td>
+                                    <td>:&nbsp; <span class="val"> 60</span></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Productivity</td>
+                                    <td>:&nbsp; <span class="val"> 120</span></td>
+                                  </tr>
+                                </table>
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6">
+                              <div class="table-responsive">
+                                <table class="efficiency-table">
+                                  <tr>
+                                    <td>Shift Target</td>
+                                    <td>:&nbsp; <span class="val"> 576</span></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Production Till Hour</td>
+                                    <td>:&nbsp; <span class="val"  style="color:green;">120</span></td>
+                                  </tr>
+                                  <tr>
+                                    <td>Defect</td>
+                                    <td>:&nbsp; <span class="val" style="color:red;">5 </span></td>
+                                  </tr>
+                                  <tr>
+                                    <td>PPP</td>
+                                    <td>:&nbsp; <span class="val">1.25</span></td>
+                                  </tr>
+                                </table>
+                              </div>
+                            </div>
+                        </div>
+                        <div id="efficiency" style="width:100%;height:270px;"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                  <div class="card-body">
+                      <div class="row">
+                          <div class="col-md-4">
+                              Today Target
+                          </div>    
+                          <div class="col-md-4">
+                              Today Proc
+                          </div> 
+                          <div class="col-md-4">
+                              Today(%)
+                          </div> 
+                      </div>        
+                  </div>
+              </div>
+              <div class="card">
+                  <div class="card-body">
+                      <div class="row">
+                          <div class="col-md-4">
+                              MTD Target
+                          </div>    
+                          <div class="col-md-4">
+                              MTD Proc
+                          </div> 
+                          <div class="col-md-4">
+                              MTD(%)
+                          </div> 
+                      </div>
+                  </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div  id="sewing_chart" style="width: 100%; height: 250px;"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class=" align-items-center">
+                            <div id="hourly_ppp" style="width: 100%; height:250px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="defect_chart" class="text-center" style="width: 100%;height: 250px;"></div>                    
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="align-items-center">
+                            <div id="hourly_defect" style="height:250px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>   
+{% endblock %}   
+{% block page_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js" integrity="sha512-LYmkblt36DJsQPmCK+cK5A6Gp6uT7fLXQXAX0bMa763tf+DgiiH3+AwhcuGDAxM1SvlimjwKbkMPL3ZM1qLbag==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+      // efficiency chart
+      var chartDom = document.getElementById('efficiency');
+      var myChart = echarts.init(chartDom);
+      var option;
+      
+      option = {
+          responsive: true,
+          toolbox: {
+            show: true,
+            feature: {
+              mark: { show: true },
+              dataView: { show: true, readOnly: false },
+              saveAsImage: { show: true }
+            }
+          },
+          series: [
+            {
+              type: 'gauge',
+              startAngle: 180,
+              endAngle: 0,
+              center: ['50%', '75%'],
+              radius: '90%',
+              min: 0, max: 1,
+              splitNumber: 10,
+              axisLine: {
+                lineStyle: {
+                  width: 25,
+                  color: [
+                    [0.1, '#FF2E76'],
+                    [0.2, '#FF6E76'],
+                    [0.3, '#fa8452'],
+                    [0.4, '#ffc858'],
+                    [0.5, '#FDDD60'],
+                    [0.6, '#58D9F9'],
+                    [0.7, '#5aa9F9'],
+                    [0.8, '#5470c6'],
+                    [0.9, '#5b7272'],
+                    [1.0, '#3ba272']
+                  ]
+                }
+              },
+              pointer: {
+                icon: 'path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z',
+                length: '50%',
+                width: 13,
+                offsetCenter: ['0%', '-50%']
+              },
+              axisTick: {
+                length: 0,
+              },
+              splitLine: {
+                length: 0,
+              },
+              axisLabel: {
+                color: '#464646',
+                fontSize: 16,
+                distance: -40,
+                rotate: 'tangential',
+                formatter: function (value) {
+                  if (value === 1) {
+                    return '100';
+                  } else if (value === 0.9) {
+                    return '90';
+                  } else if (value === 0.8) {
+                    return '80';
+                  } else if (value === 0.7) {
+                    return '70';
+                  } else if (value === 0.6) {
+                    return '60';
+                  } else if (value === 0.5) {
+                    return '50';
+                  } else if (value === 0.4) {
+                    return '40';
+                  } else if (value === 0.3) {
+                    return '30';
+                  } else if (value === 0.2) {
+                    return '20';
+                  } else if (value === 0.1) {
+                    return '10';
+                  } else if (value === 0) {
+                    return '0';
+                  }
+                  return '';
+                }
+              },
+              title: {
+                offsetCenter: [0, '10%'],
+                fontSize: 20
+              },
+              detail: {
+                fontSize: 30,
+                offsetCenter: [0, '-15%'],
+                valueAnimation: true,
+                formatter: function (value) {
+                  return Math.round(value * 100) + '%';
+                },
+                color: 'auto'
+              },
+              data: [
+                {
+                  value: 0.439,
+                  name: 'Efficiency'
+                }
+              ]
+            }
+          ]
+      };
+      option && myChart.setOption(option);
+      $(window).on('resize', function(){
+          if(myChart != null && myChart != undefined){
+              myChart.resize();
+          }
+      });
+
+      var chartDom1 = document.getElementById('sewing_chart');
+      var myChart1 = echarts.init(chartDom1);
+      var option1;
+      option1 = {
+        responsive: true,
+        toolbox: {
+          show: true,
+          feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: false },
+            saveAsImage: { show: true }
+          }
+        },
+        title: {
+          text: 'Sewing',
+          left:'center',
+        },
+        xAxis: {
+          type: 'category',
+          data: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            name: 'Direct',
+            type: 'bar',
+            barWidth: '60%',
+            data: [10, 52, 200, 334, 390, 330, 220]
+          }
+        ]
+      };
+    
+      option1 && myChart1.setOption(option1);
+      $(window).on('resize', function(){
+          if(myChart1 != null && myChart1 != undefined){
+              myChart1.resize();
+          }
+      });
+      
+    // Defect chart    
+    var chartDom2 = document.getElementById('defect_chart');
+    var myChart2 = echarts.init(chartDom2);
+    var option2;
+    option2 = {
+      responsive: true,
+      toolbox: {
+        show: true,
+        feature: {
+          mark: { show: true },
+          dataView: { show: true, readOnly: false },
+          saveAsImage: { show: true }
+        }
+      },
+      title: {
+        text: 'Hourly Defect',
+        subtext:'% Wise Top 5 Defect',
+        left:"center"
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        bottom:0,
+      },
+      labelLine: {
+        show: false
+      },
+      series: [
+        {
+          type: 'pie',
+          radius: '50%',
+          data: [
+            { value: 5, name: 'Defect' },
+            { value: 3, name: 'Repairable' },
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }
+      ]
+    };
+  
+    option2 && myChart2.setOption(option2);
+    $(window).on('resize', function(){
+        if(myChart2 != null && myChart2 != undefined){
+            myChart2.resize();
+        }
+    });
+    
+    // Defect chart    
+    var chartDom3 = document.getElementById('hourly_ppp');
+    var myChart3 = echarts.init(chartDom3);
+    var option3;
+    option3 = {
+      responsive: true,
+      toolbox: {
+        show: true,
+        feature: {
+          mark: { show: true },
+          dataView: { show: true, readOnly: false },
+          saveAsImage: { show: true }
+        }
+      },
+      title: {
+        text: 'Hourly PPP',
+        left:'center',
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+      legend: {
+        type: 'scroll',
+        orient: 'vertical',
+        left:'left',
+        bottom:0,
+      },
+      series: [
+        {
+          name: 'Access From',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '40',
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: [
+            { value: 735, name: 'Direct' },
+            { value: 580, name: 'Email' },
+            { value: 484, name: 'Union Ads' },
+            { value: 300, name: 'Video Ads' }
+          ]
+        }
+      ]
+    };
+  
+    option3 && myChart3.setOption(option3);
+    $(window).on('resize', function(){
+        if(myChart3 != null && myChart3 != undefined){
+            myChart3.resize();
+        }
+    });
+    
+      // Defect chart    
+      var chartDom4 = document.getElementById('hourly_defect');
+      var myChart4 = echarts.init(chartDom4);
+      var option4;
+      option4 = {
+        responsive: true,
+        toolbox: {
+          show: true,
+          feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: false },
+            saveAsImage: { show: true }
+          }
+        },
+        title: {
+          text: 'Hourly Defect',
+          left:"center"
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: [820, 932, 901, 934, 1290, 1330, 1320],
+            type: 'line',
+            areaStyle: {}
+          }
+        ]
+      };
+    
+      option4 && myChart4.setOption(option4);
+      $(window).on('resize', function(){
+          if(myChart4 != null && myChart4 != undefined){
+              myChart4.resize();
+          }
+      });
+  });
+</script>
+{% endblock %}   

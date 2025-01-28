@@ -1,0 +1,40 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %} Notifications List {% endblock %}
+
+{% block content %}
+
+
+<div class="card border-danger">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-12 align-self-center">
+                <h4 class="text-themecolor mb-0"> Notifications List </h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+        <div class="table-responsive">
+            <table class="table table-hover no-wrap">
+                <tbody>
+                    {% for n in unread_list %}
+                    <tr>
+                        <td style="width:150px">{{ n.verb }}</td>
+                        <td class="max-texts notify_list_item" data-id="{{ n.slug }}">
+                            <a href="{{ n.action_url }}" target="_blank"> {{ n.description }}</a>
+                        </td>
+                        <td class="text-right"> {{ n.timesince }} </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class='text-center h4'>No New Notifications</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+   
+{% endblock %}

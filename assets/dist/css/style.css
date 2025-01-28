@@ -2467,7 +2467,7 @@ pre code {
 }
 
 .form-control:focus {
-    color: #4F5467;
+    color: #162ca8;
     background-color: #fff;
     border-color: rgba(0, 0, 0, 0.1);
     outline: 0;
@@ -26565,7 +26565,7 @@ Form Material page
 .form-material .form-control,
 .form-material .form-control.focus,
 .form-material .form-control:focus {
-    background-image: linear-gradient(#fb9678, #fb9678), linear-gradient(#e9ecef, #e9ecef);
+    background-image: linear-gradient(#162ca8, #162ca8), linear-gradient(#e9ecef, #e9ecef);
     border: 0 none;
     border-radius: 0;
     box-shadow: none;

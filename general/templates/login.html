@@ -1,0 +1,197 @@
+{% extends "base.html" %} 
+{% load static %}
+
+ {% block page_title %}Enterprise Business Integration Tool{% endblock %}
+ {% block page_css %}
+<!-- page css -->
+<link href="{% static 'dist/css/pages/login-register-lock.css' %}?v=0.3" rel="stylesheet">
+<style>
+    body {
+        background-color:#324A62 !important;
+    }
+
+    .login-logo{ width:13%; }
+    
+    .text-grey {
+        color: #7a7a7a;
+    }
+    
+    .esquire-font {
+        font-family: Esquivel, sans-serif;
+        font-weight: 400;
+    }
+    
+    .esquire-light-font {
+        font-family: Esquivel-Light, sans-serif;
+    }
+    
+    .form-group i {
+        font-weight: 600;
+    }
+    .required{
+        display: none;
+    }
+    .bottom-right {
+        position: absolute;
+        top: 18px;
+        right: 231px;
+    }
+    .main-heading {
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Fira Sans', Ubuntu, Oxygen, 'Oxygen Sans', Cantarell, 'Droid Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Lucida Grande', Helvetica, Arial, sans-serif;
+        font-size: 3em;
+        font-weight: 200;
+    }
+    .column {
+        float: left;
+        width: 11.11%;
+        padding: 5px;
+      }
+      
+      /* Clearfix (clear floats) */
+      .box::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+
+      .esquire-font {
+          font-family: Esquivel, sans-serif;
+          font-weight: 400;
+      }
+      @media only screen and (max-width: 639px) {
+        .login-box.card{
+            margin: 0 auto !important;
+        }
+        .social-icons{ 
+            margin-right: 7% !important;
+        }
+        .login-logo{ 
+            width:50% !important; 
+            margin-left: 15% !important; 
+        }
+        .login-box{ 
+            width: 94%;
+            margin: 0 3% !important;
+        }
+      }
+      @media only screen and (max-width: 992px) {
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .social-icons{ margin-right: 10% !important;}
+        .login-box{ 
+            width: 100%;
+            margin: 0 20% !important;
+            padding: 0 10% !important;
+        }
+        .navbar-box { margin : 0 !important; }
+        .login-logo{ width:25%; margin-left: 10%; }
+        .login-register, .forgot-pass {
+            padding: 20% 5% 10%;
+        }
+      }
+     
+</style>
+{% endblock %} 
+{% block body %}
+<div style="background-color:white">
+    <div class="container navbar-box card" style="background-color:white">
+        <div class="row">
+            <div class="col-lg-8 col-md col pl-0" >
+                <div class="text-center pb-3 pt-3">
+                    <div class="text-left login-logo">
+                        <a href="{% url 'general:app_login' %}">
+                            <img src="/assets/images/ebit-transparent.png" alt="E-Bit Logo" id="logo"  style="width:100%;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-6">
+                <div class="row social-icons">
+                    <div class="col"></div>
+                    <div class="col-12 col-md-7">
+                        <div class="row no-gutters">
+                            <div class="col text-center py-3">
+                                <a target='_blank' href="https://www.facebook.com/ebitofficial/">
+                                    <img title="Facebook" src="/assets/images/icon/facebook.png" alt="Facebook Logo">
+                                </a>
+                            </div>
+                            <div class="col text-center py-3">
+                                <a target='_blank' href="https://www.linkedin.com/company/e-bitofficial/">
+                                    <img title="Linkdin" src="/assets/images/icon/linkedin.png" alt="Linkedin Logo" >
+                                </a>
+                            </div>
+                            <div class="col text-center py-3">
+                                <a target='_blank' href="https://www.instagram.com/ebit.erp/">
+                                    <img title="Instagram" src="/assets/images/icon/instagram.png" alt="Instagram Logo" >
+                                </a>
+                            </div>
+                            <div class="col text-center py-3">
+                                <a target='_blank' href="https://www.youtube.com/channel/UC6XjyFSVzNQU7b7fFjxSUkQ">
+                                    <img title="Youtube" src="/assets/images/icon/youtube.png" alt="Youtube Logo" >
+                                </a>
+                            </div>
+                            <div class="col text-center py-3">
+                                <a target='_blank' href="https://e-bit.biz/">
+                                    <img title="Website" src="/assets/images/icon/website.png" alt="E-Bit Logo">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
+<section id="wrapper" style="background-color:#324A62" class="mt-0">
+    <div class="login-register">
+        <div class="login-box card pt-0">
+            <div class="card-body pt-0">             
+                <form class="form" id="loginform" method="POST" >
+                    {% csrf_token %}
+                    <input type="hidden" name="next_url" value="{{ request.GET.next }}" />
+                    <h1 class="text-left m-b-30 text-white main-heading">Integrity toward integrated solution</h1>
+                    <div class="form-group">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="employee_id"><i class="ti-user" style="color:#324A62"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="employee_id"  {% if employee_id %} value="{{employee_id}}" {% endif %} id="employee_id" placeholder="Employee ID" autofocus required>
+                        </div>
+                    </div>
+                    <div class="form-group mb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="password"><i class="ti-lock" style="color:#324A62"></i></span>
+                            </div>
+                            <input type="password" class="form-control" name="password" value="" id="password" placeholder="Password" required>
+                        </div>
+                    </div>
+                 
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <div class="d-flex no-block align-items-center">
+                                <div class="ml-auto">
+                                    <a href="/forgot-password" id="to-recover" class="text-white"><i class="fas fa-lock m-r-5"></i> Forgot Password?</a>
+                                </div>
+                            </div>   
+                        </div>
+                    </div>
+                    <div class="form-group text-center mb-0">
+                        <div class="col-xs-12 ">
+                            <button class="btn btn-block btn-rounded btn-block btn-light font-weight-bold" type="submit" style="color:#324A62">Login</button><br>
+                        </div>
+                    </div>
+                    <div class="form-group m-b-0">
+                        <div class="col-sm-12 text-center text">
+                            <!-- <a href="http://esquiretechnology.com/" target="_blank"><span class="text-white esquire-font">&copy; Esquire Technology Ltd</span></a> -->
+                            <a href="http://esquiretechnology.com/" target="_blank"><span class="text-white">&copy; Esquire Technology Ltd</span></a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

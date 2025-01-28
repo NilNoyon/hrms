@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Responsibility for User{% endblock %}
+
+{% block content %}
+<div class="row row-cards">
+
+  {% include "user/sidebar.html" %}
+
+  <div class="col-lg-9">
+    <form class="card" method="post" action="{% url 'desk:responsibility' %}">
+      {% csrf_token %}
+      <div class="card-status bg-teal"></div>
+      <div class="card-header">
+        <h3 class="card-title text-uppercase">Add Responsibility for desk:</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-6 col-md-6">
+            <div class="form-group">
+              <label class="form-label">Resolver:</label>
+              <select class="form-control text-capitalize custom-select" name="user" required>
+                <option value="">Select Resolver</option>
+                {% for u in users %}
+                <option value="{{ u.id }}" {% if user.id == u.id %} selected {% endif %}>{{ u.name }} ( {{ u.department }} )</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-12 col-md-12">
+            <div class="form-group">
+              <div>
+                {% for category in categories %}
+                <!--<label class="custom-control custom-checkbox custom-control-inline">-->
+                  <!--<input type="checkbox" class="custom-control-input" name="responsibility" value="{{ category.id }}" >-->
+                  <!--<span class="custom-control-label">{{ category.name }}</span>-->
+                <!--</label>-->
+                  {% if category.category_set.all|length == 0 %}
+                    <label class="custom-control custom-checkbox custom-control-inline">
+                      <input type="checkbox" class="custom-control-input" name="responsibility" value="{{ category.id }}" {% for res in responsibilities %} {% if res.id == cat.id  %} checked {% endif %} {% endfor %}>
+                      <span class="custom-control-label">{{ category.name }}</span>
+                    </label>
+                  {% else %}
+                    <h5>{{ category.name }}: </h5>
+                  {% endif %}
+
+                  {% for cat in category.category_set.all %}
+                    <label class="custom-control custom-checkbox custom-control-inline">
+                      <input type="checkbox" class="custom-control-input" name="responsibility" value="{{ cat.id }}" {% for res in responsibilities %} {% if res.id == cat.id  %} checked {% endif %} {% endfor %}>
+                      <span class="custom-control-label">{{ cat.name }}</span>
+                    </label>
+                  {% endfor %}
+                  <br>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-lg bg-teal text-white text-uppercase btn-block font-weight-bold">Update Responsibility</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $('.custom-select').on('change', function(e) {
+        var user = $(this).val();
+        window.location.href = "{% url "desk:responsibility" %}"+user;
+    });
+</script>
+
+{% endblock %}

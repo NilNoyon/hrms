@@ -1,0 +1,61 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Attendance{% endblock %}
+
+{% block add_css %}
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                    <h4 class="mb-1">Attendance List</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="">
+            <table id="process-table" class="table table-border card-table table-vcenter" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="d-sm-table-cell">#SL.</th>
+                        <th class="d-sm-table-cell">Name</th>
+                        <th class="d-sm-table-cell">Branch</th>
+                        <th class="d-sm-table-cell">Route No</th>
+                        <th class="d-sm-table-cell">Swift Code</th>
+                        <th class="d-sm-table-cell">Foreign Attendance</th>
+                        <th class="d-sm-table-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for attendance in attendances %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td class="">{{ attendance.name }}</td>
+                    <td class="">{{ attendance.branch }}</td>
+                    <td class="text-center">{{ attendance.route_no }}</td>
+                    <td class="text-center">{{ attendance.swift_code }}</td>
+                    <td class="text-center">{{ attendance.is_foreign|yesno }}</td>
+                    <td class="text-center">
+                        <a class="h4 m-r-10 text-success" href="{% url 'attendance_update' attendance.id %}?page={{ page_number }}" class="h4 text-danger">
+                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% include 'inc/paginate.html' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+    <script>
+        $("#process-table").DataTable({});
+    </script>
+
+{% endblock %}

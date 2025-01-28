@@ -212,7 +212,7 @@ class MaintenanceRequest(CoreAction):
           return reverse("fa:maintenance_view", kwargs={"id": self.pk})
     
 
-class RequestDetails(EBSCoreAction):
+class RequestDetails(CoreAction):
      maintenance       = models.ForeignKey(MaintenanceRequest, on_delete=models.CASCADE, null=True, blank=True)
      asset             = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, blank=True)
      item              = models.ForeignKey(AssetItem, on_delete=models.CASCADE, null=True, blank=True, default=None)
@@ -309,7 +309,7 @@ class VehicleService(CoreActionWithUpdate):
      def __str__(self):
           return self.provider
 
-class VehicleRequisition(EBSCoreActionWithUpdate):
+class VehicleRequisition(CoreActionWithUpdate):
      route_types   = (
           ('One way', 'One way'),
           ('Two way', 'Two way'),
