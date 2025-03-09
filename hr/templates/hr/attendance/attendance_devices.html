@@ -1,0 +1,190 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Attendance Devices{% endblock %}
+
+{% block add_css %}
+<style>
+    .tableFixHead {
+        overflow    : auto;
+        height      : 61.25vh;
+        width       : 100%;
+        font-size:   12px; 
+    } 
+    .tableFixHead table {
+        border-top  : 0px solid transparent !important;
+        border-collapse : unset;
+        border-spacing : 0px !important;
+        margin-bottom : 0px !important;
+    }
+    .tableFixHead thead{
+        position    : sticky;
+        top         : 0px;
+        width       : 100%;
+        min-width   : 100%;
+        max-width   : 100%;
+        z-index     : 1;
+    }
+    .tableFixHead .table th, td {
+        text-align  : center;
+        background  : #fff; 
+        padding     : 8px 16px;
+    }
+    .required{display: none;}
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="mb-1">Attendance Devices</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:import_attendance_devices' %}" class="btn btn-sm btn-success" title="Add New">
+                                    <i class="fa fa-upload"></i> Import
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-rl">
+            <form class="floating-labels" method="post" id="form">
+            {% csrf_token %}
+                <div class="tableFixHead">
+                    <table class="table table-vcenter">
+                        <thead>
+                            <tr class="text-center">
+                                <th width="10%">DevID</th>
+                                <th>Location</th>
+                                <th>Building</th>
+                                <th>Floor</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="floating-labels">
+                            {% for device in devices %}
+                            <tr class="text-center">
+                                <td>
+                                    <div class="form-group mb-0">
+                                        <input type="hidden" name="device_id" value="{{device.id}}">
+                                        <input class="form-control text-center bg-transparent" type="text" readonly value="{{device.device_id}}">
+                                        <span class="bar"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group mb-0">
+                                        <select class="form-control select2 location" name="location[{{device.id}}]" data-tags="true" data-title="Location">
+                                            <option value="" selected disabled>Location</option>
+                                            {% for l in locations %}
+                                            <option value="{{l.id}}" {% if device.location_id == l.id %}selected{% endif %}>{{l.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span class="bar"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group mb-0">
+                                        <select class="form-control select2 building" name="building[{{device.id}}]" data-tags="true" data-title="Building">
+                                            <option value="" disabled>Building</option>
+                                            {% if device.building_id %}
+                                            <option value="{{device.building_id}}" selected>{{device.building.name}}</option>
+                                            {% endif %}
+                                        </select>
+                                        <span class="bar"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group mb-0">
+                                        <select class="form-control select2 floor" name="floor[{{device.id}}]" data-tags="true" data-title="Floor">
+                                            <option value="" selected disabled>Floor</option>
+                                            {% if device.floor_id %}
+                                            <option value="{{device.floor.name}}" selected>{{device.floor.name}}</option>
+                                            {% endif %}
+                                        </select>
+                                        <span class="bar"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group mb-0">
+                                        <input class="form-control" type="text" name="name[{{device.id}}]" value="{{ device.name }}" required>
+                                        <span class="bar"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group mb-0">
+                                        <label class="my-3" style="position: relative;">
+                                            <input type="checkbox" name="status[{{device.id}}]" id="status" class="js-switch" data-color="#009efb" 
+                                                data-size="mini" {% if device.status.title|lower == 'active' %}checked{% endif %} />
+                                            Active
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 ml-auto mt-2">
+                        <div class="button-group">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success receive-goods">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+
+    {% comment %} Get Buildings {% endcomment %}
+    $(".location").on('change', function(){
+        let id = $(this).val(); $(".building").empty();
+        console.log(id);
+        if (id){
+            $.ajax({
+                url : "{% url 'hr:get_location_wise_building' %}",
+                data: { id:id }, type: "POST", dataType: 'json', 
+                success: function (data) {
+                    $(".building").select2({
+                        allowClear  : true,
+                        placeholder : "Building",
+                        data        : data.building,
+                    });
+                },
+            });
+        }
+    });
+    
+    {% comment %} Get Floors {% endcomment %}
+    $(".building").on('change', function(){
+        let id = this.value; $(".floor").empty();
+        if (id){
+            $.ajax({
+                url : "{% url 'hr:get_building_wise_floor' %}",
+                type: "POST", dataType: 'json', data: { id:id },
+                success: function (data) {
+                    $(".floor").select2({
+                        allowClear  : true,
+                        placeholder : "Floor",
+                        data        : data.floor,
+                    });
+                },
+            });
+        }
+    });
+
+</script>
+{% endblock %}

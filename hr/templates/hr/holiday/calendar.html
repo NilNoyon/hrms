@@ -1,0 +1,182 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% block page_title %}Holiday Calendar{% endblock %}
+
+{% block add_css %}
+<link href="https://unpkg.com/js-year-calendar@latest/dist/js-year-calendar.min.css" rel="stylesheet">
+<style>
+    body {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      
+      .calendar .calendar-header {
+        background-color: #f5f5f5;
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+        border: 0;
+      }
+      
+      .calendar .calendar-header .year-title {
+        font-size: 18px;
+      }
+      
+      .calendar .calendar-header .year-title:not(.year-neighbor):not(.year-neighbor2) {
+        border-bottom: 2px solid #2196f3;
+      }
+      
+      .calendar .months-container .month-container {
+        margin-bottom: 25px;
+      }
+      
+      .calendar table.month {
+        box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+        border-radius: 6px;
+        background-color: white;
+        height: 100%;
+      }
+      
+      .calendar table.month th.month-title {
+        background-color: #2196F3;
+        color: white;
+        padding: 12px;
+        font-weight: 400;
+      }
+      
+      .calendar table.month th.day-header {
+        padding-top: 10px;
+        color: #CDCDCD;
+        font-weight: 400;
+        font-size: 12px;
+      }
+      
+      .calendar table.month td.day .day-content {
+        padding: 8px;
+      }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-12 align-self-center">
+                <h4 class="text-themecolor mb-0">Holiday Calendar</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row custom-color rounded-lg p-3 mr-0 ml-0">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <select class="form-control text-capitalize select2 company" id="company"
+                        name="company" data-title="Company">
+                        {% for c in company_list %}
+                        <option value="{{c.id}}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <table class="table table-border table-striped table-vcenter text-danger" id="holiday" style="width:100%; font-size: 12px;">
+                    <thead>
+                        <tr class="text-center">
+                            <th>Title</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for holiday in holiday_list %}
+                        <tr>
+                            <td>{{ holiday.name }}</td>
+                            <td class="text-center">
+                                {{ holiday.start_date|date:'d F, Y'|upper }} 
+                                {% if holiday.start_date != holiday.end_date %}
+                                to <br /> 
+                                {{ holiday.end_date|date:'d F, Y'|upper }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="text-center font-weight-bold text-danger" colspan="2">Holidays Not Declared Yet!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-9">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="https://unpkg.com/js-year-calendar@latest/dist/js-year-calendar.min.js"></script>
+<script>
+    function setup_calendar(calendar_data=[]) {
+        new Calendar('#calendar', {
+            style:'background',
+            clickDay: function(e) {
+                if(e.events.length > 0) {
+                    var content = '';
+                    for (var i in e.events) {
+                        content += '<div class="event-tooltip-content">'
+                        + '<div class="event-name" style="color:' + e.events[i].color + '">' + e.events[i].name + '</div>'
+                        + '</div>';
+                    }
+                
+                    $(e.element).popover({ 
+                        trigger: 'manual',
+                        container: 'body',
+                        html:true,
+                        content: content
+                    });
+                    
+                    $(e.element).popover('show');
+                }
+            },
+            mouseOutDay: function(e) {
+                if(e.events.length > 0) {
+                    $(e.element).popover('hide');
+                }
+            },
+            dayContextMenu: function(e) {
+                $(e.element).popover('hide');
+            },
+            dataSource: calendar_data,
+            weekStart   : 6,
+            year        : new Date().getFullYear(),
+            allowOverlap : true,
+        });
+    }
+
+    $(document).ready(function () {
+        
+        $("body").on('change', "#company", function(){
+            $.ajax({
+                url : "{% url 'hr:get_calendar_data' %}",
+                type: "POST", dataType: 'json', data: { company_id:$(this).val() },
+                success: function (data) {
+                    calendar_data = [];
+                    $("#holiday tbody").html(data['html'])
+                    for($i=0; $i<data['data'].length; $i++){
+                        hdata = data['data'][$i];
+                        single_data = {
+                            color       : (hdata['name'] != 'Today' ) ? '#f44336' : '#2196F3', name : hdata['name'],
+                            startDate   : new Date(hdata['startYear'], hdata['startMonth'] - 1, hdata['startDay']),
+                            endDate     : new Date(hdata['endYear'], hdata['endMonth'] - 1, hdata['endDay']),
+                        };
+                        calendar_data.push(single_data);
+                    }
+                    setup_calendar(calendar_data);
+                },
+            });
+        });
+
+        {% if user_company %}
+        $("#company").val('{{user_company.id}}').trigger("change");
+        {% endif %}
+
+    });
+</script>
+{% endblock %}

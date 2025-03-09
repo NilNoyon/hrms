@@ -1,0 +1,154 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% block page_title %}Holiday Management{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .custom-control-label::before, .custom-control-label::after {
+        top: 0.1rem !important;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card mb-0">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 align-self-center">
+                <h4 class="text-themecolor mb-0">Holiday Management</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body py-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'holiday' %}active{% endif %}" data-toggle="tab" href="#holiday" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-home"></i></span> 
+                    <span class="hidden-xs-down"> List </span>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'holiday_update' %}active{% endif %}" data-toggle="tab" href="#holiday_update" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
+                    <span class="hidden-xs-down"> Setup </span>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'holiday_setup' %}active{% endif %}" data-toggle="tab" href="#holiday_setup" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
+                    <span class="hidden-xs-down"> Entry </span>
+                </a>
+            </li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane custom-height {% if tab_name == 'holiday' %}active{% endif %}" role="tabpanel" id="holiday">
+                {% include 'hr/holiday/list.html' %}
+            </div>
+            <div class="tab-pane custom-height {% if tab_name == 'holiday_update' %}active{% endif %}" role="tabpanel" id="holiday_update">
+                <form class="floating-labels p-4" method="post" id="form" action="{{ haction_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Company">
+                            <option value="">Company</option>
+                            {% for c in company_list %}
+                            <option value="{{c.id}}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="holiday_update"></div>
+                </form>
+            </div>
+            <div class="tab-pane custom-height {% if tab_name == 'holiday_setup' %}active{% endif %}" role="tabpanel" id="holiday_setup">
+                {% include 'hr/holiday/setup.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+
+        $(".card-table").DataTable({responsive: true});
+        
+        $('.singledate').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: false,
+            opens: "left",
+            locale: { format: 'DD/MM/YYYY' },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY'));
+            $(this).parent().addClass("focused");
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+
+        date_range_picker('.datepicker');
+
+        {% comment %} Delete {% endcomment %}
+        $('body').on('click','.delete_btn', function(e){
+            e.preventDefault();
+            Swal.fire({
+                text                : 'Do you want to delete this from list?',
+                type                : 'question',
+                confirmButtonText   : 'Yes',
+                confirmButtonColor  : "#00c292",
+                showCancelButton    : true,
+                cancelButtonText    : 'No',
+                cancelButtonColor   : "#e46a76",
+                reverseButtons      : false
+            }).then((result) => {
+                if(result.value){
+                    window.location.href = $(this).data('url')
+                }
+            });
+        });
+        {% comment %} Delete {% endcomment %}
+
+        $("body").on("select2:select", "#company", function(){
+            $.ajax({
+                url : "{% url 'hr:get_holiday_company_data' %}",
+                type: "POST", dataType: 'html', 
+                data: { company_id:$(this).val() },
+                success: function (data) {
+                    $(".holiday_update").html(data);
+
+                    // Switchery
+                    $('.switchery').remove(); 
+                    var elems = Array.prototype.slice.call(document.querySelectorAll('#holiday .js-switch'));
+                    elems.forEach(function(html) {
+                        var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
+                    });
+                    date_range_picker('#holiday .datepicker')
+                }
+            });
+        });
+    });
+
+    function date_range_picker(selector=''){
+        $(selector).daterangepicker({
+            autoUpdateInput: false,
+            showDropdowns: true,
+            opens: "left",
+            locale: { format: 'DD/MM/YYYY' }
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + " - " + picker.endDate.format('DD/MM/YYYY'));
+            $(this).parent().addClass("focused");
+            var duration = moment.duration((picker.endDate).diff(picker.startDate));
+            $(this).closest('td').siblings(".num_days").text(duration.days() + 1);
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+            $(this).closest('td').siblings(".num_days").text('');
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,276 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block page_title %}
+  Apprisal Requests List
+{% endblock %}
+
+{% block add_css %}
+  <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet" />
+  <style>
+    #employeeModal table th,
+    #employeeModal table td {
+      padding: 5px 10px !important;
+      position: relative;
+    }
+    small.error-label {
+      top: 0px;
+      right: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="card border-danger">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-md-12 align-self-center">
+          <h4 class="text-themecolor mb-0">Apprisal Requests List</h4>
+        </div>
+      </div>
+    </div>
+    <div class="card-body pt-0">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#approval_pending_list" role="tab">Pending List</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#approved_list" role="tab">Approved List</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#rejected_list" role="tab">Rejected List</a>
+        </li>
+      </ul>
+      <div class="tab-content tabcontent-border">
+        <div class="tab-pane p-20 active" id="approval_pending_list" role="tabpanel">
+          <table id="approval-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+            <thead>
+              <tr class="text-center">
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Designation</th>
+                <th>Last Appraisal</th>
+                <th>Status</th>
+                <th>Created at</th>
+                <th>Approve / Reject</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in pending_appraisals %}
+                <tr class="text-center">
+                  <td>{{ data.appraisee.personal.employee_id }}</td>
+                  <td>{{ data.appraisee.name }}</td>
+                  <td>{{ data.appraisee.designation.name }}</td>
+                  <td>{{ data.last_date_of_appraisal|date:'d-M-Y' }}</td>
+                  <td>{{ data.status.title }}</td>
+                  <td>{{ data.created_at|date:'d-M-Y g:i A' }}</td>
+                  <td width="15%">
+                    <button type="button" class="btn btn-link btn-approve text-success" data-id="{{ data.id }}" data-toggle="modal" data-target="#employeeModal"><span class="icon h4"><i class="ti-check-box"></i></span></button>
+                    <a href="javascript:void(0);" class="btn btn-link text-danger reject-btn" data-id="{{ data.id }}"><span class="icon h4" data-id="{{data.id}}"><i class="far fa-window-close"></i></span></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane p-20" id="approved_list" role="tabpanel">
+          <table id="approved-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Last Appraisal Date</th>
+                <th>Total Points</th>
+                <th>Status</th>
+                <th>Created at</th>
+                <th>Approved at</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in approved_appraisals %}
+                <tr>
+                  <td>{{ data.appraisee.personal.employee_id }}</td>
+                  <td>{{ data.appraisee.name }}</td>
+                  <td>{{ data.last_date_of_appraisal|date:'d-M-Y' }}</td>
+                  <td>{{ data.grand_total|floatformat:0 }}</td>
+                  <td>{{ data.status.title }}</td>
+                  <td>{{ data.created_at|date:'d-M-Y g:i A' }}</td>
+                  <td>{{ data.updated_at|date:'d-M-Y g:i A' }}</td>
+                  <td class="text-center">
+                    <button type="button" class="h4 btn btn-link btn-view text-success" data-id="{{ data.id }}" data-toggle="modal" data-target="#employeeModal"><span class="icon"><i class="ti-eye"></i></span></button>
+                    <a class="h4 btn btn-link text-warning" target="_blank" href="{% url 'hr:appraisal_print' data.id %}"><span class="icon"><i class="ti-printer"></i></span></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane p-20" id="rejected_list" role="tabpanel">
+          <table id="rejected-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Last Appraisal Date</th>
+                <th>Total Points</th>
+                <th>Created at</th>
+                <th>Rejected at</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in rejected_appraisals %}
+                <tr>
+                  <td>{{ data.appraisee.personal.employee_id }}</td>
+                  <td>{{ data.appraisee.name }}</td>
+                  <td>{{ data.last_date_of_appraisal|date:'d-M-Y' }}</td>
+                  <td>{{ data.grand_total|floatformat:0 }}</td>
+                  <td>{{ data.created_at|date:'d-M-Y g:i A' }}</td>
+                  <td>{{ data.updated_at|date:'d-M-Y g:i A' }}</td>
+                  <td class="text-center">
+                    <button type="button" class="h4 btn btn-link btn-view text-success" data-id="{{ data.id }}" data-toggle="modal" data-target="#employeeModal"><span class="icon"><i class="ti-eye"></i></span></button>
+                    <a class="h4 btn btn-link text-warning" target="_blank" href="{% url 'hr:appraisal_print' data.id %}"><span class="icon"><i class="ti-printer"></i></span></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title font-weight-bold" id="employeeModalLabel">Performance Appraisal</h3>
+          <button type="button" class="btn btn-link text-danger btn-close" data-dismiss="modal" aria-label="Close"><span class="icon"><i class="ti-close"></i></span></button>
+        </div>
+        <div class="modal-body">
+          <form class="floating-labels" method="post" id="form">
+            {% csrf_token %} 
+            <input type="hidden" name="appraisal_id" id="appraisal_id">
+            <input type="hidden" name="cahirman_user" value="{{chairman_user|yesno}}">
+            <div id="employee-data"></div>
+            <div id="form-data">
+              {% if not chairman_user %}
+              <div class="row mt-4">
+                <div class="col-md-4">
+                  <div class="form-group">
+                      <input class="form-control single_date" id="effective_from_date" required name="effective_from_date">
+                      <span class="bar"></span>
+                      <label for="effective_from_date">Effective From Date :</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <input class="form-control" id="increment_amount" name="increment_amount" required >
+                        <span class="bar"></span>
+                        <label for="increment_amount">Increment Amount :</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <input class="form-control" id="promoted_as" name="promoted_as">
+                        <span class="bar"></span>
+                        <label for="promoted_as">New Designation :</label>
+                    </div>
+                </div>
+              </div>
+              {% endif %}
+              <div class="form-group mt-3">
+                <textarea rows="2" class="form-control bg-transparent mb-0" id="comments" name="comments" required></textarea>
+                <span class="bar"></span>
+                <label for="comments">Comments :</label>
+              </div>
+              <div class="row">
+                <div class="col-md-3 ml-auto">
+                  <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success"><span class="btn-label"><i class="fa fa-check"></i></span> Approve</button>
+                </div>
+                <div class="col-md-3">
+                  <a id="modal-btn-reject" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-danger text-white reject-btn" data-id=""><span class="btn-label"><i class="fa fa-close"></i></span> Reject</a>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_js %}
+  <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+  <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+  <script>
+    $('.single_date').daterangepicker({
+        singleDatePicker: true,
+        autoUpdateInput: false,
+        parentEl: "#employeeModal .modal-body",
+        locale: { format: 'DD/MM/YYYY' },
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+    });
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      $($.fn.dataTable.tables(true)).DataTable().columns.adjust()
+    })
+    $('.btn-approve').click(function () {
+        let id = $(this).data('id');
+        $.ajax({ type: "POST", data: { id:id },
+            url : "{% url 'hr:get_appraisal_data' %}",
+            success: function (data) { 
+                $("#appraisal_id").val(id);
+                $('#employee-data').html(data);
+                $("#form-data").show();
+                $("#modal-btn-reject").attr('data-id', id)
+                $('#employeeModal').modal('show');
+            },
+         });
+    })
+    $('.btn-view').click(function () {
+        let id = $(this).data('id');
+        $.ajax({ type: "POST", data: { id:id },
+            url : "{% url 'hr:get_appraisal_data' %}",
+            success: function (data) { 
+                $("#appraisal_id").val(id);
+                $('#employee-data').html(data);
+                $("#form-data").hide();
+                $('#employeeModal').modal('show');
+            },
+         });
+    })
+    $("body").on("click", ".reject-btn", function(){
+      let id = $(this).data('id');
+      $('#employeeModal').modal('hide');
+      Swal.fire({
+          text: "Do you want to reject this Appraisal?",
+          input: 'textarea',
+          inputPlaceholder: "Write the reason why you are rejecting...",
+          showCancelButton: true,
+          confirmButtonText: 'Submit',
+          confirmButtonColor: "#00c292",
+          cancelButtonText: 'Cancel',
+          cancelButtonColor: "#e46a76",
+          reverseButtons: false,
+      }).then((result) => {
+          if (result.value) {
+              $.ajax({
+                  type    : "POST",
+                  url     : '{% url "hr:reject_appraisal" %}',
+                  data    : { "notes" : result.value, 'id':id },
+                  success : function (data) {
+                      Swal.fire({
+                          type: 'success',
+                          title: 'Successfully Rejected',
+                          showConfirmButton: false
+                      })
+                      setTimeout(function(){ location.reload(); }, 2000);
+                  }
+              });
+          }
+      });
+    })
+  </script>
+{% endblock %}

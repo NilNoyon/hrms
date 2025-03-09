@@ -1,0 +1,34 @@
+<div class="table-responsive pt-4 px-2">
+    <table class="table table-border table-striped table-vcenter" id="holiday" style="width:100%">
+        <thead>
+            <tr class="text-center">
+                <th>SL.</th>
+                <th>Company</th>
+                <th>Title</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Num of Days</th>
+                <th>Declared By</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for holiday in holiday_list %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td>{{ holiday.company.short_name }}</td>
+                <td>{{ holiday.name }}</td>
+                <td>{{ holiday.start_date|date:'d/M/Y'|upper }}</td>
+                <td>{{ holiday.end_date|date:'d/M/Y'|upper }}</td>
+                <td class="text-center">{{ holiday.num_of_days }}</td>
+                <td>{{ holiday.created_by.name }}</td>
+                <td>{{ holiday.updated_by.name }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td class="text-center font-weight-bold text-danger" colspan="7">Holidays Not Declared Yet!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,5 +1,5 @@
 {% extends "admin.html" %}
-{% load sc_filters %}
+{% load general_filters %}
 
 {% block page_title %}Dashboard{% endblock %}
 
@@ -223,7 +223,7 @@
                             <p>You're logged in as {{request.session.role_text}}</p>
                         </div>    
                 
-                        {% if request.session.role_text == 'Admin' or request.session.role_text == 'Super Admin' or request.session.employee_id == 'EC00007179' %}
+                        {% if request.session.role_text == 'Admin' or request.session.role_text == 'Super Admin' %}
                         <div class="flex-body bg-white mt-3 mb-1">
                             <div class="flex-child-home" >
                            

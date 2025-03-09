@@ -1,0 +1,302 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Shift{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Shift List</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr class="text-center">
+                                    {% comment %} <th class="d-sm-table-cell">SL.</th> {% endcomment %}
+                                    <th>Shift-ID</th>
+                                    {% comment %} <th>Location</th> {% endcomment %}
+                                    <th>Name</th>
+                                    <th>Opening</th>
+                                    <th>Start</th>
+                                    <th>Grace</th>
+                                    <th>Buffer</th>
+                                    <th>End</th>
+                                    <th>Status</th>
+                                    <th class="d-sm-table-cell" style="width:100px;"></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for data in object_list %}
+                                    <tr class="text-center">
+                                        {% comment %} <td class="">{{ forloop.counter }}</td> {% endcomment %}
+                                        <td>{{ data.shift_id }}</td>
+                                        {% comment %} <td class="text-left">{{ data.company.short_name }}/{{ data.location|default_if_none:"" }}</td> {% endcomment %}
+                                        <td>{{ data.name }}</td>
+                                        <td>{{ data.day_start|date:'h:i A'|upper }}</td>
+                                        <td>{{ data.start_time|date:'h:i A'|upper }}</td>
+                                        <td>{{ data.grace_time|date:'h:i A'|upper }}</td>
+                                        <td>{{ data.buffer_time|date:'h:i A'|upper }}</td>
+                                        <td>{{ data.end_time|date:'h:i A'|upper }}</td>
+                                        <td>
+                                            <label class="mx-auto mb-0">
+                                                <input type="checkbox" data-id="{{data.id}}" data-type="status" {% if data.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                                    class="js-switch shift-update-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </td>
+                                        <td class="text-left">
+                                            <a class="h4 m-r-10 m-l-10 text-success" href="{% url 'hr:shift_update' data.id %}">
+                                                <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                            </a>
+                                            <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:shift_delete' data.id %}">
+                                                <span class="icon"><i class="ti-trash"></i></span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:shift_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        {% comment %} <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="company">Company</label>
+                                    <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required>
+                                        <option value="" disabled selected></option>
+                                        {% for c in company_list %}
+                                        <option value="{{c.id}}" {% if instance.company_id == c.id %}selected{% endif%}>{{c.short_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="location">Location</label>
+                                    <select class="form-control text-capitalize select2" name="location" id="location" data-title="Location" required>
+                                        <option value="" disabled selected></option>
+                                        {% for l in location_list %}
+                                        <option value="{{l.id}}" {% if office.location_id == l.id %} selected {% endif %}>{{l.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div> {% endcomment %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" data-title="Shift ID" id="shift_id" name="shift_id" value="{{ instance.shift_id }}" required>
+                                    <span class="bar"></span>
+                                    <label for="shift_id">Shift ID</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" data-title="Shift" id="name" name="name" value="{{ instance.name }}" required>
+                                    <span class="bar"></span>
+                                    <label for="name">Shift</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="day_start">Day Start</label>
+                                    <input type="text" class="form-control timeonly open-left" id="day_start" name="day_start" 
+                                        value="{{instance.day_start|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="grace_time">Grace Time</label>
+                                    <input type="text" class="form-control timeonly open-left" id="grace_time" name="grace_time" 
+                                        value="{{instance.grace_time|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="start_time">Start Time</label>
+                                    <input type="text" class="form-control timeonly" id="start_time" name="start_time" 
+                                        value="{{instance.start_time|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="buffer_time">Buffer Time</label>
+                                    <input type="text" class="form-control timeonly" id="buffer_time" name="buffer_time" 
+                                        value="{{instance.buffer_time|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="end_time">End Time</label>
+                                    <input type="text" class="form-control timeonly open-left" id="end_time" name="end_time" 
+                                        value="{{instance.end_time|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status" class="mt-2">
+                                    <input type="checkbox" id="status" name="status" class="js-switch" {% if instance.status.title == "Active" or not instance %}checked{% endif %} data-color="#009efb" data-size="mini"/> Status
+                                </label>
+                            </div>
+                        </div>
+                        {% comment %} <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ot_start_time">OT Start Time</label>
+                                    <input type="text" class="form-control timeonly" id="ot_start_time" name="ot_start_time"
+                                        value="{{instance.ot_start_time|date:"h:i A"}}" >
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ot_end_time">OT End Time</label>
+                                    <input type="text" class="form-control timeonly open-left" id="ot_end_time" name="ot_end_time"
+                                        value="{{instance.ot_end_time|date:"h:i A"}}" >
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                        </div> {% endcomment %}
+                        <div class="">
+                            <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        $('.timeonly').daterangepicker({
+            showDropdowns: true,
+            timePicker: true,
+            timePicker24Hour: false,
+            timePickerIncrement: 1,
+            timePickerSeconds: false,
+            singleDatePicker:true,
+            autoUpdateInput : false,
+            locale: { format: 'hh:mm A' }
+        });
+        $('.timeonly.open-left').daterangepicker({
+            opens: "left",
+            timePicker: true,
+            showDropdowns: true,
+            singleDatePicker:true,
+            timePickerIncrement: 1,
+            timePicker24Hour: false,
+            autoUpdateInput : false,
+            timePickerSeconds: false,
+            locale: { format: 'hh:mm A' }
+        });
+        
+        $('.timeonly').on('show.daterangepicker', function (ev, picker) {
+            picker.container.find(".calendar-table").hide();
+            $(this).parent().addClass("focused");
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+            $(this).parent().addClass("focused");
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            picker.element.val('');
+            (this).parent().removeClass("focused");
+        });
+
+
+        {% if instance %}
+            $("#location").val({{instance.location_id}}).trigger("change")
+        {% endif %}
+    });
+    $(".card-table").DataTable({"ordering": false});
+
+    {% comment %} Delete Shift {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this Shift from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+
+    $('body').on('click', '.shift-update-switch', function (e) {
+        var id     = $(this).data('id');
+        $.ajax({
+           url : "{% url 'hr:shift_update_status' %}",
+           type: "POST", dataType: 'json', data: { id:id },
+           success: function (data) {
+               toasterMsg("success", "This Shift successfully updated!", 5000);
+           },
+        });
+    });
+    {% comment %} Delete Shift {% endcomment %}
+</script>
+{% endblock %}
+
+
+

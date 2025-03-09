@@ -595,7 +595,7 @@ class PFMonthlyContribution(CoreActionWithUpdate):
      is_round                  = models.BooleanField(default=False, null=True, blank=True)
      Voucher_no                = models.CharField(max_length=20, null=True , blank=True)
      emp_percent               = models.DecimalField(max_digits=50,decimal_places=2)
-     company_percent           = models.DecimalField(max_digits=50,decimal_places=2)
+     branch_percent            = models.DecimalField(max_digits=50,decimal_places=2)
      gross_salary              = models.IntegerField(default="")
      contribution_amount       = models.IntegerField(default="")
      entry_date                = models.DateTimeField(auto_now_add=False, null=True, blank=True)

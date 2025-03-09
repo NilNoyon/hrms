@@ -1,0 +1,501 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load filter %}
+
+{% block page_title %}Helpdesk {% endblock %}
+
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Helpdesk</h4>
+      </div>
+    </div>
+  </div>
+<div class="card-body pt-0">
+    <form class="floating-labels custom-color rounded-lg p-3" method="post" id="issueForm" enctype="multipart/form-data" action="{% url 'desk:issue_dashboard' %}" >
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-7">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <select class="form-control text-capitalize select2 type" name="fo" id="fo" data-title="Fabric Order" >
+                  <option value="" disabled selected></option>
+                  {% for fo_no in fabric_order_list %}
+                      <option value="{{ fo_no.fabric_order_no }}"> {{fo_no.fabric_order_no}}</option>
+                  {% endfor %}
+                  
+              </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <select class="form-control text-capitalize select2 type" name="taged_user" id="taged_user" data-title="Send Notification To" >
+                  <option value="" disabled selected></option>
+                  {% for user in taged_user %}
+                      <option value="{{ user.id }}"> {{user.name}}({{user.employee_id}})({{user.department}})</option>
+                  {% endfor %}
+                  
+              </select>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="description" class="form-label">Please describe your problem in details</label>
+                <textarea rows="2" class="form-control" id="description" name="description" required></textarea>
+                <span class="bar"></span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="button-group ">
+                <button type="button" class="btn btn-sm waves-effect waves-light btn-rounded btn-success mx-auto flo" id="btnIssueSubmit" style="width:70%;">
+                  <span class="btn-label"><i class="fa fa-check"></i></span>
+                  Submit
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              
+            </div>
+            
+            
+          </div>
+        </div>
+        <div class="col-md-5">
+            <div class="form-group mb-0" >
+              <input type="file"  class="dropify" name="attachment" id="attachment" data-default-file="" data-height="150" />
+              <!-- <p class="text-center">Attachment</p> -->
+            </div>
+          
+        </div>
+      </div>
+    </form>
+  
+    {% if request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+      <ul class="nav nav-tabs mt-3" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#pending" role="tab">Pending <span class="badge badge-danger py-0 rounded-pill ml-2">{{ pending_issue_list|length }}</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#my_issue" role="tab">Self Desk {% if my_issue_list|length > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ my_issue_list|length }}</span>{% endif %}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#assigned_issue" role="tab">All Assigned {% if assigned_issue_list|length > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ assigned_issue_list|length }}</span>{% endif %}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#solved_issue" role="tab">All Solved {% if solved_issue_list|length > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ solved_issue_list|length }}</span>{% endif %}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#textile" role="tab">Textile {% if textile_issue_list|length > 0 %}<span class="badge badge-danger py-0 rounded-pill ml-2">{{ textile_issue_list|length }}</span>{% endif %}</a>
+        </li>
+      </ul>
+      <!-- Tab panes -->
+  <div class="tab-content tabcontent-border">
+        <div class="tab-pane p-20 active" id="pending" role="tabpanel">
+            <table id="pending_table" class="table table-striped table-vcenter">
+                <thead>
+                    <tr>
+                      <th class="d-sm-table-cell">Issue ID</th>
+                      <th class="d-md-table-cell" style="width:40%">Description</th>
+                      <th class="d-md-table-cell">Issuer</th>
+                      <th class="d-md-table-cell">Issue Date</th>
+                      <th class="d-lg-table-cell">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for issue in pending_issue_list %}
+                        <tr id="row_{{issue.id}}">
+                            <td class="">{{ issue.ref }}</td>
+                            <td class="">
+                              <span class="issue_desc_{{issue.id}}_show">{% if issue.fabric_order_no %}({{issue.fabric_order_no}}) {% endif %}{{ issue.description|truncatewords:10 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|length > 50 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('issue_desc_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                              <span class="issue_desc_{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('issue_desc_{{issue.id}}');" style="color:blue;"></i></span>
+                            </td>
+                            <td class="">
+                              <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer_id}}" class="user_info text-info" data-target="#userModal">
+                                {{ issue.issuer }}</a>
+                            </td>
+                            <td>{{ issue.created_at }}</td>
+                            <td>
+                              <div id="btnResolve_{{issue.id}}">
+                                <button type="submit" id="start_{{issue.id}}" class="btn waves-effect waves-light btn-circle btn-outline-info" onClick="issueResolve('{{issue.id}}','3')"><i title="Start" class="fas fa-play"></i>
+                                </button>
+                              </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+      
+        <div class="tab-pane p-20" id="my_issue" role="tabpanel">
+            <table id="my_issue_table" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th class="d-sm-table-cell">Issue ID</th>
+                    <th class="d-sm-table-cell">Description</th>
+                    <th class="d-sm-table-cell">Issuer</th>
+                    <th class="d-sm-table-cell">Issue Date</th>
+                    <th class="d-sm-table-cell">Assigned Date</th>
+                    <th class="d-sm-table-cell">Feedback Note</th>
+                    <th class="d-sm-table-cell">Action</th>
+                  </tr>
+                </thead>
+              <tbody>
+                  {% for issue in my_issue_list %}
+                      <tr id="row_{{issue.id}}">
+                          <td>{{ issue.ref  }}</td>
+                          <td>
+                            <span class="issue_desc_{{issue.id}}_show">{% if issue.fabric_order_no %}({{issue.fabric_order_no}}) {% endif %}{{ issue.description|truncatechars:50 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|length > 50 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('issue_desc_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                            <span class="issue_desc_{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('issue_desc_{{issue.id}}');" style="color:blue;"></i></span>
+                          </td>
+                          <td>
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer_id}}" class="user_info text-info" data-target="#userModal">
+                              {{ issue.issuer }}</a>
+                          </td>
+                          <td>{{ issue.created_at }}</td>
+                          <td id="assigned_date_{{issue.id}}">{{ issue.assigned_at }}</td>
+                          <td id="resolver_note_{{issue.id}}">
+                            {% if issue.resolver_note %}
+                              <span class="resolver_note_{{issue.id}}_show"><b>Note: </b>{{ issue.resolver_note|truncatewords:8 }} {% if issue.resolver_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('resolver_note_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                              <span class="resolver_note_{{issue.id}}_hide" style="display:none"><b>Note: </b>{{ issue.resolver_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('resolver_note_{{issue.id}}');" style="color:blue;"></i></span>
+                            {% elif issue.feedback_note %}
+                              <span class="feedback_note_{{issue.id}}_show"><b>Note: </b>{{ issue.feedback_note|truncatewords:8 }} {% if issue.feedback_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('feedback_note_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                              <span class="feedback_note_{{issue.id}}_hide" style="display:none"><b>Note: </b>{{ issue.feedback_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('feedback_note_{{issue.id}}');" style="color:blue;"></i></span>
+                            {% else %}
+                              N/A
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if issue.status == "2" %}
+                              <div id="btnResolve_{{issue.id}}">
+                                <button type="submit" id="start_{{issue.id}}" class="btn waves-effect waves-light btn-rounded btn-outline-warning" onClick="issueResolve('{{issue.id}}','3')"><i title="Start" class="ti-control-play"></i>
+                                </button>
+                              </div>
+                            {% elif issue.status == "3" %}
+                              {% if issue.issuer.email %}<a href="https://teams.microsoft.com/l/chat/0/0?users={{ issue.issuer.email }}" target="_show" class="btn waves-effect waves-light btn-circle btn-outline-info" style="color:blue; padding-left: 5px;padding-top: 6px;vertical-align: middle;" title="Teams"><img src="/assets/icons/teams.svg" alt="Teams" width="25" height="25"></a>{% endif %}
+                              <button type="submit" class="btn waves-effect waves-light btn-rounded btn-outline-info" onClick="issueFeedbackModal('{{issue.id}}')">Feedback</button>
+                              {% if not issue.da_status %}
+                              <a class="btn waves-effect waves-light btn-rounded btn-outline-info" target="_blank" href="{% url 'desk:device_assessment_entry' %}?issue_ref={{issue.ref}}">Device Assessment</a>
+                              {% endif %}
+                              <button type="submit" class="btn waves-effect waves-light btn-circle btn-outline-success" onClick="issueCompleteModal('{{issue.id}}')"><i title="Done" class="fas fa-check"></i></button>
+                              <button onclick="issueCancelModal('{{issue.id}}')" class="btn waves-effect waves-light btn-rounded btn-outline-warning">Cancel</button>
+                            {% else %}
+                              {{ issue.get_status_display }}
+                            {% endif %}
+                          </td>
+                      </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+        </div>
+        <div class="tab-pane p-20" id="assigned_issue" role="tabpanel">
+            <table id="assigned_issue_table" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th class="d-sm-table-cell">Issue ID</th>
+                    <th class="d-md-table-cell" style="width:40%">Description</th>
+                    <th class="d-md-table-cell">Issuer</th>
+                    <th class="d-md-table-cell">Issue Date</th>
+                    <th class="d-md-table-cell">Assigned Date</th>
+                    <th class="d-md-table-cell">Assigned</th>
+                  </tr>
+                </thead>
+              <tbody>
+                  {% for issue in assigned_issue_list %}
+                      <tr id="row_{{issue.id}}">
+                          <td class="">{{ issue.ref  }}</td>
+                          <td class="">
+                            <span class="issue_desc_{{issue.id}}_show">{% if issue.fabric_order_no %}({{issue.fabric_order_no}}) {% endif %}{{ issue.description|truncatechars:50 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|length > 50 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('issue_desc_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                            <span class="issue_desc_{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('issue_desc_{{issue.id}}');" style="color:blue;"></i></span>
+                          </td>
+                          <td class="">
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer_id}}" class="user_info text-info" data-target="#userModal">
+                              {{ issue.issuer }}</a>
+                          </td>
+                          <td>{{ issue.created_at }}</td>
+                          <td>{{ issue.assigned_at }}</td>
+                          <td>
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.assigned_to}}" class="user_info text-info" data-target="#userModal">
+                              {{ issue.assigned_to_name }}</a>
+                        </td>
+                      </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+        </div>
+        <div class="tab-pane p-20" id="solved_issue" role="tabpanel">
+            <table id="solved_issue_table" class="table table-border card-table table-vcenter scrollerDT" data-url="{% url 'desk:get_issues_for_dataTable' %}">
+                <thead>
+                  <tr>
+                    <th class="d-sm-table-cell">Issue ID</th>
+                    <th class="d-md-table-cell" style="width:40%">Description</th>
+                    <th class="d-md-table-cell">Issuer</th>
+                    <th class="d-md-table-cell">Issue Date</th>
+                    <th class="d-md-table-cell">Solved Date</th>
+                    <th class="d-md-table-cell">Resolved Note</th>
+                    <th class="d-md-table-cell">Solved By</th>
+                  </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+        </div>
+        <div class="tab-pane p-20" id="textile" role="tabpanel">
+            <table id="textile_issue_table" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th class="d-sm-table-cell">Issue ID</th>
+                    <th class="d-sm-table-cell">Fabric Order No</th>
+                    <th class="d-md-table-cell" style="width:40%">Description</th>
+                    <th class="d-md-table-cell">Issuer</th>
+                    <th class="d-md-table-cell">Notify to</th>
+                    <th class="d-md-table-cell">Issue Date</th>
+                    <th class="d-md-table-cell">Solved Date</th>
+                    <th class="d-md-table-cell">Resolved Note</th>
+                    <th class="d-md-table-cell">Solved By</th>
+                  </tr>
+              </thead>
+              <tbody>
+                {% for issue in textile_issue_list %}
+                      <tr id="row_{{issue.id}}">
+                          <td class="">{{ issue.ref  }}</td>
+                          <td class="">{% if issue.fabric_order_no %}{{issue.fabric_order_no}} {% endif %}</td>
+                          <td class="">
+                            <span class="issue_desc_{{issue.id}}_show">{{ issue.description|truncatechars:50 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|length > 50 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('issue_desc_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                            <span class="issue_desc_{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('issue_desc_{{issue.id}}');" style="color:blue;"></i></span>
+                          </td>
+                          <td class="">
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer_id}}" class="user_info text-info" data-target="#userModal">
+                              {{ issue.issuer }}</a>
+                          </td>
+                          <td class="">
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.taged_to_id}}" class="user_info text-info" data-target="#userModal">
+                              {{ issue.taged_to }}</a>
+                          </td>
+                          <td>{{ issue.created_at }}</td>
+                          <td>{{ issue.resolved_at }}</td>
+                          <td>{{ issue.resolver_note }}</td>
+                          <td>
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.assigned_to}}" class="user_info text-info" data-target="#userModal">
+                              {{ issue.assigned_to_name }}</a>
+                        </td>
+                        
+
+                      </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+        </div>
+      {% else %}
+        <table id="issue_table" class="table table-striped table-vcenter">
+          <thead>
+              <tr>
+                <th class="d-sm-table-cell">Issue ID</th>
+                <th class="d-md-table-cell" style="width:40%">Description</th>
+                <th class="d-md-table-cell" >Raised By</th>
+                <th class="d-md-table-cell">Resolver</th>
+                <th class="d-md-table-cell">Feedback Note</th>
+                <th class="d-md-table-cell">Resolved Note</th>
+                <th class="d-md-table-cell">Issue Date</th>
+                <th class="d-lg-table-cell">Status</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for issue in my_issue_list %}
+                  <tr id="row_{{issue.id}}">
+                      <td class="">{{ issue.ref }}</td>
+                      <td class="">
+                        <span class="issue_desc_{{issue.id}}_show">{% if issue.fabric_order_no %}({{issue.fabric_order_no}}){% endif %} {{ issue.description|truncatechars:50 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|length > 50 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('issue_desc_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                        <span class="issue_desc_{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('issue_desc_{{issue.id}}');" style="color:blue;"></i></span>
+                      </td>
+                      <td class="">
+                        
+                          <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer}}" class="user_info text-info" data-target="#userModal">
+                            {{ issue.issuer.name }} ({{issue.issuer.department}})</a>
+                       
+                      </td>
+                      <td class="">
+                        {% if issue.status == "1" %}
+                          N/A
+                        {% else %}
+                          <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.assigned_to}}" class="user_info text-info" data-target="#userModal">
+                            {{ issue.assigned_to_name }}</a>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if issue.feedback_note %}
+                        <span class="feedback_note_{{issue.id}}_show">{{ issue.feedback_note|truncatewords:8 }} {% if issue.feedback_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('feedback_note_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                        <span class="feedback_note_{{issue.id}}_hide" style="display:none">{{ issue.feedback_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('feedback_note_{{issue.id}}');" style="color:blue;"></i></span>
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </td>
+                      <td id="resolver_note_{{issue.id}}">
+                        {% if issue.resolver_note %}
+                          <span class="resolver_note_{{issue.id}}_show"><b>Note: </b>{{ issue.resolver_note|truncatewords:8 }} {% if issue.resolver_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('resolver_note_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                          <span class="resolver_note_{{issue.id}}_hide" style="display:none"><b>Note: </b>{{ issue.resolver_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('resolver_note_{{issue.id}}');" style="color:blue;"></i></span>
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </td>
+                      <td>{{ issue.created_at }}</td>
+                      <td>
+                        {% if issue.status == "2" or issue.status == "3" %} 
+                          {{ issue.assigned_to_name.name }} Assgned at {{ issue.assigned_at }}
+                        {% elif issue.status == "1" %} 
+                          {{ issue.get_status_display }}
+                        {% elif issue.status == "4" %} 
+                          {{ issue.assigned_to_name.name }} Solved at {{ issue.resolved_at }}
+                        {% endif %}
+                      </td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+  </div>
+</div>
+
+
+<div class="modal fade" id="complete" tabindex="-1" role="dialog" aria-labelledby="complete" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h4 class="modal-title" id="issueModalTitle">Issue Complete</h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body">
+                            <div class="row floating-labels mt-1">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label for="note" class="form-label">Note</label>
+                                    <textarea rows="2" class="form-control" id="note" name="resolver_note"></textarea>
+                                    <span class="bar"></span>
+                                  </div>
+                                  <div id="btnIssueDone" class="text-center"></div>                                
+                                </div>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+
+{% include 'inc/scrollerDT.html' %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'dist/js/desk.js' %}?v=1.2"></script>
+<script>
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+      $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+  });
+  let table = $('#issue_table,#pending_table').DataTable({
+              dom: "<'row top'<'col-md-8 heading'><'col-md-4 mt-2'f>>t<'row'<'col-4'><'col-8'p>>",
+              ordering: true,
+              paging: false,
+              pageLength: 50,
+              lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+              responsive: true,
+              "order": [[ 4, "desc" ]],
+              fixedHeader: {
+                  header: false
+              },
+              language: {
+                  paginate: {
+                      previous: "<",
+                      next: ">",
+                  }
+              },
+              scrollY: '50vh'
+    });
+
+  $('#assigned_issue_table').DataTable({
+      dom: "<'row top'<'col-md-8 heading'><'col-md-4 mt-2'f>>t<'row'<'col-4'><'col-8'p>>",
+      ordering: true,
+      paging: false,
+      pageLength: 50,
+      lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+      responsive: true,
+      "order": [[ 4, "desc" ]],
+      // "order": [[ 4, "desc" ],[ 3, "desc" ]],
+      
+      fixedHeader: {
+          header: false
+      },
+      language: {
+          paginate: {
+              previous: "<",
+              next: ">",
+          }
+      },
+      scrollY: '50vh'
+  });
+  $('#textile_issue_table').DataTable({
+      dom: "<'row top'<'col-md-8 heading'><'col-md-4 mt-2'f>>t<'row'<'col-4'><'col-8'p>>",
+      ordering: true,
+      paging: false,
+      pageLength: 50,
+      lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+      responsive: true,
+      "order": [[ 4, "desc" ]],
+      // "order": [[ 4, "desc" ],[ 3, "desc" ]],
+      
+      fixedHeader: {
+          header: false
+      },
+      language: {
+          paginate: {
+              previous: "<",
+              next: ">",
+          }
+      },
+      scrollY: '50vh'
+  });
+
+  $('#my_issue_table').DataTable({
+      dom: "<'row top'<'col-md-8 heading'><'col-md-4 mt-2'f>>t<'row'<'col-4'><'col-8'p>>",
+      ordering: false,
+      paging: false,
+      pageLength: 50,
+      lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+      {% comment %} responsive: true, {% endcomment %}
+      // "order": [[ 4, "desc" ]],
+      // "order": [[ 4, "desc" ],[ 3, "desc" ]],
+      
+      fixedHeader: {
+          header: false
+      },
+      language: {
+          paginate: {
+              previous: "<",
+              next: ">",
+          }
+      },
+      scrollY: '50vh'
+  });
+  
+  // Reset Filter
+  $clone = $("#issue_filter").clone()
+  $("#issue_filter").remove();
+  $clone.appendTo(".heading");
+  $(".heading").children().show();
+  
+  $(document).ready(function() {
+      var method = '{{method_chk}}';
+      if(method == "post") window.location.href = "/helpdesk/";
+  });
+</script>
+{% endblock %}

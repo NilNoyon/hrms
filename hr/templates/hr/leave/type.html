@@ -1,0 +1,186 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Leave Type{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Leave Type List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Payable</th>
+                                    <th>Status</th>
+                                    <th>Created By</th>
+                                    <th>Lastly Updated By</th>
+                                    <th>Last Action</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave_type in object_list %}
+                                <tr>
+                                    <td class="">{{ forloop.counter }}</td>
+                                    <td>{{ leave_type.short_title }}</td>
+                                    <td>{{ leave_type.description|truncatechars:20 }}</td>
+                                    <td>
+                                        <label class="mx-auto">
+                                            <input type="checkbox" data-id="{{leave_type.id}}" data-type="status" {% if leave_type.payable %}checked{% endif %} name="status" 
+                                                class="js-switch leave-type-update-payable-switch" data-color="#009efb" data-size="mini" />
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label class="mx-auto">
+                                            <input type="checkbox" data-id="{{leave_type.id}}" data-type="status" {% if leave_type.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                                class="js-switch leave-type-update-switch" data-color="#009efb" data-size="mini" />
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <a href="#aboutModal" data-toggle="modal" data-id="{{ leave_type.created_by_id }}" class='user_info text-info' data-target="#userModal">{{ leave_type.created_by.name }}</a>
+                                    </td>
+                                    <td>
+                                        <a href="#aboutModal" data-toggle="modal" data-id="{{ leave_type.updated_by_id }}" class='user_info text-info' data-target="#userModal">{{ leave_type.updated_by.name }}</a>
+                                    </td>
+                                    <td>{{ leave_type.updated_at|date:'d-M-Y h:i A'|upper }}</td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:leave_type_update' leave_type.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:leave_type_delete' leave_type.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:leave_type_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" data-title="Title" id="short_title" name="short_title" value="{{ instance.short_title }}" required>
+                            <span class="bar"></span>
+                            <label for="short_title">Title</label>
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="3" class="form-control bg-transparent" id="description" name="description">{{ instance.description }}</textarea>
+                            <span class="bar"></span>
+                            <label for="description">Description</label>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="">
+                                        <input type="checkbox" name="payable" id="payable" class="js-switch" data-color="#009efb" 
+                                            data-size="mini" {% if instance.payable or not instance %}checked{% endif %} />
+                                        Payable
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="">
+                                        <input type="checkbox" name="status" id="status" class="js-switch" data-color="#009efb" 
+                                            data-size="mini" {% if instance.status.title == "Active" or not instance %}checked{% endif %} />
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mt-4">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script>
+    $(".card-table").DataTable({});
+
+    {% comment %} Delete HRLeaveType {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this HRLeaveType from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+    {% comment %} Delete HRLeaveType {% endcomment %}
+    
+    $('body').on('click', '.leave-type-update-switch', function (e) {
+        var id     = $(this).data('id');
+        $.ajax({
+           url : "{% url 'hr:leave_type_update_status' %}",
+           type: "POST", dataType: 'json', data: { id:id },
+           success: function (data) {
+               toasterMsg("success", "This Holiday successfully updated!", 5000);
+           },
+        });
+    });
+    
+    $('body').on('click', '.leave-type-update-payable-switch', function (e) {
+        var id     = $(this).data('id');
+        $.ajax({
+           url : "{% url 'hr:leave_type_update_payable_status' %}",
+           type: "POST", dataType: 'json', data: { id:id },
+           success: function (data) {
+               toasterMsg("success", "This Leave Type payable status successfully updated!", 5000);
+           },
+        });
+    });
+</script>
+{% endblock %}
+

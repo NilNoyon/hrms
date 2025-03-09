@@ -1,0 +1,196 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Leave Policy{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Leave Policy List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    {% comment %} <th class="d-sm-table-cell">SL.</th> {% endcomment %}
+                                    <th>Company</th>
+                                    <th>Leave</th>
+                                    <th>E.Type</th>
+                                    <th>E.Category</th>
+                                    <th>Allocated</th>
+                                    <th>Last Action by</th>
+                                    <th>Status</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in object_list %}
+                                <tr>
+                                    {% comment %} <td class="">{{ forloop.counter }}</td> {% endcomment %}
+                                    <td>{{ leave.company.short_name }}</td>
+                                    <td>{{ leave.leave_type.short_title }}</td>
+                                    <td>{{ leave.employee_type.value }}</td>
+                                    <td>{{ leave.employee_category.value }}</td>
+                                    <td class="text-right">{{ leave.allocated_days }} day/s</td>
+                                    <td>
+                                        {% if leave.updated_by_id %}
+                                        <a href="#aboutModal" data-toggle="modal" data-id="{{ leave.updated_by_id }}" class='user_info text-info' data-target="#userModal">{{ leave.updated_by.name }}</a>
+                                        {% else %}
+                                        <a href="#aboutModal" data-toggle="modal" data-id="{{ leave.created_by_id }}" class='user_info text-info' data-target="#userModal">{{ leave.created_by.name }}</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <label class="mx-auto">
+                                            <input type="checkbox" data-id="{{leave.id}}" data-type="status" {% if leave.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                                class="js-switch leave-master-update-switch" data-color="#009efb" data-size="mini" />
+                                        </label>
+                                    </td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:leave_master_update' leave.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        {% comment %} <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:leave_master_delete' leave.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a> {% endcomment %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:leave_master_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required />
+                                <option value="" disabled selected></option>
+                                {% for company in companies %}
+                                <option value="{{company.id}}" {% if instance.company_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="leave_type">Leave Type</label>
+                            <select class="form-control text-capitalize select2" name="leave_type" id="leave_type" data-title="Leave Type" required />
+                                <option value="" disabled selected></option>
+                                {% for l in leave_types %}
+                                <option value="{{l.id}}" {% if instance.leave_type_id == l.id %}selected{% endif%}>{{l.short_title}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee_type">Employee Type</label>
+                            <select class="form-control text-capitalize select2" name="employee_type" id="employee_type" data-title="Employee Type" required />
+                                <option value="" disabled selected></option>
+                                {% for et in employee_types %}
+                                <option value="{{et.id}}" {% if instance.employee_type_id == et.id %}selected{% endif%}>{{et.value}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee_category">Employee Category</label>
+                            <select class="form-control text-capitalize select2" name="employee_category" id="employee_category" data-title="Employee Category" required />
+                                <option value="" disabled selected></option>
+                                {% for ec in employee_categories %}
+                                <option value="{{ec.id}}" {% if instance.employee_category_id == ec.id %}selected{% endif%}>{{ec.value}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" step="1" min="0" max="365" class="form-control text-capitalize" data-title="Allocated Days" id="allocated_days" name="allocated_days" value="{{ instance.allocated_days }}" required>
+                                    <span class="bar"></span>
+                                    <label for="allocated_days">Allocated Days</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="">
+                                        <input type="checkbox" name="status" id="status" class="js-switch" data-color="#009efb" 
+                                            data-size="mini" {% if instance.status.title == "Active" or not instance %}checked{% endif %} />
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script>
+    $(".card-table").DataTable({"order": []});
+
+    {% comment %} Delete HRLeaveMaster {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this Leave Master from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+    {% comment %} Delete HRLeaveMaster {% endcomment %}
+    
+    $('body').on('click', '.leave-master-update-switch', function (e) {
+        var id     = $(this).data('id');
+        $.ajax({
+           url : "{% url 'hr:leave_master_update_status' %}",
+           type: "POST", dataType: 'json', data: { id:id },
+           success: function (data) {
+               toasterMsg("success", "This Leave Master status successfully updated!", 5000);
+           },
+        });
+    });
+</script>
+{% endblock %}
+

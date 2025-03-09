@@ -1,0 +1,93 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Employee List{% endblock %}
+
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Employee List</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/helpdesk/employee-add/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body custom-color rounded-lg p-3 custom-rl pt-0">
+    <div class="">
+      <table id="users-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+        <thead>
+          <tr>
+            <th class="d-sm-table-cell">Employee ID</th>
+            <th class="d-md-table-cell">Name</th>
+            <th class="d-sm-table-cell">Company</th>
+            <th class="d-sm-table-cell">Sitting Location</th>
+            <th class="d-md-table-cell">Department</th>
+            <th class="d-md-table-cell">Designation</th>
+            <th class="d-md-table-cell">Report To</th>
+            <th class="d-md-table-cell">Status</th>
+            <th class="d-lg-table-cell">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in employee_list %}
+          <tr>
+            <td class="">{{ data.employee_id }}</td>
+            <td class="">{{ data.name }}</td>
+            <td class="d-sm-table-cell">{{ data.company }}</td>
+            <td>{% if data.location %} {{ data.location }} {% else %} N/A {% endif %}</td>
+            <td class="">{{ data.department }}</td>
+            <td class="">{{ data.designation }}</td>
+            <!-- <td class="d-md-table-cell">{% if data.date_of_joining %} {{ data.date_of_joining }} {% else %} N/A {% endif %}</td> -->
+            <td class="">{{ data.reporting_to_name }}</td>
+            <td class="text-center">
+              <label class="mx-auto">
+                <input type="checkbox" data-id="{{ data.employee_id }}" {% if data.status == 1 %} checked {% endif %} name="status" class="js-switch employee-update-switch" data-color="#009efb" data-size="mini" />
+              </label>
+            </td>
+            <td class="text-left">
+              <!-- <a href="" class="h4 m-r-10 text-info">
+                    <span class="icon"><i class="icon-layers"></i></span>
+                  </a> -->
+              <a href="/helpdesk/employee/{{ data.employee_id }}/update/" class="h4 m-r-10 text-success">
+                <span class="icon"><i class="ti-pencil-alt"></i></span>
+              </a>
+              <!-- <a href="" class="h4 text-danger">
+                      <span class="icon"><i class="ti-trash"></i></span>
+                    </a> -->
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  
+{% endblock %}
+
+{% block page_js %}
+<script>
+   $('.employee-update-switch').on('click', function (e) {
+    var id = $(this).data('id');
+    $.ajax({
+      url: "{% url 'desk:updateEmployeeStatus' %}",
+      type: "GET", // http method
+      data: { employee_id: id },
+      dataType: 'json',
+      success: function (data) {
+        //alert("Update success")
+      },
+    });
+  });
+</script>
+{% endblock %}

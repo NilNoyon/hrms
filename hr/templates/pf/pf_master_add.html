@@ -1,0 +1,343 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} Pf Master {% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0"> {{ action.name }} Provident Fund</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/hr/pf_master_add/" class="btn btn-sm btn-success" title="Custom Button"><i
+                  class="ti-plus"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+          <a class="nav-link{% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#add_Pf" role="tab"> {{action.name}} </a>
+
+      </li>
+      <li class="nav-item"> 
+          <a class="nav-link {% if option %} active {% endif %}" data-toggle="tab" href="#list" role="tab">List</a>
+      </li>
+    </ul>
+    <div class="tab-content tabcontent-border">
+      <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="add_Pf" role="tabpanel">
+        <form class="floating-labels" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-12">
+              <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="company">Company</label>
+                      <select class="form-control text-capitalize select2" id="company" name="company"
+                        data-title="Company" required>
+                        <option value="" disabled selected></option>
+                        {% for data in company_list %}
+                        <option value="{{data.id}}" {% if pf_master.company_id == data.id %} selected {% endif %}>{{data.name}}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="pf_heading" name="pf_heading" required
+                      value="{{ pf_master.pf_heading }}">
+                    <span class="bar"></span>
+                    <label for="pf_heading">PF Heading</label>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="number" class="form-control" id="pf_registation_no" name="pf_registation_no" required
+                      value="{{ pf_master.pf_registation_no }}">
+                    <span class="bar"></span>
+                    <label for="pf_registation_no">PF Registation No</label>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+
+                    <input type="text" class="form-control singledate" id="date_of_formation" name="date_of_formation" required>
+  
+                    <span class="bar"></span>
+  
+                    <label for="date_of_formation">Date of Formation</label>
+  
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Basis of PF Computation</label>
+                    <select class="form-control select2" id="basis_of_pf_computation" name="basis_of_pf_computation" data-title="Basis of PF computation" required>
+                      <option value="On Basic Salary" {% if pf_master.basis_of_pf_computation == "On Basic Salary" %} selected {% endif %}>On Basic Salary</option>
+                      <option value="On Basic Gross" {% if pf_master.basis_of_pf_computation == "On Basic Gross" %} selected {% endif %}>On Basic Gross</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Basis of Accounting</label>
+                    <select class="form-control select2" id="basis_of_accounting" name="basis_of_accounting" data-title="Basis of Accounting" required>
+                      <option value="Accrual" {% if pf_master.basis_of_accounting == "Accrual" %} selected {% endif %}>Accrual</option>
+                      <option value="Cash" {% if pf_master.basis_of_accounting == "Cash" %} selected {% endif %}>Cash</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Mode of Loan Interest</label>
+                    <select class="form-control select2" id="mode_of_lone_interest" name="mode_of_loan_interest" data-title="Mode of Lone Interest" required>
+                      <option value="Compound" {% if pf_master.mode_of_loan_interest == "Compound" %} selected {% endif %}>Compound</option>
+                      <option value="Simple" {% if pf_master.mode_of_loan_interest == "Simple" %} selected {% endif %}>Simple</option>
+                      <option value="Compound and Day Wise" {% if pf_master.mode_of_loan_interest == "Compound and Day Wise" %} selected {% endif %}>Compound and Day Wise</option>
+                    </select>
+                  </div>
+                </div> 
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="number" class="form-control" id="rate_employee" name="rate_employee" required
+                      value="10" readonly>
+                    <span class="bar"></span>
+                    <label for="rate_employee">Rate of Employee Contribution(%)</label>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="number" class="form-control" id="rate_company" name="rate_company" required
+                      value="10" readonly>
+                    <span class="bar"></span>
+                    <label for="rate_company">Rate of Company Contribution(%)</label>
+                  </div>
+                </div>
+
+                
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="number" class="form-control" id="opening_balance_of_lapse_forfeiture" name="opening_balance_of_lapse_forfeiture" required
+                      value="{{ pf_master.opening_balance_of_lapse_forfeiture }}">
+                    <span class="bar"></span>
+                    <label for="opening_balance_of_lapse_forfeiture">Opening Balance of Lapse/Forfeiture</label>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Mode of Lone Interest</label>
+                    <select class="form-control select2" id="service_lenght" name="service_lenght" data-title="Service Lenght" required>
+                      <option value="Date of Joining" {% if pf_master.service_lenght == "Date of Joining" %} selected {% endif %}>Date of Joining</option>
+                      <option value="Date of Membership" {% if pf_master.service_lenght == "Date of Membership" %} selected {% endif %}>Date of Membership</option>
+                    </select>
+                  </div>
+                </div> 
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Income Distribution Mode</label>
+                    <select class="form-control select2" id="income_distribution_mode" name="income_distribution_mode" data-title="Income Distribution Mode" required>
+                      <option value="Weighted Distribution" {% if pf_master.income_distribution_mode == "Weighted Distribution" %} selected {% endif %}>Weighted Distribution</option>
+                      <option value="Rate 78 Mode" {% if pf_master.income_distribution_mode == "Rate 78 Mode" %} selected {% endif %}>Rate 78 Mode</option>
+                      <option value="Spacial Distribution" {% if pf_master.income_distribution_mode == "Spacial Distribution" %} selected {% endif %}>Spacial Distribution</option>
+                    </select>
+                  </div>
+                </div> 
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="number" class="form-control" id="hight_limit_of_contribution" name="hight_limit_of_contribution" required
+                      value="{{ pf_master.hight_limit_of_contribution }}">
+                    <span class="bar"></span>
+                    <label for="hight_limit_of_contribution">Hightest Limit of Contribution</label>
+                  </div>
+                </div>
+
+                
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Daywise Contribution Calculation?</label>
+                    <select class="form-control select2" id="day_wise_contribution_calculation" name="day_wise_contribution_calculation" data-title="Daywise Contribution Calculation" required>
+                      <option value="YES" {% if pf_master.day_wise_contribution_calculation == "YES" %} selected {% endif %}>YES</option>
+                      <option value="NO" {% if pf_master.day_wise_contribution_calculation == "NO" %} selected {% endif %}>NO</option>
+                    </select>
+                  </div>
+                </div> 
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Ex-Member Fund and Lapse Consolidate During Discontinuation</label>
+                    <select class="form-control select2" id="ex_member_fund" name="ex_member_fund" data-title="Ex-Member Fund and Lapse" required>
+                      <option value="YES" {% if pf_master.ex_member_fund == "YES" %} selected {% endif %}>YES</option>
+                      <option value="NO" {% if pf_master.ex_member_fund == "NO" %} selected {% endif %}>NO</option>
+                    </select>
+                  </div>
+                </div> 
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">Multipul Loan Allowed?</label>
+                    <select class="form-control select2" id="ex_member_fund" name="ex_member_fund" data-title="Ex-Member Fund and Lapse" required>
+                      <option value="YES" {% if pf_master.ex_member_fund == "YES" %} selected {% endif %}>YES</option>
+                      <option value="NO" {% if pf_master.ex_member_fund == "NO" %} selected {% endif %}>NO</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="col-md-12">
+                  <div class="col-md-4">
+
+                  </div>
+                  <div class="col-md-3 ml-auto mt-2">
+                    <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                      <span class="btn-label"><i class="fa fa-check"></i></span>
+                      {{action.btnTxt}}
+                    </button>
+                  </div>
+                  <div class="col-md-4">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="tab-pane p-20 {% if option %} active {% endif %} " id="list" role="tabpanel">
+        <table  class="table display table-border card-table table-vcenter" style="width:100%">
+          <thead>
+            <tr>
+              <th class="d-sm-table-cell">PF ID</th>
+              <th class="d-sm-table-cell">Company</th>
+              <th class="d-md-table-cell">PF Heading</th>
+              <th class="d-sm-table-cell">PF Registation Number</th>
+              <th class="d-sm-table-cell">Date of Formation</th>
+              <th class="d-md-table-cell">Basis of Pf Compution</th>
+              <th class="d-md-table-cell">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in pf_master_list %}
+              <tr>
+                  <td class="">{{ data.id }}</td>
+                  <td class="">{{ data.company }}</td>
+                  <td class="">{{ data.pf_heading }}</td>
+                  <td class="d-sm-table-cell">{{ data.pf_registation_no }}</td>
+                  <td class="">{{ data.date_of_formation|date:"d-M-Y" }}</td>
+                  <td class="">{{ data.basis_of_pf_computation }}</td>
+                  <td class="text-left">
+                    <a href="/hr/pf_master/{{ data.id }}/update/" class="h4 m-r-10 text-success">
+                      <span class="icon"><i class="ti-pencil-alt"></i></span>
+                    </a>
+                    {% if data.isDelete == True %}
+                      <a href="#"  onclick="deletePfMaster('{{data.id}}')" class="h4 text-danger">
+    
+                        <span class="icon"><i class="ti-trash" title="Delete Company"></i></span>
+                      </a>
+                    {% endif %}
+                  </td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% comment %} <script src="{% static 'node_modules/moment/moment.js' %}"></script> 
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script> {% endcomment %}
+<script>
+  var nowDate = new Date();
+  var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+
+  $('.singledate').daterangepicker({
+
+    singleDatePicker: true,
+
+    showDropdowns: true,
+
+    maxDate: today
+
+  });
+</script>
+<script>
+  $(document).ready(function () {
+
+    $('table.display').DataTable({
+
+    "order": [[ 0, 'desc' ], [ 1, 'desc' ]],
+   responsive:true,
+    paging: true,
+
+    bInfo: false
+  });
+});
+
+    function deletePfMaster(id) {
+      const swalWithBootstrapButtons = Swal.mixin({
+          customClass: {
+              confirmButton: 'btn btn-success',
+              cancelButton: 'mr-2 btn btn-danger'
+          },
+          buttonsStyling: false,
+      })    
+      Swal.fire({
+          title: "Confirmation",
+          text: "Do you want to delete this?",
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+          reverseButtons: true
+      }).then((result) => {
+          if (result.value) { 
+            var id_url = "/hr/pf_master/"+id.toString()+"/delete/";
+            $.ajax({
+                url: id_url,
+                type: 'POST',
+                dataType: 'json',
+                async: false,
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $("#"+id.toString()).remove();
+                    Swal.fire({
+                        type: 'success',
+                        title: 'PF Deleted',
+                        text: data,
+                    });
+                    location.reload();
+                },
+                error: function (data) {
+                    Swal.fire({
+                    type: 'error',
+                    title: 'Something Went Wrong!',
+                    text: data,
+                })
+                }
+            });
+        } 
+      });
+    }
+</script>
+{% endblock %}

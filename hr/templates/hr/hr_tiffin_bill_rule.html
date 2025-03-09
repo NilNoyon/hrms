@@ -1,0 +1,204 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Tiffin Bill Rule{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Tiffin Bill Rule List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Name</th>
+                                    <th>Emp. Category</th>
+                                    <th>Amount</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in object_list %}
+                                <tr>
+                                    <td class="">{{ forloop.counter }}</td>
+                                    <td>{{ data.name }}</td>
+                                    <td>{{ data.employee_category.value }}</td>
+                                    <td>{{ data.amount }}</td>
+                                    <td>{{ data.start_time|date:"h:i A" }}</td>
+                                    <td>{{ data.end_time|date:"h:i A" }}</td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:hr_tiffin_bill_rule_update' data.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:hr_tiffin_bill_rule_delete' data.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:hr_tiffin_bill_rule_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" data-title="Name" id="name" name="name" value="{{ instance.name }}" required>
+                            <span class="bar"></span>
+                            <label for="name">Name</label>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="employee_category">Employee Category</label>
+                                    <select class="form-control text-capitalize select2" name="employee_category" id="employee_category" data-title="Employee Category" required />
+                                        <option value="" disabled selected></option>
+                                        {% for ec in employee_categories %}
+                                        <option value="{{ec.id}}" {% if instance.employee_category_id == ec.id %}selected{% endif%}>{{ec.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" data-title="Amount" id="amount" name="amount" value="{{ instance.amount }}" required>
+                                    <span class="bar"></span>
+                                    <label for="amount">Amount</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="start_time">Start Time</label>
+                                    <input type="text" class="form-control timeonly open-left" id="start_time" name="start_time" 
+                                        value="{{instance.start_time|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="end_time">End Time</label>
+                                    <input type="text" class="form-control timeonly open-left" id="end_time" name="end_time" 
+                                        value="{{instance.end_time|date:"h:i A"}}" autocomplete="off" required>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="status" class="mb-2">
+                                    <input type="checkbox" id="status" name="status" class="js-switch" {% if instance.status.title == "Active" or not instance %}checked{% endif %} data-color="#009efb" data-size="mini"/> Status
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(".card-table").DataTable({});
+    $('.timeonly').daterangepicker({
+        showDropdowns: true,
+        timePicker: true,
+        timePicker24Hour: false,
+        timePickerIncrement: 1,
+        timePickerSeconds: false,
+        singleDatePicker:true,
+        autoUpdateInput : false,
+        locale: { format: 'hh:mm A' }
+    });
+    $('.timeonly.open-left').daterangepicker({
+        opens: "left",
+        timePicker: true,
+        showDropdowns: true,
+        singleDatePicker:true,
+        timePickerIncrement: 1,
+        timePicker24Hour: false,
+        autoUpdateInput : false,
+        timePickerSeconds: false,
+        locale: { format: 'hh:mm A' }
+    });
+        
+    $('.timeonly').on('show.daterangepicker', function (ev, picker) {
+        picker.container.find(".calendar-table").hide();
+        $(this).parent().addClass("focused");
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+        $(this).parent().addClass("focused");
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        picker.element.val('');
+        (this).parent().removeClass("focused");
+    });
+
+    {% comment %} Delete Tiffin Bill Rule {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this Tiffin Bill Rule from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+    {% comment %} Delete Tiffin Bill Rule {% endcomment %}
+</script>
+{% endblock %}

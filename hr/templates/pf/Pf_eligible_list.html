@@ -1,0 +1,67 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Employee Eligible List{% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Employee Eligible List</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+    <div class="">
+      <table id="users-table" class="table dataTables_scrollBody dataTables_scrollHead table-border card-table table-vcenter data-table" style="width:100%">
+        <thead>
+            <tr>
+              <th class="d-sm-table-cell">Employee ID</th>
+              <th class="d-sm-table-cell">Name</th>
+              <th class="d-md-table-cell">Company</th>
+              <th class="d-sm-table-cell">Department</th>
+              <th class="d-sm-table-cell">Designation</th>
+              <th class="d-sm-table-cell">Joining Date</th>
+              <th class="d-md-table-cell">Durations</th>
+              <th class="d-md-table-cell">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in emply_data_list %}
+            <tr>
+              <td class="">{{ data.employee_id }}</td>
+              <td class="">{{ data.name }}</td>
+              <td class="">{{ data.company }}</td>
+              <td class="d-sm-table-cell">{{ data.department }}</td>
+              <td class="">{{ data.designation }}</td>
+              <td class="">{{ data.create_at|date:"d-M-Y" }}</td>
+              <td class="">{{ data.tenure}}</td>
+              {% if not data.has_pf %}
+                <td>
+                  <a href="/hr/employee-pf-add/{{ data.id }}/" class="btn btn-sm btn-success" title="Add Eligible Employee"><i class="ti-plus"></i></a>
+                </td>
+              {% else %}
+              <td></td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+      </div>
+  </div>
+</div>
+<script>
+
+</script>
+{% endblock %}
+

@@ -1,7 +1,7 @@
 {% load static %}
 {% load cache %}
 {% load data_load %}
-{% load sc_filters %}
+{% load general_filters %}
 
 {% comment %} {% cache 500 my_menulist_key %} {% endcomment %}
 <link href="{% static 'dist/css/navbar.css' %}?v=0.1" rel="stylesheet">
@@ -455,7 +455,7 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="/dashboard">
                 {% comment %} logo image {% endcomment %}
-                <img class="" src="/assets/images/ebit-transparent.png" alt="Esquire Logo" />
+                <img class="" src="/assets/images/hr-logo.png" alt="HRMS Logo" />
             </a>
         </div>
        
@@ -469,50 +469,52 @@
             </ul>
             <div class="sidebar-nav mr-auto">
                 <ul class="menu_main navbar-nav mr-auto show-hide" id="sidebarnav">
-                    {% if request.session.is_head or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" or request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
-                    <li class="nav-item py-lg-2 pr-lg-2 align-items-center vertical-align" id="helpdesk">
-                        <a class="nav-link" href="javascript:;" aria-expanded="false">
-                        <div class="flex-container">
-                            <div class="flex-child magenta pl-lg-2">
-                                <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
-                                    <i class="fas fa-handshake singlei Helpdesk icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i>                                
-                                </div>
-                            </div>            
-                            <div class="flex-child green">
-                                <div style="height:auto;" class="justify-center text-center">
-                                   <span style="margin: 0;line-height:33.59px;font-size:14px;"> Helpdesk</span>
-                                </div>
-                            </div>                           
-                        </div> 
-                      
-                        </a>
-                        <ul aria-expanded="false" class="collapse">
-                            <li><a class='desk-link' href="{% url 'desk:issue_dashboard' %}">Issues</a></li>
-                            {% if request.session.hd_role == "4" or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" %}
-                            <li><a class='desk-link' href="{% url 'desk:helpdesk_report' %}">Helpdesk Report</a></li>
-                            {% endif %}
-                            <li><a class='desk-link' href="{% url 'desk:assessment_list' %}">Device Assessment</a></li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item mr-lg-1 py-lg-2 pr-lg-2">
-                        <a class="nav-link" href="{% url 'desk:issue_dashboard' %}" aria-expanded="false">
+                    {% comment %}
+                        {% if request.session.is_head or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" or request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+                        <li class="nav-item py-lg-2 pr-lg-2 align-items-center vertical-align" id="helpdesk">
+                            <a class="nav-link" href="javascript:;" aria-expanded="false">
                             <div class="flex-container">
                                 <div class="flex-child magenta pl-lg-2">
                                     <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
-                                        <i class="fas fa-handshake singlei Helpdesk icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i>
-                                     
+                                        <i class="fas fa-handshake singlei Helpdesk icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i>                                
                                     </div>
                                 </div>            
                                 <div class="flex-child green">
                                     <div style="height:auto;" class="justify-center text-center">
-                                       <span style="margin: 0;line-height:33.59px;font-size:14px;"> Helpdesk</span>
+                                    <span style="margin: 0;line-height:33.59px;font-size:14px;"> Helpdesk</span>
                                     </div>
                                 </div>                           
-                            </div>                       
-                         </a>
-                    </li>
-                    {% endif %}
+                            </div> 
+                        
+                            </a>
+                            <ul aria-expanded="false" class="collapse">
+                                <li><a class='desk-link' href="{% url 'desk:issue_dashboard' %}">Issues</a></li>
+                                {% if request.session.hd_role == "4" or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" %}
+                                <li><a class='desk-link' href="{% url 'desk:helpdesk_report' %}">Helpdesk Report</a></li>
+                                {% endif %}
+                                <li><a class='desk-link' href="{% url 'desk:assessment_list' %}">Device Assessment</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item mr-lg-1 py-lg-2 pr-lg-2">
+                            <a class="nav-link" href="{% url 'desk:issue_dashboard' %}" aria-expanded="false">
+                                <div class="flex-container">
+                                    <div class="flex-child magenta pl-lg-2">
+                                        <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center">
+                                            <i class="fas fa-handshake singlei Helpdesk icon-size"  style="margin: 0;line-height:33.59px;font-size:14px;"></i>
+                                        
+                                        </div>
+                                    </div>            
+                                    <div class="flex-child green">
+                                        <div style="height:auto;" class="justify-center text-center">
+                                        <span style="margin: 0;line-height:33.59px;font-size:14px;"> Helpdesk</span>
+                                        </div>
+                                    </div>                           
+                                </div>                       
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endcomment %}
                     {% regroup request.session.id|menu_list by menu__module_name as module_list %}
                     {% for module_name in module_list|slice:"3" %}
                     {% if forloop.last %} 

@@ -1,0 +1,177 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load humanize %}
+
+{% block page_title %}Festival Bonus{% endblock %}
+
+{% block add_css %}
+    <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+    <style>
+        table{
+            font-size: 12px !important;
+        }
+        table#salary-table tbody td:nth-child(n+9) {
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-12 align-self-center">
+        <h4 class="text-themecolor mb-0">Festival Bonus</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+    <form class="floating-labels mt-2" method="post" id="report_form" action="{% url "hr:get_salary_report" %}">
+      {% csrf_token %}
+      <input type="hidden" id="report_type" name="report_type" value="pdf" />
+      <div class="row">
+        <div class="col-md-1">
+            <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-0">
+              <label for="company">Company</label>
+              <select class="form-control select2" name="company" id="company" data-title="Company" />
+                  <option value="" disabled selected></option>
+                  {% for company in companies %}
+                  <option value="{{company.id}}">{{company.short_name}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-0">
+              <label for="company">Department</label>
+              <select class="form-control select2" name="department" id="department" data-title="Department" />
+                  <option value="" disabled selected></option>
+                  {% for department in departments %}
+                  <option value="{{department.id}}">{{department.title}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-0">
+              <label for="employee_category">Employee Category</label>
+              <select class="form-control select2" name="employee_category" id="employee_category" data-title="Employee Category" />
+                  <option value="" disabled selected></option>
+                  {% for ec in employee_categories %}
+                  <option value="{{ec.id}}">{{ec.value}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>  
+        <div class="col-md">
+            <div class="form-group">
+                <label for="date">Cut of Date</label>
+                <input type="text" data-title="Date" class="form-control singledate" name="date" id="date" autocomplete="off" required />
+                <span class="bar"></span>
+            </div>
+        </div>
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-md">
+              <button class="btn btn-block btn-outline-success waves-effect waves-light submit_button" type="button">
+                <span class="btn-label"><i class="fas fa-search"></i></span> Search
+              </button>
+            </div>
+            {% comment %} <div class="col-md">
+              <button class="btn btn-block btn-outline-warning waves-effect waves-light export_button" type="button">
+                <span class="btn-label"><i class="ti-printer"></i> PDF</span>
+              </button>
+            </div>  {% endcomment %}
+            <div class="col-md">
+              <button class="btn btn-block btn-outline-info waves-effect waves-light excel_button" type="button">
+                <span class="btn-label"><i class="fas fa-download"></i> Excel</span>
+              </button>
+            </div>  
+          </div>  
+        </div>   
+      </div>   
+    </form>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered custom-table table-nowrap mb-0 mt-3 hide" id="salary-table">
+            <thead>
+                <tr class="text-center">
+                    <th>Company</th>
+                    <th>Department</th>
+                    <th>Cost Center</th>
+                    <th>Staff Category</th>
+                    <th>Section Info</th>
+                    <th>Employee code</th>
+                    <th>Employee Name</th>
+                    <th>Designation</th>
+                    <th>DOJ</th>
+                    <th>COD</th>
+                    <th>Service Days</th>
+                    <th>Gross Salary</th>
+                    <th>Basic</th>
+                    <th>Bonus Amount</th>
+                    <th>Account No.</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>      
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script src="{% static 'admin/js/table_to_excel.js' %}"></script>
+<script>
+    var d = new Date(), nowDate = new Date(d.setDate(d.getDate()-7));
+    $('.singledate').daterangepicker({
+        singleDatePicker: true,
+        autoUpdateInput : false,
+        {% comment %} minDate : nowDate, {% endcomment %}
+        locale  : {format: 'YYYY-MM-DD'},
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+    });
+    $("body").on("click", ".reset_button", function(){
+        $("#company").val('').trigger("change");
+        $("#department").val('').trigger("change");
+        $("#employee_category").val('').trigger("change");
+        $("#salary-table").hide();
+    });
+    $("body").on("click", ".submit_button, .excel_button", function(e){
+        $("#salary-table").hide();
+        let excel_button = $(this).hasClass("excel_button") ? $(this).hasClass("excel_button") : false;
+        let company = $("#company").val();
+        if (company){
+          $.ajax({
+            type : "POST", async : false,
+            url  : '{% url "hr:get_festival_report" %}',
+            data : { department : $("#department").val(), 
+                company : company, date : $("#date").val(),
+                employee_category : $("#employee_category").val(),
+            }, success : function (data) { $("#salary-table").show();
+              $("#salary-table tbody").empty().html(data['report_data']);
+              if($('#salary-table tbody tr').length && excel_button){ 
+                TableToExcel.convert(document.getElementById("salary-table"), {
+                  name: `bonus_sheet.xlsx`, sheet: { name: 'Bonus Sheet' }
+                });
+              }
+            }
+          });
+        } else { toasterMsg('warning', 'At least Search by Year, Month and Company!', 5000); }
+    });
+    
+    $("body").on("click", ".export_button", function(e){
+        let company = $("#company").val();
+        if (company){
+            $("#report_form").attr('target', '_blank'); validateForm($("#report_form"));
+        } else { toasterMsg('warning', 'At least Search by Year, Month and Company!', 5000); }
+    });
+</script>
+{% endblock %}

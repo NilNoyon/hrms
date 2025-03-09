@@ -1,0 +1,199 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %} Pf Discontinuation{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .show-grid .row {
+    margin-bottom: 15px;
+  }
+
+  .show-grid [class^=col-] {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    /* background-color: #eee;
+    background-color: rgba(86,61,124,.15);
+    border: 1px solid #ddd;
+    border: 1px solid rgba(86,61,124,.2); */
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card mt-0 pt-0">
+
+  <div class="card-header">
+    <h4 class="text-themecolor mb-0 mt-0"> Discontinuation</h4>
+  </div>
+
+  <div class="card-body show-grid pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link{% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#pf_discontinue" role="tab"> {{action.name}} </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link {% if option %} active {% endif %}" data-toggle="tab" href="#list" role="tab">List</a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="pf_discontinue" role="tabpanel">
+                <form class="floating-labels mt-3" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-7 ">
+                            <div class="row p-4" style="border: 1px solid #ddd;">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="employee">Employee</label>
+                                    <select class="form-control text-capitalize select2" id="employee" name="employee"
+                                        data-title="Employee" required>
+                                        <option value="" disabled selected></option>
+                                            {% for data in employee_pf_list %}
+                                                <option value="{{data.id}}" {% if data.employee.employee_id == employee.employee_id %} selected {% endif %}>{{data.employee.employee_id}} -- {{data.employee.name}}
+                                                </option>
+                                            {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control singledate date_of_formation" id="date_of_formation" name="date_of_formation">
+                                    <span class="bar"></span>
+                                    <label for="date_of_formation">Date of Discontinuation</label>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="lapse_voucher" name="lapse_voucher" value="">
+                                    <span class="bar"></span>
+                                    <label for="lapse_voucher">Ex-Member,Lapse Voucher</label>
+                                </div>
+                            </div>
+                
+                
+                            <div class="col-md-12">
+                                <div class="form-group">               
+                                    <textarea type="text" id="reason" name="reason" class="form-control" value="" required></textarea>                   
+                                    <span class="bar"></span>
+                                    <label for="reason">Reason Of Discontinuation</label>
+                                </div>
+                            </div>
+                        </div>
+                      
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <div class="p-4" style="border: 1px solid #ddd;">
+                            <div class="row">
+                                <div class="col-md-8 font-weight-bold ">Total Year of PF Membership</div>
+                                <div class="col-md-4 font-weight-bold" id ="total_year_pf" name="total_year_pf"></div>               
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 font-weight-bold">Total Year of Service</div>
+                                <div class="col-md-4 font-weight-bold " id ="total_year_service" name="total_year_service"></div>               
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 font-weight-bold">PF Policy ID</div>
+                                <div class="col-md-4 font-weight-bold" id="policy" name="policy" ></div>               
+                            </div>  
+                              
+                        </div>
+
+                        <div class="col-md-6 ml-auto mt-5">
+                            <div class="button-group">
+                                <button class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success item-edit-btn save-btn" type="submit" data-name="save">
+                                     <span class="btn-label"><i class="fa fa-check"></i></span>
+                                            Submit
+                                </button>
+                            </div>
+                        </div>
+
+
+                    </div>                
+                   
+                    </div>
+                </form>
+            </div>
+            <div class="tab-pane p-20 {% if option %} active {% endif %} " id="list" role="tabpanel">
+                <table  class="table display table-border card-table table-vcenter" style="width:100%">
+                <thead>
+                    <tr>
+                    <th class="d-sm-table-cell">Employee ID</th>
+                    <th class="d-sm-table-cell">Employee Name</th>
+                    <th class="d-sm-table-cell">Date of Discontinuation</th>
+                    <th class="d-sm-table-cell">Reason of Discontinuation</th>
+                    <th class="d-sm-table-cell">Voucher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in pf_discontinue_list %}
+                    <tr>
+                    <td class="">{{ data.employee_pf.employee.employee_id }}</td>
+                    <td class="">{{ data.employee_pf.employee.name }}</td>
+                    <td class="">{{ data.date_discontinuation }}</td>
+                    <td class="">{{ data.reason }}</td>
+                    <td class="">{{ data.lapse_voucher }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.date_of_formation').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        locale: {
+            format: 'DD-MMM-YYYY'
+        },
+        autoUpdateInput: false
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+  $(document).ready(function () {
+
+    $('table.display').DataTable({
+    responsive:true,
+    ordering: true,
+
+    paging: false,
+
+    bInfo: false
+  });
+});
+
+$('#employee').on('change', function () { 
+    if($('#employee option:selected').length > 0){  
+        $.ajax({ 
+            cache: false, 
+            url: "{% url 'hr:get_pf_discontinue' %}", 
+            type: "POST", 
+            data: { employee : $(this).val() }, 
+            success: function (data) {
+              $('#policy').html(data["policy"]);
+              $('#total_year_pf').html(data["tenure2"]);
+              $('#total_year_service').html(data["tenure"]);
+            },
+
+            error: function (xhr, desc, err) { 
+              errorMsg(err) 
+            } 
+        }); 
+    } 
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Job Card{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Job Card</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    {% comment %} <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:attendance_list' %}" class="btn btn-sm btn-info" title="Custom Button"><i class="ti-view-list-alt"></i></a>
+                            </div>                        
+                        </div>
+                    </div> {% endcomment %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-height custom-rl pt-0">
+            <div class="row floating-labels">
+                <div class="col-md">
+                    <div class="form-group">
+                        <select class="form-control text-capitalize select2" name="company" id="company"
+                            data-title="Company">
+                            <option value="" disabled selected></option>
+                            {% for data in company_list %}
+                            <option value="{{data.id}}">{{data.short_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <select class="form-control text-capitalize select2" name="department" id="department"
+                            data-title="Department">
+                            <option value="" disabled selected></option>
+                            {% for data in department_list %}
+                            <option value="{{data.id}}">{{data.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <select class="form-control text-capitalize select2" name="designation" id="designation"
+                            data-title="Designation">
+                            <option value="" disabled selected></option>
+                            {% for data in designation_list %}
+                            <option value="{{data.id}}">{{data.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <select class="form-control text-capitalize user" id="user" name="user" data-title="Employee">
+                            <option value="" disabled selected></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <input type="text" data-title="Attendance Date" class="form-control datepicker text-center" 
+                            name="attendance_date" id="attendance_date" autocomplete="off" required />
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-info btn-block submit_button">Search</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered custom-table table-nowrap mb-0 hide" id="attendance-table">
+                    <thead>
+                        <tr class="text-center">
+                            <th>Company</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Leave</th>
+                            <th>Holiday</th>
+                            <th>Weekend</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>              
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.datepicker').daterangepicker({
+        showDropdowns: true,
+        autoUpdateInput: false,
+        opens: "left",
+        locale: { format: 'DD/MM/YYYY' }
+    }).on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + "-" + picker.endDate.format('DD/MM/YYYY'));
+        $(this).parent().addClass("focused");
+        var duration = moment.duration((picker.endDate).diff(picker.startDate));
+        $(this).closest('td').siblings(".num_days").text(duration.days() + 1);
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+        $(this).closest('td').siblings(".num_days").text('');
+    });
+
+    $("#user").select2({
+        minimumInputLength  : 3,
+        placeholder         : "Employee",
+        allowClear          : true,
+        ajax: {
+            url             : "{% url 'hr:get_employee_data' %}",
+            dataType        : "json",
+            data            : function(term, page) { return { 
+                                    q : term, company : $("#company").val(),
+                                    department : $("#department").val(),
+                                    designation : $("#designation").val() }; 
+                            },
+            processResults  : function (data) { return { results: data.employee_list }; }
+        },
+    });
+    
+    $("body").on("click", ".submit_button", function(e){
+        $("#attendance-table").hide();
+        $.ajax({
+            type    : "POST",
+            url     : '{% url "hr:get_job_card_data" %}',
+            data    : { employee : $("#user").val(),
+                        company : $("#company").val(),
+                        department : $("#department").val(),
+                        designation : $("#designation").val(),
+                        attendance_date : $("#attendance_date").val() 
+                    },
+            success : function (data) {
+                $("#attendance-table").show();
+                $("#attendance-table tbody").empty().html(data['report_data']);
+            }
+        });
+    });
+</script>
+{% endblock %}

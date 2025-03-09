@@ -1,0 +1,73 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load humanize %}
+
+{% block page_title %} Import Other Salary Amounts {% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Import Other Salary Amounts</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form class="floating-labels mt-3" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-3 offset-md-3">
+                        <div class="form-group">
+                            <label for="route_type">Year</label>
+                            <select class="form-control text-capitalize select2" name="year" id="year" data-title="Year" required/>
+                                <option value="" disabled selected></option>
+                                {% for y in years %}
+                                    <option value="{{y}}" {% if sinstance.year == y %}selected{% endif%}>{{y}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="month">Month</label>
+                            <select class="form-control text-capitalize select2" name="month" id="month" data-title="Month" required/>
+                                <option value="" disabled selected></option>
+                                {% for m in months %}
+                                    <option value="{{m.0}}" {% if sinstance.month == m.0 %}selected{% endif%}>{{m.1}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 offset-md-3">
+                        <div class="form-group">
+                            <input type="file" id="import_file" name="import_file" class="dropify" data-height="200" required>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                <span class="btn-label"><i class="fa fa-check"></i></span> Import
+                            </button>
+                        </div>
+                        <small class="form-text text-muted text-center mt-5">
+                            <a href="{% static 'dummy/other-salary-amounts.xlsx' %}?v=1" class="h4">
+                                <span class="icon"><i class="fas fa-download"></i></span> Download Template
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Location{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Location List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Created By</th>
+                                    <th>Updated By</th>
+                                    <th>Last Updated</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in object_list %}
+                                <tr>
+                                    <td class="">{{ forloop.counter }}</td>
+                                    <td>{{ data }}</td>
+                                    <td>
+                                        <label class="mx-auto">
+                                            <input type="checkbox" data-id="{{data.id}}" data-type="status" {% if data.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                                class="js-switch location-update-switch" data-color="#009efb" data-size="mini" />
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <a href="#aboutModal" data-toggle="modal" data-id="{{ data.created_by_id }}" class='user_info text-info' data-target="#userModal">{{ data.created_by.name }}</a>
+                                    </td>
+                                    <td>
+                                        <a href="#aboutModal" data-toggle="modal" data-id="{{ data.updated_by_id }}" class='user_info text-info' data-target="#userModal">{{ data.updated_by.name }}</a>
+                                    </td>
+                                    <td>{{ data.updated_at|date:'d/M/Y h:i A'|upper }} </td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:location_update' data.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        {% comment %} <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:location_delete' data.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a> {% endcomment %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:location_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" data-title="Location" id="name" name="name" value="{{ instance.name }}" required>
+                            <span class="bar"></span>
+                            <label for="name">Location</label>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="status" class="mb-2">
+                                    <input type="checkbox" id="status" name="status" class="js-switch" {% if instance.status.title == "Active" or not instance %}checked{% endif %} data-color="#009efb" data-size="mini"/> Status
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+<script>
+
+    $(".card-table").DataTable({});
+    {% comment %} Delete Location {% endcomment %}
+
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this Location from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+
+    $('body').on('click', '.location-update-switch', function (e) {
+        var id     = $(this).data('id');
+        $.ajax({
+           url : "{% url 'hr:location_update_status' %}",
+           type: "POST", dataType: 'json', data: { id:id },
+           success: function (data) {
+               toasterMsg("success", "This Location successfully updated!", 5000);
+           },
+        });
+    });
+
+    {% comment %} Delete Location {% endcomment %}
+
+</script>
+
+{% endblock %}
+
+
+

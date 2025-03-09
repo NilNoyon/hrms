@@ -1,0 +1,88 @@
+{% load sc_filters %}
+
+<style>
+    .wrapper1{ width: 100%; overflow-x: auto; overflow-y: hidden;}
+    .wrapper2 { width: 100%; overflow: hidden;}
+    .wrapper1 { height: 20px; }
+    .div1 { height: 20px; }
+    .div2 { position:relative; }
+    .sticky-col {
+        position: -webkit-sticky;
+        position: sticky;
+        background-color: white !important;
+    }
+    .name-col {
+        width: 85px;
+        min-width: 85px;
+        max-width: 85px;
+        left: 0px;
+    }
+    .first-col, .second-col,
+    .third-col, .forth-col, .fifth-col {
+        width: 48px;
+        min-width: 48px;
+        max-width: 48px;
+        left: 85px;
+        text-align: center;
+    }
+    .second-col { left: 133px; }
+    .third-col  { left: 181px; }
+    .forth-col  { left: 229px; }
+    .fifth-col  { left: 277px; }
+    .table th, .table td { padding: 5px !important;}
+</style>
+
+
+<table class="table table-bordered custom-table table-nowrap mb-0" id="attendance-table" style="font-size: 12px;">
+    <thead>
+        <tr class="text-center">
+            <th class="sticky-col name-col">Employee</th>
+            <th class="sticky-col first-col">Total</th>
+            <th class="sticky-col second-col">Prsnt</th>
+            <th class="sticky-col third-col">Absnt</th>
+            <th class="sticky-col forth-col">Weknd</th>
+            <th class="sticky-col fifth-col">Leave</th>
+            {% for i in dates %}
+            <th>{{i|date:"j M y"}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in data %}
+        <tr class="text-center">
+            <td class="sticky-col name-col text-left">
+                <a href="#aboutModal" data-toggle="modal" data-id="{{d.employee.user_info.id}}" class="user_info text-info" data-target="#userModal">{{ d.employee.employee_id }}</a>
+            </td>
+            <td class="sticky-col first-col">
+                <a class="text-warning" href="{% url 'hr:my_job_card' d.employee.employee_id start_date end_date %}" target="_blank">{{d.total}}</a>
+            </td>
+            <td class="sticky-col second-col">
+                {{d.present}}
+            </td>
+            <td class="sticky-col third-col">
+                {{d.absent}}
+            </td>
+            <td class="sticky-col forth-col">
+                {{d.weekends}}
+            </td>
+            <td class="sticky-col fifth-col">
+                {{d.leave}}
+            </td>
+            {% for i in d.range_days %}
+            <td style="background-color:
+            {% if i == 'PR' %}transparent
+            {% elif i == 'WK' %}#DEFFEB
+            {% elif i == 'AB' %}#FB9678
+            {% elif i == 'LT' %}#FFD9CC
+            {% elif i == 'LE' %}#FFAAAA
+            {% elif i == 'EO' %}#F6E3E3
+            {% elif i == 'RS' %}#D0D8FF
+            {% elif i == 'OS' %}#bec7f9
+            {% elif i == 'LV' %}#aef7b0
+            {% elif i == 'HL' %}#DFFFEF
+            {% endif %}">{{i}}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

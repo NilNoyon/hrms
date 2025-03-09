@@ -1,0 +1,74 @@
+{% extends "print_base_landscape_new.html" %}
+{% load static %}
+{% block page_title %}Salary Report - {{month}}/{{year}}{% endblock %}
+{% block header_title %}Salary Report - {{month}}/{{year}}{% endblock %}
+
+{% block add_css %}
+{% comment %} <link href="{% static 'dist/css/style.css' %}?v=0.1" rel="stylesheet"> {% endcomment %}
+<style>
+    table#salary-table{font-size:5.8px;border: 1px solid #111;border-collapse:collapse;margin-top: 20px;}
+    #salary-table td,#salary-table th{border: 1px solid #111;text-align: center;}
+    @page {
+        size:landscape;
+        margin: 0.2in 0.2in 0.2in 0.2in !important;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="table-responsive">
+    <table class="table" id="salary-table">
+        <thead>
+          <tr class="text-center">
+              <th colspan="9">Personal Informations</th>
+              <th colspan="6">Salary Breakdowns</th>
+              <th colspan="8">Month Informations</th>
+              <th colspan="8">Payable Amounts (BDT)</th>
+              <th rowspan="2">Total Payable (BDT)</th>
+              <th colspan="5">Deduction Amounts (BDT)</th>
+              <th rowspan="2">Net Payable (BDT)</th>
+          </tr>
+          <tr class="text-center">
+              <th class="">Employee ID</th>
+              <th class="">Company</th>
+              <th class="">Department</th>
+              <th class="">Designation</th>
+              <th class="">Cost Center</th>
+              <th class="">Grade</th>
+              <th class="">Staff Category</th>
+              <th class="">DOJ</th>
+              <th class="">Gross Salary</th>
+              <th class="">Basic</th>
+              <th class="">House Rent</th>
+              <th class="">Medical</th>
+              <th class="">Conveyance</th>
+              <th class="">Food Allowance</th>
+              <th class="">Others Allowance</th>
+              <th class="">Working Day</th>
+              <th class="">Holiday/ Weekend</th>
+              <th class="">Total Days</th>
+              <th class="">Late</th>
+              <th class="">Absent</th>
+              <th class="">With Pay</th>
+              <th class="">W/Pay</th>
+              <th class="">OT Hours</th>
+              <th class="">Salary</th>
+              <th class="">Over Time</th>
+              <th class="">Holiday</th>
+              <th class="">Night</th>
+              <th class="">Attendance</th>
+              <th class="">Incentive</th>
+              {% comment %} <th class="">Festival</th> {% endcomment %}
+              <th class="">Arrear</th>
+              <th class="">Tifin Bill</th>
+              <th class="">Loan</th>
+              <th class="">Absent</th>
+              <th class="">Others</th>
+              <th class="">ITDS</th>
+              <th class="">PF</th>
+          </tr>
+        </thead>
+        <tbody>{{data|safe}}</tbody>
+    </table>
+</div>  
+{% endblock %}

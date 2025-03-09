@@ -1,0 +1,93 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% block page_title %}Leave Allocation{% endblock %}
+{% block add_css %}
+<style>
+    .custom-control-input:checked~.custom-control-label::before {
+        border-color: #03a9f3;
+        background-color: #03a9f3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                    <h4 class="mb-1">Company wise Leave Allocation</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form class="" method="post" id="form">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-vcenter">
+                        <thead class="text-center">
+                            <tr>
+                                <th class="pt-0">
+                                    <div class="form-group mb-0">
+                                        <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" />
+                                            <option value="" disabled selected></option>
+                                            {% for company in companies %}
+                                            <option value="{{company.id}}" {% if instance.company_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </th>
+                                {% for ec in employee_categories %}
+                                <th width="{{ 75|div_float:employee_categories.count|floatformat:-2 }}%">
+                                    <input type="hidden" name="employee_category" value="{{ec.id}}" />
+                                    {{ec.value}}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in leave_types %}
+                            <tr>
+                                <td class="py-0">
+                                    <div class="row">
+                                        <div class="col-md pl-3">{{ leave.short_title }}</div>
+                                        <div class="col-md border-left text-right pr-3">{{ leave.description}}</div>
+                                    </div>
+                                    <input type="hidden" name="leave" value="{{leave.id}}" />
+                                </td>
+                                {% for ec in employee_categories %}
+                                <td class="p-0">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text" style="border: 0; border-radius: 0; align-items: normal;">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="checkbox[{{leave.id}}][{{ec.id}}]" 
+                                                        name="checkbox[{{leave.id}}][{{ec.id}}]" checked value="1">
+                                                    <label class="custom-control-label" for="checkbox[{{leave.id}}][{{ec.id}}]"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="text" class="form-control text-center border-0" name="leave_days[{{leave.id}}][{{ec.id}}]" />
+                                        <input type="hidden" name="allocation[{{leave.id}}][{{ec.id}}]" />
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 ml-auto mt-2">
+                        <div class="button-group">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success receive-goods">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+

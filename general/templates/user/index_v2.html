@@ -1,6 +1,6 @@
 {% extends "admin.html" %}
 {% load static %}
-{% load sc_filters %}
+{% load general_filters %}
 
 {% block page_title %}Users{% endblock %}
 
@@ -56,40 +56,6 @@
             </ul>
             <!-- Tab panes -->
             <div class="tab-content tabcontent-border">
-                <!-- {% if request.session.role_text not in 'FP, PD' %} 
-                    <div class="tab-pane {% if tab_name == 'development' %}active{% endif %} p-20" id="developmentTAB" role="tabpanel">
-                        <table id="development-table" class="table table-striped card-table table-vcenter" data-url="{% url 'mnm:get_fabric_order_for_dataTable' 'development' %}">
-                            <thead>
-                                <tr>
-                                <th class="d-sm-table-cell">SN</th>
-                                <th class="d-sm-table-cell">Fabric Order No</th>
-                                <th class="d-sm-table-cell">Pre Cost</th>
-                                <th class="d-sm-table-cell">Order QTY</th>
-                                <th class="d-sm-table-cell">Ship Date</th>
-                                <th class="d-md-table-cell" width="5%">Style</th>
-                                <th class="d-lg-table-cell">Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>  
-                {% endif %} -->
-                <!-- <div class="tab-pane active p-20" id="pendingTAB" role="tabpanel">
-                    <table id="pending-table" class="table table-striped card-table table-vcenter" data-url="{% url 'knitting:get_knit_production_list_filter' 'pending' %}">
-                        <thead>
-                            <tr>
-                                <th class="d-sm-table-cell">##</th>
-                                <th class="d-sm-table-cell">Date</th>
-                                <th class="d-sm-table-cell">Buyer</th>
-                                <th class="d-sm-table-cell">Style No</th>
-                                <th class="d-sm-table-cell">File NO</th>
-                                <th class="d-sm-table-cell">PO NO</th>
-                                <th class="d-sm-table-cell">Order QTY</th>
-                                <th class="d-sm-table-cell">Action</th>
-                                
-                            </tr>
-                        </thead>
-                    </table>
-                </div>   -->
                 <div class="tab-pane active p-20" id="submittedTAB" role="tabpanel">
                     <table id="submitted-table" class="table table-striped card-table table-vcenter" data-url="{% url 'get_users_for_dataTable' 'submitted' %}">
                         <thead>

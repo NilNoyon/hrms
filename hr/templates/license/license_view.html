@@ -1,0 +1,85 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}License Entry View {% endblock %}
+
+{% block add_css %}
+
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+
+<style>
+    .floating-labels .custom-control-label {
+        position: relative;
+        cursor: context-menu;
+    }
+
+    .floating-labels .custom-label {
+        position: relative;
+    }
+
+    .select2-container--default.select2-container--disabled .select2-selection--single {
+        background-color: transparent !important;
+    }
+
+    textarea,
+    select {
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 align-self-center">
+                        <h4 class="text-themecolor mb-0">License Entry View</h4>
+                    </div>
+                    <div class="col-md-6 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="/hr/license-entry/" class="btn btn-sm btn-info" title="License List"><i
+                                        class="ti-view-list-alt"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+                <div class="table-responsive">
+                    <table class="table" style="font-weight: 400;">
+                            <tr>
+                            <td>Comapany : {{instance.company}}</td>
+                            <td>License Name : {{instance.license_name}}</td>
+                            <td>License/Certificate : {{instance.certificate_no}}</td>
+                            <td>Issu/Renewal Date : {{instance.issu_date}}</td>
+                            </tr>
+                            <tr>
+                            <td>Expire Date : {{instance.expire_date}}</td>
+                            <td>Renewal Status : {{instance.renewal_status}}</td>
+                            <td>Remarks: {{instance.remarks}}</td>
+                            <td>
+                                <div class="ebs2-card-effect-inner">
+                                    <h5 class="mb-4 mt-2">Attachments: </h5>
+                                    <figure class="m-0 mr-2 d-inline-block">
+                                        <a href="/assets/uploads/{{instance.attachment}}" target="_blank">
+                                            <img src="{% static 'images/file.png' %}" alt="" class="img-fluid" style="height: 30px !important" title="{{sc_data_file_name}}">
+                                        </a>
+                                    </figure>
+                                </div>
+                            </td>
+                            </tr>
+                    </table>
+                </div>
+                   
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

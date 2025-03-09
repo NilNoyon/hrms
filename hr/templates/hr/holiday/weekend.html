@@ -1,0 +1,83 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% block page_title %}Company wise Weekends{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .input-group{ position: relative;} 
+    .input-group .form-group { width: 100%; display: inline-block; }
+    .input-group .input-group-append { display: inline-block; position: absolute; left: 0; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-12 align-self-center">
+                <h4 class="text-themecolor mb-0">Company wise Weekends</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="custom-color rounded-lg p-3 mr-0 ml-0">
+            <form class="floating-labels p-4" method="post" id="form" action="{% url 'hr:company_weekends' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-3" id="company_field">
+                        <div class="form-group">
+                            <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Company">
+                                <option value="">Company</option>
+                                {% for c in company_list %}
+                                <option value="{{c.id}}">{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        date_picker();
+        $("body").on('select2:select', "#company", function(){
+            $.ajax({
+                url : "{% url 'hr:get_weekend_data' %}",
+                data: { company_id:$(this).val() },
+                type: "POST", dataType: 'json', 
+                success: function (data) {
+                    if(data['html'] != ""){
+                        $("#company_field").parent().append(data['html']);
+                        date_picker();
+                    } else { $("#company_field").siblings().remove(); }
+                },
+            });
+        }).on('select2:unselect', "#company", function(){
+            $("#company_field").siblings().remove();
+        });
+
+        function date_picker(){
+            $('.singledate').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                autoUpdateInput: false,
+                opens: "left",
+                locale: { format: 'DD/MM/YYYY' },
+            }).on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                $(this).parent().addClass("focused");
+            }).on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+        }
+    });
+</script>
+{% endblock %}

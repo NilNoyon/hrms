@@ -15,14 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+import notification.urls
 from django.urls import path
 from django.conf.urls import include
-import os 
-from django.views.static import serve 
-from django.conf import settings
 
 urlpatterns = [
     path('', include('general.urls')),
+    path('inbox/notifications/', include(notification.urls, namespace='notifications')),
     path('admin/', admin.site.urls),
     # path('fixed-asset/', include('ngoasset.urls')),
     # path('hr/', include('hr.urls')),

@@ -1,0 +1,191 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Salary Structure List{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Salary Structure List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Slab</th>
+                                    <th>Head</th>
+                                    <th>Type</th>
+                                    <th>Value/Percentage</th>
+                                    <th>Range</th>
+                                    <th>Remarks</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in object_list %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ data.slab.value }}</td>
+                                    <td>{{ data.head.value }}</td>
+                                    <td>{% if 'A' in data.type %}Addition{% elif 'D' in data.type %}Deduction{% endif %}</td>
+                                    <td>
+                                        {% if data.value_percentage %}
+                                        {{ data.value_percentage|floatformat:"-2" }}
+                                        {% if 'V' in data.type %}BDT{% elif 'P' in data.type %}%{% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td class="">{% if data.start_gross == null and data.end_gross == null %} N/A {% elif data.start_gross != null or data.end_gross != null %} {{ data.start_gross }} - {{ data.end_gross }} {% endif %}</td>
+                                    <td class="">{{ data.remarks }}</td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:salary_structure_update' data.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:salary_structure_delete' data.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:salary_structure_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="slab">Salary Slab</label> <span class="bar"></span>
+                                    <select class="form-control select2" name="slab" id="slab" data-title="Salary Slab" required>
+                                        <option value="">Salary Slab</option>
+                                        {% for slab in slab_list %}
+                                        <option value="{{slab.id}}" {% if instance.slab_id == slab.id %} selected {% endif %}>{{slab.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="head">Salary Head</label> <span class="bar"></span>
+                                    <select class="form-control select2" name="head" id="head" data-title="Salary Head" required>
+                                        <option value="">Salary Head</option>
+                                        {% for head in head_list %}
+                                        <option value="{{head.id}}" {% if instance.head_id == head.id %} selected {% endif %}>{{head.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="type">Type</label>
+                                    <select class="form-control select2" name="type" id="type" data-title="Type" required>
+                                        <option value="">Type</option>
+                                        <option value="AV" {% if instance.type == "AV" %} selected {% endif %}>Addition Value</option>
+                                        <option value="AP" {% if instance.type == "AP" %} selected {% endif %}>Addition Percent</option>
+                                        <option value="DV" {% if instance.type == "DV" %} selected {% endif %}>Deduction Value</option>
+                                        <option value="DP" {% if instance.type == "DP" %} selected {% endif %}>Deduction Percent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="value_percentage" name="value_percentage" min="1"  value="{{ instance.value_percentage }}" >
+                                    <span class="bar"></span>
+                                    <label for="value_percentage">Value/Percent</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="start_gross" min="1" name="start_gross"  value="{{ instance.start_gross }}" >
+                                    <span class="bar"></span>
+                                    <label for="start_gross">Start</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="end_gross" name="end_gross" min="1" value="{{ instance.end_gross }}" >
+                                    <span class="bar"></span>
+                                    <label for="end_gross">End</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-control" id="remarks" name="remarks" rows="3">{{ instance.remarks }}</textarea>
+                            <span class="bar"></span>
+                            <label for="remarks">Remarks</label> 
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mx-auto">
+                                <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block page_js %}
+<script>
+    $(".card-table").DataTable({});
+    {% comment %} Delete Salary Structure {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this Salary Structure from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+    {% comment %} Delete Salary Structure {% endcomment %}
+</script>
+{% endblock %}
+
+
+

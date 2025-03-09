@@ -1,0 +1,201 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load inv_filters %}
+
+{% block page_title %}Leave Allocations{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .input-group{ position: relative;} 
+    .input-group .form-group { width: 100%; display: inline-block; }
+    .input-group .input-group-append { display: inline-block; position: absolute; right: 0; }
+    .tableFixHead {
+        overflow: auto;
+        height: 65vh;
+    } 
+    .tableFixHead table {
+        border-top: 0px solid transparent !important;
+        border-collapse: unset;
+        border-spacing: 0px !important;
+        margin-bottom: 0px !important;
+    }
+    .tableFixHead thead{
+        position: sticky;
+        top: 0px;
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        z-index: 1;
+    }
+    .tableFixHead .table th, 
+    .tableFixHead .table td {
+        background: #fff; 
+        padding: 8px 16px;
+        text-align: center !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                    <h4 class="mb-1">Leave Allocations</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-height custom-rl pt-0">
+            <div class="form-fields">
+                <div class="row form floating-labels">
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            <button class="btn btn-block btn-outline-warning rreset_button" type="button">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control rcompany_field select2" data-title="Company" name="company">
+                                <option value="" selected>Company</option>
+                                {% for c in company_list %}
+                                <option value="{{c.id}}">{% strip_single_quote_tag c.short_name %}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control rdepartment_field select2" data-title="Department" name="department">
+                                <option value="" disabled selected>Department</option>
+                                {% for i in department_list %}
+                                <option value="{{i.id}}">{{i.title}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control rdesignation_field select2" data-title="Designation" name="designation">
+                                <option value="" disabled selected>Designation</option>
+                                {% for i in designation_list %}
+                                <option value="{{i.id}}">{{i.name}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control rleave_type_field select2" data-title="Leave Type" name="leave_type">
+                                <option value="" disabled selected>Leave Type</option>
+                                {% for i in leave_type_list %}
+                                <option value="{{i.id}}">{{i.short_title}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control remployee_category_field select2" data-title="Employee Category" name="employee_category">
+                                <option value="" disabled selected>Employee Category</option>
+                                {% for i in employee_category_list %}
+                                <option value="{{i.id}}">{{i.value}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="input-group">
+                            <div class="form-group mb-0">
+                                <input type="text" class="form-control rsearch_field" name="search_box" placeholder="Search by Employee ID..." title="Search by Employee ID...">
+                                <span class="bar"></span>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="search_btn btn" type="button"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="regular_data" class="table-responsive tableFixHead">
+                <table id="regular-table" class="table table-striped card-table table-vcenter">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Fiscal Year</th>
+                            <th>Leave Type</th>
+                            <th>Allocated</th>
+                            <th>Availed</th>
+                            <th>Applied</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+    
+    $(".rcompany_field, .rdepartment_field, .rdesignation_field, .rleave_type_field, .remployee_category_field").on("select2:select select2:unselect", function(e){
+        rcommon_table_data();
+    });
+    $(".rreset_button").on("click", function(e){
+        $(".rcompany_field, .rdepartment_field, .rdesignation_field, .rleave_type_field, .remployee_category_field").val('').trigger("change");
+        $(".rsearch_field").val('');
+        rcommon_table_data(reset_data=true);
+    });
+
+    var rstart = 0, rblock_request = false, rend_pagination = false, rcounter = 20; rget_data();
+    function rcommon_table_data(selector, reset_data=true){
+        rget_data(true);
+    }
+
+    $('#regular_data').scroll(function () {
+        rmargin = $('#regular_data').children('table').height() - $('.custom-height').height();
+        if ($('#regular_data').scrollTop() > rmargin && rend_pagination === false && rblock_request === false) {
+            rblock_request = true;
+            rstart += rcounter; rget_data();
+        }
+    });
+
+    function rget_data(reset=false){
+        if(reset) { rstart = 0; }
+        $rtabpane = $('#regular_data').parent('.tab-pane');
+        let company = $(".rcompany_field").val(), department = $(".rdepartment_field").val();
+        let designation = $(".rdesignation_field").val(), search_data = $(".rsearch_field").val();
+        let leave_type = $(".rleave_type_field").val(), employee_category = $(".remployee_category_field").val();
+        $.ajax({
+            type    : 'POST', url : "{% url 'hr:get_leave_allocation_for_datatable' %}",
+            data    : { "start" : rstart, "company" : company, "department" : department, "designation" : designation, "search" : search_data, 'reset' : reset, "counter" : rcounter, "leave_type" : leave_type, "employee_category" : employee_category },
+            success : function (data) {
+                let id_name = $rtabpane.attr('id');
+                $(".nav-link[href='#" + id_name + "'] span").text(data.total_data);
+                if (data.end_pagination === true) {
+                    rend_pagination = true;
+                } else { rend_pagination = false; }
+                if (data.reset_data === true ){
+                    $('#regular-table').find('tbody').html('');
+                }
+                $('#regular-table').find('tbody').append(data.content);
+                rblock_request = false;
+            }
+        })
+    }
+</script>
+{% endblock %}

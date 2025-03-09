@@ -1,0 +1,137 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Attendance List{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Attendance Entry</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:attendance_entry' %}" class="btn btn-sm btn-success" title="Manual Attendance"><i class="ti-pencil-alt"></i></a>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-rl custom-height">
+            <form class="" method="post" id="form">
+                {% csrf_token %}
+                <div class="row floating-labels">
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control text-capitalize select2" name="company" id="company"
+                                data-title="Company">
+                                <option value="" disabled selected></option>
+                                {% for data in company_list %}
+                                <option value="{{data.id}}">{{data.short_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control text-capitalize select2" name="department" id="department"
+                                data-title="Department">
+                                <option value="" disabled selected></option>
+                                {% for data in department_list %}
+                                <option value="{{data.id}}">{{data.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control text-capitalize select2" name="designation" id="designation"
+                                data-title="Designation">
+                                <option value="" disabled selected></option>
+                                {% for data in designation_list %}
+                                <option value="{{data.id}}">{{data.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <select class="form-control text-capitalize select2 user" id="user" name="user" data-title="User">
+                                <option value="" disabled selected></option>
+                                {% for data in user_list %}
+                                <option value="{{data.id}}">{{data.name}}({{data.employee_id}})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <input type="text" data-title="Attendance Date" class="form-control singledate" 
+                                name="attendance_date" id="attendance_date" placeholder="Attendance Date" required />
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <button type="submit" id="btnSetAccessControl" class="btn btn-info btn-block">
+                                <span class="btn-label"><i class="fa fa-search"></i></span> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <table class="table table-border floating-labels mb-0">
+                <thead>
+                    <tr class="text-center">
+                        <th>Employee</th>
+                        <th>Designation</th>
+                        <th width="13%">Shift</th>
+                        <th width="13%">Location</th>
+                        <th width="13%">In Time</th>
+                        <th width="13%">Out Time</th>
+                        <th width="13%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendances %}
+                    <tr class="text-center">
+                        <td class="py-0 text-left">
+                            {{ attendance.employee.personal.employee_id }} - {{ attendance.employee.personal.name }}
+                        </td>
+                        <td>
+                            {{ attendance.employee.designation.name }}
+                        </td>
+                        <td>
+                            {{ attendance.shift.name }}
+                        </td>
+                        <td>
+                            {% if attendance.outside_office %}
+                            Outside Office
+                            {% else %}
+                            {{ attendance.location.name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ attendance.in_time|date:"h : i A" }}
+                        </td>
+                        <td>
+                            {{ attendance.out_time|date:"h : i A" }}
+                        </td>
+                        <td>
+                            {{ attendance.remarks }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

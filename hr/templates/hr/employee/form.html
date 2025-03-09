@@ -1,0 +1,2042 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load inv_filters %}
+{% load sc_filters %}
+
+{% block page_title %}Employee{% endblock %}
+
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<link href="{% static 'dist/css/pages/tab-page.css' %}" rel="stylesheet">
+<style>
+    .btn-light {
+        color: #f8f9fa;
+        background-color: #ccc;
+        border-color: #f8f9fa;
+        display: block;
+        position: absolute;
+        top: 25%;
+        margin-top: -12px;
+    }
+
+    input:focus,
+    button:focus,
+    .form-control:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .form-control:disabled,
+    .form-control[readonly] {
+        background-color: #fff;
+    }
+
+    ul>li.disabled>a {
+        color: #777;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-center {
+        justify-content: center;
+    }
+
+    .wizard .nav-tabs {
+        position: relative;
+        margin-bottom: 0;
+        border-bottom-color: transparent;
+    }
+
+    .wizard>div.wizard-inner {
+        position: relative;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .connecting-line {
+        height: 2px;
+        background: #e0e0e0;
+        position: absolute;
+        width: 66.667%;
+        margin: 0 auto;
+        left: 10px;
+        right: 0;
+        top: 15px;
+        z-index: 1;
+    }
+
+    .wizard .nav-tabs>li.active>a,
+    .wizard .nav-tabs>li.active>a:hover,
+    .wizard .nav-tabs>li.active>a:focus {
+        color: #555555;
+        cursor: default;
+        border: 0;
+        border-bottom-color: transparent;
+    }
+
+    span.round-tab {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        display: inline-block;
+        border-radius: 50%;
+        background: #fff;
+        z-index: 2;
+        position: absolute;
+        left: 0;
+        text-align: center;
+        font-size: 16px;
+        color: #0e214b;
+        font-weight: 500;
+        border: 1px solid #ddd;
+    }
+
+
+    span.round-tab i {
+        color: #555555;
+
+    }
+
+    .wizard li.active span.round-tab {
+        background: #0db02b;
+        color: #fff;
+        border-color: #0db02b;
+    }
+
+    .wizard li.active span.round-tab i {
+        color: #5bc0de;
+    }
+
+    .wizard .nav-tabs>li.active>a i {
+        color: #0db02b;
+    }
+
+    .wizard .nav-tabs>li {
+        width: 33.33%;
+    }
+
+    .wizard li:after {
+        content: " ";
+        position: absolute;
+        left: 46%;
+        opacity: 0;
+        margin: 0 auto;
+        bottom: 0px;
+        border: 5px solid transparent;
+        border-bottom-color: red;
+        transition: 0.1s ease-in-out;
+    }
+
+    .wizard .nav-tabs>li a {
+        width: 30px;
+        height: 30px;
+        margin: 20px auto;
+        border-radius: 100%;
+        padding: 0;
+        background-color: transparent;
+        position: relative;
+        top: 0;
+    }
+
+    .wizard .nav-tabs>li a i {
+        position: absolute;
+        top: -15px;
+        font-style: normal;
+        font-weight: 400;
+        white-space: nowrap;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .wizard .nav-tabs>li a:hover {
+        background: transparent;
+    }
+
+    .wizard .tab-pane {
+        position: relative;
+        padding-top: 20px;
+    }
+
+    .wizard h3 {
+        margin-top: 0;
+    }
+
+    /* .prev-step,
+    .next-step {
+        font-size: 13px;
+        padding: 8px 24px;
+        border: none;
+        border-radius: 4px;
+        margin-right: 30px;
+    } */
+
+    .form-control[disabled],
+    .form-control[readonly],
+    fieldset[disabled] .form-control {
+        background-color: #fdfdfd;
+    }
+
+    legend {
+        display: none
+    }
+
+    .content .tab-content .wizard .wizard-inner .ul .li .disabled a {
+        color: #999;
+        cursor: default;
+    }
+
+    .floating-labels .form-control:focus {
+        border-bottom: 1px solid #c1c1c1;
+    }
+
+    .btn-inverse {
+        display: none
+    }
+
+    .grayout {
+        opacity: 0.6;
+        /* Real browsers */
+        filter: alpha(opacity=60);
+        /* MSIE */
+    }
+
+
+    .profile-pic-wrapper {
+        width: 25%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pic-holder {
+        text-align: center;
+        position: relative;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: auto;
+    }
+
+    .pic-holder .pic {
+        height: 100%;
+        width: 100%;
+        -o-object-fit: cover;
+        object-fit: cover;
+        -o-object-position: center;
+        object-position: center;
+    }
+
+    .pic-holder .upload-file-block,
+    .pic-holder .upload-loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(90, 92, 105, 0.7);
+        color: #f8f9fc;
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .pic-holder .upload-file-block {
+        cursor: pointer;
+    }
+
+    .pic-holder:hover .upload-file-block {
+        opacity: 1;
+    }
+
+    .pic-holder.uploadInProgress .upload-file-block {
+        display: none;
+    }
+
+    .pic-holder.uploadInProgress .upload-loader {
+        opacity: 1;
+    }
+
+    /* Snackbar css */
+    .snackbar {
+        visibility: hidden;
+        min-width: 250px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 14px;
+        transform: translateX(-50%);
+    }
+
+    .snackbar.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    .tab-pane {
+        border-top-color: white
+    }
+
+    .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: transparent !important;
+  }
+    @-webkit-keyframes fadein {
+        from {
+            bottom: 0;
+            opacity: 0;
+        }
+
+        to {
+            bottom: 30px;
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadein {
+        from {
+            bottom: 0;
+            opacity: 0;
+        }
+
+        to {
+            bottom: 30px;
+            opacity: 1;
+        }
+    }
+
+    @-webkit-keyframes fadeout {
+        from {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        to {
+            bottom: 0;
+            opacity: 0;
+        }
+    }
+
+    @keyframes fadeout {
+        from {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        to {
+            bottom: 0;
+            opacity: 0;
+        }
+    }
+
+    .btn-toolbar {
+        display: block;
+    }
+   
+    @media (max-width: 767px) {
+        .wizard .nav-tabs>li a i {
+            display: none;
+        }
+    }
+    .subtitle {
+        margin: 1em 0 2em 0;
+        font-size: 18px;
+        line-height: 0.5;
+        text-align: center;
+    }
+    .subtitle span {
+        display: inline-block;
+        position: relative;  
+    }
+    .subtitle span:before,
+    .subtitle span:after {
+        content: "";
+        position: absolute;
+        height: 5px;
+        border-top: 2px solid #c1c1c1;
+        top: 5px;
+        width: 200px;
+    }
+    .subtitle span:before {
+        right: 100%;
+        margin-right: 15px;
+    }
+    .subtitle span:after {
+        left: 100%;
+        margin-left: 15px;
+    }
+    .input-group{ position: relative;} 
+    .input-group .form-group { width: 100%; display: inline-block; }
+    .input-group .input-group-append { display: inline-block; position: absolute; right: 0; }
+    
+    .nav-tabs .nav-link .badge { padding: 1px 10px 0px !important; }
+    .tableFixHead {
+        overflow: auto;
+        height: 65vh;
+    } 
+    .tableFixHead table {
+        border-top: 0px solid transparent !important;
+        border-collapse: unset;
+        border-spacing: 0px !important;
+        margin-bottom: 0px !important;
+    }
+    .tableFixHead thead{
+        position: sticky;
+        top: 0px;
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        z-index: 1;
+    }
+    .tableFixHead .table th, 
+    .tableFixHead .table td {
+        text-align: center !important;
+        background: #fff; 
+        padding: 8px 16px;
+    }
+    #home .switchery-label {
+        width: 100%;
+    }
+    #home .switchery {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Row -->
+
+<div class="card border-danger">
+    <div class="card-header">
+        <h4 class="text-themecolor mb-0">Employee</h4>
+    </div>
+    <div class="card-body content pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"> 
+                <a class="nav-link active" data-toggle="tab" href="#home" role="tab">
+                    Enroll
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link" data-toggle="tab" href="#regular" role="tab">
+                    Regular <span class="badge badge-danger rounded-pill ml-2"></span>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link" data-toggle="tab" href="#incomplete" role="tab">
+                    Incomplete <span class="badge badge-danger rounded-pill ml-2"></span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border p-2">
+            <div class="tab-pane active p-20" id="home" role="tabpanel">
+                <div class="wizard mt-3">
+                    <div class="wizard-inner">
+                        <div class="connecting-line"></div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active" id="accounts_information">
+                                <a href="#step1" data-toggle="tab" role="tab" aria-expanded="true">
+                                    <span class="round-tab">1 </span> <i class="pl-4">Personal</i>
+                                </a>
+                            </li>
+                            <li role="presentation" class="disabled" id="companys_information">
+                                <a href="#step2" data-toggle="tab" role="tab" aria-expanded="false">
+                                    <span class="round-tab">2</span> <i class="grayout pl-4">Official</i>
+                                </a>
+                            </li>
+                            <li role="presentation" class="disabled" id="personals_information">
+                                <a href="#step3" data-toggle="tab" aria-controls="step3" role="tab">
+                                    <span class="round-tab">3</span> <i class="grayout pl-4">Nominee & Bank</i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="main_form">
+                        <form role="form" class="form-horizontal floating-labels" id="myform" enctype='multipart/form-data'>{% csrf_token %}
+                            <input type="hidden" id="official_id" name="official_id" value=""/>
+                            <input type="hidden" id="personal_id" name="personal_id" value="">
+                            <input type="hidden" id="nominee_id" name="nominee_id" value="">
+                            <input type="hidden" id="bank_id" name="bank_id" value="">
+
+                        {% comment %} Start Personal Information {% endcomment %}
+                            <fieldset id="account_information" class="tab-pane active pt-0" role="tabpanel">
+                                <legend>1.Personal Info </legend>
+                                <div class="row mb-0 pb-0">
+                                    <div class="col-md-3 card-body pb-0">
+                                        <div class="form-group">
+                                            <input type="file" name="profile_pic" id="newProfilePhoto" class="dropify-profile" 
+                                                data-height="150" accept="image/*" data-show-remove="false" />
+                                        </div>
+
+                                        <div class="form-group mt-4">
+                                            <input type="file" name="signature" id="signature" class="dropify-signature" data-height="80" accept="image/*"
+                                                data-show-remove="false" {% if employee.signature %} data-default-file="/assets/uploads{{employee.signature}}" {% endif %}>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9 card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                                    <label for="first_name">Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="first_name_bn" name="first_name_bn" required>
+                                                    <label for="first_name_bn">Name (BN)</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="number" class="form-control" id="phone" name="phone">
+                                                    <label for="phone">Phone Number </label>
+                                                </div>
+                                            </div>
+                                            <!-- <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                                    <label for="last_name">Last Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="last_name_bn" name="last_name_bn" required>
+                                                    <label for="last_name_bn">Last Name (BN)</label>
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="father" name="father" required>
+                                                    <label for="father">Father Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="father_name_bn" name="father_name_bn" required>
+                                                    <label for="father_name_bn">Father Name (BN)</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="number" class="form-control" id="father_phone_no" name="father_phone_no">
+                                                    <label for="father_phone_no">Father Phone No. </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="mother_name" name="mother_name" required>
+                                                    <label for="mother_name">Mother Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="mother_name_bn" name="mother_name_bn" required>
+                                                    <label for="mother_name_bn">Mother Name (BN)</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="number" class="form-control" id="mother_phone_no" name="mother_phone_no">
+                                                    <label for="mother_phone_no">Mother Phone No. </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                  <input type="text" class="form-control singledate" id="date_of_birth" name="date_of_birth" required>
+                                                  <span class="bar"></span>
+                                                  <label for="date_of_birth">Date Of Birth</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <label for="gender">Gender</label>
+                                                    <select class="form-control custom-select select2" name="gender" data-title="Gender" id="gender" placeholder="Gender" required>
+                                                        <option value="" disabled selected></option>
+                                                        {% for i in gender_list %}
+                                                            <option value="{{i.id}}">{{i.value}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <label for="blood">Blood Group</label>
+                                                    <select class="form-control custom-select select2" name="blood" data-title="Blood Group" id="blood">
+                                                        <option value="" disabled selected></option>
+                                                        {% for i in blood_group_list %}
+                                                            <option value="{{i.0}}">{{i.1}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <label for="religion">Religion</label>
+                                                    <select class="form-control custom-select select2" name="religion" data-title="Religion" id="religion" placeholder="Option">
+                                                        <option value="" disabled selected></option>
+                                                        {% for i in religion_list %}
+                                                            <option value="{{i.id}}">{{i.value}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" id="nationality" name="nationality" value="Bangladeshi">
+                                                    <label for="nationality">Nationality </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="email" class="form-control" id="email" name="email" onchange="email_duplicate_check('personal', this);">
+                                                    <label for="email">Personal Email</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="nid" name="nid">
+                                            <label for="nid">NID No. </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="birth_certificate" name="birth_certificate">
+                                            <label for="birth_certificate">Birth Certificate No. </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="passport" name="passport">
+                                            <label for="passport">Passport No. </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="maritialStatus">Maritial Status</label>
+                                            <select class="form-control custom-select select2" name="maritialStatus" data-title="Maritial Status" id="maritialStatus" placeholder="Option">
+                                                <option value="" disabled selected></option>
+                                                {% for i in marital_status_list %}
+                                                    <option value="{{i.id}}">{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" id="show_marital_info">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="spouse" name="spouse">
+                                            <label for="spouse">Spouse Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="spouse_name_bn" name="spouse_name_bn">
+                                            <label for="spouse_name_bn">Spouse Name (BN)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" id="spouse_phone_no" name="spouse_phone_no">
+                                            <label for="spouse_phone_no">Spouse Phone No. </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="no_of_children" name="no_of_children">
+                                            <label for="no_of_children">Number of Children</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="present_location">Present Location</label>
+                                            <select class="form-control custom-select select2" name="present_location" data-title="Present Location" id="present_location" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in geo_location_list %}
+                                                    <option value="{{i.id}}">{{i.location_en}} ~ {{i.location_bn}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <textarea id="present" name="present" class="form-control" rows="1" required></textarea>
+                                                    </div>
+                                                    <label for="present">Present City/Village/House/Road</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <textarea id="present_bn" name="present_bn" class="form-control" rows="1" required></textarea>
+                                                    </div>
+                                                    <label for="present_bn">Present City/Village/House/Road (BN)</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="permanent_location">Permanent Location</label>
+                                            <select class="form-control custom-select select2" name="permanent_location" data-title="Permanent Location" id="permanent_location" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in geo_location_list %}
+                                                    <option value="{{i.id}}">{{i.location_en}} ~ {{i.location_bn}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <textarea id="permanent" name="permanent" class="form-control" rows="1" required></textarea>
+                                                    </div>
+                                                    <label for="permanent">Permanent City/Village/House/Road</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <textarea id="permanent_bn" name="permanent_bn" class="form-control" rows="1" required></textarea>
+                                                    </div>
+                                                    <label for="permanent_bn">Permanent City/Village/House/Road (BN)</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            
+                                <div class="row">
+                                    <div class="col-md-3 ml-auto mt-2">
+                                        <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn">
+                                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                        </button>                               
+                                    </div>
+                                </div>
+                            </fieldset>
+                            {% comment %} End Personal Information {% endcomment %}
+
+                            {% comment %} Start Official Information {% endcomment %}
+                            <fieldset id="company_information" class="tab-pane pt-0" role="tabpanel">
+                                <legend>2.Official Info </legend>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="company">Company</label>
+                                            <select class="form-control  custom-select select2" id="company" name="company" data-title="Company" placeholder="gender" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in company_list %}
+                                                <option value="{{i.id}}">{{i.short_name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="department">Department</label>
+                                            <select class="form-control custom-select custom-select select2" id="department" name="department" data-title="Department" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in department_list %}
+                                                    <option value="{{i.id}}">{{i.title}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="designation">Designation</label>
+                                            <select class="form-control custom-select select2" id="designation" name="designation" data-title="Designation" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in designation_list %}
+                                                    <option value="{{i.id}}">{{i.name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="section">Section</label>
+                                            <select class="form-control custom-select select2" id="section" name="section" data-title="Section" required>
+                                                <option value="" disabled selected></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="cost_center">Cost Center</label>
+                                            <select class="form-control custom-select select2"
+                                                name="cost_center" data-title="Cost Center" id="cost_center">
+                                                <option value="" disabled selected></option>
+                                                {% for i in company_list %}
+                                                <option value="{{i.id}}">{{i.short_name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="employee_unit">Unit</label>
+                                            <select class="form-control custom-select select2"
+                                                name="employee_unit" data-title="Unit" id="employee_unit" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in unit_list %}
+                                                <option value="{{i.id}}">{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="location">Sitting Location</label>
+                                            <select class="form-control custom-select select2" id="location" name="location" data-title="Sitting Location" required>
+                                                <option value="" disabled selected></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="building">Building</label>
+                                            <select class="form-control custom-select select2" id="building" name="building" data-title="Building" >
+                                                <option value="" disabled selected></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="floor">Floor</label>
+                                            <select class="form-control custom-select select2" id="floor" name="floor" data-title="Floor">
+                                                <option value="" disabled selected></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="line">Line</label>
+                                            <select class="form-control custom-select select2" id="line" name="line" data-title="Line">
+                                                <option value="" disabled selected></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="employeeCategory">Employee Category</label>
+                                            <select class="form-control custom-select select2"
+                                                name="employeeCategory" data-title="Employee Category" id="employeeCategory" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in employee_category_list %}
+                                                <option value="{{i.id}}">{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="employeeType">Employment Type</label>
+                                            <select class="form-control custom-select select2" id="employeeType" name="employeeType" data-title="Employment Type" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in employee_type_list %}
+                                                <option value="{{i.id}}">{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="reporting_to">Reporting Boss</label>
+                                            <select class="form-control custom-select select2"
+                                                id="reporting_to" name="reporting_to" data-title="Reporting Boss">
+                                                <option value="" disabled selected></option>
+                                                {% for data in dept_head_list %}
+                                                    <option value="{{data.id}}" {% if data.id == employee.reporting_to_id %} selected {% endif %}>{{data.personal.first_name}} {{data.personal.last_name}}({{data.personal.employee_id}})</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="skill_category">Skill Category</label>
+                                            <select class="form-control custom-select select2" data-tags='True'
+                                                name="skill_category" data-title="Skill Category" id="skill_category">
+                                                <option value="" disabled selected></option>
+                                                {% for i in skill_category_list %}
+                                                    <option value="{{i.id}}">{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="grade">Grade</label>
+                                            <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
+                                                <option value="" disabled selected></option>
+                                                {% for i in 7|times %}
+                                                <option value="{{ i|add:1 }}">{{i|add:1}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="employee_id"
+                                                name="employee_id" required>
+                                            <label for="employee_id">Employee ID</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="punchcardno"
+                                                name="punchcardno" required>
+                                            <label for="punchcardno">Punch Card No</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="office_phone" name="office_phone" />
+                                            <label for="office_phone">Official Phone</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" id="officialMail" name="officialMail" onchange="email_duplicate_check('official', this);">
+                                            <label for="officialMail">Official Mail</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" id="pabx" name="pabx" />
+                                            <label for="pabx">PABX</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control singledateJoin" id="dateOfJoining" name="dateOfJoining" required />
+                                            <span class="bar"></span>
+                                            <label for="dateOfJoining">Date of Joining</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="provision">Provision(Month)</label>
+                                            <select class="form-control custom-select select2" name="provision_month"
+                                                data-title="Provision(Month)" id="provision_month" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in provision_month %}
+                                                <option value="{% if i.0 %}{{i.0}}{% else %}{{i.1}}{% endif %}">{{i.1}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="shift">Shift</label>
+                                            <select class="form-control custom-select select2"
+                                                id="shift" name="shift" data-title="Shift" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in shift_list %}
+                                                    <option value="{{i.id}}">{{i.shift_id}} :: {{i.name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="weeklyOff">Weekly Off</label>
+                                            <select class="form-control select2" multiple data-title="Weekly Off" name="weeklyOff" id="weeklyOff">
+                                                <option value="" disabled></option>
+                                                <option value="4" {% if "4" in office.holiday %} selected {% endif %}>Friday</option>
+                                                <option value="5" {% if "5" in office.holiday %} selected {% endif %}>Saturday</option>
+                                                <option value="6" {% if "6" in office.holiday %} selected {% endif %}>Sunday</option>
+                                                <option value="0" {% if "0" in office.holiday %} selected {% endif %}>Monday</option>
+                                                <option value="1" {% if "1" in office.holiday %} selected {% endif %}>Tuesday</option>
+                                                <option value="2" {% if "2" in office.holiday %} selected {% endif %}>Wednesday</option>
+                                                <option value="3" {% if "3" in office.holiday %} selected {% endif %}>Thursday</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="attendance_bonus">Attendance Bonus</label>
+                                            <select class="form-control custom-select select2" name="attendance_bonus" data-title="Attendance Bonus" id="attendance_bonus">
+                                                <option value="" disabled selected></option>
+                                                {% for ab in ab_rule_list %}
+                                                    <option value="{{ab.id}}">{{ab}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="gross"
+                                                name="gross" required>
+                                            <label for="gross">Gross</label>
+                                        </div>
+                                    </div> -->
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="tin" name="tin">
+                                            <label for="tin">TIN</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group mt-2">
+                                            <label class="switchery-label" for="income_tax">Income Tax
+                                                <input type="checkbox" id="income_tax" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group mt-2">
+                                            <label class="switchery-label" for="tiffin_bill">Tiffin Bill
+                                                <input type="checkbox" id="tiffin_bill" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group mt-2">
+                                            <label class="switchery-label" for="transportOff">Transport
+                                                <input type="checkbox" id="transportOff" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group mt-2">
+                                            <label class="switchery-label" for="pfFacilityOff">PF Facility
+                                                <input type="checkbox" id="pfFacilityOff" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label class="switchery-label" for="overTimeOff">Over Time
+                                                <input type="checkbox" id="overTimeOff" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label class="switchery-label" for="off_day_ot">Off Day OT
+                                                <input type="checkbox" id="off_day_ot" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label class="switchery-label" for="holiday_bonus">Holiday Bonus
+                                                <input type="checkbox" id="holiday_bonus" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label class="switchery-label" for="is_user">Is User?
+                                                <input type="checkbox" id="is_user" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label class="switchery-label" for="status">Status
+                                                <input type="checkbox" id="status" class="js-switch" data-color="#009efb" data-size="mini"  {% if office.status.title|lower == 'active' %} checked {% endif %} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-4">
+                                    <div class="col-md-3 ml-auto mt-2">
+                                        <button type="button" id="previous" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info prev-step">
+                                            <span class="btn-label"><i class="fa fa-refresh"></i></span>
+                                            Previous
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mt-2">
+                                        <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn1">
+                                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                        </button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            {% comment %} End Official Information {% endcomment %}
+                            
+                            {% comment %} Start Nominee & Bank Information {% endcomment %}
+                            <fieldset id="personal_information" class="tab-pane  pt-0" role="tabpanel">
+                                <legend>3.Nominee & Bank Info </legend>
+                                <div class="forms-container">
+                                    <p class="subtitle"><span>Nominee Details</span></p>
+                                    <div class="row">
+                                        <div class="col-md">
+                                            <div class="row">
+                                                <input type="hidden" id="create_nominee" value="true">
+                                                <div class="col-sm-4 nopadding">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="nameNom" name="nameNom[]" value="">
+                                                        <label for="nameNom">Name</label>
+                                                        <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4 nopadding">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="nidNom"
+                                                            name="nidNom[]" value="">
+                                                            <label for="nid">NID</label>
+                                                            <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4 nopadding">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="relation"
+                                                            name="relation[]" value="">
+                                                            <label for="relation">Relation</label>
+                                                            <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4 nopadding">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="phoneNom"
+                                                            name="phoneNom[]" value="">
+                                                            <label for="phoneNom">Phone No</label>
+                                                            <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4 nopadding">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="nominee_address"
+                                                            name="nominee_address" value="">
+                                                            <label for="nominee_address">Address</label>
+                                                            <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4 nopadding">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control" id="share_of_right"
+                                                            name="share_of_right" value="">
+                                                            <label for="share_of_right">Share Of Right</label>
+                                                            <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                        
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group mt-2">
+                                                <input type="file" name="nominee_photo" id="nominee_photo" class="dropify-nominee" data-height="80" data-show-remove="false" {% if employee.nominee_photo %} data-default-file="/assets/uploads{{employee.nominee_photo}}" {% endif %}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="subtitle"><span>Bank Details</span></p>
+                                    <div class="row">
+                                        <input type="hidden" id="create_bank" value="true">
+                                        <div class="col-sm-4 nopadding">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="bank_name" name="bank_name" value="">
+                                                <label for="bank_name">Bank Name</label>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4 nopadding">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="branch_name" name="branch_name" value="">
+                                                <label for="branch_name">Branch Name</label>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4 nopadding">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" id="account_no" name="account_no" value="">
+                                                <label for="account_no">Account No</label>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3 ml-auto mt-2">
+                                            <button type="button" id="previous2" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info prev-step ">                                                         
+                                                Previous
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mt-2">
+                                            <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn2">
+                                                <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            {% comment %} End Nominee & Bank Information {% endcomment %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane p-2" id="regular" role="tabpanel">
+                <div class="form-fields">
+                    <div class="row form floating-labels">
+                        <div class="col-md-1">
+                            <div class="form-group">
+                                <button class="btn btn-block btn-outline-warning rreset_button" type="button">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-group">
+                                <select class="form-control rcompany_field select2" data-title="Company" name="company">
+                                    <option value="" selected>Company</option>
+                                    {% for c in company_list %}
+                                    <option value="{{c.id}}">{% strip_single_quote_tag c.short_name %}</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-group">
+                                <select class="form-control rdepartment_field select2" data-title="Department" name="department">
+                                    <option value="" disabled selected>Department</option>
+                                    {% for i in department_list %}
+                                    <option value="{{i.id}}">{{i.title}}</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-group">
+                                <select class="form-control rdesignation_field select2" data-title="Designation" name="designation">
+                                    <option value="" disabled selected>Designation</option>
+                                    {% for i in designation_list %}
+                                    <option value="{{i.id}}">{{i.name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-group">
+                                <select class="form-control remployee_category_field select2" data-title="Employee Category" name="employee_category">
+                                    <option value="" disabled selected>Employee Category</option>
+                                    {% for i in employee_category_list %}
+                                    <option value="{{i.id}}">{{i.value}}</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <input type="text" class="form-control rdate_field" placeholder="Select Date Range..." autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="input-group">
+                                <div class="form-group mb-0">
+                                    <input type="text" class="form-control rsearch_field" name="search_box" placeholder="Search by Employee ID..." title="Search by Employee ID...">
+                                    <span class="bar"></span>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="search_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        {% comment %} <div class="col-md-1">
+                            <div class="form-group">
+                                <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div> {% endcomment %}
+                    </div>
+                </div>
+                <div id="regular_data" class="table-responsive tableFixHead">
+                    <table id="regular-table" class="table table-striped card-table table-vcenter">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Designation</th>
+                                <th>DOJ</th>
+                                <th>Division</th>
+                                <th>Sub Section</th>
+                                <th>Unit</th>
+                                <th>Department</th>
+                                <th>Section</th>
+                                <th>Employee Category</th>
+                                <th>Phone</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane p-2" id="incomplete" role="tabpanel">
+                <div class="form-fields">
+                    <div class="row form floating-labels">
+                        <div class="col-md-1">
+                            <div class="form-group">
+                                <button class="btn btn-block btn-outline-warning icreset_button" type="button">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="input-group">
+                                <div class="form-group mb-0">
+                                    <input type="text" class="form-control icsearch_field icname_field" name="search_box" placeholder="Search by Name..." title="Search by Name...">
+                                    <span class="bar"></span>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="icsearch_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="input-group">
+                                <div class="form-group mb-0">
+                                    <input type="text" class="form-control icsearch_field icemail_field" name="search_box" placeholder="Search by Email..." title="Search by Email...">
+                                    <span class="bar"></span>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="icsearch_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="input-group">
+                                <div class="form-group mb-0">
+                                    <input type="text" class="form-control icsearch_field icphone_field" name="search_box" placeholder="Search by Phone No..." title="Search by Phone No...">
+                                    <span class="bar"></span>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="icsearch_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="input-group">
+                                <div class="form-group mb-0">
+                                    <input type="text" class="form-control icdate_field" name="to_date" placeholder="Select Date Range..." autocomplete="off">
+                                    <span class="bar"></span>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn calendar-btn" type="button"><i class="fa fa-calendar-days"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        {% comment %} <div class="col-md">
+                            <div class="form-group">
+                                <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div> {% endcomment %}
+                    </div>
+                </div>
+                <div id="incomplete_data" class="table-responsive tableFixHead">
+                    <table id="incomplete-table" class="table table-striped card-table table-vcenter" style="width:100%" data-url="{% url 'hr:get_employee_for_datatable' %}">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Father</th>
+                                <th>Date of Birth</th>
+                                <th>Gender</th>
+                                <th>NID</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+<!-- for js -->
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    
+    $(".rcompany_field, .rdepartment_field, .rdesignation_field, .remployee_category_field").on("select2:select select2:unselect", function(e){
+        rcommon_table_data();
+    });
+    $(".rreset_button").on("click", function(e){
+        $(".rcompany_field, .rdepartment_field, .rdesignation_field, .remployee_category_field").val('').trigger("change");
+        $(".rdate_field, .rsearch_field").val('');
+        rcommon_table_data(reset_data=true);
+    });
+    $(".rdate_field").daterangepicker({
+        singleDatePicker: false,
+        showDropdowns   : true,
+        autoUpdateInput : false,
+        opens           : "left",
+        locale          : {
+            cancelLabel : 'Clear',
+            format      : 'YYYY-MM-DD'
+        },
+    }).on('apply.daterangepicker', function(ev, picker) {
+        start_date      = picker.startDate.format('YYYY-MM-DD');
+        end_date        = picker.endDate.format('YYYY-MM-DD');
+        $(this).val(start_date + " - " + end_date);
+        rcommon_table_data();
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        start_date = end_date = null;
+        $(this).val(null);
+        rcommon_table_data();
+    });
+    $(".search_btn").on("click", function(e){
+        rcommon_table_data();
+    });
+    $("body").on("keydown", ".rsearch_field", function(e) {
+        if (e.keyCode == 13) { rcommon_table_data(this); }
+    });
+
+    var rstart = 0, rblock_request = false, rend_pagination = false, rcounter = 20; rget_data();
+    function rcommon_table_data(selector, reset_data=true){
+        rget_data(true);
+    }
+
+    $('#regular_data').scroll(function () {
+        rmargin = $('#regular_data').children('table').height() - $('#regular_data').closest('.tab-pane').height();
+        if ($('#regular_data').scrollTop() > rmargin && rend_pagination === false && rblock_request === false) {
+            rblock_request = true;
+            rstart += rcounter; rget_data();
+        }
+    });
+
+    function rget_data(reset=false){
+        if(reset) { rstart = 0; }
+        $rtabpane = $('#regular_data').parent('.tab-pane');
+        let company = $(".rcompany_field").val(), department = $(".rdepartment_field").val(), designation = $(".rdesignation_field").val(), employee_category = $(".remployee_category_field").val(), multi_date = ($('.rdate_field').val()).split(" - ");
+        let start_date = multi_date[0], end_date = multi_date[1], search_data = $(".rsearch_field").val();
+        $.ajax({
+            type    : 'POST',
+            url     : "{% url 'hr:get_employee_for_datatable' %}",
+            data    : { "start" : rstart, "company" : company, "department" : department, "designation" : designation, "employee_category" : employee_category, "start_date" : start_date, "end_date" : end_date, "search" : search_data, 'reset' : reset, "counter" : rcounter },
+            success : function (data) {
+                let id_name = $rtabpane.attr('id');
+                $(".nav-link[href='#" + id_name + "'] span").text(data.total_data);
+                if (data.end_pagination === true) {
+                    rend_pagination = true;
+                } else { rend_pagination = false; }
+                if (data.reset_data === true ){
+                    $('#regular-table').find('tbody').html('');
+                }
+                $('#regular-table').find('tbody').append(data.content);
+                rblock_request = false;
+                
+                switchery('#regular-table');
+            }
+        })
+    }
+
+    $('body').on('click', '.employee-update-switch', function (e) {
+         $.ajax({
+            type: "POST", dataType: 'json',
+            data: { id:$(this).data('id') },
+            url : "{% url 'hr:employee_update_status' %}",
+            success: function (data) {
+                toasterMsg("success", "This Employee successfully updated!", 5000);
+            },
+         });
+    });
+
+    $('body').on('click', '.employeeinfo-update-switch', function (e) {
+        $.ajax({
+           type: "POST", dataType: 'json',
+           data: { id:$(this).data('id') },
+           url : "{% url 'hr:employee_info_update_status' %}",
+           success: function (data) {
+               toasterMsg("success", "This Employee successfully updated!", 5000);
+           },
+        });
+    });
+    
+    function email_duplicate_check(model, el){
+        $.ajax({
+            url : "{% url 'hr:email_duplicate_check' %}",
+            type: "POST", dataType: 'json', 
+            data: { model:model,email:$(el).val() },
+            success: function (data) {
+                if(data) {
+                    $(el).val('')
+                    toasterMsg("warning", "This email already used!", 5000);
+                }
+            },
+        });
+    }
+    
+    function companyWiseBuilding(id){
+        $.ajax({
+            type: "POST", dataType: 'json', 
+            url : "{% url 'hr:get_company_and_location_wise_building' %}",
+            data: { location_id:id,company_id:$("#company").val() },
+            success: function (data) {
+                $("#building").empty();
+                $('#building').select2({
+                    placeholder: "Building",
+                    allowClear: true,
+                    data: data.building,
+                });
+            },
+        });
+    }
+
+    function companyWiseLine(id){
+        $.ajax({
+            type: "POST", dataType: 'json', 
+            data: {company_id:$("#company").val() },
+            url : "{% url 'hr:get_company_wise_line' %}",
+            success: function (data) {
+                $("#line").empty();
+                $('#line').select2({
+                    placeholder: "Line",
+                    allowClear: true,
+                    data: data.line,
+                });
+            },
+        });
+    }
+
+    function buildingWiseFloor(id){
+        $.ajax({
+            url : "{% url 'hr:get_building_wise_hrfloor' %}",
+            type: "POST", dataType: 'json', data: { id:id },
+            success: function (data) {
+                $("#floor").empty();
+                $('#floor').select2({
+                    placeholder: "Floor",
+                    allowClear: true,
+                    data: data.floor,
+                });
+            },
+        });
+    }
+
+    function nextTab(elem) {
+        $(elem).next().find('a[data-toggle="tab"]').click();
+    }
+
+    function prevTab(elem) {
+        $(elem).prev().find('a[data-toggle="tab"]').click();
+    }
+
+    $(document).ready(function () {
+
+        //editable submit button color change
+        $('#company_information, #personal_information').hide();
+
+        //for remove opaciti from nav-tabs
+        $("#saveBtn1").on("click", function (e) {
+            $("#companys_information i").removeClass("grayout")
+        });
+
+        $("#saveBtn2").on("click", function (e) {
+            $("#companys_information i").removeClass("grayout")
+            $("#personals_information i").removeClass("grayout")
+        });
+
+        //for select error text hide
+        $("#home select").on("select2:select select2:unselect", function (e) {
+            if($(this).closest('.form-group').find('small').length > 0){
+                $("#myform").valid();
+            }
+        });
+        
+        $(".next").click(function () {
+            var form = $("#myform");
+            form.validate({
+                errorElement : 'small',
+                errorClass: 'error-label',
+                success: function(label,element) {
+                    label.parent().removeClass('error');
+                    label.remove(); 
+                }, highlight: function( element, errorClass, validClass ) {
+                        var elem = $(element);
+                        if (elem.hasClass("select2-hidden-accessible")) {
+                            $("#select2-" + elem.attr("id") + "-container").parent().addClass(errorClass);
+                        } else { $( element ).addClass( errorClass ).removeClass( validClass ); }
+                }, unhighlight: function( element, errorClass, validClass ) {
+                        var elem = $(element);
+                        if (elem.hasClass("select2-hidden-accessible")) {
+                            $("#select2-" + elem.attr("id") + "-container").parent().removeClass(errorClass);
+                        } else { $( element ).removeClass( errorClass ).addClass( validClass ); }
+                }, errorPlacement: function(error, element) {
+                    var elem = $(element);
+                    if (elem.hasClass("select2-hidden-accessible")) {
+                        element = $("#select2-" + elem.attr("id") + "-container").parent().parent().parent();
+                        error.insertAfter(element);
+                    } else { error.insertAfter(element); }
+                }
+            });
+            if (form.valid() === true) {
+                let personal_id = $("#personal_id").val();
+                let official_id = $("#official_id").val();
+                if ($('#account_information').is(":visible")) {
+                    var data = new FormData();
+                    data.append('photo', $('#newProfilePhoto')[0].files[0]);
+                    data.append('signature', $('#signature')[0].files[0]);
+                    data.append('first_name', $('#first_name').val());
+                    data.append('first_name_bn', $('#first_name_bn').val());
+                    // data.append('last_name', $('#last_name').val());
+                    // data.append('last_name_bn', $('#last_name_bn').val());
+                    data.append('phone_no', $('#phone').val());
+                    data.append('father_name', $('#father').val());
+                    data.append('father_name_bn', $('#father_name_bn').val());
+                    data.append('father_phone_no', $('#father_phone_no').val());
+                    data.append('mother_name', $('#mother_name').val());
+                    data.append('mother_name_bn', $('#mother_name_bn').val());
+                    data.append('mother_phone_no', $('#mother_phone_no').val());
+                    data.append('email', $('#email').val());
+                    data.append('date_of_birth', $('#date_of_birth').val());
+                    data.append('gender', $('#gender').val());
+                    data.append('nationality', $('#nationality').val());
+                    data.append('nid', $('#nid').val());
+                    data.append('birth_certificate', $('#birth_certificate').val());
+                    data.append('passport', $('#passport').val());
+                    data.append('religion', $('#religion').val());
+                    data.append('blood_group', $('#blood').val());
+                    data.append('maritial_status', $('#maritialStatus').val());
+                    data.append('spouse_name', $('#spouse').val());
+                    data.append('spouse_name_bn', $('#spouse_name_bn').val());
+                    data.append('spouse_phone_no', $('#spouse_phone_no').val());
+                    data.append('no_of_children', $('#no_of_children').val());
+                    data.append('permanent_location', $('#permanent_location').val());
+                    data.append('permanent', $('#permanent').val());
+                    data.append('permanent_bn', $('#permanent_bn').val());
+                    data.append('present_location', $('#present_location').val());
+                    data.append('present', $('#present').val());
+                    data.append('present_bn', $('#present_bn').val());
+                    data.append('personal_id', $('#personal_id').val());
+                    $.ajax({
+                        processData : false, contentType : false,
+                        async   : false, type : "POST", data: data,
+                        url     : "{% url 'hr:employee_personal_info' %}",
+                        mimeType: "multipart/form-data", dataType : "json",
+                        success : function (data) {
+                            if(data.msg === "success"){
+                                $("#personal_id").val(data.personal_id);
+                                var active = $('.wizard .nav-tabs li.active');
+                                active.next().removeClass('disabled');
+                                nextTab(active);
+                                
+                                $('#accounts_information').removeClass('active');
+                                $('#companys_information').addClass('active');
+                                current_fs = $('#account_information');
+                                next_fs = $('#company_information');
+                                toasterMsg("success", "Personal information stored.", 5000);
+                            }
+                        },
+                    });
+                } else if ($('#company_information').is(":visible")) {
+                    var tiffin_bill     = $("#tiffin_bill").is(':checked') ? 'true' : 'false';
+                    var transportOff    = $("#transportOff").is(':checked') ? 'true' : 'false';
+                    var overTimeOff     = $("#overTimeOff").is(':checked')  ? 'true' : 'false';
+                    var off_day_ot      = $("#off_day_ot").is(':checked')   ? 'true' : 'false';
+                    var holiday_bonus   = $("#holiday_bonus").is(':checked')? 'true' : 'false';
+                    var has_pf          = $("#pfFacilityOff").is(':checked')? 'true' : 'false';
+                    var income_tax      = $("#income_tax").is(':checked')   ? 'true' : 'false';
+                    var is_user         = $("#is_user").is(':checked')      ? 'true' : 'false';
+                    $.ajax({
+                        url: "{% url 'hr:employee_official_info' %}",
+                        async:false, type: "POST", dataType: 'json',
+                        data: { 
+                            official_id : official_id,
+                            company     : $("#company").val(),
+                            location    : $("#location").val(),
+                            department  : $("#department").val(),
+                            designation : $("#designation").val(),
+                            section     : $("#section").val(),
+                            floor       : $("#floor").val(),
+                            line        : $("#line").val(),
+                            shift       : $("#shift").val(),
+                            cost_center : $("#cost_center").val(),
+                            unit        : $("#employee_unit").val(),
+                            office_email: $("#officialMail").val(),
+                            punch_id    : $("#punchcardno").val(),
+                            grade       : $("#grade").val(),
+                            holiday     : JSON.stringify($("#weeklyOff").val()),
+                            personal_id : $("#personal_id").val(),
+                            employee_id : $("#employee_id").val(),
+                            tin         : $("#tin").val(),
+                            building    : $("#building").val(),
+                            joining_date: $("#dateOfJoining").val(),
+                            confirmation_date : $("#dateOfConfirmation").val(),
+                            reporting_to  : $("#reporting_to").val(),
+                            office_mobile : $("#office_phone").val(),
+                            employee_type : $("#employeeType").val(),
+                            skill_category: $("#skill_category").val(),
+                            attendance_bonus  : $("#attendance_bonus").val(),
+                            employee_category : $("#employeeCategory").val(),
+                            provision_month   : $("#provision_month").val(),
+                            transport_facility: transportOff,
+                            holiday_bonus     : holiday_bonus,
+                            income_tax  : income_tax,
+                            tiffin_bill : tiffin_bill,
+                            overtime    : overTimeOff,
+                            off_day_ot  : off_day_ot,
+                            has_pf      : has_pf,
+                            is_user     : is_user 
+                        },  success: function (data) {
+                            if(data.msg === "success"){
+                                $("#official_id").val(data.official_id);
+                                var active = $('.wizard .nav-tabs li.active');
+                                active.next().removeClass('disabled');
+                                nextTab(active);
+                                $('#companys_information').removeClass('active');
+                                $('#personals_information').addClass('active');
+                                current_fs = $('#company_information');
+                                next_fs = $('#personal_information');
+                                toasterMsg("success", "Official information stored.", 5000);
+                            }else{
+                                toasterMsg("warning", data.msg, 5000);
+                            }
+                        },
+                    });
+                } else if ($('#personal_information').is(":visible")) {
+                    var dataN = new FormData();
+                    dataN.append('nominee_photo', $('#nominee_photo')[0].files[0]);
+                    dataN.append('nominee_name', $('#nameNom').val());
+                    dataN.append('nominee_nid', $('#nidNom').val());
+                    dataN.append('nominee_mobile', $('#phoneNom').val());
+                    dataN.append('relation', $('#relation').val());
+                    dataN.append('nominee_address', $('#nominee_address').val());
+                    dataN.append('share_of_right', $('#share_of_right').val());
+                    dataN.append('nominee_id', $("#nominee_id").val());
+                    dataN.append('personal_id', personal_id);
+                    dataN.append('create', $("#create_nominee").val());
+                    $.ajax({
+                        processData : false, contentType : false,
+                        type : "POST",  data : dataN,
+                        url     : "{% url 'hr:employee_nominee_info' %}",
+                        mimeType: "multipart/form-data", dataType : "json",
+                        success: function (data) {
+                            if(data.msg === "success"){
+                                $("#nominee_id").val(data.nominee_id);
+                                toasterMsg("success", "Nominee information stored.", 5000);
+                                $('#personal_information').find("button#saveBtn2").text("Update");
+                                $("#create_nominee").val('false');
+                            }
+                        },
+                    });
+                    $.ajax({
+                        url : "{% url 'hr:employee_bank_info' %}",
+                        type : "POST", dataType : 'json',
+                         data : { 
+                            'personal_id'   : personal_id,
+                            'bank_id'       : $("#bank_id").val(),
+                            'bank_name'     : $("#bank_name").val(),
+                            'branch_name'   : $("#branch_name").val(),
+                            'account_no'    : $("#account_no").val(),
+                            'create'        : $("#create_bank").val(),
+                        }, success: function (data) {
+                            if(data.msg === "success"){
+                                $("#bank_id").val(data.bank_id);
+                                toasterMsg("success", "Bank information stored.", 5000);
+                                $('#personal_information').find("button#saveBtn2").text("Update");
+                                $("#create_bank").val('false');
+                            }
+                        },
+                    });
+                }
+                next_fs.show(); current_fs.hide();
+            }
+        });
+      
+        $('#previous').click(function () {
+            $('#accounts_information').addClass('active');
+            $('#companys_information').removeClass('active');
+            //alert(10) 
+            current_fs = $('#company_information');
+            next_fs = $('#account_information');
+            $('#account_information').find("button#saveBtn").text("Update");
+            hide_fs = $('#personal_information');
+            hide_fs.hide(); next_fs.show(); current_fs.hide();
+        });
+
+        $('#previous2').click(function() {
+            $('#companys_information').addClass('active');
+            $('#personals_information').removeClass('active');
+            $('#banks_information').removeClass('active');
+            $('#accounts_information').removeClass('active');
+            var active = $('.wizard .nav-tabs li.active');
+            prevTab(active);
+            $('#company_information').find("button#saveBtn1").text("Update");
+            current_fs = $('#personal_information');
+            next_fs = $('#company_information');
+            hide_fs = $('#account_information');
+            next_fs.show(); current_fs.hide();
+        });
+
+        $('#previous3').click(function () {
+            $('#personals_information').addClass('active');
+            $('#banks_information').removeClass('active');
+            $('#accounts_information').removeClass('active');
+            $('#companys_information').removeClass('active');
+            var active = $('.wizard .nav-tabs li.active');
+            prevTab(active);
+            $('#company_information').find("button#saveBtn1").text("Update");
+            next_fs = $('#personal_information');
+            hide_fs = $('#bank_information');
+            hide_fs.hide(); next_fs.show();
+        });
+
+        $('.dropify-profile').dropify({
+            messages: {
+                'default': 'Upload Profile Picture',
+                'replace': 'Replace Profile Picture',
+                'remove':  'Remove Profile Picture',
+                'error':   'Ooops, something went wrong!'
+            }
+        });
+
+        $('.dropify-signature').dropify({
+            messages: {
+                'default': 'Upload Signature',
+                'replace': 'Replace Signature',
+                'remove':  'Remove Signature',
+                'error':   'Ooops, something went wrong!'
+            }
+        });
+
+        $('.dropify-nominee').dropify({
+            messages: {
+                'default': 'Upload Nominee Photo',
+                'replace': 'Replace Nominee Photo',
+                'remove':  'Remove Nominee Photo',
+                'error':   'Ooops, something went wrong!'
+            }
+        });
+
+        $('#show_marital_info').hide();
+        let married_id = '{% for ms in marital_status_list %}{% if ms.value == "Married" %}{{ms.id}}{% endif %}{% endfor %}';
+        $("body").on("change", "#maritialStatus", function(e){
+            let ms_id = $('#maritialStatus').val();
+            if(ms_id == married_id){ $('#show_marital_info').show();
+            } else { $('#show_marital_info').hide(); }
+        });
+        // Single Date Range Picker
+        $('#date_of_birth, #dateOfJoining, #dateOfConfirmation').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            locale: { format: 'DD/MM/YYYY' }
+        }).val('');
+
+        $("#location").on('select2:select', function(){
+            {% comment %} $.ajax({
+                type: "POST", dataType: 'json', 
+                url : "{% url 'hr:get_all_shift' %}",
+                success: function (data) {
+                    $("#shift").empty().select2({
+                        placeholder: "Shift",
+                        allowClear: true,
+                        data: data.shift,
+                    });
+                },
+            }); {% endcomment %}
+            companyWiseBuilding(this.value);
+        });
+    
+        $("#company").on('select2:select', function(){
+            $.ajax({
+                url : "{% url 'hr:get_company_wise_location' %}",
+                type: "POST", dataType: 'json', data: { id:this.value },
+                success: function (data) {
+                    $("#location").empty();
+                    $('#location').select2({
+                        placeholder: "Location",
+                        allowClear: true,
+                        data: data.location,
+                    });
+                },
+            });
+            companyWiseLine(this.value);
+            $.ajax({
+                url : "{% url 'hr:get_company_wise_holidays' %}",
+                type: "POST", dataType: 'json', data: { id:this.value },
+                success: function (data) {
+                    if(data.holidays != null){
+                        $('#weeklyOff').val(data.holidays).trigger('change');
+                    } else { $('#weeklyOff').val([]).trigger('change'); }
+                    
+                },
+             });
+        });
+        
+        $("#department").on('select2:select', function(){
+            $.ajax({
+                url : "{% url 'hr:get_department_wise_section' %}",
+                type: "POST", dataType: 'json', data: { id:this.value },
+                success: function (data) {
+                    $("#section").empty();
+                    $('#section').select2({
+                        placeholder: "Section",
+                        allowClear: true,
+                        data: data.section,
+                    });
+                },
+             });
+        });
+        
+        $("#building").on('select2:select', function(){
+            buildingWiseFloor(this.value);
+        });
+
+        $("#reporting_to").select2({
+            minimumInputLength  : 3,
+            placeholder         : "Reporting Boss",
+            allowClear          : true,
+            ajax: {
+                url             : "{% url 'hr:get_employee_data' %}",
+                dataType        : "json",
+                data            : function(term, page) { 
+                                    return { q : term }; 
+                                },
+                processResults  : function (data) { 
+                                    return { results: data.employee_list }; 
+                                }
+            },
+        });
+
+        switchery('#incomplete-table');
+
+    });
+    
+    $(".icreset_button").on("click", function(e){
+        $(".icname_field, .icdate_field, .icemail_field, .icphone_field").val('');
+        iccommon_table_data(reset_data=true);
+    });
+    $(".icdate_field").daterangepicker({
+        singleDatePicker: false,
+        showDropdowns   : true,
+        autoUpdateInput : false,
+        opens           : "left",
+        locale          : {
+            cancelLabel : 'Clear',
+            format      : 'YYYY-MM-DD'
+        },
+    }).on('apply.daterangepicker', function(ev, picker) {
+        start_date      = picker.startDate.format('YYYY-MM-DD');
+        end_date        = picker.endDate.format('YYYY-MM-DD');
+        $(this).val(start_date + " - " + end_date);
+        iccommon_table_data();
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        start_date = end_date = null;
+        $(this).val(null);
+        iccommon_table_data();
+    });
+    $('.calendar-btn').click(function(event){
+        event.preventDefault();
+        $('.icdate_field').click();
+    });
+    $(".icsearch_btn").on("click", function(e){
+        iccommon_table_data();
+    });
+    $("body").on("keydown", ".icsearch_field", function(e) {
+        if (e.keyCode == 13) { iccommon_table_data(this); }
+    });
+    var icstart = 0, icblock_request = false, icend_pagination = false, iccounter = 20; icget_data();
+    function iccommon_table_data(selector, reset_data=true){
+        icget_data(true);
+    }
+    function icget_data(reset=false){
+        if(reset) { icstart = 0; }
+        $tabpane = $('#incomplete_data').closest('.tab-pane');
+        let icmulti_date = ($('.icdate_field').val()).split(" - ");
+        let icstart_date = icmulti_date[0], icend_date = icmulti_date[1];
+        let name = $(".icname_field").val(), email = $(".icemail_field").val(), phone = $(".icphone_field").val();
+        $.ajax({
+            type    : 'POST',
+            url     : "{% url 'hr:get_incomplete_employees_for_datatable' %}",
+            data    : { "name" : name, "email" : email, "phone" : phone,
+                        "start" : icstart, 'reset' : reset, "counter" : iccounter,
+                        "start_date" : icstart_date, "end_date" : icend_date,
+            },
+            success : function (data) {
+                let id_name = $tabpane.attr('id');
+                $(".nav-link[href='#" + id_name + "'] span").text(data.total_data);
+                if (data.icend_pagination === true) {
+                    icend_pagination = true;
+                } else { icend_pagination = false; }
+                if (data.reset_data === true ){
+                    $('#incomplete-table').find('tbody').html('');
+                }
+                $('#incomplete-table').find('tbody').append(data.content);
+                icblock_request = false;
+                switchery('#incomplete-table');
+            }
+        })
+    }
+
+    $('#incomplete_data').scroll(function () {
+        icmargin = $('#incomplete_data').children('table').height() - $('#incomplete_data').closest('.tab-pane').height();
+        if ($('#incomplete_data').scrollTop() > icmargin && icend_pagination === false && icblock_request === false) {
+            icblock_request = true; icstart += iccounter; icget_data();
+        }
+    });
+
+    function switchery(selector=''){
+        $(selector + ' .switchery').remove(); 
+        var elems = Array.prototype.slice.call(document.querySelectorAll(selector + ' .js-switch'));
+        elems.forEach(function(html) {
+            var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
+        });
+    }
+
+</script>
+{% endblock %}

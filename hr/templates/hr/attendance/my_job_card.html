@@ -1,0 +1,169 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Job Card{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Job Card</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    {% comment %} <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:attendance_list' %}" class="btn btn-sm btn-info" title="Custom Button"><i class="ti-view-list-alt"></i></a>
+                            </div>                        
+                        </div>
+                    </div> {% endcomment %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-height custom-rl pt-0">
+            
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Name : </span>{{employee.name|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Employee ID : </span>{{employee.employee_id}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Punch No. : </span>{{employee.punch_id}}</h6>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Company : </span>{{employee.company.name|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Department : </span>{{employee.department.name|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Designation : </span>{{employee.designation.name|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Employee Category : </span>{{employee.employee_category.value|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Employment Type : </span>{{employee.employee_type.value|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Unit : </span>{{employee.unit.value|default_if_none:"N/A"|capfirst}}</h6>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Section : </span>{{employee.section.name|default_if_none:"N/A"|title}}</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><span class="font-weight-bold">Location : </span>
+                                {% if employee.floor %}
+                                Floor : {{ employee.floor.name }} {% if employee.line %}
+                                - Line : {{ employee.line.name }}, {% else %}, {% endif %} 
+                                {% endif %} {% if employee.building %} Building :
+                                {{ employee.building|default_if_none:"N/A" }},
+                                {% endif %} {% if employee.location %}
+                                {{ employee.location|default_if_none:"N/A" }}
+                                {% endif %}
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center delivery-info">
+                            <tr class="text-center">
+                                <td class="font-weight-bold bg-light">
+                                    Total : {{ total_days }} day/s
+                                </td>
+                                <td class="font-weight-bold bg-light">
+                                    Present : {{present}} day/s
+                                </td>
+                            </tr>
+                            <tr class="text-center">
+                                <td class="font-weight-bold bg-light">
+                                    Leave : {{leave}} day/s
+                                </td>
+                                <td class="font-weight-bold bg-light">
+                                    Absent : {{absent}} day/s
+                                </td>
+                            </tr>
+                            <tr class="text-center">
+                                <td class="font-weight-bold bg-light">
+                                    Weekends : {{weekends}} day/s
+                                </td>
+                                <td class="font-weight-bold bg-light">
+                                    Holidays : 0 day/s
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered custom-table table-nowrap mb-0" id="attendance-table">
+                    <thead>
+                        <tr class="text-center bg-info text-white">
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Shift</th>
+                            <th>Shift In</th>
+                            <th>Shift Out</th>
+                            <th>Actual In</th>
+                            <th>Actual Out</th>
+                            <th>Work Hrs</th>
+                            <th>Late</th>
+                            {% comment %} <th>OT</th> {% endcomment %}
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for calendar_log in calendar_logs%}
+                        <tr class="text-center" style="background-color:
+                            {% if calendar_log.in_time == '' %}transparent
+                            {% elif calendar_log.remarks == 'Weekend' %}#DEFFEB
+                            {% elif calendar_log.remarks == 'In Leave' %}#AEF7B0
+                            {% elif calendar_log.remarks == 'Roaster' %}#D0D8FF
+                            {% elif calendar_log.remarks == 'Holiday' %}#DFFFEF
+                            {% elif calendar_log.remarks == 'Absent' %}#FB9678
+                            {% elif calendar_log.in_time == '00:00:00' %}#FB9678
+                            {% comment %} {% elif calendar_log.late_time != '00:00:00' and calendar_log.early_leave_time != '00:00:00' %}#FFAAAA {% endcomment %}
+                            {% elif calendar_log.late_time != '00:00:00' %}#FFD9CC
+                            {% comment %} {% elif calendar_log.early_leave_time != '00:00:00' %}#F6E3E3 {% endcomment %}
+                            {% endif %}">
+                            <td>{{calendar_log.log_date|date:"d-M-Y"|upper}}</td>
+                            <td>{{calendar_log.log_date|date:"l"}}</td>
+                            <td>{{calendar_log.shift}}</td>
+                            <td>{{calendar_log.shift_start}}</td>
+                            <td>{{calendar_log.shift_end}}</td>
+                            <td>{{calendar_log.in_time}}</td>
+                            <td>{{calendar_log.out_time}}</td>
+                            <td>{{calendar_log.work_hrs}}</td>
+                            <td>{{calendar_log.late_time}}</td>
+                            {% comment %} <td>{{calendar_log.early_leave_time}}</td> {% endcomment %}
+                            <td>{{calendar_log.remarks|safe }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>              
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% endblock %}

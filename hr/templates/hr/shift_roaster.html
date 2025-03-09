@@ -1,0 +1,475 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load inv_filters %}
+{% load sc_filters %}
+
+{% block page_title %}Shift Roster{% endblock %}
+
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .input-group{ position: relative;} 
+    .input-group .form-group { width: 100%; display: inline-block; }
+    .input-group .input-group-append { display: inline-block; position: absolute; right: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <h4 class="text-themecolor mb-0">Shift Roster</h4>
+        </div>
+        <div class="card-body content pt-0">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"> 
+                    <a class="nav-link active" data-toggle="tab" href="#entry" role="tab">
+                        Entry
+                    </a>
+                </li>
+                <li class="nav-item"> 
+                    <a class="nav-link" data-toggle="tab" href="#list" role="tab">
+                        List <span class="badge badge-danger rounded-pill ml-2"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content tabcontent-border p-2">
+                <div class="tab-pane active p-20" id="entry" role="tabpanel">
+                    <div class="row floating-labels mt-2">
+                        <div class="col-md-2">
+                            <div class="form-group mb-3">
+                                <label for="company">Company</label>
+                                <select class="form-control select2" name="company" id="company" data-title="Company">
+                                    <option value="" disabled selected></option>
+                                    {% for company in companies %}
+                                    <option value="{{company.id}}">{{company.short_name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-3">
+                                <label for="company">Department</label>
+                                <select class="form-control select2" name="department" id="department" data-title="Department">
+                                    <option value="" disabled selected></option>
+                                    {% for department in departments %}
+                                    <option value="{{department.id}}">{{department.title}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-3">
+                                <label for="designation">Designation</label>
+                                <select class="form-control select2" name="designation" id="designation" data-title="Designation">
+                                    <option value="" disabled selected></option>
+                                    {% for designation in designations %}
+                                    <option value="{{designation.id}}">{{designation.title}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label for="employee">Employees</label>
+                                <select class="form-control select2" name="employee" id="employee" data-title="Employees" multiple>
+                                    {% for shift in shifts %}
+                                        <option value="{{shift.id}}">{{shift.shift_id}} - {{shift.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info mt-2 search_button">
+                                <span class="btn-label"><i class="fa fa-search"></i></span> Search
+                            </button>
+                        </div>   
+                    </div>
+                        
+                    <form class="floating-labels mt-2" method="post">
+                        {% csrf_token %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-nowrap mb-0 hide" id="employee-table" style="max-height:40%;">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th width="15px">
+                                            <div class="custom-control custom-checkbox mb-1">
+                                                <input type="checkbox" class="custom-control-input select_all" id="select_all" onClick="toggle(this)">
+                                                <label class="custom-control-label" for="select_all"></label>
+                                            </div>
+                                        </th>
+                                        <th class="">Company</th>
+                                        <th class="">Department</th>
+                                        <th class="">Designation</th>
+                                        <th class="">Employee ID</th>
+                                        <th class="">Employee Name</th>
+                                        <th class="">Shift</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div class="hide mt-5" id='final_form'>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group mb-3">
+                                        <label for="shift">Shift</label>
+                                        <select class="form-control select2" name="shift" id="shift" data-title="Shift">
+                                            <option value="" disabled selected></option>
+                                            {% for shift in shifts %}
+                                                <option value="{{shift.id}}">{{shift.shift_id}} - {{shift.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <div class="form-group mb-3">
+                                            <input type="text" class="form-control date_field" name="duration" placeholder="Select Date Range..." autocomplete="off">
+                                            <span class="bar"></span>
+                                        </div>
+                                        <div class="input-group-append">
+                                            <button class="btn calendar-btn" type="button"><i class="fa fa-calendar-days"></i></button>
+                                        </div>
+                                    </div>
+                                </div>   
+                                <div class="col-md-2 ml-auto">
+                                    <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mt-2">
+                                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                    </button>
+                                </div>   
+                            </div>   
+                        </div>   
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="list" role="tabpanel">
+                    <div class="form-fields">
+                        <div class="row form floating-labels">
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <button class="btn btn-block btn-outline-warning rreset_button" type="button">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select class="form-control company_field select2" data-title="Company" name="company">
+                                        <option value="" selected>Company</option>
+                                        {% for c in company_list %}
+                                        <option value="{{c.id}}">{% strip_single_quote_tag c.short_name %}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select class="form-control department_field select2" data-title="Department" name="department">
+                                        <option value="" disabled selected>Department</option>
+                                        {% for i in department_list %}
+                                        <option value="{{i.id}}">{{i.title}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <select class="form-control designation_field select2" data-title="Designation" name="designation">
+                                        <option value="" disabled selected>Designation</option>
+                                        {% for i in designation_list %}
+                                        <option value="{{i.id}}">{{i.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control date_field" placeholder="Select Date Range..." autocomplete="off">
+                                        <span class="bar"></span>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="btn calendar-btn" type="button"><i class="fa fa-calendar-days"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="input-group">
+                                    <div class="form-group mb-0">
+                                        <input type="text" class="form-control search_field" name="search_box" placeholder="Search by Employee ID..." title="Search by Employee ID...">
+                                        <span class="bar"></span>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="search_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="col-md-1">
+                                <div class="form-group">
+                                    <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                    <table id="regular-table" class="table table-border card-table table-vcenter">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Regular Shift</th>
+                                <th>Roster Shift</th>
+                                <th>Roster Date</th>
+                                <th>Created by</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="update_roaster_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form class="floating-labels mt-2" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="modal_emp_id" readonly>
+                            <span class="bar"></span>
+                            <label for="modal_emp_id">Employee ID</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="roaster_shift" readonly>
+                            <span class="bar"></span>
+                            <label for="roaster_shift">Roster Shift</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_shift">Shift</label>
+                            <select class="form-control select2" name="new_shift" id="new_shift" data-title="Shift">
+                                <option value="" disabled selected></option>
+                                {% for shift in shifts %}
+                                    <option value="{{shift.id}}">{{shift.shift_id}} - {{shift.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mt-2">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+     
+    $('body').on('click','.check_emp', function(){
+        var all_checked = true;
+        $('.check_emp').each(function (index, item) {
+            if (!$(item).is(':checked')) {
+                all_checked = false;
+            }
+        });
+        if(all_checked){
+            $('#select_all').prop("checked", true);
+        }else{ $('#select_all').prop("checked", false); }
+    });
+
+    // selecting all items for approval 
+    $('.select_all').click(function(){
+        if($(this).is(':checked')){
+            $('.check_emp').attr('checked', true);
+        } else{ $('.check_emp').attr('checked', false); }
+        
+        var total_checkbox          = $(".check_emp:checkbox").length;
+        var total_checked_checkbox  = $(".check_emp:checkbox").filter(":checked").length;
+        
+        if ( total_checkbox != total_checked_checkbox){
+            $(".select_all").attr('checked', false);
+        }
+
+    });
+
+    function toggle(elm) {
+        if ($(elm).is(':checked')) {
+            $('.check_emp').each(function (index, item) {
+                if (!$(this).is(':checked')) {
+                    $(item).trigger('click');
+                }
+            });
+        } else {
+            $('.check_emp').each(function (index, item) {
+                if ($(this).is(':checked')) {
+                    $(item).trigger('click');
+                }
+            });
+        }
+    }
+
+    $('.calendar-btn').click(function(event){
+        event.preventDefault(); 
+        $(this).closest('.input-group').find('.date_field').click();
+        console.log($(this).closest('.input-group').find('.date_field').html());
+
+    });
+
+    $(".date_field").daterangepicker({
+        singleDatePicker: false,
+        showDropdowns   : true,
+        autoUpdateInput : false,
+        opens           : "left",
+        locale          : {
+            cancelLabel : 'Clear',
+            format      : 'YYYY-MM-DD'
+        },
+    }).on('apply.daterangepicker', function(ev, picker) {
+        start_date      = picker.startDate.format('YYYY-MM-DD');
+        end_date        = picker.endDate.format('YYYY-MM-DD');
+        $(this).val(start_date + " - " + end_date);
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        start_date = end_date = null; $(this).val(null);
+    });
+
+    $("#employee").select2({
+        minimumInputLength  : 3,
+        placeholder         : "Employees",
+        allowClear          : true,
+        ajax: {
+            url             : "{% url 'hr:get_employee_data' %}",
+            dataType        : "json",
+            data            : function(term, page) { return { 
+                                q : term, company : $("#company").val(),
+                                department : $("#department").val(),
+                                designation : $("#designation").val() }; 
+                            },
+            processResults  : function (data) { return { results: data.employee_list }; }
+        },
+    });
+    
+    $("body").on("click", ".search_button", function(e){
+        $("#employee-table").hide();
+        $.ajax({
+            type    : "POST",
+            url     : '{% url "hr:get_employee_data_for_shift_roaster" %}',
+            data    : { employee : $("#employee").val(),
+                        company : $("#company").val(),
+                        department : $("#department").val(),
+                        designation : $("#designation").val()
+                    },
+            success : function (data) {
+                $("#employee-table, #final_form").show();
+                $("#employee-table tbody").empty().html(data['report_data']);
+            }
+        });
+    });
+
+    $(".company_field, .department_field, .designation_field, .shift_field").on("select2:select select2:unselect", function(e){
+        common_table_data();
+    });
+    $(".reset_button").on("click", function(e){
+        $(".company_field, .department_field, .designation_field, .shift_field").val('').trigger("change");
+        $(".date_field, .search_field").val(''); common_table_data(reset_data=true);
+    });
+    $(".form-fields .date_field").on('apply.daterangepicker', function(ev, picker) {
+        start_date  = picker.startDate.format('YYYY-MM-DD');
+        end_date    = picker.endDate.format('YYYY-MM-DD');
+        $(this).val(start_date + " - " + end_date);
+        common_table_data();
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        start_date = end_date = null;
+        $(this).val(null); common_table_data();
+    });
+
+    $(".search_btn").on("click", function(e){
+        common_table_data();
+    });
+    $("body").on("keydown", ".search_field", function(e) {
+        if (e.keyCode == 13) { common_table_data(this); }
+    });
+
+    var start = 0, block_request = false, end_pagination = false, counter = 20; get_data();
+    function common_table_data(selector, reset_data=true){
+        get_data(true);
+    }
+
+    $('#regular_data').scroll(function () {
+        margin = $('#regular_data').children('table').height() - $('#regular_data').closest('.tab-pane').height();
+        if ($('#regular_data').scrollTop() > margin && end_pagination === false && block_request === false) {
+            block_request = true; start += counter; rget_data();
+        }
+    });
+
+    function get_data(reset=false){
+        if(reset) { start = 0; }
+        $tabpane = $('#regular_data').parent('.tab-pane');
+        let company = $(".company_field").val(), department = $(".department_field").val(), shift = $(".shift_field").val();
+        let designation = $(".designation_field").val(), multi_date = ($('.date_field').val()).split(" - ");
+        let start_date = multi_date[0], end_date = multi_date[1], search_data = $(".search_field").val();
+        $.ajax({
+            type    : 'POST',
+            url     : "{% url 'hr:get_roasters_for_dataTable' %}",
+            data    : { "start" : start, "company" : company, "department" : department, "shift" : shift,
+                        "designation" : designation, "start_date" : start_date, "end_date" : end_date,
+                        "search" : search_data, 'reset' : reset, "counter" : counter },
+            success : function (data) {
+                let id_name = $tabpane.attr('id');
+                $(".nav-link[href='#" + id_name + "'] span").text(data.total_data);
+                if (data.end_pagination === true) {
+                    end_pagination = true;
+                } else { end_pagination = false; }
+                if (data.reset_data === true ){
+                    $('#regular-table').find('tbody').html('');
+                }
+                $('#regular-table').find('tbody').append(data.content);
+                block_request = false;
+            }
+        })
+    }
+
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        let msg = "Do you want to delete this from list?"
+        Swal.fire({
+            text : msg, type    : 'question',
+            showCancelButton    : true,
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+
+    $('body').on('click','.edit_btn', function(e){
+        let url = $(this).data('url'), id = $(this).data('id');
+        $.ajax({
+            type : 'POST', data : { "id":id }, 
+            url : "{% url 'hr:get_roaster_data' %}",
+            success : function (data) {
+                $("#modal_emp_id").val(data['emp_id']).parent().addClass('focused');
+                $("#roaster_shift").val(data['shift']).parent().addClass('focused');
+                $("#update_roaster_modal form").attr('action', url);
+                $('#update_roaster_modal').modal(); }
+        });
+    });
+</script>
+{% endblock %}

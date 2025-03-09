@@ -1,0 +1,245 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Sync Attendance{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .required{display: none;}
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="mb-1">Sync Attendance</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:attendance_devices' %}" class="btn btn-sm btn-info" title="Add New">
+                                    <i class="ti-view-list-alt"></i> Devices
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-rl">
+            <form class="floating-labels pt-3" method="post" id="form">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group mb-0">
+                            <input type="text" class="form-control datepicker text-center duration" name="duration" 
+                                placeholder="Date Range..." autocomplete="off">
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-0">
+                            <label for="company">Company</label>
+                            <select class="form-control select2 company" id="company" name="company" data-title="Company">
+                                <option value="" selected disabled>Company</option>
+                                {% for c in companies %}
+                                <option value="{{c.id}}">{{c.short_name}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select class="form-control text-capitalize select2 department" id="department" name="department" data-title="Department">
+                                <option value="" disabled selected></option>
+                                {% for data in department_list %}
+                                <option value="{{data.id}}">{{data.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-0">
+                            <select class="form-control select2 employee" name="employee" multiple data-title="Employee">
+                                <option value="">Employee</option>
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-2">
+                        <div class="form-group mb-0">
+                            <select class="form-control select2 location" name="location" data-title="Location">
+                                <option value="" selected disabled>Location</option>
+                                {% for l in locations %}
+                                <option value="{{l.id}}">{{l.name}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    {% comment %} 
+                    <div class="col-md">
+                        <div class="form-group mb-0">
+                            <select class="form-control select2 building" name="building" data-title="Building">
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group mb-0">
+                            <select class="form-control select2 floor" name="floor" data-title="Floor">
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div> {% endcomment %}
+                    <div class="col-md-8">
+                        <div class="form-group mb-0">
+                            <select class="form-control select2 device" name="device" multiple data-title="Device">
+                                {% comment %} <option value="">Device</option> {% endcomment %}
+                                {% for d in devices %}
+                                <option value="{{d.ip_address}}">{{d.name}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mt-2">
+                        <div class="button-group">
+                            <button type="button" class="btn btn-sm btn-block btn-rounded btn-success submit_button">
+                                <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <div class="col-md-12" align="center">
+                <div class="spinner-border text-info my-3" role="status" id="loader" align="center">
+                    <span class="sr-only" >Loading...</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-rl mt-3 hide" id="attendance-table-data">
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        
+        $("#loader").hide();
+
+        $('.datepicker').daterangepicker({
+            showDropdowns: true,
+            opens: "right",
+            locale: { format: 'DD/MM/YYYY' }
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + "-" + picker.endDate.format('DD/MM/YYYY'));
+            $(this).parent().addClass("focused");
+            var duration = moment.duration((picker.endDate).diff(picker.startDate));
+            $(this).closest('td').siblings(".num_days").text(duration.days() + 1);
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+            $(this).closest('td').siblings(".num_days").text('');
+        });
+
+        $('body').on("click", ".submit_button", function(e){
+            let multi_date  = ($(".duration").val()).split("-");
+            let start_date  = multi_date[0], end_date = multi_date[1];
+            $("#attendance-table-data").empty().hide();
+            $.ajax({
+                type    : "POST", url : '{% url "hr:get_attendance_data_from_devices"  %}',
+                data    : { 'device':$(".device").val(), 'employee':$(".employee").val(), "location":$(".location").val(),
+                'company_id':$(".company").val(), 'department':$(".department").val(), "building":$(".building").val(), 
+                "floor":$(".floor").val(), 'start_date':start_date, 'end_date':end_date},
+                beforeSend: function(){ $("#loader").show(); },
+                complete: function(){ $("#loader").hide(); },
+                success : function (data) {
+                    $("#attendance-table-data").show().append(data);
+                }
+            });
+        });
+        
+        {% comment %} Get Buildings {% endcomment %}
+        $(".location").on('change', function(){
+            let id = $(this).val(); $(".building").empty();
+            if (id){
+                $.ajax({
+                    url : "{% url 'hr:get_location_wise_building' %}",
+                    data: { id:id }, type: "POST", dataType: 'json', 
+                    success: function (data) {
+                        $(".building").select2({
+                            allowClear  : true,
+                            placeholder : "Building",
+                            data        : data.building,
+                        });
+                    },
+                });
+            }
+        });
+        
+        {% comment %} Get Floors {% endcomment %}
+        $(".building").on('change', function(){
+            let id = this.value; $(".floor").empty();
+            if (id){
+                $.ajax({
+                    url : "{% url 'hr:get_building_wise_floor' %}",
+                    type: "POST", dataType: 'json', data: { id:id },
+                    success: function (data) {
+                        $(".floor").select2({
+                            allowClear  : true,
+                            placeholder : "Floor",
+                            data        : data.floor,
+                        });
+                    },
+                });
+            }
+        });
+
+        {% comment %} Get Devices {% endcomment %}
+        $(".location, .building, .floor").on('change', function(){
+            let location_id = $(".location").val(), building_id = $(".building").val(), floor_id = $(".floor").val();
+            $.ajax({
+                url : "{% url 'hr:get_attendance_devices' %}", type: "POST", dataType: 'json',
+                data: { location_id:location_id, building_id:building_id, floor_id:floor_id },
+                success: function (data) {
+                    $(".device").empty().select2({
+                        allowClear  : true,
+                        placeholder : "Device",
+                        data        : data.devices,
+                    });
+                },
+            });
+        });
+        
+        $(".company, .location, .building, .floor").on('change', function(){
+            let company_id = $(".company").val(), location_id = $(".location").val();
+            let building_id = $(".building").val(), floor_id = $(".floor").val();
+            $.ajax({
+                url : "{% url 'hr:get_employees' %}", type: "POST", dataType: 'json', 
+                data: { company_id:company_id, location_id:location_id, 
+                        building_id:building_id, floor_id:floor_id },
+                success: function (data) {
+                    $(".employee").empty().select2({
+                        allowClear  : true,
+                        placeholder : "Employee",
+                        data        : data.employees,
+                    });
+                },
+            });
+        });
+    });
+</script>
+{% endblock %}

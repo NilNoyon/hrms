@@ -1,0 +1,320 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Device Assessment List{% endblock %}
+
+{% block add_css %}
+  <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Device Assessment List</h4>
+      </div>
+      {% if request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+        <div class="col-md-6 align-self-center text-right">
+          <div class="d-flex justify-content-end align-items-center">
+            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+              <div class="btn-group" role="group" aria-label="First group">
+                <a href="/helpdesk/device-assessment-entry/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <form class="floating-labels" method="post">{% csrf_token %}
+      <div class="row  custom-color rounded-lg p-3 mr-0 ml-0">
+        <div class="col-md align-self-center">
+            <div class='input-group mb-0'>
+                <input type='text' class="form-control linkedCalendars" placeholder="Date" {% if searchDateRange %} value="{{searchDateRange}}" {% else %} value="" {% endif %} autocomplete="off" name="searchDateRange" id='searchDateRange' />
+                <span class="bar"></span>
+            </div>         
+        </div>
+        <div class="col-md align-self-center">
+          <div class="form-group mb-0">
+              {% comment %} <label for="device">Device</label> {% endcomment %}
+              <select class="form-control text-capitalize select2" id="device" name="device" data-title="Device">
+                  <option value="" selected>Select</option>
+                  {% for data in device_list %}
+                      <option value="{{data.device_name}}" {% if data.device_name == device %} selected {% endif %}>{{data.device_name}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md align-self-center">
+            <div class="form-group mb-0">
+                {% comment %} <label for="device_type" class="form-label">Device Type</label> {% endcomment %}
+                <select class="select2 form-control custom-select" id="device_type" name="device_type" data-title="Device Type">
+                    <option value="" selected>Select</option>
+                    <option value="New" {% if device_type == "New" %} selected {% endif %}>New</option>
+                    <option value="Replace" {% if device_type == "Replace" %} selected {% endif %}>Replace</option>
+                    <option value="Used" {% if device_type == "Used" %} selected {% endif %}>Used</option>
+                    <option value="Handover" {% if device_type == "Handover" %} selected {% endif %}>Handover</option>
+                    <option value="Service" {% if device_type == "Service" %} selected {% endif %}>Service</option>
+                </select>
+                <span class="bar"></span>
+            </div>
+        </div>
+        <div class="col-md align-self-center">
+            <div class="form-group mb-0">
+                {% comment %} <label for="status" class="form-label">Status</label> {% endcomment %}
+                <select class="select2 form-control custom-select" id="status" name="status" data-title="Status">
+                    <option value="" selected>Select</option>
+                    <option value="1" {% if status == "1" %} selected {% endif %}>Pending Department Head Approval</option>
+                    <option value="2" {% if status == "2" %} selected {% endif %}>Pending ICT Department Head Approval</option>
+                    <option value="4" {% if status == "4" %} selected {% endif %}>Pending CEO Approval</option>
+                    <option value="5" {% if status == "5" %} selected {% endif %}>Approved</option>
+                    <option value="6" {% if status == "6" %} selected {% endif %}>Canceled</option>
+                </select>
+                <span class="bar"></span>
+            </div>
+        </div>
+        <div class="col-md align-self-center">
+            <div class="text-center mb-0">
+                <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success" id="btnIssueSubmit">
+                    <span class="btn-label"><i class="fa fa-search"></i></span> Search
+                </button>
+            </div>
+        </div>
+      </div>
+    </form>
+    <div class="table-responsive  custom-color rounded-lg p-3 mt-3">
+      <table id="assessment_table" class="table table-border card-table table-vcenter scrollerDT" data-url="{% url 'desk:assessment_list' %}" style="width:100%">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Note</th>
+            <th>Type</th>
+            <th>Device</th>
+            <th>Review</th>
+            <th>Status</th>
+            <th width="100"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in assessment_list %}
+          <tr id="assess_row_{{user.id}}">
+            <td>
+              <a href="#aboutModal" data-toggle="modal" data-id="{{ user.assessment_for_id }}" class="user_info text-info" data-target="#userModal">
+                {{ user.assessment_for }}</a>
+            </td>
+            <td style="width:30%">
+              <div class="{{user.id}}_show">{{ user.note|safe|truncatewords:10 }} {% if user.note|wordcount > 10 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('{{user.id}}');" style="color:blue;"></i> {% endif %}</div> 
+              <div class="{{user.id}}_hide" style="display:none">{{ user.note|safe}} <i class='fas fa-arrow-circle-up' onclick="close_td('{{user.id}}');" style="color:blue;"></i></div>
+            </td>
+            <td>{{ user.device_type }}</td>
+            <td>
+              {% if user.device %}{{ user.device }}{% else %}
+              {% for item in user.item.all %}<b>{{ item.item_master.item_name }},</b> {{item}} <br />
+              {% endfor %}{% endif %}
+            </td>
+            <td style="width:20%">
+                <span class="review_{{user.id}}_show">
+                  Assessment by {{ user.assessment_by_name }} at {{ user.created_at }},
+                  {% if user.issuer_dpt_approve_at %} Employee Dept. Head reviewed at {{ user.issuer_dpt_approve_at }}, {% endif %}
+                  {% if user.ict_dpt_approve_at %} ICT Head reviewed at {{ user.ict_dpt_approve_at }} {% endif %} 
+                  {% if user.ceo_approve_at or user.ict_finished_at or user.status == "6" %}
+                    <i class='fas fa-arrow-circle-down' onclick="expand_td('review_{{user.id}}');" style="color:blue;"></i> 
+                  {% endif %} 
+                </span> 
+                <span class="review_{{user.id}}_hide" style="display:none">
+                  Assessment by {{ user.assessment_by_name }} at {{ user.created_at }},
+                  {% if user.issuer_dpt_approve_at %} Employee Dept. Head reviewed at {{ user.issuer_dpt_approve_at }}, {% endif %}
+                  {% if user.ict_dpt_approve_at %} ICT Head reviewed at {{ user.ict_dpt_approve_at }},{% endif %}
+                  {% if user.ceo_approve_at %} CEO reviewed at {{ user.ceo_approve_at }}, {% endif %}
+                  {% if user.ict_finished_at %} ICT Finished at {{ user.ict_finished_at }}, {% endif %}
+                  {% if user.status == "6" %} Canceled at {{ user.canceled_at }} by {{ user.canceled_by }} {% endif %} 
+                  <i class='fas fa-arrow-circle-up' onclick="close_td('review_{{user.id}}');" style="color:blue;"></i>
+                </span>                
+            </td>
+            <td>{{ user.get_status_display }}</td>
+            <td class="text-center">
+                <a href="#" data-toggle="modal" data-id="{{ user.id }}" class='assessment_view'>
+                  <span class="icon"><i class="ti-eye"></i></span>
+                </a>
+                {% if user.status != "5" and user.status != "6" %}
+                  {% if user.status == "1" and user.head_of_assessment == request.session.id or user.status == "2" and user.head_of_ict == request.session.id or user.status == "4" and user.ceo == request.session.id or user.assessment_by == request.session.id %}
+                    <button type="button" id="assessment_{{user.id}}" class="btn waves-effect waves-light btn-rounded btn-outline-info ml-3" onClick="assessmentApproveModal('{{user.id}}','{{user.status}}','{{user.device_type}}', '{{user.head_of_assessment}}', '{{user.assessment_by}}')">Approve/Reject
+                    </button>
+                  {% endif %}
+                {% endif %}
+                {% if user.status == "5" or user.status == "6" %}
+                    <a class="ml-3" href="/helpdesk/device-assessment/{{user.id}}/report/" target='_blank'>
+                      <span class="icon"><i class="ti-download"></i></span>
+                    </a>
+                {% endif %}
+                {% if user.status == "4" or user.status == "5" %}
+                  {% if user.item.count > 0 and not user.sr_status %}
+                    <a class="btn btn-link text-info small ml-2 generate_sr" data-id='{{user.id}}' href="javascript:void(0)">SR</a>
+                  {% endif %}
+                {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="assessmentView" tabindex="-1" role="dialog" aria-labelledby="assessmentView" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="assessmentView">Device Assessment Detail</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table table-border card-table table-vcenter">
+              <tr>
+                <th>Reviewer</th>
+                <th>Date</th>
+                <th>Note</th>
+              </tr>
+              <tbody id="review"></tbody>            
+            </table>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="approve" tabindex="-1" role="dialog" aria-labelledby="approve" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="approve">Device Assessment Approval</h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body">
+                              <div class="row floating-labels mt-1">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label for="note" class="form-label">Note</label>
+                                    <textarea rows="2" class="form-control" id="note" name="resolver_note"></textarea>
+                                    <span class="bar"></span>
+                                  </div>
+                                  <div id="btnAssessmentApprove"></div>
+                                </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'dist/js/desk.js' %}"></script>
+<script src="{% static 'dist/js/moment.min.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+  function assessmentApproveModal(obj, status,assessment_type,emp_dept_head, assessment_by) {
+      $('#approve').modal('show');
+      var ict_dept_head = "{{ict_dpt_head}}";
+      var user_id = "{{request.session.id}}";
+
+      var btn = ``
+      if(assessment_by != user_id) {
+        if(assessment_type != "Service" || ict_dept_head != user_id) {
+          btn += `
+            <button class="btn waves-effect waves-light btn-rounded btn-success" onClick="assessmentApprove('`+ obj.toString() + `',`+ status + `,'Approve')">Approve
+              </button>
+          `
+        }
+        btn += `
+            <button class="btn waves-effect waves-light btn-rounded btn-danger" onClick="assessmentApprove('`+ obj.toString() + `',`+ status + `,'Reject')">Reject
+            </button>
+          `
+      }
+      if( (assessment_by == user_id) || ((status == 2) && (ict_dept_head == user_id)) || ((assessment_type == "Service") && (ict_dept_head == user_id)) || (emp_dept_head == ict_dept_head)) {
+        btn += `
+        <button class="btn waves-effect waves-light btn-rounded btn-info" onClick="assessmentApprove('`+ obj.toString() + `',`+ status + `,'Finish')">Finish
+        </button>
+      `
+      } 
+      $("#btnAssessmentApprove").html(btn);
+  }
+
+  let table = $('#assessment_table').DataTable({
+              dom: "<'row top'<'col-md text-center'f>>t<'row'<'col-4'><'col-8'p>>",
+              ordering: true,
+              paging: false,
+              pageLength: 50,
+              lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+              responsive: true,
+              "order": [[ 5, "desc" ]],
+              fixedHeader: {
+                  header: false
+              },
+              language: {
+                  paginate: {
+                      previous: "<",
+                      next: ">",
+                  }
+              },
+              scrollY: '50vh'
+  });
+
+  $('.linkedCalendars').daterangepicker({
+        linkedCalendars: true,
+        autoUpdateInput:false, 
+        autoApply: false,
+  });
+
+  $('.linkedCalendars').on('cancel.daterangepicker', function(ev, picker) {
+        $('.linkedCalendars').val('');
+  });
+
+  $('input[name="searchDateRange"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+  })
+
+  $('body').on('click','.generate_sr', function(e){
+    e.preventDefault();
+    let da_id = $(this).data('id');
+    Swal.fire({
+      text                : 'Do you want to generate SR?',
+      type                : 'question',
+      confirmButtonText   : 'Yes',
+      confirmButtonColor  : "#00c292",
+      showCancelButton    : true,
+      cancelButtonText    : 'No',
+      cancelButtonColor   : "#e46a76",
+      reverseButtons      : false
+    }).then((result) => {
+      if (result.value) {
+          $.ajax({
+              type    : "POST", data : { "da_id" : da_id },
+              url     : '{% url "desk:generate_sr_from_desk" %}',
+              success : function (data) {
+                  Swal.fire({
+                      type: 'success',
+                      title: 'SR Generated Successfully!',
+                      showConfirmButton: false
+                  })
+                  setTimeout(function(){ window.location.href = data.url; }, 2000);
+              }
+          });
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,492 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %} Pf Transfer{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .show-grid .row {
+    margin-bottom: 15px;
+  }
+
+  fieldset.scheduler-border {
+    {% comment %} border: 1px groove #ddd !important;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    -webkit-box-shadow: 0px 0px 0px 0px #000;
+    box-shadow: 0px 0px 0px 0px #000; {% endcomment %}
+  }
+
+  legend.scheduler-border {
+    font-size: 1.2em !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    width: auto;
+    padding: 0 10px;
+    border-bottom: none;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h4 class="text-themecolor mb-0 mt-0">Transfer Eployee</h4>
+  </div>
+  <div class="card-body show-grid pt-0 pb-0" style="padding-left:1.7rem!important;padding-right:1.7rem!important;">
+    <form class="floating-labels custom-color rounded-lg p-3 mb-4" method ="post" id="employee_transfer">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-8 float-left">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="employee" class="font-weight-bold">Employee</label>
+                  <select class="form-control text-capitalize select2" id="employee" name="employee"
+                        data-title="Employee">
+                     <option value="" disabled selected></option>
+                       {% for data in employee_list %}
+                          <option value="{{data.id}}" {% if data.employee_id == employee_id %} selected {% endif %}>{{data.employee_id}} -- {{data.name}}
+                          </option>
+                      {% endfor %}
+                  </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-5">
+          <fieldset class="scheduler-border">
+            <legend class="scheduler-border">Source Employee Information</legend>
+            <div class="pl-2">
+              <div class="row mb-0">
+                <div class="col-md-12 py-4">
+                  <div class="row">
+                    <div class="col-md-5 font-weight-bold py-2">Company</div>
+                    <div class="col-md-4 font-weight-bold py-2" id ="company" name="company"></div>
+
+                    <div class="col-md-5 font-weight-bold py-2">Department</div>
+                    <div class="col-md-7 font-weight-bold py-2" id="department" name="department_from"></div>
+
+                    <div class="col-md-5 font-weight-bold py-2">Employee ID</div>
+                    <div class="col-md-7 font-weight-bold py-2" id="employee_id" name="employee_id"></div>
+
+                    <div class="col-md-5 font-weight-bold py-2">Designation</div>
+                    <div class="col-md-7 font-weight-bold py-2" id="designation" name="designation_from"></div>
+
+                    <div class="col-md-5 font-weight-bold py-2">Father's Name</div>
+                    <div class="col-md-7 font-weight-bold py-2" id="father_name" name="father_name"></div>
+
+                    <div class="col-md-5 font-weight-bold py-2">Phone</div>
+                    <div class="col-md-7 font-weight-bold py-2" id="phone_no" name="phone_no"></div>
+                    <div class="col-md-5 font-weight-bold py-2">Email</div>
+                    <div class="col-md-7 font-weight-bold py-2" id='email' name='email'></div>
+                    <div class="col-md-5 font-weight-bold py-2">Fax</div>
+                    <div class="col-md-7 font-weight-bold py-2"id='faxNo' name="faxNo"></div>
+                    <div class="col-md-5 font-weight-bold py-2">Date Of Joining</div>
+                    <div class="col-md-7 font-weight-bold py-2" id='create_at' name='create_at'></div>
+                    <div class="col-md-5 font-weight-bold py-2" id='' name=''>Branch</div>
+                    <div class="col-md-7 font-weight-bold py-2">Dhaka</div>
+
+                    <div class="col-md-5 font-weight-bold py-2">Permanent Address</div>
+                    <div class="col-md-7 font-weight-bold py-2" id="permanent_address" name="permanent_address">
+                    </div>
+                    <div class="col-md-5 font-weight-bold py-2">Contact Address</div>
+                    <div class="col-md-7 font-weight-bold py-2" id='contact_address' name='contact_address'></div>
+                    <div class="col-md-5 font-weight-bold py-2">Remarks</div>
+                    <div class="col-md-7 font-weight-bold py-2" id='' name=''></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="col-md-7">
+          <fieldset class="scheduler-border">
+            <legend class="scheduler-border">Destination Employee Information</legend>
+            <div class="row">
+              <input type='hidden' value='save'  name='submition_type'>
+              <input type="hidden" class="form-control" id="emp_id" name="emp_id">
+              <div class="col-md-6 mt-2">
+                <div class="form-group">
+                  <label for="company">Destination Company</label>
+                   <select class="form-control text-capitalize select2" id="company" name="company"
+                      data-title="Company" required>
+                      <option value="" disabled selected></option>
+                      {% for data in company_list %}
+                      <option value="{{data.id}}" {% if employee.company_id == data.id %} selected {% endif %}>{{data.name}}
+                      </option>
+                      {% endfor %}
+                   </select>
+                </div>
+              </div>
+              <div class="col-md-6 mt-2">
+                <div class="form-group">
+                  <label for="department">Department</label>
+                    <select class="form-control text-capitalize select2" name="department_to" data-title="Department"
+                      required>
+                      <option value="" disabled selected></option>
+                      {% for data in department_list %}
+                      <option value="{{data.id}}" {% if employee.department_id == data.id %} selected {% endif %}>
+                        {{data.name}}</option>
+                      {% endfor %}
+                   </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="to_employee" name="to_employee_id" value="">
+                  <span class="bar"></span>
+                  <label for="employee">New Employee ID</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="designation">Designation</label>
+                  <select class="form-control text-capitalize select2" name="designation_to" data-title="Designation"
+                    required>
+                    <option value="" disabled selected></option>
+                    {% for data in designation_list %}
+                    <option value="{{data.id}}" {% if employee.designation_id == data.id %} selected {% endif %}>
+                      {{data.name}}</option>
+                    {% endfor %}
+                </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="email" name="email" value="" required>
+                  <span class="bar"></span>
+                  <label for="email">Email</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="text" class="form-control singledate effictive_from_date" id="effictive_from_date" name="effictive_from_date">
+                  <span class="bar"></span>
+                  <label for="effictive_from_date">Date of Joining</label>
+                </div>
+              </div>
+
+
+              <div class="col-md-12">
+                <div class="form-group">
+                  <textarea type="text" id="remarks" name="remarks" class="form-control" value=""></textarea>
+                  <span class="bar"></span>
+                  <label for="remarks">Remarks</label>
+                </div>
+              </div>
+              <div class="col-md-6 ml-auto ">
+                <div class="button-group">
+                  <button
+                    class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success item-edit-btn save-btn"
+                    type="submit" data-name="save">
+                    <span class="btn-label"><i class="fa fa-check"></i></span>
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+     </form>
+
+      <fieldset class="scheduler-border custom-color rounded-lg p-3">
+        <legend class="scheduler-border">Member Information For Destination Company</legend>
+        <form class="floating-labels" id="Pf_info" method="POST"> {% csrf_token %}
+          <div class="col-md-12">
+            <div class="row">
+              <div class="col-md-12 py-0">
+                <input type='hidden' value='submit'  name='submition_type'>
+                
+                <input type="hidden" class="form-control" id="emp_id_2" name="emp_id">
+                <input type="hidden" class="form-control" id="pf_emp_id" name="pf_emp_id">
+                <input type='hidden' name='pf_id' id="pf_id">
+                <input type='hidden' name='policy' id="policy">
+                <input type='hidden' name='basis_of_contribution' id="input_basis_of_contribution">
+
+                <div class="row">
+                  <div class="col-md-4 font-weight-bold">Basis of PF Computation</div>
+                  <div class="col-md-2 font-weight-bold" id='basis_of_contribution'></div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="emp_opening_contribution" name="emp_opening_contribution" value="" required>
+                  <span class="bar"></span>
+                  <label for="emp_opening_contribution">Opening Balance of Employee's Fund</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="basic_gross_salary" name="basic_gross_salary" value="" required>
+                  <span class="bar"></span>
+                  <label for="basic_gross_salary">Basic/Gross Salary</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="company_opening_contribution" name="company_opening_contribution" value="" required>
+                  <span class="bar"></span>
+                  <label for="company_opening_contribution">Opening Balance of Company's Fund</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="date_Pf_membership" name="date_Pf_membership" value="" readonly required >
+                  <span class="bar"></span>
+                  <label for="date_Pf_membership">Date of PF Membership</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="emp_opening_balance_interest" name="emp_opening_balance_interest" value="" required>
+                  <span class="bar"></span>
+                  <label for="emp_opening_balance_interest">Opening Balance of Interest(Employee)</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="rate_employee_contribution" name="rate_employee_contribution" value="" required>
+                  <span class="bar"></span>
+                  <label for="rate_employee_contribution">Rate of Employee's Contribution</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="company_opening_balance_interest" name="company_opening_balance_interest" value="" required>
+                  <span class="bar"></span>
+                  <label for="company_opening_balance_interest">Opening Balance of Interest(Company)</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="rate_company_contribution" name="rate_company_contribution" value="">
+                  <span class="bar"></span>
+                  <label for="rate_company_contribution">Rate of Company's Contribution</label>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="designation">Provident Fund</label>
+                  <select class="form-control text-capitalize select2" id="current_pf" name="pf" data-title="Provident Fund">
+                    <option value="" disabled selected></option>
+                    {% for data in pf %}
+                    <option value="{{data.id}}"> {{data.pf_heading}} </option>
+                    {% endfor %}
+                </select>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="designation">Policy</label>
+                  <select class="form-control text-capitalize select2" id="current_policy" name="policy" data-title="Policy">
+                    <option value="" disabled selected></option>
+                    {% for data in policy %}
+                    <option value="{{data.id}}"> {{data.pf_policy_heading}} </option>
+                    {% endfor %}
+                </select>
+                </div>
+              </div>
+
+              <div class="col-md-4 py-0">
+                <div class="row">
+                  <div class="col-md-4 font-weight-bold">Total</div>
+                  <div class="col-md-2 font-weight-bold"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 ml-auto mt-2">
+              <div class="button-group">
+                <button type="button" id="submit_btn"
+                  class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                  Generate Vouchar for Destination Company
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4 mr-auto mt-2">
+              <div class="button-group">
+                <button type="submit"
+                  class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-primary transfer_btn " data-name="submit">
+                  Transfer Member
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </fieldset>
+  </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+  var nowDate = new Date();
+  var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+  $('.effictive_from_date').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    maxDate : today,
+    locale: {
+        format: 'DD-MMM-YYYY'
+    },
+    autoUpdateInput: false
+}).on("apply.daterangepicker", function (e, picker) {
+    picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+  $('#employee').on('change', function () { 
+    if($('#employee option:selected').length > 0){  
+        $.ajax({ 
+            cache: false, 
+            url: "{% url 'hr:get_employee_transfer' %}", 
+            type: "POST", 
+            data: { employee : $(this).val() }, 
+            success: function (data) {
+              {% comment %} console.log('data ',data) {% endcomment %}
+              $('#company').html(data["company"]);
+              $('#policy').val(data["policy"]);
+              $('#employee_id').html(data["employee"]);
+              $('#to_employee').val(data["employee"]);
+              $('#to_employee').parent().addClass('focused');
+              $('#father_name').html(data["father_name"]);
+              $('#permanent_address').html(data["permanent_address"]);
+              $('#contact_address').html(data["contact_address"]);
+              $('#email').html(data["email"]);
+              $('#department').html(data["department"]);
+              $('#designation').html(data["designation"]);
+              $('#phone_no').html(data["phone"]);
+              $('#emp_id').val(data["emp_id"]);
+              $('#emp_id_2').val(data["emp_id"]);
+              $('#emp_pf_id').val(data["emp_pf_id"]);
+              $('#faxNo').html(data["fax"]);
+              $('#create_at').html(data["joining_date"]);
+              $('#basic_gross_salary').val(data["basic_gross_salary"]);
+              $('#basic_gross_salary').parent().addClass('focused');
+              $('#basis_of_contribution').html(data["basis_of_contribution"]); 
+              $('#input_basis_of_contribution').val(data["input_basis_of_contribution"]); 
+              $('#date_Pf_membership').val(data["date_Pf_membership"]);
+              $('#date_Pf_membership').parent().addClass('focused');
+              $('#pf_id').val(data["pf_id"]);
+              $('#pf_emp_id').val(data["pf_emp_id"]);
+              $('#current_pf').val(data["pf_id"]).trigger("change");
+              $('#current_policy').val(data["policy"]).trigger("change");
+              $('#rate_employee_contribution').val(data["rate_employee_contribution"]);
+              $('#rate_employee_contribution').parent().addClass('focused');
+              $('#rate_company_contribution').val(data["rate_company_contribution"]);
+              $('#rate_company_contribution').parent().addClass('focused');
+              $('#emp_opening_contribution').val(data["emp_opening_contribution"]);
+              $('#emp_opening_contribution').parent().addClass('focused');
+              $('#company_opening_contribution').val(data["company_opening_contribution"]); 
+              $('#company_opening_contribution').parent().addClass('focused');
+              $('#emp_opening_balance_interest').val(data["emp_opening_balance_interest"]);
+              $('#emp_opening_balance_interest').parent().addClass('focused');
+              $('#company_opening_balance_interest').val(data["company_opening_balance_interest"]);
+              $('#company_opening_balance_interest').parent().addClass('focused');
+              {% comment %} $('#pf').val(data["provident_fund"]);
+              ('#pf').parent().addClass('focused'); {% endcomment %}
+              
+            },
+            error: function (xhr, desc, err) { 
+              errorMsg(err) 
+            } 
+        }); 
+    } 
+});
+$(document).ready(function () {
+
+  $("#employee_transfer .save-btn").click(function(e){
+        $("#submition_type").attr('value','save');
+      }); 
+
+  $("#Pf_info .transfer_btn").click(function(e){
+        $("#submition_type").attr('value','submit');
+     });
+});
+
+$("#employee_transfer").submit(function(e){
+  // prevent from normal form behaviour
+      e.preventDefault();
+      // serialize the form data  
+      var serializedData = $(this).serialize();
+      $.ajax({
+          type : 'POST',
+          url :  "{% url 'hr:employee_transfer' %}",
+          data : serializedData,
+          success : function(data){
+              $("#employee_transfer")[0].reset(); 
+              $.toast({
+                heading: "Employee Transfer Success",
+                text: data["data"],
+                position: 'top-right',
+                loaderBg: '#00FF00',
+                icon: data['icon'],
+                hideAfter: 5000,
+                stack: false
+  
+              });   
+          },
+          error : function(data){
+            $.toast({
+              heading: "Employee Transfer Failed",
+              text: data["data"],
+              position: 'top-right',
+              loaderBg: '#00FF00',
+              icon: data['icon'],
+              hideAfter: 5000,
+              stack: false
+            });
+          }
+      });
+ });
+
+ $("#Pf_info").submit(function(e){
+  // prevent from normal form behaviour
+      e.preventDefault();
+      // serialize the form data  
+      var serializedData = $(this).serialize();
+      $.ajax({
+          type : 'POST',
+          url :  "{% url 'hr:employee_transfer' %}",
+          data : serializedData,
+          success : function(data){
+              $("#employee_transfer")[0].reset();
+              $.toast({
+                heading: "PF Transfer Success",
+                text: data["data"],
+                position: 'top-right',
+                loaderBg: '#00FF00',
+                icon: data['icon'],
+                hideAfter: 5000,
+                stack: false
+  
+              }); 
+          },
+
+          error : function(data){
+              $.toast({
+                heading: "PF Transfer Failed",
+                text: data["data"],
+                position: 'top-right',
+                loaderBg: '#FF0000',
+                icon: data['icon'],
+                hideAfter: 5000,
+                stack: false
+              }); 
+          }
+      });
+ });
+
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,189 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Income Tax Slab{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Income Tax Slab</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                      <table id="users-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+                        <thead>
+                          <tr>
+                            <th class="d-sm-table-cell">Amount Range</th>
+                            <th class="d-md-table-cell">Deduction</th>
+                            <th class="d-md-table-cell">Remarks</th>
+                            <th class="d-lg-table-cell">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for data in slab_list %}
+                            <tr id="{{data.id}}">
+                              <td class="">{% if data.from_amount == null and data.to_amount == null %} N/A {% elif data.from_amount != null or data.to_amount != null %} {{ data.from_amount }} - {{ data.to_amount }} {% endif %}</td>
+                                <td class="">{% if data.type == 'Value' %} {{ data.deduction }} BDT {% elif data.type == 'Percent' %} {{ data.deduction }} % {% endif %}</td>
+                                <td class="">{{ data.remarks }}</td>
+                                <td class="text-left" width="10%">
+                                <a href="/hr/income-tax-slab/{{data.id}}/edit/" class="h4 m-r-10 text-success">
+                                    <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                </a>
+                                <a href="#" onclick="deleteIncomeTaxSlabData('{{data.id}}')" class="h4 text-danger">
+                                    <span class="icon"><i class="ti-trash"></i></span>
+                                </a>
+                                </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div> 
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }} Tax Slab</h4>
+                        </div>
+                        {% if slab %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:income_tax_slab' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <input type="number" class="form-control" id="from_amount" min="1" name="from_amount"  value="{{ slab.from_amount }}" required="">
+                          <span class="bar"></span>
+                          <label for="from_amount">From Amount</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <input type="number" class="form-control" id="to_amount" name="to_amount" min="1" value="{{ slab.to_amount }}" required="">
+                          <span class="bar"></span>
+                          <label for="to_amount">To Amount</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <span class="required">*</span>
+                          <input type="number" class="form-control" id="deduction" onclick="return validate();" name="deduction" min="1"  value="{{ slab.deduction }}" required="">
+                          <span class="bar"></span>
+                          <label for="deduction">Deduction</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label for="type">Type</label>
+                          <select class="form-control text-capitalize select2" name="type" id="type" data-title="Type" required="">
+                              <option value="Value" {% if slab.type == "Value" %} selected {% endif %}>BDT</option>
+                              <option value="Percent" {% if slab.type == "Percent" %} selected {% endif %}>%</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3">{{ slab.remarks }}</textarea>
+                        <span class="bar"></span>
+                        <label for="remarks">Remarks</label> 
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mx-auto">
+                            <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                            </button>
+                        </div>
+                    </div>
+                  </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block page_js %}
+<script>
+  function validate(){
+     var min = parseInt(document.getElementById('from_amount').value);
+     var max = parseInt(document.getElementById('to_amount').value);
+     if(min > max){
+          alert('To amount should not less than From amount');
+          return false;
+     }else{
+          return false;
+     }
+  }
+  function deleteIncomeTaxSlabData(id) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'mr-2 btn btn-danger'
+        },
+        buttonsStyling: false,
+    })    
+    swalWithBootstrapButtons.fire({
+        title: "Do you want to delete this slab?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.value) {
+
+            var id_url = "/hr/income-tax-slab/"+id.toString()+"/delete/";
+            $.ajax({
+                url: id_url,
+                type: 'POST',
+                dataType: 'json',
+                async: false,
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $("#"+id.toString()).remove();
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Income Tax Slab Deleted',
+                        text: data,
+                    });
+                },
+                error: function (data) {
+                    Swal.fire({
+                    type: 'error',
+                    title: 'Something Went Wrong!',
+                    text: data,
+                })
+                }
+            });
+        } 
+    });
+}
+
+</script>
+{% endblock %}

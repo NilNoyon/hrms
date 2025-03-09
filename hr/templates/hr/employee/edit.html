@@ -1,0 +1,1262 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Update Employee {% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .dataTables_wrapper .select2-container .select2-selection--single .select2-selection__rendered,
+    .dataTables_wrapper .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .dataTables_wrapper .select2-container--default .select2-selection--single,
+    .dataTables_wrapper .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+
+    
+
+    .profile-pic-wrapper {
+        width: 25%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pic-holder {
+        text-align: center;
+        position: relative;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    .pic-holder .pic {
+        height: 100%;
+        width: 100%;
+        -o-object-fit: cover;
+        object-fit: cover;
+        -o-object-position: center;
+        object-position: center;
+    }
+
+    .pic-holder .upload-file-block,
+    .pic-holder .upload-loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(90, 92, 105, 0.7);
+        color: #f8f9fc;
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .pic-holder .upload-file-block {
+        cursor: pointer;
+    }
+
+    .pic-holder:hover .upload-file-block {
+        opacity: 1;
+    }
+
+    .pic-holder.uploadInProgress .upload-file-block {
+        display: none;
+    }
+
+    .pic-holder.uploadInProgress .upload-loader {
+        opacity: 1;
+    }
+    .floating-labels .form-control:focus {
+        border-bottom: 1px solid #c1c1c1;
+    }
+    #official_form .switchery-label {
+        width: 100%;
+    }
+    #official_form .switchery {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+</style>
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row"> 
+                <div class="col-md-8 align-self-center"><h4 class="text-themecolor mb-0">Employee Update</h4></div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                               <a href="{% url 'hr:employee_view' personal.id %}" class="btn btn-sm btn-outline-info mr-2" target="_blank" title="Employee View"><i class="ti-eye"></i></a>
+                               <a href="{% url 'hr:employee_add' %}" class="btn btn-sm btn-info" title="Employee List"><i class="ti-list"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link active" data-toggle="tab" href="#personal_info" id="personal_info_tab">Personal </a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#official_info" id="official_info_tab">Official  </a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#nominee_info" id="nominee_info_tab">Nominee </a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#bank_info" id="bank_info_tab">Bank </a> 
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabcontent-border">
+                <input type="hidden" id="personal_id" name="personal_id" value="{{personal.id}}">
+                <input type="hidden" id="official_id" name="official_id" value="{{office.id}}"/>
+                <input type="hidden" id="nominee_id" name="nominee_id" value="{{nominee.id}}">
+                <input type="hidden" id="bank_id" name="bank_id" value="{{bank.id}}">
+                <div class="tab-pane p-20 active" id="personal_info" role="tabpanel">
+                    <form role="form" class="form-horizontal floating-labels mt-2" id="myform" enctype='multipart/form-data'>{% csrf_token %}
+                        <div class="row mb-0 pb-0">
+                            <div class="col-md-3 card-body pb-0">
+                                <div class="form-group mt-3">
+                                    <input type="file" name="profile_pic" id="newProfilePhoto" class="dropify-profile" data-height="150" accept="image/*" 
+                                        data-show-remove="false" {% if personal.photo and personal.photo.url %} 
+                                        data-default-file="/assets{{personal.photo.url}}" {% endif %}/>
+                                </div>
+                                <div class="form-group mt-4">
+                                    <input type="file" name="signature" id="signature" class="dropify-signature" data-height="80" accept="image/*"
+                                        data-show-remove="false" {% if personal.signature and personal.signature.url %} 
+                                        data-default-file="/assets{{personal.signature.url}}" {% endif %}>
+                                </div>
+                            </div>
+                            <div class="col-md-9 card-body pb-0">
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="first_name" name="first_name" value="{{personal.first_name|default_if_none:''}}" required>
+                                            <label for="first_name">Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="first_name_bn" name="first_name_bn" value="{{personal.first_name_bn|default_if_none:''}}" required>
+                                            <label for="first_name_bn">Name (BN)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="" id="phone" name="phone" value="{{personal.phone_no|default_if_none:""}}">
+                                            <label for="phone">Phone Number </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="father" name="father" value="{{personal.father_name|default_if_none:''}}" required>
+                                            <label for="father">Father Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="father_name_bn" name="father_name_bn" value="{{personal.father_name_bn|default_if_none:''}}" required>
+                                            <label for="father_name_bn">Father Name (BN)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="" id="father_phone_no" name="father_phone_no" value="{{personal.father_phone_no|default_if_none:""}}">
+                                            <label for="father_phone_no">Father Phone Number </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="mother_name" name="mother_name" value="{{personal.mother_name|default_if_none:''}}" required>
+                                            <label for="mother_name">Mother Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="mother_name_bn" name="mother_name_bn" value="{{personal.mother_name_bn|default_if_none:''}}" required>
+                                            <label for="mother_name_bn">Mother Name (BN)</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="" id="mother_phone_no" name="mother_phone_no" value="{{personal.mother_phone_no|default_if_none:""}}">
+                                            <label for="mother_phone_no">Mother Phone Number </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                          <input type="text" class="form-control singledate" id="date_of_birth" name="date_of_birth" required>
+                                          <span class="bar"></span>
+                                          <label for="date_of_birth">Date Of Birth</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="gender">Gender</label>
+                                            <select class="form-control custom-select text-capitalize select2" name="gender" data-title="Gender" id="gender" placeholder="Gender" required>
+                                                <option value="" disabled selected></option>
+                                                {% for i in gender_list %}
+                                                    <option value="{{i.id}}" {% if i.id == personal.gender_id %} selected {% endif %}>{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="blood">Blood Group</label>
+                                            <select class="form-control custom-select text-capitalize select2" name="blood" data-title="Blood Group" id="blood">
+                                                <option value="" disabled selected></option>
+                                                {% for i in blood_group_list %}
+                                                    <option value="{{i.0}}" {% if i.0 == personal.blood_group %} selected {% endif %}>{{i.1}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <label for="religion">Religion</label>
+                                            <select class="form-control custom-select text-capitalize select2" name="religion" data-title="Religion" id="religion" >
+                                                <option value="" disabled selected></option>
+                                                {% for i in religion_list %}
+                                                    <option value="{{i.id}}" {% if i.id == personal.religion_id %} selected {% endif %}>{{i.value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="nationality" name="nationality" value="{{personal.nationality|default_if_none:""}}">
+                                            <label for="nationality">Nationality </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" placeholder="" id="email" name="email" value="{{personal.email|default_if_none:""}}" onchange="email_duplicate_check('personal', this);">
+                                            <label for="email">Personal Email</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-0">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="nid" name="nid" value="{{personal.nid|default_if_none:""}}">
+                                    <label for="nid">NID No. </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="birth_certificate" name="birth_certificate" value="{{personal.birth_certificate|default_if_none:""}}">
+                                    <label for="birth_certificate">Birth Certificate No. </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="passport" name="passport" value="{{personal.passport|default_if_none:""}}">
+                                    <label for="passport">Passport No. </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="maritialStatus">Maritial Status</label>
+                                    <select class="form-control custom-select text-capitalize select2" name="maritialStatus" data-title="Maritial Status" id="maritialStatus" >
+                                        <option value="" disabled selected></option>
+                                        {% for i in marital_status_list %}
+                                            <option value="{{i.id}}" {% if i.id == personal.marital_status_id %} selected {% endif %}>{{i.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-0">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="spouse" name="spouse" value="{{personal.spouse_name|default_if_none:""}}">
+                                    <label for="spouse">Spouse Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="spouse_name_bn" name="spouse_name_bn" value="{{personal.spouse_name_bn|default_if_none:""}}">
+                                    <label for="spouse_name_bn">Spouse Name (BN)</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" placeholder="" id="spouse_phone_no" name="spouse_phone_no" value="{{personal.spouse_phone_no|default_if_none:""}}">
+                                    <label for="spouse_phone_no">Spouse Phone Number </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="no_of_children" name="no_of_children" value="{{personal.no_of_children|default_if_none:""}}">
+                                    <label for="no_of_children">Number of Children</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-0">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="present_location">Present Location</label>
+                                    <select class="form-control custom-select select2" name="present_location" data-title="Present Location" id="present_location" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in geo_location_list %}
+                                            <option value="{{i.id}}" {% if i.id == personal.present_location_id %} selected {% endif %}>{{i.location_en}} ~ {{i.location_bn}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <div class="controls">
+                                                <textarea id="present_address" name="present_address" class="form-control" rows="1" required>{{personal.present_address|default_if_none:''}}</textarea>
+                                            </div>
+                                            <label for="present_address">Present City/Village/House/Road</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <div class="controls">
+                                                <textarea id="present_address_bn" name="present_address_bn" class="form-control" rows="1" required>{{personal.present_address_bn|default_if_none:''}}</textarea>
+                                            </div>
+                                            <label for="present_address_bn">Present City/Village/House/Road (BN)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="permanent_location">Permanent Location</label>
+                                    <select class="form-control custom-select select2" name="permanent_location" data-title="Permanent Location" id="permanent_location" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in geo_location_list %}
+                                            <option value="{{i.id}}" {% if i.id == personal.permanent_location_id %} selected {% endif %}>{{i.location_en}} ~ {{i.location_bn}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <div class="controls">
+                                                <textarea id="permanent_address" name="permanent_address" class="form-control" rows="1" required>{{personal.permanent_address|default_if_none:''}}</textarea>
+                                            </div>
+                                            <label for="permanent_address">Permanent City/Village/House/Road</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <div class="controls">
+                                                <textarea id="permanent_address_bn" name="permanent_address_bn" class="form-control" rows="1" required>{{personal.permanent_address_bn|default_if_none:''}}</textarea>
+                                            </div>
+                                            <label for="permanent_address_bn">Permanent City/Village/House/Road (BN)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-0">
+                            <div class="col-md-3 ml-auto mt-2">
+                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnUpdatePersonal">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>                 
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="official_info" role="tabpanel">
+                    <form role="form" class="form-horizontal floating-labels mt-2" id="official_form" enctype='multipart/form-data'>{% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="company">Company</label>
+                                    <select class="form-control  custom-select select2" id="company" name="company" data-title="Company" placeholder="gender" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in company_list %}
+                                        <option value="{{i.id}}" {% if office.company_id == i.id %} selected {% endif %}>{{i.short_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="department">Department</label>
+                                    <select class="form-control custom-select custom-select select2" id="department" name="department" data-title="Department" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in department_list %}
+                                            <option value="{{i.id}}" {% if office.department_id == i.id %} selected {% endif %}>{{i.title}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="designation">Designation</label>
+                                    <select class="form-control custom-select select2" id="designation" name="designation" data-title="Designation" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in designation_list %}
+                                            <option value="{{i.id}}" {% if office.designation_id == i.id %} selected {% endif %}>{{i.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="section">Section</label>
+                                    <select class="form-control custom-select select2" id="section" name="section" data-title="Section" required>
+                                        <option value="" disabled selected></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="cost_center">Cost Center</label>
+                                    <select class="form-control custom-select select2" name="cost_center" data-title="Cost Center" id="cost_center">
+                                        <option value="" disabled selected></option>
+                                        {% for i in company_list %}
+                                        <option value="{{i.id}}" {% if office.cost_center_id == i.id %} selected {% endif %}>{{i.short_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="employee_unit">Unit</label>
+                                    <select class="form-control custom-select select2"
+                                        name="employee_unit" data-title="Unit" id="employee_unit" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in unit_list %}
+                                        <option value="{{i.id}}" {% if office.unit_id == i.id %} selected {% endif %}>{{i.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="location">Sitting Location</label>
+                                    <select class="form-control custom-select select2" id="location" name="location" data-title="Sitting Location" required>
+                                        <option value="" disabled selected></option>
+                                        {% for l in location_list %}
+                                        <option value="{{l.id}}" {% if office.location_id == l.id %} selected {% endif %}>{{l.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="building">Building</label>
+                                    <select class="form-control custom-select select2" id="building" name="building" data-title="Building" >
+                                        <option value="" disabled selected></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="floor">Floor</label>
+                                    <select class="form-control custom-select select2" id="floor" name="floor" data-title="Floor">
+                                        <option value="" disabled selected></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="line">Line</label>
+                                    <select class="form-control custom-select select2" id="line" name="line" data-title="Line">
+                                        <option value="" disabled selected></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="employeeCategory">Employee Category</label>
+                                    <select class="form-control custom-select select2" name="employeeCategory" data-title="Employee Category" id="employeeCategory" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in employee_category_list %}
+                                        <option value="{{i.id}}" {% if office.employee_category_id == i.id %} selected {% endif %}>{{i.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="employeeType">Employment Type</label>
+                                    <select class="form-control custom-select select2" id="employeeType" name="employeeType" data-title="Employment Type" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in employee_type_list %}
+                                        <option value="{{i.id}}" {% if office.employee_type_id == i.id %} selected {% endif %}>{{i.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="reporting_to">Reporting Boss</label>
+                                    <select class="form-control custom-select select2"
+                                        id="reporting_to" name="reporting_to" data-title="Reporting Boss">
+                                        <option value="" disabled selected></option>
+                                        {% if office.reporting_to %}
+                                        <option value="{{ office.reporting_to_id }}" selected>{{ office.reporting_to.personal.employee_id }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="skill_category">Skill Category</label>
+                                    <select class="form-control custom-select select2"
+                                        name="skill_category" data-title="Skill Category" id="skill_category">
+                                        <option value="" disabled selected></option>
+                                        {% for i in skill_category_list %}
+                                            <option value="{{i.id}}" {% if office.skill_category_id == i.id %} selected {% endif %}>{{i.value}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="grade">Grade</label>
+                                    <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
+                                        <option value=""></option>
+                                        {% for i in 7|times %}
+                                        <option value="{{ i|add:1 }}" {% if office.grade == i|add:1|slugify %} selected {% endif %}>{{i|add:1}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="employee_id"
+                                        name="employee_id" value="{{office.employee_id|default_if_none:''}}" required>
+                                    <label for="employee_id">Employee ID</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="punchcardno"
+                                        name="punchcardno" value="{{office.punch_id|default_if_none:''}}" required>
+                                    <label for="punchcardno">Punch Card No</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="office_phone"
+                                        name="office_phone" value="{{office.office_mobile|default_if_none:''}}">
+                                    <label for="office_phone">Official Phone</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="" id="officialMail" name="officialMail"
+                                        value="{{office.office_email|default_if_none:''}}" onchange="email_duplicate_check('official', this);" />
+                                    <label for="officialMail">Official Mail</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" id="pabx" name="pabx" />
+                                    <label for="pabx">PABX</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group focused">
+                                    <input type="text" class="form-control singledateJoin" id="dateOfJoining" name="dateOfJoining" required />
+                                    <span class="bar"></span>
+                                    <label for="dateOfJoining">Date of Joining</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="provision">Provision(Month)</label>
+                                    <select class="form-control custom-select select2" name="provision_month"
+                                        data-title="Provision(Month)" id="provision_month" required>
+                                        {% for i in provision_month %}
+                                        <option value="{% if i.0 %}{{i.0}}{% else %}{{i.1}}{% endif %}"
+                                            {% if office.provision_month == i.0 %} selected {% endif %}>{{i.1}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="shift">Shift</label>
+                                    <select class="form-control custom-select select2"
+                                        id="shift" name="shift" data-title="Shift" required>
+                                        <option value="" disabled selected></option>
+                                        {% for i in shift_list %}
+                                            <option value="{{i.id}}" {% if office.shift_id == i.id %}selected{% endif %}>{{i.shift_id}} :: {{i.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="weeklyOff">Weekly Off</label>
+                                    <select class="form-control select2" multiple data-title="Weekly Off" name="weeklyOff" id="weeklyOff">
+                                        <option value="" disabled></option>
+                                        <option value="4" {% if "4" in office.holiday %} selected {% endif %}>Friday</option>
+                                        <option value="5" {% if "5" in office.holiday %} selected {% endif %}>Saturday</option>
+                                        <option value="6" {% if "6" in office.holiday %} selected {% endif %}>Sunday</option>
+                                        <option value="0" {% if "0" in office.holiday %} selected {% endif %}>Monday</option>
+                                        <option value="1" {% if "1" in office.holiday %} selected {% endif %}>Tuesday</option>
+                                        <option value="2" {% if "2" in office.holiday %} selected {% endif %}>Wednesday</option>
+                                        <option value="3" {% if "3" in office.holiday %} selected {% endif %}>Thursday</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="attendance_bonus">Attendance Bonus</label>
+                                    <select class="form-control custom-select select2" name="attendance_bonus" data-title="Attendance Bonus" id="attendance_bonus">
+                                        <option value="" disabled selected></option>
+                                        {% for ab in ab_rule_list %}
+                                            <option value="{{ab.id}}" {% if office.attendance_bonus_id == ab.id %} selected {% endif %}>{{ab}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="gross"
+                                        name="gross" value="{{office.salary}}" required>
+                                    <label for="gross">Gross</label>
+                                </div>
+                            </div> -->
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="tin" name="tin" value="{{office.tin|default_if_none:""}}" >
+                                    <label for="tin">TIN</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="income_tax">Income Tax
+                                        <input type="checkbox" id="income_tax" class="js-switch" data-color="#009efb" data-size="mini" {% if office.income_tax %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="tiffin_bill">Tiffin Bill
+                                        <input type="checkbox" id="tiffin_bill" class="js-switch" data-color="#009efb" data-size="mini" {% if office.tiffin_bill %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="transportOff">Transport
+                                        <input type="checkbox" id="transportOff" class="js-switch" data-color="#009efb" data-size="mini" {% if office.transport_facility %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="pfFacilityOff">PF Facility
+                                        <input type="checkbox" id="pfFacilityOff" class="js-switch" data-color="#009efb" data-size="mini" {% if office.has_pf %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="overTimeOff">Over Time
+                                        <input type="checkbox" id="overTimeOff" class="js-switch" data-color="#009efb" data-size="mini" {% if office.overtime %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="off_day_ot">Off Day OT
+                                        <input type="checkbox" id="off_day_ot" class="js-switch" data-color="#009efb" data-size="mini" {% if office.off_day_ot %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="holiday_bonus">Holiday Bonus
+                                        <input type="checkbox" id="holiday_bonus" class="js-switch" data-color="#009efb" data-size="mini"  {% if office.holiday_bonus %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="is_user">Is User?
+                                        <input type="checkbox" id="is_user" class="js-switch" data-color="#009efb" data-size="mini"  {% if is_user %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="status">Status
+                                        <input type="checkbox" id="status" class="js-switch" data-color="#009efb" data-size="mini"  {% if office.status.title|lower == 'active' %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-3 ml-auto mt-2">
+                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnOfficial">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>                 
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="nominee_info" role="tabpanel">
+                    <form role="form" class="form-horizontal floating-labels mt-2" id="nominee_form" enctype='multipart/form-data'>{% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="nameNom" name="nameNom[]" value="{{nominee.nominee_name}}">
+                                            <label for="nameNom">Name</label>
+                                            <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="nidNom"
+                                                name="nidNom[]" value="{{nominee.nominee_nid}}">
+                                                <label for="nid">NID</label>
+                                                <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="relation"
+                                                name="relation[]" value="{{nominee.relation}}">
+                                                <label for="relation">Relation</label>
+                                                <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="phoneNom"
+                                                name="phoneNom[]" value="{{nominee.nominee_mobile}}">
+                                                <label for="phoneNom">Phone No</label>
+                                                <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="nominee_address"
+                                                name="nominee_address" value="{{nominee.nominee_address}}">
+                                                <label for="nominee_address">Address</label>
+                                                <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="share_of_right"
+                                                name="share_of_right" value="{{nominee.share_of_right}}">
+                                                <label for="share_of_right">Share Of Right</label>
+                                                <span class="bar"></span>
+                                        </div>
+                                    </div>
+                            
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <input type="file" name="nominee_photo" id="nominee_photo" class="dropify-nominee" data-height="90" accept="image/*"
+                                            data-show-remove="false" {% if nominee.nominee_photo and nominee.nominee_photo.url %} 
+                                            data-default-file="/assets{{nominee.nominee_photo.url}}" {% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 ml-auto mt-2">
+                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnUpdateNominee">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>                 
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="bank_info" role="tabpanel">
+                    <form role="form" class="form-horizontal floating-labels mt-2" id="nominee_form" enctype='multipart/form-data'>{% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{bank.bank_name|default_if_none:""}}">
+                                            <label for="bank_name">Bank Name</label>
+                                            <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="branch_name" name="branch_name" value="{{bank.branch_name|default_if_none:""}}">
+                                            <label for="branch_name">Branch Name</label>
+                                            <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 nopadding">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="account_no" name="account_no" value="{{bank.account_no|default_if_none:""}}">
+                                            <label for="account_no">Account No</label>
+                                            <span class="bar"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 ml-auto mt-2">
+                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnUpdateBankInfo">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>                 
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            {% if office %}
+
+                // Department wise Section
+                $.ajax({
+                    url : "{% url 'hr:get_department_wise_section' %}",
+                    type: "POST", dataType: 'json', data: { id:'{{office.department_id}}' },
+                    success: function (data) {
+                        $("#section").empty().select2({
+                            placeholder: "Section",
+                            allowClear: true,
+                            data: data.section,
+                        }).val('{{office.section_id}}').trigger("change");
+                        $("#section").parent().addClass("focused");
+                    },
+                });
+
+                // Company wise Location
+                $("#location").val('{{office.location_id}}').trigger("change");
+                $("#location").parent().addClass("focused");
+
+                // Company wise Line
+                $.ajax({
+                    url : "{% url 'hr:get_company_wise_line' %}",
+                    type: "POST", dataType: 'json', 
+                    data: { company_id:'{{office.company_id}}' },
+                    success: function (data) {
+                        $("#line").empty().select2({
+                            placeholder: "Line",
+                            allowClear: true,
+                            data: data.line,
+                        }).val('{{office.line_id}}').trigger("change");
+                        $("#line").parent().addClass("focused");
+                    },
+                });
+
+                // Company & Location wise Shift
+                {% comment %} $.ajax({
+                    type: "POST", dataType: 'json', 
+                    url : "{% url 'hr:get_all_shift' %}",
+                    success: function (data) {
+                        $("#shift").empty().select2({
+                            placeholder: "Shift",
+                            allowClear: true,
+                            data: data.shift,
+                        }).val('{{office.shift_id}}').trigger("change");
+                        $("#shift").parent().addClass("focused");
+                    },
+                }); {% endcomment %}
+
+                // Company & Location wise Building
+                $.ajax({
+                    type: "POST", dataType: 'json', 
+                    url : "{% url 'hr:get_company_and_location_wise_building' %}",
+                    data: { location_id:'{{office.location_id}}',company_id:'{{office.company_id}}' },
+                    success: function (data) {
+                        $("#building").empty().select2({
+                            placeholder : "Building",
+                            allowClear  : true,
+                            data        : data.building,
+                        }).val('{{office.building_id}}').trigger("change");
+                        $("#building").parent().addClass("focused");
+                    },
+                });
+
+                // Building wise Floor
+                {% if office.building_id %}
+                $.ajax({
+                    url : "{% url 'hr:get_building_wise_hrfloor' %}",
+                    type: "POST", dataType: 'json', 
+                    data: { id:'{{office.building_id}}' },
+                    success: function (data) {
+                        $("#floor").empty().select2({
+                            placeholder : "Floor",
+                            allowClear  : true,
+                            data        : data.floor,
+                        }).val('{{office.floor_id}}').trigger("change");
+                        $("#floor").parent().addClass("focused");
+                    },
+                });
+                {% endif %}
+
+            {% endif %}
+
+            // Single Date Range Picker
+            $('#date_of_birth, #dateOfJoining').daterangepicker({
+                singleDatePicker: true, showDropdowns: true, locale: { format: 'DD/MM/YYYY' }
+            });
+            $('#date_of_birth').val('{{personal.date_of_birth|date:"d/m/Y"}}');
+            {% if personal.date_of_birth %} $('#date_of_birth').parent().addClass("focused"); {% endif %}
+            $('#dateOfJoining').val('{{office.joining_date|date:"d/m/Y"}}');
+            {% if office.joining_date %} $('#dateOfJoining').parent().addClass("focused"); {% endif %}
+        
+            $("#company").on('select2:select', function(){
+                {% comment %} companyLocationWiseShift(); {% endcomment %}
+                companyWiseLine(this.value);
+                $.ajax({
+                    url : "{% url 'hr:get_company_wise_holidays' %}",
+                    type: "POST", dataType: 'json', data: { id:this.value },
+                    success: function (data) {
+                        if (data.holidays != null) {
+                            $('#weeklyOff').val(data.holidays).trigger('change');
+                        } else { $('#weeklyOff').val([]).trigger('change'); }
+                    },
+                 });
+            });
+            
+            $("#department").on('select2:select', function(){
+                $.ajax({
+                    url : "{% url 'hr:get_department_wise_section' %}",
+                    type: "POST", dataType: 'json', data: { id:this.value },
+                    success: function (data) {
+                        $("#section").empty();
+                        $('#section').select2({
+                            placeholder: "Section",
+                            allowClear: true,
+                            data: data.section,
+                        });
+                    },
+                 });
+            });
+
+            $("#location").on('select2:select', function(){
+                {% comment %} companyLocationWiseShift(); {% endcomment %}
+                companyWiseBuilding(this.value);
+            });
+            
+            $("#building").on('select2:select', function(){
+                buildingWiseFloor(this.value);
+            });
+
+            $("#reporting_to").select2({
+                minimumInputLength  : 3,
+                placeholder         : "Reporting Boss",
+                allowClear          : true,
+                ajax: {
+                    url             : "{% url 'hr:get_employee_data' %}",
+                    dataType        : "json",
+                    data            : function(term, page) { 
+                        return { q : term }; 
+                    }, processResults : function (data) { 
+                        return { results: data.employee_list }; 
+                    }
+                },
+            });
+        });
+
+        function email_duplicate_check(model, el){
+            $.ajax({
+                url : "{% url 'hr:email_duplicate_check' %}",
+                type: "POST", dataType: 'json', data: { model:model,email:$(el).val() },
+                success: function (data) {
+                    if(data)
+                    {
+                        $(el).val('')
+                        toasterMsg("warning", "This email already used!", 5000);
+    
+                    }
+                },
+            });
+        }
+
+        function companyLocationWiseShift(){
+            let location_id=$("#location").val(), company_id=$("#company").val();
+            if(location_id && company_id){
+                $.ajax({
+                    type: "POST", dataType: 'json', 
+                    url : "{% url 'hr:get_company_and_location_wise_shift' %}",
+                    data: { location_id:location_id,company_id:company_id },
+                    success: function (data) {
+                        $("#shift").empty().select2({
+                            placeholder: "Shift",
+                            allowClear: true,
+                            data: data.shift,
+                        });
+                    },
+                });
+            }
+        }
+    
+        function companyWiseBuilding(id){
+            $.ajax({
+                url : "{% url 'hr:get_company_and_location_wise_building' %}",
+                type: "POST", dataType: 'json', data: { location_id:id },
+                success: function (data) {
+                    $("#building").empty().select2({
+                        placeholder : "Building",
+                        allowClear  : true,
+                        data        : data.building,
+                    });
+                },
+            });
+        }
+
+        function companyWiseLine(id){
+            $.ajax({
+                type: "POST", dataType: 'json', 
+                data: {company_id:$("#company").val() },
+                url : "{% url 'hr:get_company_wise_line' %}",
+                success: function (data) {
+                    $("#line").empty();
+                    $('#line').select2({
+                        placeholder: "Line",
+                        allowClear: true,
+                        data: data.line,
+                    });
+                },
+            });
+        }
+    
+        function buildingWiseFloor(id){
+            $.ajax({
+                url : "{% url 'hr:get_building_wise_hrfloor' %}",
+                type: "POST", dataType: 'json', data: { id:id },
+                success: function (data) {
+                    $("#floor").empty().select2({
+                        placeholder : "Floor",
+                        allowClear  : true,
+                        data        : data.floor,
+                    });
+                },
+            });
+        }
+        
+        $('.dropify-profile').dropify({
+            messages: {
+                'default': 'Upload Profile Picture',
+                'replace': 'Replace Profile Picture',
+                'remove':  'Remove Profile Picture',
+                'error':   'Ooops, something went wrong!'
+            }
+        });
+
+        $('.dropify-signature').dropify({
+            messages: {
+                'default': 'Upload Signature',
+                'replace': 'Replace Signature',
+                'remove':  'Remove Signature',
+                'error':   'Ooops, something went wrong!'
+            }
+        });
+
+        $('.dropify-nominee').dropify({
+            messages: {
+                'default': 'Upload Nominee Photo',
+                'replace': 'Replace Nominee Photo',
+                'remove':  'Remove Nominee Photo',
+                'error':   'Ooops, something went wrong!'
+            }
+        });
+        
+        $("#btnUpdatePersonal").on('click', function(){
+            var data = new FormData();
+            data.append('photo', $('#newProfilePhoto')[0].files[0]);
+            data.append('signature', $('#signature')[0].files[0]);
+            data.append('first_name', $('#first_name').val());
+            data.append('first_name_bn', $('#first_name_bn').val());
+            // data.append('last_name', $('#last_name').val());
+            // data.append('last_name_bn', $('#last_name_bn').val());
+            data.append('phone_no', $('#phone').val());
+            data.append('father_name', $('#father').val());
+            data.append('father_name_bn', $('#father_name_bn').val());
+            data.append('father_phone_no', $('#father_phone_no').val());
+            data.append('mother_name', $('#mother_name').val());
+            data.append('mother_name_bn', $('#mother_name_bn').val());
+            data.append('mother_phone_no', $('#mother_phone_no').val());
+            data.append('email', $('#email').val());
+            data.append('date_of_birth', $('#date_of_birth').val());
+            data.append('gender', $('#gender').val());
+            data.append('nationality', $('#nationality').val());
+            data.append('nid', $('#nid').val());
+            data.append('birth_certificate', $('#birth_certificate').val());
+            data.append('passport', $('#passport').val());
+            data.append('religion', $('#religion').val());
+            data.append('blood_group', $('#blood').val());
+            data.append('maritial_status', $('#maritialStatus').val());
+            data.append('spouse_name', $('#spouse').val());
+            data.append('spouse_name_bn', $('#spouse_name_bn').val());
+            data.append('spouse_phone_no', $('#spouse_phone_no').val());
+            data.append('no_of_children', $('#no_of_children').val());
+            data.append('permanent_location', $('#permanent_location').val());
+            data.append('permanent', $('#permanent_address').val());
+            data.append('permanent_bn', $('#permanent_address_bn').val());
+            data.append('present_location', $('#present_location').val());
+            data.append('present', $('#present_address').val());
+            data.append('present_bn', $('#present_address_bn').val());
+            data.append('personal_id', $('#personal_id').val());
+            $.ajax({
+                processData : false, contentType : false,
+                async   : false, type : "POST", data: data,
+                url     : "{% url 'hr:employee_personal_info' %}",
+                mimeType: "multipart/form-data", dataType : "json",
+                success : function (data) {
+                    if(data.msg === "success"){
+                        toasterMsg("success", "Personal information updated.", 5000);
+                    }
+                },
+            });
+        })
+
+        let personal_id = $("#personal_id").val()
+        let official_id = $("#official_id").val()
+        $("#btnOfficial").on('click', function(){
+            $.ajax({
+                url: "{% url 'hr:employee_official_info' %}",
+                async:false,
+                type: "POST", // http method
+                data: { company : $("#company").val(),
+                location : $("#location").val(),
+                department : $("#department").val(),
+                designation : $("#designation").val(),
+                section : $("#section").val(),
+                floor : $("#floor").val(),
+                cost_center : $("#cost_center").val(),
+                unit : $("#employee_unit").val(),
+                line : $("#line").val(),
+                shift : $("#shift").val(),
+                attendance_bonus : $("#attendance_bonus").val(),
+                reporting_to : $("#reporting_to").val(),
+                office_mobile : $("#office_phone").val(),
+                employee_id : $("#employee_id").val(),
+                official_id : official_id,
+                office_email : $("#officialMail").val(),
+                punch_id : $("#punchcardno").val(),
+                employee_type : $("#employeeType").val(),
+                skill_category : $("#skill_category").val(),
+                employee_id : $("#employee_id").val(),
+                pabx : $("#pabx").val(),
+                initial_grade : $("#initialGrade").val(),
+                grade : $("#grade").val(),
+                holiday : JSON.stringify($("#weeklyOff").val()),
+                joining_date : $("#dateOfJoining").val(),
+                confirmation_date : $("#dateOfConfirmation").val(),
+                employee_category : $("#employeeCategory").val(),
+                provision_month : $("#provision_month").val(),
+                income_tax : $("#income_tax").prop('checked'),
+                tiffin_bill : $("#tiffin_bill").prop('checked'),
+                transport_facility : $("#transportOff").prop('checked'),
+                overtime : $("#overTimeOff").prop('checked'),
+                off_day_ot : $("#off_day_ot").prop('checked'),
+                holiday_bonus : $("#holiday_bonus").prop('checked'),
+                personal_id : $("#personal_id").val(),
+                tin : $("#tin").val(),
+                building : $("#building").val(),
+                has_pf : $("#overTimeOff").prop('checked'),
+                is_user : $("#is_user").prop('checked'),
+                status : $("#status").prop('checked')},
+                dataType: 'json',
+                success: function (data) {
+                    $("#official_id").val(data.official_id);
+                    if(data.msg === "success"){
+                        toasterMsg("success", "Official information updated.", 5000);
+                    }else{
+                        toasterMsg("warning", data.msg, 5000);
+                    }
+                },
+            });
+        })
+
+        $("#btnUpdateNominee").on("click", function(){
+            var dataN = new FormData();
+            dataN.append('nominee_photo',   $('#nominee_photo')[0].files[0]);
+            dataN.append('nominee_name',    $('#nameNom').val());
+            dataN.append('nominee_nid',     $('#nidNom').val());
+            dataN.append('nominee_mobile',  $('#phoneNom').val());
+            dataN.append('relation',        $('#relation').val());
+            dataN.append('nominee_address', $('#nominee_address').val());
+            dataN.append('share_of_right',  $('#share_of_right').val());
+            dataN.append('nominee_id',      $("#nominee_id").val());
+            dataN.append('personal_id',     personal_id);
+            $.ajax({
+                processData : false, contentType : false,
+                async   : false, type : "POST",  data : dataN,
+                url     : "{% url 'hr:employee_nominee_info' %}",
+                mimeType: "multipart/form-data", dataType : "json",
+                success : function (data) { toasterMsg(data.status, data.msg, 5000); },
+            });
+        })
+
+        $("#btnUpdateBankInfo").on("click", function(){
+            $.ajax({
+                url     : "{% url 'hr:employee_bank_info' %}",
+                async   : false, type: "POST", dataType: 'json',
+                data    : { 'personal_id'   : personal_id, 
+                    'bank_name'     : $("#bank_name").val(),
+                    'branch_name'   : $("#branch_name").val(),
+                    'account_no'    : $("#account_no").val(),
+                    'bank_id'       : $("#bank_id").val(),
+                }, success : function (data) { toasterMsg(data.status, data.msg, 5000); },
+            });
+        })
+    </script>
+{% endblock %}

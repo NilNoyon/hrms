@@ -1,0 +1,296 @@
+{% load static %}
+{% load math-filters %}
+{% load sc_filters %}
+
+<!doctype html>
+<html lang="en" dir="ltr">
+    <head>
+        <title>Appraisal</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta http-equiv="Content-Language" content="en" />
+        <meta name="msapplication-TileColor" content="#2d89ef">
+        <meta name="theme-color" content="#4188c9">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+
+        {% block css %}
+        <link href="{% static 'dist/css/style.css' %}" rel="stylesheet" />
+        <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" />
+        <style>
+            body{
+                font-size: 12px !important;
+            }
+            .bold-text{
+                font-size: 14px !important;
+                font-weight: 900 !important;"
+            }
+            .table-borderless th,
+            .table-borderless td,
+            .table-borderless thead th,
+            .table-borderless tbody+tbody {
+                border: 0 !important;
+            }
+            @page {
+                size: A4;
+                margin: 6mm 4mm;
+            }
+        </style>
+        {% endblock %}
+    </head>
+    <body>
+        <div class="page">
+            <h2 style="text-align: center">{{appraisal.appraisee.company.name}}</h2>
+            <p style="text-align: center; margin-top: 0px; padding-top: 0px;">
+                {{appraisal.appraisee.company.address}} <br>
+                {{ appraisal.appraisee.company.phone_no }} {% if appraisal.appraisee.company.phone_no and appraisal.appraisee.company.fax %} | {% endif %} {{ appraisal.appraisee.company.fax }}
+            </p>
+            <hr>
+            <h4 class="mt-2 mb-4 font-weight-bold" align="center">Appraisal Statement</h4>
+            <div class="row">
+                <div class="col-sm">
+                    <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                        <td>
+                            <strong>Employee Name</strong>
+                        </td>
+                        <td> {{appraisal.appraisee.name}}</td>
+                        </tr>
+                        <tr>
+                        <td>
+                            <strong>Employee ID</strong>
+                        </td>
+                        <td> {{appraisal.appraisee.personal.employee_id}}</td>
+                        </tr>
+                        <tr>
+                        <td>
+                            <strong>Department</strong>
+                        </td>
+                        <td>{{appraisal.appraisee.department.name}}</td>
+                        </tr>
+                        <tr>
+                        <td>
+                            <strong>Current Designation</strong>
+                        </td>
+                        <td>{{appraisal.appraisee.designation.name}}</td>
+                        </tr>
+                        {% if appraisal.promoted_as %}
+                        <tr class="text-success">
+                        <td>
+                            <strong>New Designation</strong>
+                        </td>
+                        <td>{{appraisal.promoted_as}}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                    </table>
+                </div>
+                <div class="col-sm">
+                    <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                        <td>
+                            <strong>Date of Joining</strong>
+                        </td>
+                        <td> {{appraisal.appraisee.joining_date|date:'d-M-Y'|upper}}</td>
+                        </tr>
+                        <tr>
+                        <td>
+                            <strong>Salary Amount</strong>
+                        </td>
+                        <td>BDT {{appraisal.appraisee.salary}}</td>
+                        </tr>
+                        <tr class="text-warning">
+                        <td>
+                            <strong>Last Date of Appraisal</strong>
+                        </td>
+                        <td>{{appraisal.last_date_of_appraisal|date:'d-M-Y'|upper}}</td>
+                        </tr>
+                        <tr class="text-warning">
+                        <td>
+                            <strong>Last Increment Amount</strong>
+                        </td>
+                        <td>BDT {{appraisal.last_increment_amount}}</td>
+                        </tr>
+                        {% if appraisal.effective_from_date %}
+                        <tr class="text-success">
+                        <td>
+                            <strong>Effective from Date</strong>
+                        </td>
+                        <td>{{appraisal.effective_from_date|date:'d-M-Y'|upper}}</td>
+                        </tr>
+                        {% endif %}
+                    </tr>
+                    {% if appraisal.increment_amount %}
+                    <tr class="text-success">
+                        <td>
+                        <strong>Increment Amount</strong>
+                        </td>
+                        <td>BDT {{appraisal.increment_amount}}</td>
+                    </tr>
+                    {% endif %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+            <table class="table table-bordered">
+            <thead>
+                <tr class="text-center h4">
+                <th>Performance Indicator</th>
+                <th>Rating (1-5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pi in performance_data %}
+                <tr>
+                <td>
+                    <strong>{{forloop.counter}}. {{pi.label}}</strong>
+                </td>
+                <td class="text-right">{{pi.score}}</td>
+                </tr>
+                {% empty %}
+                {% for key, pi in performance_indicators %}
+                <tr>
+                <td>
+                    <strong>{{forloop.counter}}. {{pi}}</strong>
+                </td>
+                <td class="text-right">
+                    <input class="form-control text-right" type="number" min="0" max="5" id="{{key}}" name="{{key}}" required>
+                </td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                {% if appraisal.coo_comments %}
+                <tr>
+                <td>
+                    <strong>Grand Total</strong>
+                </td>
+                <td class="text-right">
+                    <strong>{{appraisal.grand_total|floatformat:0}}</strong>
+                </td>
+                </tr>
+                {% endif %}
+            </tbody>
+            </table>
+            <div class="row">
+                <div class="col-sm-6">
+                    <table class="table table-bordered">
+                    <tr>
+                        <td>
+                        <strong>Major Strengths :</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{appraisal.strengths}}</td>
+                    </tr>
+                    </table>
+                </div>
+                <div class="col-sm-6">
+                    <table class="table table-bordered">
+                    <tr>
+                        <td>
+                        <strong>Improvement Areas :</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{appraisal.improvement_areas}}</td>
+                    </tr>
+                    </table>
+                </div>
+                <div class="col-sm">
+                    <table class="table table-bordered">
+                    <tr>
+                        <td>
+                        <strong>Self Justification :</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{appraisal.self_justification}}</td>
+                    </tr>
+                    </table>
+                </div>
+                {% if appraisal.coo_comments %}
+                <div class="col-sm">
+                    <table class="table table-bordered">
+                    <tr>
+                        <td>
+                        <strong>Dept Head Comments : {% if appraisal.status.title|lower == 'rejected' and not appraisal.chairman_user_id %}<span class="text-danger">( Rejected )</span>{% endif %}</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{appraisal.coo_comments}}</td>
+                    </tr>
+                    </table>
+                </div>
+                {% endif %}
+                {% if appraisal.chairman_comments %}
+                <div class="col-sm-12">
+                    <table class="table table-bordered">
+                    <tr>
+                        <td>
+                        <strong>MD Comments : {% if appraisal.status.title|lower == 'rejected' and appraisal.chairman_user_id %}<span class="text-danger">( Rejected )</span>{% endif %}</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{appraisal.chairman_comments}}</td>
+                    </tr>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row" style="page-break-inside: avoid;">
+                <div class="col-sm" align="center">
+                    <p>Requested By</p>
+                    {{ appraisal.appraisee.user_info.signature }}
+                    <h6 class="small mt-2">{{ appraisal.created_at }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{appraisal.appraisee.user_info.name}}</h6>
+                    <p class="small">{{appraisal.appraisee.user_info.designation}}</p>
+                </div>
+                <div class="col-sm" align="center">
+                    <p>{% if appraisal.status.title|lower == 'rejected' and not appraisal.chairman_user_id %}Rejected{% else %}Approved{% endif %} By Dept Head</p>
+                    {{ appraisal.coo_user.signature }}
+                    <h6 class="small mt-2">{{ appraisal.coo_forwarded_at }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{appraisal.coo_user.name}}</h6>
+                    <p class="small">{{appraisal.coo_user.designation}}</p>
+                </div>
+                {% if appraisal.chairman_user %}
+                <div class="col-sm" align="center">
+                    <p>{% if appraisal.status.title|lower == 'rejected' and appraisal.chairman_user_id %}Rejected{% else %}Approved{% endif %} By MD</p>
+                    {{ appraisal.chairman_user.signature }}
+                    <h6 class="small mt-2">{{ appraisal.chairman_approved_at }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{appraisal.chairman_user.name}}</h6>
+                    <p class="small">{{appraisal.chairman_user.designation}}</p>
+                </div>
+                {% else %}
+                <div class="col-sm" align="center">
+                    <p>Approved By</p>
+                    <p style='height: 50px; width: auto; padding: 0px !important; margin: 0px !important;'></p>
+                    <h6 class="small mt-2" style="color: transparent;">signature time</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{appraisal.appraisee.user_info.company.md.name}}</h6>
+                    <p class="small">{{appraisal.appraisee.user_info.company.md.designation}}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <script type="text/javascript">
+            window.onload = function () {
+                setTimeout(function () {
+                    window.print();
+                }, 50);
+        
+                window.onafterprint = function () {
+                    setTimeout(window.close, 300);
+                };
+            };
+        </script>
+    </body>
+</html>

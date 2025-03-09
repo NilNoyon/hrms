@@ -1,0 +1,211 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Salary Structure{% endblock %}
+
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-12 align-self-center">
+        <h4 class="text-themecolor mb-0">Salary Structure</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+          <a class="nav-link {% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#list" role="tab">List</a>
+      </li>
+      <li class="nav-item"> 
+          <a class="nav-link {% if option %} active {% endif %}" data-toggle="tab" href="#setup" role="tab">Setup</a>
+      </li> 
+    </ul>
+    <div class="tab-content tabcontent-border">
+      <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="list" role="tabpanel">
+        <table id="users-table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+          <thead>
+            <tr class="text-center">
+              <th class="d-sm-table-cell">Slab Name</th>
+              <th class="d-md-table-cell">Heads</th>
+              <th class="d-md-table-cell">Type</th>
+              <th class="d-md-table-cell">Value/Percentage</th>
+              <th class="d-md-table-cell">Range</th>
+              <th class="d-md-table-cell">Remarks</th>
+              <th class="d-lg-table-cell"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for data in slab_list %}
+              <tr id="{{data.id}}" class="text-center">
+                  <td class="text-left">{{ data.slab_name }}</td>
+                  <td class="text-left">{{ data.heads }}</td>
+                  <td class="">{% if 'A' in data.type %}Addition{% elif 'D' in data.type %}Deduction{% endif %}</td>
+                  <td>
+                    {% if data.value_percentage %}
+                      {{ data.value_percentage|floatformat:"-2" }}
+                      {% if 'V' in data.type %}BDT{% elif 'P' in data.type %}%{% endif %}
+                    {% endif %}
+                  </td>
+                  <td class="">{% if data.start_gross == null and data.end_gross == null %} N/A {% elif data.start_gross != null or data.end_gross != null %} {{ data.start_gross }} - {{ data.end_gross }} {% endif %}</td>
+                  <td class="">{{ data.remarks }}</td>
+                  <td class="text-left" width="10%">
+                  <a href="{% url 'hr:slab_update' data.id %}" class="h4 m-r-10 text-success">
+                      <span class="icon"><i class="ti-pencil-alt"></i></span>
+                  </a>
+                  <a href="#" onclick="deleteSlabData('{{data.id}}')" class="h4 text-danger">
+                      <span class="icon"><i class="ti-trash"></i></span>
+                  </a>
+                  </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane p-20 {% if option %} active {% endif %}" id="setup" role="tabpanel">
+        <form class="floating-labels" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <span class="required">*</span><input type="text" class="form-control" id="slab_name" name="slab_name" maxlength="100" value="{{ slab.slab_name }}" required="">
+                <span class="bar"></span>
+                <label for="slab_name">Slab Name</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <span class="required">*</span><input type="text" class="form-control" id="heads" name="heads" maxlength="300" value="{{ slab.heads }}" required="">
+                <span class="bar"></span>
+                <label for="heads">Heads</label>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <label for="type">Type</label>
+                <select class="form-control text-capitalize select2" name="type" id="type" data-title="Type" required="">
+                    <option value="AV" {% if slab.type == "AV" %} selected {% endif %}>Addition Value</option>
+                    <option value="AP" {% if slab.type == "AP" %} selected {% endif %}>Addition Percent</option>
+                    <option value="DV" {% if slab.type == "DV" %} selected {% endif %}>Deduction Value</option>
+                    <option value="DP" {% if slab.type == "DP" %} selected {% endif %}>Deduction Percent</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="number" class="form-control" id="value_percentage" name="value_percentage" min="1"  value="{{ slab.value_percentage }}" >
+                <span class="bar"></span>
+                <label for="value_percentage">Value/Percent</label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="number" class="form-control" id="start_gross" min="1" name="start_gross"  value="{{ slab.start_gross }}" >
+                <span class="bar"></span>
+                <label for="start_gross">Start</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="number" class="form-control" id="end_gross" name="end_gross" min="1" value="{{ slab.end_gross }}" >
+                <span class="bar"></span>
+                <label for="end_gross">End</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="text" class="form-control" id="remarks" name="remarks"  value="{{ slab.remarks }}">
+                <span class="bar"></span>
+                <label for="remarks">Remarks</label>
+              </div>
+            </div>
+            <!-- <div class="col-md-2 mb-5">
+              <label class="mt-2">
+                <input type="checkbox" {% if not slab.status and slab %} unchecked {% else %} checked {% endif %} name="status" class="js-switch" data-color="#009efb" data-size="mini" />
+                Status
+              </label>
+            </div> -->
+            <div class="col-md-2 mb-5">
+              <label class="mt-2">
+                
+              </label>
+            </div>
+            <div class="col-md-2 mb-5">
+              <label class="mt-2">
+                
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 ml-auto mt-2">
+              <div class="button-group">
+                <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                  <span class="btn-label"><i class="fa fa-check"></i></span>
+                  {{action_name}}
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script>
+
+  function deleteSlabData(id) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'mr-2 btn btn-danger'
+        },
+        buttonsStyling: false,
+    })    
+    swalWithBootstrapButtons.fire({
+        title: "Do you want to delete this Salary Structure?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.value) {
+
+            var id_url = "/hr/slab/"+id.toString()+"/delete/";
+            $.ajax({
+                url: id_url,
+                type: 'POST',
+                dataType: 'json',
+                async: false,
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $("#"+id.toString()).remove();
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Salary Structure Deleted',
+                        text: data,
+                    });
+                },
+                error: function (data) {
+                    Swal.fire({
+                    type: 'error',
+                    title: 'Something Went Wrong!',
+                    text: data,
+                })
+                }
+            });
+        } 
+    });
+}
+
+</script>
+{% endblock %}

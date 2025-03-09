@@ -1,0 +1,693 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load data_load %}
+{% load sc_filters %}
+
+{% block page_title %}Employee Details{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<link href="{% static 'dist/css/pages/ribbon-page.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Employee Details</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                               <a href="{% url 'hr:employee_edit' employee.id %}" class="btn btn-sm btn-outline-success mr-2" target="_blank" title="Employee View"><i class="ti-pencil-alt"></i></a>
+                               <a href="{% url 'hr:employee_add' %}" class="btn btn-sm btn-info" title="Custom Button"><i class="ti-view-list-alt"></i></a>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body  custom-color rounded-lg p-3 custom-rl mx-0 custom-height">
+                            <center class="m-t-10">
+                                <img src="{% if employee.photo and employee.photo.url %}/assets{{employee.photo.url}} {% else %} {% static 'images/users/user.png'%} {% endif %}" class="img-circle" width="150">
+                                <h4 class="card-title m-t-10">{{employee.name}}</h4>
+                                <h6 class="card-title m-t-10 font-weight-bold {% if details.status.title|lower == 'active' %}text-success{% else %}text-warning{% endif %}">Status : {{details.status.title}}</h6>
+                                {% if employee.signature and employee.signature.url %}
+                                <img src="/assets{{employee.signature.url}}" height="40">
+                                {% endif %}
+                            </center>
+                            {% if details %}
+                            <hr>
+                            <small class="text-muted">Company</small>
+                            <h6>{{details.company.name}}</h6>
+                            <small class="text-muted">Department</small>
+                            <h6>{{details.department.name}}</h6>
+                            {% if details.designation_id %}
+                            <small class="text-muted">Designation</small>
+                            <h6>{{ details.designation.name }}</h6>
+                            {% endif %}
+                            <div class="row">
+                                <div class="col-md">
+                                    <small class="text-muted">Employee Category</small>
+                                    <h6>
+                                        {% if details.employee_category_id  %}
+                                        {{details.employee_category.value}}
+                                        {% else %}N/A{% endif %}
+                                    </h6>
+                                </div>
+                                <div class="col-md">
+                                    <small class="text-muted">Employment Type</small>
+                                    <h6>
+                                        {% if details.employee_type_id and details.employee_type.value != "" %}
+                                        {{ details.employee_type.value }} {% else %}N/A{% endif %}
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md">
+                                    <small class="text-muted">Employee ID</small>
+                                    <h6>{{employee.employee_id}}</h6>
+                                </div>
+                                <div class="col-md">
+                                    <small class="text-muted">Punch ID</small>
+                                    <h6>
+                                        {% if details.punch_id %}
+                                        {{ details.punch_id|default_if_none:"N/A" }}
+                                        {% else %}N/A{% endif %}
+                                    </h6>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="row">
+                                <div class="col-md">
+                                    <small class="text-muted">Phone No.</small>
+                                    <h6>
+                                        {% if details.office_mobile %}
+                                        {{details.office_mobile|default_if_none:"N/A"}}
+                                        {% else %}N/A{% endif %}
+                                    </h6>
+                                </div>
+                                <div class="col-md">
+                                    <small class="text-muted">PABX</small>
+                                    <h6>
+                                        {% if details.pabx %}
+                                        {{details.pabx|default_if_none:"N/A"}}
+                                        {% else %}N/A{% endif %}
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="">
+                                <small class="text-muted">Email</small>
+                                <h6>
+                                    {% if details.office_email %}
+                                    {{details.office_email|default_if_none:"N/A"}}
+                                    {% else %}N/A{% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="card">
+                        <div class="card-body custom-color rounded-lg p-3 custom-rl mx-0 custom-height">
+                            <div class="ribbon-wrapper">
+                                <div class="ribbon ribbon-default" style="width:150px;">Profile</div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Name (BN)</small>
+                                        <h6>
+                                            {% if employee.first_name_bn or employee.last_name_bn %}
+                                            {{employee.first_name_bn|default_if_none:""|capfirst}} 
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Nationality</small>
+                                        <h6>
+                                            {% if employee.nationality %}
+                                            {{employee.nationality|default_if_none:"N/A"|upper}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Personal Phone No.</small>
+                                        <h6>
+                                            {% if employee.phone_no %}
+                                            {{employee.phone_no|default_if_none:"N/A"}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Personal Email</small>
+                                        <h6>
+                                            {% if employee.email %}
+                                            {{employee.email|default_if_none:"N/A"}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Gender</small>
+                                        <h6>
+                                            {% if employee.gender_id %}
+                                            {{ employee.gender.value }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Blood Group</small>
+                                        <h6>
+                                            {% if employee.blood_group and employee.blood_group != '' %}
+                                            {{ employee.blood_group }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Religion</small>
+                                        <h6>
+                                            {% if employee.religion_id %}
+                                            {{ employee.religion.value }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Birth Certificate No.</small>
+                                        <h6>
+                                            {% if employee.birth_certificate %}
+                                            {{employee.birth_certificate|default_if_none:"N/A"}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">NID No.</small>
+                                        <h6>
+                                            {% if employee.nid %}
+                                            {{employee.nid|default_if_none:"N/A"}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Passport</small>
+                                        <h6>
+                                            {% if employee.passport %}
+                                            {{employee.passport|default_if_none:"N/A"}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Father Name</small>
+                                        <h6>
+                                            {% if employee.father_name %}
+                                            {{employee.father_name|default_if_none:"N/A"|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Father Name (BN)</small>
+                                        <h6>
+                                            {% if employee.father_name_bn %}
+                                            {{employee.father_name_bn|default_if_none:"N/A"|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Father Phone No.</small>
+                                        <h6>
+                                            {% if employee.father_phone_no %}
+                                            {{employee.father_phone_no|default_if_none:"N/A"|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Date of Birth</small>
+                                        <h6>
+                                            {% if employee.date_of_birth %}
+                                            {{employee.date_of_birth|date:"d-M-Y"|upper}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Mother Name</small>
+                                        <h6>
+                                            {% if employee.mother_name %}
+                                            {{employee.mother_name|default_if_none:"N/A"|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Mother Name (BN)</small>
+                                        <h6>
+                                            {% if employee.mother_name_bn %}
+                                            {{employee.mother_name_bn|default_if_none:""|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Mother Phone No.</small>
+                                        <h6>
+                                            {% if employee.mother_phone_no %}
+                                            {{employee.mother_phone_no|default_if_none:""|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Marital Status</small>
+                                        {% if employee.marital_status_id %}
+                                        <h6>{{ employee.marital_status.value }}</h6>
+                                        {% else %}<h6>Single</h6>{% endif %}
+                                    </div>
+                                    {% if employee.marital_status_id %}
+                                    {% if employee.marital_status.value|lower != "single" %}
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Spouse Name</small>
+                                        <h6>
+                                            {% if employee.spouse_name %}
+                                            {{ employee.spouse_name|default_if_none:"N/A"|capfirst }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Spouse Name (BN)</small>
+                                        <h6>
+                                            {% if employee.spouse_name_bn %}
+                                            {{ employee.spouse_name_bn|default_if_none:"N/A"|capfirst }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Spouse Phone No.</small>
+                                        <h6>
+                                            {% if employee.spouse_phone_no %}
+                                            {{employee.spouse_phone_no|default_if_none:"N/A"|capfirst}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">No. of Children</small>
+                                        <h6>
+                                            {% if employee.spouse_phone_no %}
+                                            {{employee.no_of_children}}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Present Address</small>
+                                        <h6>
+                                            Vill/Road: {{employee.present_address|default_if_none:"N/A"}}
+                                            {% if employee.present_location %}, {{employee.present_location.location_en}}{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Present Address  (BN)</small>
+                                        <h6>
+                                            গ্রাম/রাস্তাঃ {{employee.present_address_bn|default_if_none:"N/A"}}
+                                            {% if employee.present_location %}, {{employee.present_location.location_bn}}{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Parmanent Address</small>
+                                        <h6>
+                                            Vill/Road: {{employee.permanent_address|default_if_none:"N/A"}}
+                                            {% if employee.permanent_location %}, {{employee.permanent_location.location_en}}{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Parmanent Address  (BN)</small>
+                                        <h6>
+                                            গ্রাম/রাস্তাঃ {{employee.permanent_address_bn|default_if_none:"N/A"}}
+                                            {% if employee.permanent_location %}, {{employee.permanent_location.location_bn}}{% endif %}
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if details %}
+                            <div class="ribbon-wrapper">
+                                <div class="ribbon ribbon-default" style="width:150px;">Official</div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Division</small>
+                                        <h6>
+                                            {% if details.division_id %}
+                                            {{ details.division.name|title|default_if_none:"N/A" }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Sub-Section</small>
+                                        <h6>
+                                            {% if details.sub_section_id %}
+                                            {{ details.sub_section.name|title|default_if_none:"N/A" }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Section</small>
+                                        <h6>
+                                            {% if details.section_id %}
+                                            {{ details.section.name|default_if_none:"N/A"|title }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Cost Center</small>
+                                        <h6>
+                                            {% if details.cost_center_id %}
+                                            {{ details.cost_center.name|title|default_if_none:"N/A" }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Unit</small>
+                                        <h6>
+                                            {% if details.unit_id %}
+                                            {{ details.unit.value }}
+                                            {% else %}N/A{% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Sitting Location</small>
+                                        <h6>
+                                            {% if details.floor %}
+                                            Floor : {{ details.floor.name }} {% if details.line %}
+                                            - Line : {{ details.line.name }}, {% else %}, {% endif %} 
+                                            {% endif %} {% if details.building %} Building :
+                                            {{ details.building|default_if_none:"N/A" }},
+                                            {% endif %} {% if details.location %}
+                                            {{ details.location|default_if_none:"N/A" }}
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Skill Category</small>
+                                        <h6>
+                                            {% if details.skill_category %}
+                                            {{ details.skill_category.value|default_if_none:"N/A" }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Shift</small>
+                                        <h6>
+                                            {% if details.shift_id %}
+                                            {% if details.shift.name %}
+                                            {{ details.shift.name }}
+                                            {% elif details.shift_id %}
+                                            {{ details.shift.shift_id }}
+                                            {% endif %}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Date of Joining</small>
+                                        <h6>
+                                            {% if details.joining_date %}
+                                            {{ details.joining_date|date:"d-M-Y"|upper }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Confirmation Date</small>
+                                        <h6>
+                                            {% if details.confirmation_date %}
+                                            {{ details.confirmation_date|date:"d-M-Y"|upper }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Probation Month</small>
+                                        <h6>
+                                            {% if details.provision_month %}
+                                            {{ details.provision_month }} months
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Reporting To </small>
+                                        <h6>
+                                            {% if details.reporting_to_id %}
+                                            {{ details.reporting_to.personal.name }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Weekly Off Day</small>
+                                        <h6>
+                                            {% if details.holiday|length > 0 %}
+                                            {{details.holidays}}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">TIN</small>
+                                        <h6>
+                                            {% if details.tin %}
+                                            {{ details.tin|default_if_none:"" }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Attendance Bonus</small>
+                                        <h6>
+                                            {% if details.attendance_bonus_id %}
+                                            {{ details.attendance_bonus }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Has Income TAX?</small>
+                                        <h6>{{ details.income_tax|yesno|title }}</h6>
+                                    </div>
+                                    {% comment %} {% if details.tiffin_bill %} {% endcomment %}
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Get Tiffin Bill?</small>
+                                        <h6>{{ details.tiffin_bill|yesno|title }}</h6>
+                                    </div>
+                                    {% comment %} {% endif %} {% endcomment %}
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Has Transport Facility?</small>
+                                        <h6>{{ details.transport_facility|yesno|title }}</h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Has PF Facility?</small>
+                                        <h6>{{ details.has_pf|yesno|title }}</h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Has Over Time?</small>
+                                        <h6>{{ details.overtime|yesno|title }}</h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Has Off Day OT?</small>
+                                        <h6>{{ details.off_day_ot|yesno|title }}</h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Has Holiday Bonus?</small>
+                                        <h6>{{ details.holiday_bonus|yesno|title }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if request.session.employee_id|ifinlistSTR:'EC00007156,HC01000038,LE01000084' and details.salary and details.salary > 0 %}
+                            <div class="ribbon-wrapper">
+                                <div class="ribbon ribbon-default" style="width:150px;">Salary</div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Initial Grade</small>
+                                        <h6>
+                                            {% if details.initial_grade %}
+                                            {{ details.initial_grade|default_if_none:"N/A" }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Current Grade</small>
+                                        <h6>
+                                            {% if details.grade %}
+                                            {{ details.grade }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Gross Salary</small>
+                                        <h6>
+                                            {% if details.salary %}
+                                            BDT {{ details.salary|floatformat:-2 }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    {% for s in details.hrsalarybreakdown_set.all|dictsort:"slab_heads.head.value" %}
+                                        {% if s.amount %}
+                                        <div class="col-md-3">
+                                            <small class="text-muted">{{ s.slab_heads.head.value }}</small> 
+                                            <h6>BDT {{ s.amount|floatformat:-2 }}</h6>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% comment %} {% if details.banks.count > 0 %} {% endcomment %}
+                            <div class="ribbon-wrapper">
+                                <div class="ribbon ribbon-default" style="width:150px;">Bank</div>
+                                {% for bank in details.banks.all %}
+                                {% if not forloop.first %}<hr />{% endif %}
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Name</small>
+                                        <h6>
+                                            {% if bank.bank_name %}
+                                            {{ bank.bank_name|capfirst }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md">
+                                        <small class="text-muted">Branch Name</small>
+                                        <h6>
+                                            {% if bank.branch_name %}
+                                            {{ bank.branch_name }}
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md">
+                                        <small class="text-muted">Account</small>
+                                        <h6>
+                                            {% if bank.account_no %}
+                                            {{ bank.account_no }} ( {{ bank.status.title|title }} )
+                                            {% else %} N/A {% endif %}
+                                        </h6>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Name</small>
+                                        <h6>N/A</h6>
+                                    </div>
+                                    <div class="col-md">
+                                        <small class="text-muted">Branch Name</small>
+                                        <h6>N/A</h6>
+                                    </div>
+                                    <div class="col-md">
+                                        <small class="text-muted">Account</small>
+                                        <h6>N/A</h6>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% comment %} {% endif %}
+                            {% if details.nominees.count > 0 %} {% endcomment %}
+                            <div class="ribbon-wrapper">
+                                <div class="ribbon ribbon-default" style="width:150px;">Nominee</div>
+                                {% for nominee in details.nominees.all %}
+                                {% if not forloop.first %}<hr />{% endif %}
+                                <div class="row mt-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Name</small>
+                                                <h6>
+                                                    {% if nominee.nominee_name %}
+                                                    {{ nominee.nominee_name|capfirst }}
+                                                    {% else %} N/A {% endif %}
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Relation</small>
+                                                <h6>
+                                                    {% if nominee.relation %}
+                                                    {{ nominee.relation|capfirst }}
+                                                    {% else %} N/A {% endif %}
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Mobile</small>
+                                                <h6>
+                                                    {% if nominee.nominee_mobile %}
+                                                    {{ nominee.nominee_mobile }}
+                                                    {% else %} N/A {% endif %}
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">NID</small>
+                                                <h6>
+                                                    {% if nominee.nominee_nid %}
+                                                    {{ nominee.nominee_nid }}
+                                                    {% else %} N/A {% endif %}
+                                                </h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Share of Right</small>
+                                                <h6>
+                                                    {% if nominee.share_of_right %}
+                                                    {{ nominee.share_of_right }}%
+                                                    {% else %} N/A {% endif %}
+                                                </h6>
+                                            </div>
+                                            <div class="col-md">
+                                                <small class="text-muted">Address</small>
+                                                <h6>
+                                                    {% if nominee.nominee_address %}
+                                                    {{ nominee.nominee_address }}
+                                                    {% else %} N/A {% endif %}
+                                                </h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        {% if nominee.nominee_photo and nominee.nominee_photo.url %}
+                                        <img src="/assets{{nominee.nominee_photo.url}}" height="80">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="row mt-3">
+                                    <div class="col-md">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Name</small>
+                                                <h6>N/A</h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Relation</small>
+                                                <h6>N/A</h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Mobile</small>
+                                                <h6>N/A</h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">NID</small>
+                                                <h6>N/A</h6>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Share of Right</small>
+                                                <h6>N/A</h6>
+                                            </div>
+                                            <div class="col-md">
+                                                <small class="text-muted">Address</small>
+                                                <h6>N/A</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% comment %} {% endif %} {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
