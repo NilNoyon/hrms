@@ -1,0 +1,558 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load inv_filters %}
+{% load sc_filters %}
+
+{% block page_title %}Salary Process{% endblock %}
+
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .input-group{ position: relative;} 
+    .input-group .form-group { width: 100%; display: inline-block; }
+    .input-group .input-group-append { display: inline-block; position: absolute; right: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <h4 class="text-themecolor mb-0">Salary Process</h4>
+        </div>
+        <div class="card-body content pt-0">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"> 
+                    <a class="nav-link active" data-toggle="tab" href="#entry" role="tab">
+                        Entry
+                    </a>
+                </li>
+                <li class="nav-item"> 
+                    <a class="nav-link" data-toggle="tab" href="#pending" role="tab">
+                        Pending <span class="badge badge-danger rounded-pill ml-2"></span>
+                    </a>
+                </li>
+                <li class="nav-item"> 
+                    <a class="nav-link" data-toggle="tab" href="#list" role="tab">
+                        List <span class="badge badge-danger rounded-pill ml-2"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content tabcontent-border p-2">
+                <div class="tab-pane active p-20" id="entry" role="tabpanel">
+                    <div class="row floating-labels mt-2">
+                        <div class="col-md-2">
+                            <div class="form-group mb-3">
+                                <label for="company">Company</label>
+                                <select class="form-control select2" name="company" id="company" data-title="Company">
+                                    <option value="" disabled selected></option>
+                                    {% for company in companies %}
+                                    <option value="{{company.id}}">{{company.short_name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-3">
+                                <label for="company">Department</label>
+                                <select class="form-control select2" name="department" id="department" data-title="Department">
+                                    <option value="" disabled selected></option>
+                                    {% for department in departments %}
+                                    <option value="{{department.id}}">{{department.title}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-3">
+                                <label for="category">Emp. Category</label>
+                                <select class="form-control select2" name="category" id="category" data-title="Emp. Category" multiple>
+                                    {% for category in categories %}
+                                    <option value="{{category.id}}">{{category.value}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label for="employee">Employees</label>
+                                <select class="form-control select2" name="employee" id="employee" data-title="Employees" multiple>
+                                    {% for shift in shifts %}
+                                        <option value="{{shift.id}}">{{shift.shift_id}} - {{shift.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info mt-2 search_button">
+                                <span class="btn-label"><i class="fa fa-search"></i></span> Search
+                            </button>
+                        </div>   
+                    </div>
+                        
+                    <form class="floating-labels mt-2" method="post">
+                        {% csrf_token %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-nowrap mb-0 hide" id="employee-table" style="max-height:40%;">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th width="15px">
+                                            <div class="custom-control custom-checkbox mb-1">
+                                                <input type="checkbox" class="custom-control-input select_all" id="select_all" onClick="toggle(this)">
+                                                <label class="custom-control-label" for="select_all"></label>
+                                            </div>
+                                        </th>
+                                        <th class="">Company</th>
+                                        <th class="">Department</th>
+                                        <th class="">Designation</th>
+                                        <th class="">Employee ID</th>
+                                        <th class="">Name</th>
+                                        <th class="">Emp. Category</th>
+                                        <th class="">Salary</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div class="hide mt-4" id='final_form'>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="month">Month</label>
+                                        <select class="form-control text-capitalize select2" name="month" id="month" data-title="Month" required />
+                                            {% for m in months %}
+                                                <option value="{{m.0}}">{{m.1}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="route_type">Year</label>
+                                        <select class="form-control text-capitalize select2" name="year" id="year" data-title="year" required />
+                                            {% for y in years %}
+                                                <option value="{{y}}">{{y}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div> 
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <textarea rows="1" class="form-control bg-transparent" id="notes" name="notes"></textarea>
+                                        <span class="bar"></span>
+                                        <label for="notes">Notes</label>
+                                    </div>
+                                </div> 
+                                <div class="col-md-2 ml-auto">
+                                    <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mt-2">
+                                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                    </button>
+                                </div>   
+                            </div>   
+                        </div>   
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="pending" role="tabpanel">
+                    <div class="form-fields">
+                        <div class="row form floating-labels">
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <button class="btn btn-block btn-outline-warning preset_button" type="button">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <select class="form-control pdepartment_field select2" data-title="Department" name="department">
+                                        <option value="" disabled selected>Department</option>
+                                        {% for i in department_list %}
+                                        <option value="{{i.id}}">{{i.title}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <select class="form-control pdesignation_field select2" data-title="Designation" name="designation">
+                                        <option value="" disabled selected>Designation</option>
+                                        {% for i in designation_list %}
+                                        <option value="{{i.id}}">{{i.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="input-group">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control date_field" placeholder="Select Date Range..." autocomplete="off">
+                                        <span class="bar"></span>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="btn calendar-btn" type="button"><i class="fa fa-calendar-days"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="input-group">
+                                    <div class="form-group mb-0">
+                                        <input type="text" class="form-control psearch_field" name="search_box" placeholder="Search by Employee ID..." title="Search by Employee ID...">
+                                        <span class="bar"></span>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="psearch_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="col-md-1">
+                                <div class="form-group">
+                                    <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                    <table id="pending-table" class="table table-border card-table table-vcenter">
+                        <thead>
+                            <tr class="text-center">
+                                <th class="">Year</th>
+                                <th class="">Month</th>
+                                <th class="">No. of Employees</th>
+                                <th class="">Status</th>
+                                <th class="">Created by</th>
+                                <th class="">Created at</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+                <div class="tab-pane p-20" id="list" role="tabpanel">
+                    <div class="form-fields">
+                        <div class="row form floating-labels">
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <button class="btn btn-block btn-outline-warning rreset_button" type="button">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <select class="form-control department_field select2" data-title="Department" name="department">
+                                        <option value="" disabled selected>Department</option>
+                                        {% for i in department_list %}
+                                        <option value="{{i.id}}">{{i.title}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <select class="form-control designation_field select2" data-title="Designation" name="designation">
+                                        <option value="" disabled selected>Designation</option>
+                                        {% for i in designation_list %}
+                                        <option value="{{i.id}}">{{i.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="input-group">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control date_field" placeholder="Select Date Range..." autocomplete="off">
+                                        <span class="bar"></span>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="btn calendar-btn" type="button"><i class="fa fa-calendar-days"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="input-group">
+                                    <div class="form-group mb-0">
+                                        <input type="text" class="form-control search_field" name="search_box" placeholder="Search by Employee ID..." title="Search by Employee ID...">
+                                        <span class="bar"></span>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button class="search_btn btn" type="button"><i class="fa fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="col-md-1">
+                                <div class="form-group">
+                                    <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                    <table id="regular-table" class="table table-border card-table table-vcenter">
+                        <thead>
+                            <tr class="text-center">
+                                <th class="">Year</th>
+                                <th class="">Month</th>
+                                <th class="">No. of Employees</th>
+                                <th class="">Status</th>
+                                <th class="">Created by</th>
+                                <th class="">Created at</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="update_roaster_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form class="floating-labels mt-2" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="modal_emp_id" readonly>
+                            <span class="bar"></span>
+                            <label for="modal_emp_id">Employee ID</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="roaster_shift" readonly>
+                            <span class="bar"></span>
+                            <label for="roaster_shift">Roster Shift</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_shift">Shift</label>
+                            <select class="form-control select2" name="new_shift" id="new_shift" data-title="Shift">
+                                <option value="" disabled selected></option>
+                                {% for shift in shifts %}
+                                    <option value="{{shift.id}}">{{shift.shift_id}} - {{shift.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mt-2">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+     
+    $('body').on('click','.check_emp', function(){
+        var all_checked = true;
+        $('.check_emp').each(function (index, item) {
+            if (!$(item).is(':checked')) {
+                all_checked = false;
+            }
+        });
+        if(all_checked){
+            $('#select_all').prop("checked", true);
+        }else{ $('#select_all').prop("checked", false); }
+    });
+
+    // selecting all items for approval 
+    $('.select_all').click(function(){
+        if($(this).is(':checked')){
+            $('.check_emp').attr('checked', true);
+        } else{ $('.check_emp').attr('checked', false); }
+        
+        var total_checkbox          = $(".check_emp:checkbox").length;
+        var total_checked_checkbox  = $(".check_emp:checkbox").filter(":checked").length;
+        
+        if ( total_checkbox != total_checked_checkbox){
+            $(".select_all").attr('checked', false);
+        }
+
+    });
+
+    function toggle(elm) {
+        if ($(elm).is(':checked')) {
+            $('.check_emp').each(function (index, item) {
+                if (!$(this).is(':checked')) {
+                    $(item).trigger('click');
+                }
+            });
+        } else {
+            $('.check_emp').each(function (index, item) {
+                if ($(this).is(':checked')) {
+                    $(item).trigger('click');
+                }
+            });
+        }
+    }
+
+    $('.calendar-btn').click(function(event){
+        event.preventDefault(); 
+        $(this).closest('.input-group').find('.date_field').click();
+    });
+
+    $(".date_field").daterangepicker({
+        singleDatePicker: false,
+        showDropdowns   : true,
+        autoUpdateInput : false,
+        opens           : "left",
+        locale          : {
+            cancelLabel : 'Clear',
+            format      : 'YYYY-MM-DD'
+        },
+    }).on('apply.daterangepicker', function(ev, picker) {
+        start_date      = picker.startDate.format('YYYY-MM-DD');
+        end_date        = picker.endDate.format('YYYY-MM-DD');
+        $(this).val(start_date + " - " + end_date);
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        start_date = end_date = null; $(this).val(null);
+    });
+
+    $("#employee").select2({
+        minimumInputLength  : 3,
+        placeholder         : "Employees",
+        allowClear          : true,
+        ajax: {
+            url             : "{% url 'hr:get_employee_data' %}",
+            dataType        : "json",
+            data            : function(term, page) { return { 
+                                q : term, company : $("#company").val(),
+                                department : $("#department").val(),
+                                category : $("#category").val() }; 
+                            },
+            processResults  : function (data) { return { results: data.employee_list }; }
+        },
+    });
+    
+    $("body").on("click", ".search_button", function(e){
+        $("#employee-table").hide();
+        $.ajax({
+            type    : "POST",
+            url     : '{% url "hr:get_employee_data_for_salary_process" %}',
+            data    : { employee    : $("#employee").val(),
+                        company     : $("#company").val(),
+                        department  : $("#department").val(),
+                        category    : $("#category").val()
+                    },
+            success : function (data) {
+                $("#employee-table, #final_form").show();
+                $("#employee-table tbody").empty().html(data['report_data']);
+            }
+        });
+    });
+    
+    $(".reset_button").on("click", function(e){
+        $(".search_field").val(''); common_table_data(reset_data=true);
+    });
+
+    $(".search_btn").on("click", function(e){
+        common_table_data();
+    });
+    $("body").on("keydown", ".search_field", function(e) {
+        if (e.keyCode == 13) { common_table_data(this); }
+    });
+
+    var start = 0, block_request = false, end_pagination = false, counter = 20; get_data();
+    function common_table_data(selector, reset_data=true){
+        get_data(true);
+    }
+
+    $('#pending').scroll(function () {
+        margin = $('#pending').children('table').height() - $('#pending').height();
+        if ($('#pending').scrollTop() > margin && end_pagination === false && block_request === false) {
+            block_request = true; start += counter; rget_data();
+        }
+    });
+
+    function get_data(reset=false){
+        if(reset) { start = 0; } $tabpane = $('#pending');
+        let multi_date = ($('.date_field').val()).split(" - ");
+        let start_date = multi_date[0], end_date = multi_date[1], search_data = $(".search_field").val();
+        $.ajax({
+            type    : 'POST', url : "{% url 'hr:get_salary_process_for_datatable' %}",
+            data    : { "start" : start, "search" : search_data, 'reset' : reset, "counter" : counter, "status" : 'pending' },
+            success : function (data) {
+                let id_name = $tabpane.attr('id');
+                $(".nav-link[href='#" + id_name + "'] span").text(data.total_data);
+                if (data.end_pagination === true) { end_pagination = true;
+                } else { end_pagination = false; }
+                if (data.reset_data === true ){
+                    $('#pending-table').find('tbody').html('');
+                } block_request = false;
+                $('#pending-table').find('tbody').append(data.content);
+            }
+        })
+    }
+
+    var rstart = 0, rblock_request = false, rend_pagination = false, rcounter = 20; rget_data();
+    function rcommon_table_data(selector, reset_data=true){
+        rget_data(true);
+    }
+
+    $('#list').scroll(function () {
+        rmargin = $('#list').children('table').height() - $('#list').height();
+        if ($('#list').scrollTop() > rmargin && rend_pagination === false && rblock_request === false) {
+            rblock_request = true;
+            rstart += rcounter; rget_data();
+        }
+    });
+
+    function rget_data(reset=false){
+        if(reset) { rstart = 0; } $rtabpane = $('#list');
+        let multi_date = ($('.date_field').val()).split(" - ");
+        let start_date = multi_date[0], end_date = multi_date[1], search_data = $(".search_field").val();
+        $.ajax({
+            type    : 'POST', url : "{% url 'hr:get_salary_process_for_datatable' %}",
+            data    : { "start" : start, "search" : search_data, 'reset' : reset, "counter" : counter, "status" : 'list' },
+            success : function (data) {
+                let id_name = $rtabpane.attr('id');
+                $(".nav-link[href='#" + id_name + "'] span").text(data.total_data);
+                if (data.end_pagination === true) { end_pagination = true;
+                } else { end_pagination = false; }
+                if (data.reset_data === true ){
+                    $('#regular-table').find('tbody').html('');
+                } block_request = false;
+                $('#regular-table').find('tbody').append(data.content);
+            }
+        })
+    }
+
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        let msg = "Do you want to delete this from list?"
+        Swal.fire({
+            text : msg, type    : 'question',
+            showCancelButton    : true,
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+
+    $('body').on('click','.edit_btn', function(e){
+        let url = $(this).data('url'), id = $(this).data('id');
+        $.ajax({
+            type : 'POST', data : { "id":id }, 
+            url : "{% url 'hr:get_roaster_data' %}",
+            success : function (data) {
+                $("#modal_emp_id").val(data['emp_id']).parent().addClass('focused');
+                $("#roaster_shift").val(data['shift']).parent().addClass('focused');
+                $("#update_roaster_modal form").attr('action', url);
+                $('#update_roaster_modal').modal(); }
+        });
+    });
+</script>
+{% endblock %}

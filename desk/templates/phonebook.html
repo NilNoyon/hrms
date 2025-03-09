@@ -1,0 +1,107 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Phonebook{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Phonebook</h4>
+      </div>
+    </div>
+  </div>
+  <!-- Phonebook New Design Start -->
+  <div class="card-body custom-color rounded-lg custom-rl">
+    <div class="form-material mb-4" style="text-align: center;">
+      <input type="text" id="Search" style="width: 50%;" class="form-control" autofocus onkeyup="myFunction()" placeholder="Search employee" title="Type here"></div>
+      <div class="row">
+        {% for user in phonebook_list %}
+        <div class="col-md-6 col-lg-6 col-xl-4 target mb-4">
+            <div class="card card-body" style="border: 1px solid lightgray;border-radius: 10px; margin: 5px;">
+                <div class="row align-items-center">
+                    <div class="col-md-4 col-lg-3 text-center">
+                        <img 
+                          {% if user.personal.photo and user.personal.photo.url %} 
+                          src="/assets{{user.personal.photo.url}}" 
+                          {% else %} src="{% static 'images/users/user.png'%}" {% endif %}  
+                          width="90" height="90" alt="user" class="img-circle">
+                    </div>
+                    <div class="col-md-8 col-lg-9">
+                        <h5 class="box-title m-b-0">{{ user.personal.name }}</h5> <small>{{ user.designation }}, {{ user.department }}</small>
+                        <address style="padding-top: 12px;">
+                            <small>
+                              <a href="tel:{{ user.current_mobile }}" style="color:blue; padding-right: 15px;font-size: 1.2em;">
+                                <span class="icons-Phone-2"></span> {{ user.current_mobile }}
+                              </a>
+                              {% if user.current_email %} |
+                              <a href="https://teams.microsoft.com/l/chat/0/0?users={{ user.current_email }}" target="_show" 
+                                style="color:blue; padding-left: 15px;padding-right: 15px;vertical-align: middle;">
+                                <img src="/assets/icons/teams.svg" alt="Teams" width="25" height="25">
+                              </a>{% endif %}
+                               | <a style="color:blue; padding-right: 15px;font-size: 1.2em;"> <span class="icons-Phone"></span> {{ user.pabx }}</a><br>
+                              {% if user.current_email %}
+                              <a href="mailto:{{ user.current_email }}" style="color:blue; vertical-align: middle;padding-right: 15px;">
+                                <span class="icons-Mail-Open" style="font-size: 1.5em;"></span> {{ user.current_email }}
+                              </a> {% endif %}
+                              <span style="vertical-align: middle;"><i class="ti-location-pin"></i> {{ user.company.short_name }}</span>
+                              <div style="display: none;">{{ user.personal.employee_id }}</div>
+                            </small>
+                        </address>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- Phonebook New Design End -->
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+<!-- Old Phonebook Script Start-->
+<!-- <script>
+  let table = $('#phonebook_table').DataTable({
+            dom: "<'row top'<'col-md-6'><'col-md-6'f>>t<'row'<'col-4'><'col-8'p>>",
+            ordering: true,
+            paging: false,
+            pageLength: 50,
+            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            responsive: true,
+            fixedHeader: {
+                header: false
+            },
+            language: {
+                paginate: {
+                    previous: "<",
+                    next: ">",
+                }
+            },
+            scrollY: '50vh'
+        });
+</script> -->
+<!-- Old Phonebook Script End -->
+
+<!-- New Phonebook Script Start-->
+
+<script>
+  function myFunction() {
+      let input = document.getElementById('Search').value 
+      input=input.toLowerCase(); 
+      let x = document.getElementsByClassName('target'); 
+      
+      for (i = 0; i < x.length; i++) {  
+          if (!x[i].innerHTML.toLowerCase().includes(input)) { 
+              x[i].style.display="none"; 
+          } 
+          else { 
+              x[i].style.display="";                  
+          } 
+      } 
+  }
+</script>
+<!-- New Phonebook Script End-->
+{% endblock %}

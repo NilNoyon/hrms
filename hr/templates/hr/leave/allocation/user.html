@@ -1,0 +1,81 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% block page_title %}Leave Allocation{% endblock %}
+{% block add_css %}
+<style>
+    .custom-control-input:checked~.custom-control-label::before {
+        border-color: #03a9f3;
+        background-color: #03a9f3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                    <h4 class="mb-1">User wise Leave Allocation</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form class="" method="post" id="form">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="text-center">
+                            <tr>
+                                <th width="15%">Allocation</th>
+                                {% for lt in leave_types %}
+                                <th width="{{ 85|div_float:leave_types.count|floatformat:-2 }}%">
+                                    <input type="hidden" name="leave_masters" value="{{lt.id}}" />
+                                    {{lt.leave_type.short_title}} - {{ lt.allocated_days }} Day/s
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td class="py-0">
+                                    {{ user.personal.name }}
+                                    <input type="hidden" name="users" value="{{user.id}}" />
+                                </td>
+                                {% for lt in leave_types %}
+                                <td class="p-0">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text" style="border: 0; border-radius: 0; align-items: normal;">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="checkbox[{{user.id}}][{{lt.id}}]" 
+                                                        name="checkbox[{{user.id}}][{{lt.id}}]" checked value="1">
+                                                    <label class="custom-control-label" for="checkbox[{{user.id}}][{{lt.id}}]"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="text" class="form-control text-center border-0" name="leave_days[{{user.id}}][{{lt.id}}]" value="{{ lt.allocated_days }}" />
+                                        <input type="hidden" name="allocation[{{user.id}}][{{lt.id}}]" />
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 ml-auto mt-2">
+                        <div class="button-group">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success receive-goods">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+

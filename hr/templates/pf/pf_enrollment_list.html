@@ -1,0 +1,221 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}PF Employee Enrollment List{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  
+     .dataTables_scroll{
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255/var(--tw-bg-opacity));
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: 0.5rem !important;
+        margin-top:18px;
+        padding:2rem !important;
+    }
+</style>  
+{% endblock %}
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">PF Employee Enrollment List</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+                <a href="/hr/emp-eligible-list/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body pt-0 px-0 custom-rl">
+        <div class="table-responsive">
+            <table class="table table-border card-table table-vcenter enroll_list_table" data-url="{% url 'hr:get_employee_enrollment_list_filter' %}">
+                <thead>
+                    <tr>
+                        <th class="d-sm-table-cell">Employee ID</th>
+                        <th class="d-sm-table-cell">Name</th>
+                        <th class="d-sm-table-cell">Provident Fund</th>
+                        <th class="d-md-table-cell">Basis of PF Computation</th>
+                        <th class="d-sm-table-cell">Basic/Gross Salary</th>
+                        <th class="d-md-table-cell">Date of PF MemberShip</th>
+                        <th class="d-md-table-cell">Rate of Employee's</th>
+                        <th class="d-md-table-cell">Rate of Company's </th>
+                        <th class="d-lg-table-cell">Opening Balance of Employee's</th>
+                        <th class="d-lg-table-cell">Opening Balance of Company's</th>
+                        <th class="d-lg-table-cell"></th>
+                      </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="reset">
+          <div class="form-group" style="display: none;">
+              <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+          </div>
+        </div>
+        <div class="form-group pfs" style="display: none;">
+          <select class="form-control text-capitalize" id="pfs" name="pf">
+            <option value="" >All Provident Fund</option>
+              {% for data in Pf_list %}
+                <option value="{{data.id}}" >{{data.pf_heading}}</option>
+              {% endfor %}
+          </select>
+        </div>
+        <div class="form-group multi-date" style="display: none;">
+          <input type="text" class="form-control text-capitalize multidate remove_border" id="multi-date" name="created_at" placeholder="Select PF Enroll Date..." autocomplete="off">
+        </div>
+        <div class="input-group search_box" style="display: none;">
+          <input type="text" class="form-control remove_border" id="search_box" name="search_box" placeholder="Employee Id/Name">
+          <div class="input-group-append">
+              <button class="btn btn-info" type="button"><i class="fa fa-search"></i></button>
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+
+<script src="{% static 'node_modules/moment/moment.js' %}"></script> 
+<script src="{% static 'node_modules/dropify/dist/js/dropify.min.js' %}"></script> 
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script> 
+
+<script>
+    var completedTable = null;
+    $(document).ready(function () {
+        
+        loadDataTable({});
+    });
+
+
+    var pf    = '';
+    var search_text = '';
+    var start_date  = '';
+    var end_date    = ''; 
+
+    function loadDataTable(data){
+        
+        if (completedTable) {
+            completedTable.destroy();
+        }
+        let url = $(".enroll_list_table").data("url");
+
+        completedTable = $(".enroll_list_table").DataTable({
+            dom      : "<'custom-color rounded-lg p-3'<'row top'<'col-md-1 reset_btn'><'col-md-2 pf'><'col-md-3 date'><'col-md-4 search_area'>>>t",
+            ordering: false,
+            paging: true,
+            iDisplayLength: 25,
+            pageLength: 5,
+            autoWidth: false,
+            scrollY: '365',
+            scroller: true,
+            deferRender: true,
+            serverSide: true,
+            processing: true,
+            responsive:true,
+            ajax:{
+                type: "POST",
+                url: url,
+                data: data,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                dataSrc: ""
+            },
+
+            initComplete:function( settings, json){
+                if( Object.keys(data).length > 0 ){
+                    $("#pfs").select2("destroy").val(data.pf).select2()
+                    $("#search_box").val(data.search_text).focus() 
+                    if(data.start_date != undefined && data.start_date != ''){
+                        s_date = data.start_date.split("-").join("/");
+                        e_date = data.end_date.split("-").join("/");
+                        multi_date = s_date + " - " + e_date;
+                        $('.dataTables_wrapper .multidate').val(multi_date);
+                        $('.dataTables_wrapper .multidate').data('daterangepicker').setStartDate(s_date);
+                        $('.dataTables_wrapper .multidate').data('daterangepicker').setEndDate(e_date);
+                    }else{ $('.dataTables_wrapper .multidate').val(multi_date); }
+                }
+                $('.dataTables_scrollBody').on('scroll', function (e) {
+                  $parent = $(this).parent();
+                  $parent.children('.dataTables_scrollHead').scrollLeft($parent.children('.dataTables_scrollBody').scrollLeft());
+                });
+            }
+        });
+
+        $(".reset").children().clone().appendTo(".dataTables_wrapper .reset_btn");
+        $(".dataTables_wrapper .reset_btn").children().show();
+
+
+        $(".pfs").clone().appendTo(".dataTables_wrapper .pf");
+        $(".dataTables_wrapper .pf .pfs").show();
+        $(".dataTables_wrapper .pf .pfs #pfs").select2();
+
+        $(".search_box").clone().appendTo(".dataTables_wrapper .search_area");
+        $(".dataTables_wrapper .search_area .search_box").show();
+
+        $(".top").on("click", ".reset_button", function(){
+            pf = search_text = '';
+            $(".multidate").val('');
+            loadDataTable({});
+        }); 
+
+
+        $("#pfs").on("select2:select select2:unselecting", function(){
+            pf = $(this).val();
+            setData();
+        })
+
+        // Date Range Picker
+        $(".multi-date").children().clone().appendTo(".dataTables_wrapper .date");
+        $(".dataTables_wrapper .date").children().show();
+        $(".dataTables_wrapper .multidate").daterangepicker({
+            singleDatePicker: false,
+            showDropdowns   : true,
+            autoUpdateInput : false,
+            locale          : {
+                cancelLabel : 'Clear',
+                format      : 'YYYY/MM/DD'
+            },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            start_date      = picker.startDate.format('YYYY-MM-DD');
+            end_date        = picker.endDate.format('YYYY-MM-DD');
+            setData(start_date, end_date)
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            start_date      = null;
+            end_date        = null;
+            setData(start_date, end_date)
+        });
+        $(".search_box").on("click", ".btn", function(){
+            search_text = $("#search_box").val();
+            setData();
+        }); 
+    }
+
+    function setData(start_date='', end_date=''){
+      date_value      = $(".dataTables_wrapper .multidate").val();
+      if(start_date == '' && date_value){
+          dates       = date_value.split(" - ");
+          start_date  = dates[0].split("/").join("-");
+          end_date    = dates[1].split("/").join("-");
+      }else if(start_date==null && end_date==null){
+          start_date      = '';
+          end_date        = '';
+      }
+        data = {'pf':pf,'start_date':start_date,'end_date':end_date,'search_text':search_text}
+        loadDataTable(data);
+    }
+
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+

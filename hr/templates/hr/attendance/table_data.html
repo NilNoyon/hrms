@@ -1,0 +1,34 @@
+<div class="tableFixHead" id="dpWO-table">
+    <table class="table table-vcenter mb-0" data-wo_category='2'>
+        <thead>
+            <tr class="text-center">
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Shift</th>
+                <th>Date</th>
+                <th>In-Time</th>
+                <th>Out-Time</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendance in attendances %}
+            <tr class="text-center">
+                <td class="text-left">{{ attendance.employee.personal.employee_id }}</td>
+                <td class="text-left">{{ attendance.employee.personal.name }}</td>
+                <td class="text-left">{{ attendance.location }}</td>
+                <td>{{ attendance.shift }}</td>
+                <td class="text-left">{{ attendance.present_day|date:'d-M-Y'|upper }}</td>
+                <td>{{ attendance.in_time|date:"h:i:s A"|upper|default:"N/A" }}</td>
+                <td>{{ attendance.out_time|date:"h:i:s A"|upper|default:"N/A" }}</td>
+                <td>{{ attendance.remarks|safe }}</td>
+            </tr>
+            {% empty %}
+            <tr class="text-center">
+                <td colspan="7" class="text-danger font-weight-bold">No Attendance Found!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

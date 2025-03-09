@@ -1,0 +1,246 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} License {% endblock %}
+{% block add_css %}
+  <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card border-danger">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6 align-self-center">
+            <h4 class="text-themecolor mb-0"> License</h4>
+          </div>
+          <div class="col-md-6 align-self-center text-right">
+            <div class="d-flex justify-content-end align-items-center">
+              <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group" role="group" aria-label="First group">
+                  <div class="btn-group" role="group" aria-label="First group">
+                    <a href="/hr/license-entry/" class="btn btn-sm btn-success" title="License Entry"><i class="ti-plus"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"> 
+                <a class="nav-link {% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#list" role="tab">List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link  {% if option %} active {% endif %}" data-toggle="tab" href="#add_Pf_policy" role="tab">{{action.name}}</a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane p-20 {% if option %} active {% endif %}" id="add_Pf_policy" role="tabpanel">
+              <form class="floating-labels mt-3" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="form-group">
+                          <label for="company">Company</label>
+                          <select class="form-control text-capitalize select2" id="company" name="company"
+                            data-title="Company" required>
+                            <option value="" disabled selected></option>
+                            {% for data in company_list %}
+                               <option value="{{data.id}}" {% if instance.company_id == data.id %} selected {% endif %}>{{data.name}}
+                               </option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="license_name">License Name</label>
+                            <select class="form-control text-capitalize select2 audit_by"
+                                id="license_name" name="license_name" data-title="License Name" required>
+                                {% for data in license_name %}
+                                <option value="{{data.id}}" {% if instance.id == data.id %} selected {% endif %}>{{data.value}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                      </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="certificate_no">License/Certificate No.</label>
+                                <input type="text" class="form-control" id="certificate_no" name="certificate_no" data-title="License Name" {% if instance.certificate_no %} value={{instance.certificate_no}}{% endif %} required >
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <input type="text" class="form-control issu_date" id="issu_date" name="issu_date" {% if instance.issu_date %} value={{instance.issu_date|date:'d-M-Y'}}{% endif %} required>
+                              <span class="bar"></span>
+                              <label for="issu_date">Issue/Renewal Date</label>
+                            </div>
+                        </div>
+      
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <input type="text" class="form-control expire_date" id="expire_date" name="expire_date" {% if instance.expire_date %} value={{instance.expire_date|date:'d-M-Y'}}{% endif %} required>
+                              <span class="bar"></span>
+                              <label for="expire_date">Expire Date</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <label class="form-label">Renewal Status</label>
+                              <select class="form-control select2" id="renewal_status" name="renewal_status" data-title="Renewal Status" required>
+                                <option value="" disabled selected>Company</option>
+                                <option value="Update" {% if instance.renewal_status  == "Update" %} selected {% endif %}>Update</option>
+                                <option value="Applied" {% if instance.renewal_status == "Applied" %} selected {% endif %}>Applied</option>
+                                <option value="Parmanent" {% if instance.renewal_status == "Parmanent" %} selected {% endif %}>Parmanent</option>
+                              </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="remarks">Remarks</label>
+                                <input type="text" class="form-control" id="remarks" name="remarks" data-title="Remarks" {% if instance.remarks %} value={{instance.remarks}}{% endif %} >
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                          <div class="form-group">
+                              File <input type="file" id="attachment" name="attachment" data-height="80">
+                          </div>
+                      </div>
+                        
+                      <div class="col-md-10">
+                          <div class="form-group">
+                              <label for="">Email</label>
+                              <select class="form-control text-capitalize select2 gmail" id="gmail" multiple name="Gmail" data-title="Email" title="Email" >
+                              </select>
+                          </div>
+                      </div>
+                          
+                      <div class="col-md-2 ">
+                        <div class="button-group">
+                          <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>
+                            {{action.btnTxt}}
+                          </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="list" role="tabpanel">
+              <table class="table display table-border card-table table-vcenter" style="width:100%">
+                <thead>
+                  <tr>
+                    <th class="d-sm-table-cell">Company</th>
+                    <th class="d-sm-table-cell">License Name</th> 
+                    <th class="d-sm-table-cell">License/Certificate No.</th> 
+                    <th class="d-sm-table-cell">Issu/Renewal Date</th>
+                    <th class="d-md-table-cell">Expire Date</th>
+                    <th class="d-md-table-cell">Remaining Days</th>
+                    <th class="d-sm-table-cell">Renewal Status</th>
+                    <th class="d-sm-table-cell">Remarks</th>
+                    <th class="d-sm-table-cell">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for data in license_data_list %}
+                  <tr>
+                    <td class="">{{ data.company }}</td>
+                    <td class="">{{ data.license_name }}</td>
+                    <td class="">{{ data.certificate_no }}</td>
+                    <td class="">{{ data.issu_date }}</td>
+                    <td class="">{{ data.expire_date }}</td>
+                    <td class="">{{ data.tenure }}</td>
+                    <td class="">{{ data.renewal_status }}</td>
+                    <td class="">{{ data.remarks|default:"N/A" }}</td>
+                    <td class="text-left">
+                      <a href="/hr/license/{{data.id}}/update/" class="h4 m-r-10 text-success">
+                        <span class="icon"><i class="ti-pencil-alt"></i></span>
+                      </a>
+                      <a href="/hr/license-view/{{data.id}}/view/" class="h4 m-r-10 text-success">
+                        <span class="icon"><i class="icon-eye"></i></span>
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+
+  
+    var nowDate = new Date();
+    var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+    $('.issu_date').daterangepicker({
+      singleDatePicker: true,
+      showDropdowns: true,
+      locale: {
+          format: 'DD-MMM-YYYY'
+      },
+      autoUpdateInput: false
+  }).on("apply.daterangepicker", function (e, picker) {
+      picker.element.val(picker.startDate.format(picker.locale.format));
+  });
+
+  var nowDate = new Date();
+  var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+  $('.expire_date').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    locale: {
+        format: 'DD-MMM-YYYY'
+    },
+    autoUpdateInput: false
+    }).on("apply.daterangepicker", function (e, picker) {
+    picker.element.val(picker.startDate.format(picker.locale.format));
+    });
+
+
+  $('.employee-update-switch').on('click', function (e) {
+   var id = $(this).data('id');
+   $.ajax({
+     url:"",
+     type: "GET", // http method
+     data: { id: id },
+     dataType: 'json',
+     success: function (data) {
+     },
+   });
+ });
+
+  $(document).ready(function () {
+    $("#gmail").select2({ 
+      tags: true, 
+    });
+    $('#gmail').parent().addClass('focused');
+    $('table.display').DataTable({
+      responsive:true,
+    "ordering": true,
+
+    paging: true,
+
+    bInfo: false
+ });
+});
+</script>
+
+{% endblock %}

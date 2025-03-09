@@ -1,0 +1,193 @@
+<!-- Table inside modal -->
+<div class="row">
+  <div class="col-md">
+    <table class="table table-bordered">
+      <tbody>
+        <tr>
+          <td>
+            <strong>Employee Name</strong>
+          </td>
+          <td> {{appraisal.appraisee.name}}</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Employee ID</strong>
+          </td>
+          <td> {{appraisal.appraisee.personal.employee_id}}</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Department</strong>
+          </td>
+          <td>{{appraisal.appraisee.department.name}}</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Current Designation</strong>
+          </td>
+          <td>{{appraisal.appraisee.designation.name}}</td>
+        </tr>
+        {% if appraisal.promoted_as %}
+        <tr class="text-success">
+          <td>
+            <strong>New Designation</strong>
+          </td>
+          <td>{{appraisal.promoted_as}}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md">
+    <table class="table table-bordered">
+      <tbody>
+        <tr>
+          <td>
+            <strong>Date of Joining</strong>
+          </td>
+          <td> {{appraisal.appraisee.joining_date|date:'d-M-Y'|upper}}</td>
+        </tr>
+        <tr>
+          <td>
+            <strong>Salary Amount</strong>
+          </td>
+          <td>BDT {{appraisal.appraisee.salary}}</td>
+        </tr>
+        <tr class="text-warning">
+          <td>
+            <strong>Last Date of Appraisal</strong>
+          </td>
+          <td>{{appraisal.last_date_of_appraisal|date:'d-M-Y'|default:"N/A"|upper}}</td>
+        </tr>
+        <tr class="text-warning">
+          <td>
+            <strong>Last Increment Amount</strong>
+          </td>
+          <td>{% if appraisal.last_increment_amount %} BDT {{appraisal.last_increment_amount}} {% else %} N/A {% endif %}</td>
+        </tr>
+        {% if appraisal.effective_from_date %}
+        <tr class="text-success">
+          <td>
+            <strong>Effective from Date</strong>
+          </td>
+          <td>{{appraisal.effective_from_date|date:'d-M-Y'|upper}}</td>
+        </tr>
+        {% endif %}
+      </tr>
+      {% if appraisal.increment_amount %}
+      <tr class="text-success">
+        <td>
+          <strong>Increment Amount</strong>
+        </td>
+        <td>BDT {{appraisal.increment_amount}}</td>
+      </tr>
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<table class="table table-bordered">
+  <thead>
+    <tr class="text-center h4">
+      <th>Performance Indicator</th>
+      <th>Rating (1-5)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for pi in performance_data %}
+    <tr>
+      <td>
+        <strong>{{forloop.counter}}. {{pi.label}}</strong>
+      </td>
+      <td class="text-right">{{pi.score}}</td>
+    </tr>
+    {% empty %}
+    {% for key, pi in performance_indicators %}
+    <tr>
+      <td>
+        <strong>{{forloop.counter}}. {{pi}}</strong>
+      </td>
+      <td class="text-right">
+        <input class="form-control text-right" type="number" min="0" max="5" id="{{key}}" name="{{key}}" required>
+      </td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    {% if appraisal.coo_comments %}
+    <tr>
+      <td>
+        <strong>Grand Total</strong>
+      </td>
+      <td class="text-right">
+        <strong>{{appraisal.grand_total|floatformat:0}}</strong>
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <tr>
+        <td>
+          <strong>Major Strengths :</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>{{appraisal.strengths}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <tr>
+        <td>
+          <strong>Improvement Areas :</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>{{appraisal.improvement_areas}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-md">
+    <table class="table table-bordered">
+      <tr>
+        <td>
+          <strong>Self Justification :</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>{{appraisal.self_justification}}</td>
+      </tr>
+    </table>
+  </div>
+  {% if appraisal.coo_comments %}
+  <div class="col-md">
+    <table class="table table-bordered">
+      <tr>
+        <td>
+          <strong>Dept Head Comments : {% if appraisal.status.title|lower == 'rejected' and not appraisal.chairman_user_id %}<span class="text-danger">( Rejected )</span>{% endif %}</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>{{appraisal.coo_comments}}</td>
+      </tr>
+    </table>
+  </div>
+  {% endif %}
+  {% if appraisal.chairman_comments %}
+  <div class="col-md-12">
+    <table class="table table-bordered">
+      <tr>
+        <td>
+          <strong>MD Comments : {% if appraisal.status.title|lower == 'rejected' and appraisal.chairman_user_id %}<span class="text-danger">( Rejected )</span>{% endif %}</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>{{appraisal.chairman_comments}}</td>
+      </tr>
+    </table>
+  </div>
+  {% endif %}
+</div>

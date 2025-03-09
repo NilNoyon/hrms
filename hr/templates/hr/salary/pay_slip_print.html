@@ -1,0 +1,366 @@
+{% load static %}
+{% load math-filters %}
+{% load sc_filters %}
+
+<!doctype html>
+<html lang="en" dir="ltr">
+    <head>
+        <title>Pay Slip</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta http-equiv="Content-Language" content="en" />
+        <meta name="msapplication-TileColor" content="#2d89ef">
+        <meta name="theme-color" content="#4188c9">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+
+        {% block css %}
+        <link href="{% static 'dist/css/style.css' %}" rel="stylesheet" />
+        <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" />
+        <style>
+            body{
+                font-size: 12px !important;
+            }
+            .bold-text{
+                font-size: 14px !important;
+                font-weight: 900 !important;"
+            }
+            .table-borderless th,
+            .table-borderless td,
+            .table-borderless thead th,
+            .table-borderless tbody+tbody {
+                border: 0 !important;
+            }
+            @page {
+                size: A4;
+                margin: 6mm 4mm;
+            }
+        </style>
+        {% endblock %}
+    </head>
+    <body>
+        <div class="page">
+            <div class="row">
+                {% for d in data %}
+                <div class="col-6 my-2">
+                    <h5 class="text-center" style="font-size: 14px !important;font-weight: 900 !important;">{{company.name}}</h5>
+                    <h6 class="text-center" style="font-size: 12px !important;font-weight: 800 !important;">Pay Slip - {{month}}/{{year}}</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="p-1" colspan="3" style="width:60%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">Employee ID</th>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">: {{d.employee.personal.employee_id}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Name</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.personal.name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Designation</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.designation.name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Joining Date</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.joining_date|date:"d/M/Y"}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Total Days</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.total_days}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Working Days</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.working_day}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Holidays</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.holidays}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Weekends</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.weekends}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">With Pay Leave</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.with_pay}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">W/Pay Leave</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.without_pay}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="p-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%">Department</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%">: {{d.employee.department.short_name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Section</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.section.short_name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Sub-Section</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.unit.value}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Line</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.line.name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Grade</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.grade}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Short Leave</th>
+                                            <th class="border-0 pl-1 py-0">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Attendance</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.present_days}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Absent</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.absent_days}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">OT Hours</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.ot_hrs}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">OT Rate</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.ot_rate}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th style="width:15%" class="pl-1 py-0 bold-text">A) Salary</th>
+                                <th class="py-0 pl-1" colspan="2" style="width:45%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">Basic</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.basic|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">House Rent</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.hrent|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Food Allowance</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.food|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%;vertical-align:top;">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Medical</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.medical|bdt_currency}}</th>
+                                        </tr>
+                                        {% if d.employee.employee_category.value|lower == "staff" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Other</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.other|bdt_currency}}</th>
+                                        </tr>
+                                        {% elif d.employee.employee_category.value|lower == "worker" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Conveynce</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.conveyance|bdt_currency}}</th>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0 bold-text" style="width:50%;">Total</th>
+                                            <th class="border-0 pl-1 py-0 bold-text" style="width:50%;">: {{d.employee.salary|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" class="pl-1 py-0 bold-text">B) Allowance</th>
+                                <th class="py-0 pl-1" colspan="2" style="width:45%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">Attendance</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.attendance|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Night</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.night|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Holiday</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.holiday|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Due</th>
+                                            <th class="border-0 pl-1 py-0">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Incentive</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.incentive|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Festival</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.festival|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%;vertical-align:top;">
+                                    <table class="table table-borderless mb-0">
+                                        {% if d.employee.employee_category.value|lower == "worker" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Other</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.other|bdt_currency}}</th>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Tiffin Bill</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.tiffin}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Arrear</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.arrear}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Shift</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Daily</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">Total</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">: {{d.total_payable|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" colspan="3" class="pl-1 py-1 bold-text">C) Over Time</th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">OT wages</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">: {{d.ot|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" colspan="3" class="pl-1 py-1 bold-text">D) Total Payable</th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">A + B + C</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">: {{d.employee.salary|add:d.total_payable|add:d.ot|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" class="pl-1 py-1 bold-text">E) Deduction</th>
+                                <th class="py-0 pl-1" colspan="2" style="width:45%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">Absent</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.absent|bdt_currency}}</th>
+                                        </tr>
+                                        {% if d.employee.employee_category.value|lower == "staff" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">ITDS</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.itds|bdt_currency}}</th>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">Wagely</th>
+                                            <th class="border-0 pl-1 py-0">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">W/Pay Leave</th>
+                                            <th class="border-0 pl-1 py-0">: 0</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="py-1 pl-1" colspan="3" style="width:40%;vertical-align:top;">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Advance</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Due</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: 0</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">Loan</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.loan|bdt_currency}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">Total</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">: {{d.total_deduction|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" colspan="3" class="pl-1 py-1 bold-text">E) Net Payable</th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">D - E</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">: {{d.net_payable|bdt_currency}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:100%" class="pl-1 py-1" colspan="6">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th style="width:30%" class="pl-1 py-0">Over Time</th>
+                                            <th class="py-0" colspan="5" style="width:70%">
+                                                : ( Basic / 208 ) * 2 * OT Hours
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:30%" class="pl-1 py-0">Absent Deduction</th>
+                                            <th class="py-0" colspan="5" style="width:70%">
+                                                : ( Basic / 30 ) * Absent days
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th class="pl-1 py-0" colspan="6" style="width:100%">
+                                                This is a computer printed Payslip, So signature is not required.
+                                            </th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-center">Powered by E-BIT, Esquire Technology Limited</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% block scripts %}
+        <script type="text/javascript">
+            setTimeout(function(){
+                window.print();
+                setTimeout(window.close, 50);
+            }, 300);
+        </script>
+        {% endblock %}
+    </body>
+</html>

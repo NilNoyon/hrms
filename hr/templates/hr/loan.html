@@ -1,0 +1,175 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Loan{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Loan List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Employee</th>
+                                    <th>Amount</th>
+                                    <th>Amount Paid</th>
+                                    <th>Remaining Amount</th>
+                                    <th>Tenure Months</th>
+                                    <th>Monthly Installment</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in object_list %}
+                                <tr>
+                                    <td class="">{{ forloop.counter }}</td>
+                                    <td>{{ data.employee.name }} - {{ data.employee.employee_id }}</td>
+                                    <td>{{ data.amount|floatformat:0 }}</td>
+                                    <td>{{ data.amount_paid|floatformat:0 }}</td>
+                                    <td>{{ data.remaining_loan_amount|floatformat:0 }}</td>
+                                    <td>{{ data.tenure_months }}</td>
+                                    <td>{{ data.monthly_installment }}</td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:loan_update' data.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:loan_delete' data.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:loan_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <select class="form-control select2 employee" name="employee" data-title="Employee">
+                                <option value="">Employee</option>
+                                {% if instance.employee_id %}
+                                <option value="{{instance.employee_id}}" selected>{{instance.employee.employee_id}}</option>
+                                {% endif %}
+                            </select>
+                            <span class="bar"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" step="1" min="1" class="form-control bg-transparent text-center" id="amount" name="amount" value="{{ instance.amount|floatformat:0 }}" {% if instance.id %}readonly{% endif %} />
+                                    <span class="bar"></span>
+                                    <label for="amount">Amount</label>
+                                </div>
+                            </div>  
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" step="1" min="0" class="form-control bg-transparent text-center" id="amount_paid" name="amount_paid" value="{{ instance.amount_paid|floatformat:0 }}" {% if instance.amount_paid > 0 %}readonly{% endif %} />
+                                    <span class="bar"></span>
+                                    <label for="amount_paid">Amount Paid</label>
+                                </div>
+                            </div> 
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" step="1" min="1" class="form-control bg-transparent text-center" id="tenure_months" name="tenure_months" value="{{ instance.tenure_months }}" />
+                                    <span class="bar"></span>
+                                    <label for="tenure_months">Tenure Months</label>
+                                </div>
+                            </div>  
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" step="1" min="1" class="form-control bg-transparent text-center" id="monthly_installment" name="monthly_installment" value="{{ instance.monthly_installment|floatformat:0 }}" />
+                                    <span class="bar"></span>
+                                    <label for="monthly_installment">Monthly Installment</label>
+                                </div>
+                            </div>   
+                        </div>   
+                        <div class="form-group">
+                            <textarea rows="2" class="form-control bg-transparent" id="purpose" name="purpose">{{ instance.purpose }}</textarea>
+                            <span class="bar"></span>
+                            <label for="purpose">Purpose</label>
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="2" class="form-control bg-transparent" id="remarks" name="remarks">{{ instance.remarks }}</textarea>
+                            <span class="bar"></span>
+                            <label for="remarks">Remarks</label>
+                        </div>
+                        <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+    $(".card-table").DataTable({});
+    {% comment %} Delete Loan {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this Loan from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+    {% comment %} Delete Loan {% endcomment %}
+    $(".employee").select2({
+        minimumInputLength  : 3,
+        allowClear          : true,
+        placeholder         : "Employee",
+        ajax: {
+            data            : function(term, page) { return { q : term }; },
+            dataType        : "json", url : "{% url 'hr:get_employee_data' %}",
+            processResults  : function (data) { return { results: data.employee_list }; }
+        },
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,496 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Employee Recruitment{% endblock %}
+
+{% block add_css %}
+<style>
+    .dataTables_wrapper .select2-container .select2-selection--single .select2-selection__rendered,
+    .dataTables_wrapper .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .dataTables_wrapper .select2-container--default .select2-selection--single,
+    .dataTables_wrapper .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+</style>
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row"> 
+                <div class="col-md-8 align-self-center"><h4 class="text-themecolor mb-0">Employee Recruitment</h4></div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                               <a href="#" class="btn btn-sm btn-success create_recruit" title="Recruitment"><i class="ti-plus"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link active" data-toggle="tab" href="#pending">Pending  <span class="label label-rounded label-info float-right" style="width: 50px; text-align:center">{{ total_pending }}</span></a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#approved">Approved  <span class="label label-rounded label-info float-right" style="width: 50px; text-align:center">{{ total_approved }}</span></a> 
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabcontent-border">
+                <div class="tab-pane active p-20" id="pending" role="tabpanel">
+                    <table id="pending-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_recruit_for_datatable' 'pending' %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Recruit Year</th>
+                                <th style="width: 150px">Company</th>
+                                <th style="width: 150px">Department</th>
+                                <th style="width: 150px">Designation</th>
+                                <th style="width: 150px">Negotiated Salary</th>
+                                <th style="width: 150px">Interviewer Comments</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 150px">Created by</th>
+                                <th style="width: 100px">Created at</th>
+                                <th style="width: 200px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane p-20" id="approved" role="tabpanel">
+                    <table id="approved-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_recruit_for_datatable' 'approved' %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Recruit Year</th>
+                                <th style="width: 150px">Company</th>
+                                <th style="width: 150px">Department</th>
+                                <th style="width: 150px">Designation</th>
+                                <th style="width: 150px">Negotiated Salary</th>
+                                <th style="width: 150px">Interviewer Comments</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 150px">Created by</th>
+                                <th style="width: 100px">Created at</th>
+                                <th style="width: 200px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+                   
+        </div>
+    </div>
+    <!-- Extra Filter Requisition List -->
+    <div class="reset">
+        <div class="form-group" style="display: none;">
+            <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+    </div>
+    <div class="recruit_years">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize recruit_year_field" name="recruit_year" id="recruit_year_id">
+                <option value="" selected>Recruit Year</option>
+                {% for y in recruit_year %}
+                <option value="{{y.recruit_year}}">{{y.recruit_year}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="companies">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize company_field" name="company">
+                <option value="" selected>All Company</option>
+                {% for c in company_list %}
+                <option value="{{c.id}}">{{c.short_name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="departments">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize department_field" name="department">
+                <option value="" selected>All Department</option>
+                {% for d in all_department %}
+                    <option value="{{d.id}}">{{d.name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="designations">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize designation_field" name="designation">
+                <option value="" selected>All Designation</option>
+                {% for d in all_designation %}
+                    <option value="{{d.id}}">{{d.name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+
+    <div class="statuses">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize status_field" name="status">
+                <option value="" selected>All Status</option>
+                <option value="1">Approved By CEO</option>
+                <option value="2">Approved By MD</option>
+                <option value="3">Raised</option>
+                <option value="4">Rejected</option>
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="multi-date">
+        <div class="form-group" style="display: none;">
+            <input type="text" class="form-control date_field" name="to_date" placeholder="Select Date Range..." autocomplete="off">
+        </div>
+    </div>
+    <!-- Extra Filter Requisition List -->
+<div id="viewDIV">
+</div>
+
+{% include 'hr/recruitment/form_modal.html' %}
+
+{% endblock %}
+
+{% block page_js %}
+    {% include 'inc/js/enforceMinMax.html' %}
+    {% include 'inc/profile_modal.html' %}
+    {% include 'inc/scrollerDT.html' %}
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".cls_replacement_of").hide();
+            $("#company").select2({
+                dropdownParent      : $('#recruitModal'),
+            })
+            $("#department").select2({
+                dropdownParent      : $('#recruitModal'),
+            })
+            $("#designation").select2({
+                dropdownParent      : $('#recruitModal'),
+            })
+            $("#replacement_of").select2({
+                dropdownParent      : $('#recruitModal'),
+                minimumInputLength  : 3,
+                placeholder         : "Recruitment Of",
+                allowClear          : true,
+                ajax: {
+                    url             : "{% url 'hr:get_employee_data' %}",
+                    dataType        : "json",
+                    data            : function(term, page) { return { q : term }; },
+                    processResults  : function (data) { return { results: data.employee_list }; }
+                },
+            });
+        });
+
+
+        function checkMPBudgetBalance(el){
+            let recruit_year = $("#recruit_year").val();
+            let company = $("#company").val();
+            let department = $("#department").val();
+            let designation = $("#designation").val();
+            let negotiated_salary = $("#negotiated_salary").val();
+            let status = true;
+            let field = "";
+            $('.validation').each(function(index, item){
+                if (!this.value){
+                    status = false;
+                    field += $(this).data('title')+", "
+                }
+            })
+            if(status){
+                $.ajax({
+                    url: '{% url "hr:get_check_man_power_budget" %}',
+                    async:false,
+                    type: 'POST',
+                    data: {
+                        'recruitment_id':$("#recruitment_id").val(),'recruit_year':recruit_year,'company': company,'department':department,'designation':designation,'negotiated_salary':negotiated_salary
+                    },
+                    success: function(data){
+                        if(data == false)
+                        {
+                            $(el).val('')
+                            toasterMsg("warning", "This recruitment going to exceed the budget!", 5000);
+                        }
+                    }
+                })
+            }else{
+                toasterMsg("warning", "Please fill up the required field: "+field+"", 5000);
+            }
+
+        }
+
+        function checkDesignationWiseMPbudget(el){
+            let recruit_year = $("#recruit_year").val();
+            let company = $("#company").val();
+            let department = $("#department").val();
+            let designation = $("#designation").val();
+            let status = true;
+            let field = "";
+            $('.validation').each(function(index, item){
+                if (!this.value && this.id !== "negotiated_salary"){
+                    status = false;
+                    field += $(this).data('title')+", "
+                }
+            })
+            
+            if(status){
+                $.ajax({
+                    url: '{% url "hr:get_check_man_power_budget_designation_wise" %}',
+                    async:false,
+                    type: 'POST',
+                    data: {
+                        'recruitment_id':$("#recruitment_id").val(),'recruit_year':recruit_year,'company': company,'department':department,'designation':designation
+                    },
+                    success: function(data){
+                        alert(data.manpower_limit_value)
+                        if(data.mp_budget == true){
+                        if(data.status == false)
+                        {
+                            $(el).val('')
+                            $("#negotiated_salary").val('').attr('readonly', true).attr('max', data.manpower_limit_value)
+                            toasterMsg("warning", "This recruitment going to exceed the budget!", 5000);
+                        }else{
+                            $("#negotiated_salary").val('').attr('readonly', false).attr('max', data.manpower_limit_value)
+                        }
+                    }else{
+                        $("#negotiated_salary").val('')
+                        toasterMsg("warning", "Budget not available for this designation!", 5000);
+                        
+                    }
+                    }
+                })
+            }else{
+                toasterMsg("warning", "Please fill up the required field: "+field+"", 5000);
+            }
+
+        }
+
+
+        $("#recruitment_type").on("change", function(){
+            if(this.value == 2)
+            {$(".cls_replacement_of").show();
+            $("#negotiated_salary").parent().addClass('mt-4')
+            $("#name").parent().addClass('mt-4')
+            $("#interviewr_comments").parent().addClass('mt-4')
+          
+            }else{
+                $(".cls_replacement_of").hide();
+                $("#negotiated_salary").parent().removeClass('mt-4')
+                $("#name").parent().removeClass('mt-4')
+                $("#interviewr_comments").parent().removeClass('mt-4')
+            }
+        })
+       
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+        var pendingTable = null;
+        var approvedTable = null;
+        $(document).ready(function () {
+            dataTableFunc(pendingTable, '#pending', "#pending-table", {})
+            dataTableFunc(approvedTable, '#approved', '#approved-table', {})
+        });
+
+
+        function dataTableFunc(dataTable, root, table, data){
+            if (dataTable) { dataTable.destroy(); }
+            let url = $(table).data("url");
+            dataTable = $(table).DataTable({
+                dom             : "<'row top pending'<'col-md-1 reset_btn'><'col-md-2 recruit_year'><'col-md-2 company'><'col-md-2 department'><'col-md-2 designation'><'col-md-2 status'>>t",
+                ordering        : false,
+                paging          : true,
+                iDisplayLength  : 25,
+                pageLength      : 5,
+                autoWidth       : false,
+                scrollY         : '365',
+                scroller        : true,
+                deferRender     : true,
+                serverSide      : true,
+                processing      : true,
+                ajax:{
+                    type        : "POST",
+                    url         : url,
+                    data        : data,
+                    dataSrc     : ""
+                },
+                initComplete:function( settings, json){
+                    if( Object.keys(data).length > 0 ){
+                        if(data.recruit_year != null){ $(root + " .recruit_year_field").select2("destroy").val(data.recruit_year).select2(); }
+                        if(data.company != null){ $(root + " .company_field").select2("destroy").val(data.company).select2(); }
+                        if(data.department != null){ $(root + " .department_field").select2("destroy").val(data.department).select2(); }
+                        if(data.designation != null){ $(root + " .designation_field").select2("destroy").val(data.designation).select2(); }
+                        if(data.status != null){ $(root + " .status_field").val(data.status) }
+                       
+                        multi_date = ''
+
+                        if(data.start_date != undefined && data.start_date != ''){
+                            s_date = data.start_date.split("-").join("/");
+                            e_date = data.end_date.split("-").join("/");
+                            multi_date = s_date + " - " + e_date;
+                            $(root + ' .date_field').val(multi_date);
+                            $(root + ' .date_field').data('daterangepicker').setStartDate(s_date);
+                            $(root + ' .date_field').data('daterangepicker').setEndDate(e_date);
+                        }else{ $(root + ' .date_field').val(multi_date); }
+                        
+                    }
+                }
+            });
+
+            // Reset Filter
+            $(".reset").children().clone().appendTo(root + " .reset_btn");
+            $(root + " .reset_btn").children().show();
+            $(root).on("click", ".reset_button", function(){
+                dataTableFunc(dataTable, root, table, {});
+            });
+
+            // Company Filter
+            $(".recruit_years").children().clone().appendTo(root + " .recruit_year");
+            $(root + " .recruit_year").children().show();
+            $(root + " .recruit_year .recruit_year_field").select2();
+            $(root + " .recruit_year .recruit_year_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+            // Company Filter
+            $(".companies").children().clone().appendTo(root + " .company");
+            $(root + " .company").children().show();
+            $(root + " .company .company_field").select2();
+            $(root + " .company .company_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+
+            // Department Filter
+            $(".departments").children().clone().appendTo(root + " .department");
+            $(root + " .department").children().show();
+            $(root + " .department .department_field").select2();
+            $(root + " .department .department_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+
+            // Designation Filter
+            $(".designations").children().clone().appendTo(root + " .designation");
+            $(root + " .designation").children().show();
+            $(root + " .designation .designation_field").select2();
+            $(root + " .designation .designation_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+            
+            // Status Filter
+            $(".statuses").children().clone().appendTo(root + " .status");
+            $(root + " .status").children().show();
+            $(root + " .status_field").on("change", function(){
+                setData(dataTable, root, table);
+            });
+            
+            // Date Range Picker
+            $(".multi-date").children().clone().appendTo(root + " .date");
+            $(root + " .date").children().show();
+            $(root + " .date_field").daterangepicker({
+                singleDatePicker: false,
+                showDropdowns   : true,
+                autoUpdateInput : false,
+                locale          : {
+                    cancelLabel : 'Clear',
+                    format      : 'YYYY/MM/DD'
+                },
+            }).on('apply.daterangepicker', function(ev, picker) {
+                start_date      = picker.startDate.format('YYYY-MM-DD');
+                end_date        = picker.endDate.format('YYYY-MM-DD');
+                setData(dataTable, root, table, start_date, end_date)
+            }).on('cancel.daterangepicker', function(ev, picker) {
+                start_date      = '';
+                end_date        = '';
+                setData(dataTable, root, table, start_date, end_date)
+            });
+
+         
+            
+        }
+
+        function setData(dataTable, root, table, start_date='', end_date=''){
+            data = {
+                'recruit_year'   :   $(root + " .recruit_year_field").val(),
+                'company'       :   $(root + " .company_field").val(),
+                'department'    :   $(root + " .department_field").val(),
+                'designation'    :   $(root + " .designation_field").val(),
+                'status'        :   $(root + " .status_field").val(), 
+                'start_date'    :   start_date, 
+                'end_date'      :   end_date,
+            }
+            dataTableFunc(dataTable, root, table, data);
+        }
+      
+        $("body").on("click", ".create_recruit", function(e){
+            $("#recruit_form")[0].reset();
+            $('#viewDIV').html('');
+            $("#recruitment_id").val('')
+            $(".recruit_head").text('Recruitment');
+            $('#recruitModal').modal('show');
+        });
+
+        $("body").on("click", ".view_recruitment", function(e){
+            $.ajax({
+                url: '{% url "hr:recruit_view" %}',
+                async:false,
+                type: 'POST',
+                data: {
+                    'id': $(this).data('id'),
+                },
+                success: function(data){
+                    $('#viewDIV').html('');
+                    $('#viewDIV').append(data);
+                    $('#viewRecruitModal').modal('show');
+                }
+            })
+        })
+        
+
+
+        $("body").on("click", ".edit_recruitment", function(e){
+            $("#recruit_form")[0].reset();
+            $('#viewDIV').html('');
+            $("#recruitment_id").val($(this).data('id'))
+            $.ajax({
+                url: '{% url "hr:recruit_edit" %}',
+                async: false,
+                type: 'POST',
+                data: {
+                    'id': $(this).data('id'),
+                },
+                success: function(recruit){
+                    $(".recruit_head").text('Recruitment Update');
+                    $('#recruitModal').modal('show');
+                    $('#company').select2().val(recruit[0].company).trigger('change');
+                    $('#department').select2().val(recruit[0].department).trigger('change');
+                    $('#designation').select2().val(recruit[0].designation).trigger('change');
+                    $('#recruitment_type').select2().val(recruit[0].recruitment_type).trigger('change');
+                    $('#recruit_year').val(recruit[0].recruit_year).parent().addClass('focused');
+                    $('#name').val(recruit[0]["name"]).parent().addClass('focused');
+                    $('#negotiated_salary').val(recruit[0]["negotiated_salary"]).parent().addClass('focused');
+                    $('#interviewr_comments').val(recruit[0]["interviewr_comments"]).parent().addClass('focused');
+                    if(recruit[0]["skip_ceo_approval"]){
+                        $('#skip_ceo_approval').prop('checked', true).parent().addClass('focused');
+                    }else{
+                        $('#skip_ceo_approval').prop('checked', false).parent().addClass('focused');
+                    }
+                }
+
+            });
+        });
+
+    </script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Monthly Attendance Report{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Monthly Attendance Report</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:attendance_list' %}" class="btn btn-sm btn-info" title="Custom Button"><i class="ti-view-list-alt"></i></a>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body custom-color rounded-lg p-3 custom-height custom-rl pt-0">
+            <div class="row floating-labels mt-3">
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <select class="form-control text-capitalize select2" name="company" id="company"
+                            data-title="Company">
+                            <option value="" disabled selected></option>
+                            {% for data in company_list %}
+                            <option value="{{data.id}}">{{data.short_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select class="form-control text-capitalize select2" name="department" id="department"
+                            data-title="Department">
+                            <option value="" disabled selected></option>
+                            {% for data in department_list %}
+                            <option value="{{data.id}}">{{data.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <label class="form-label">Designation</label>
+                        <select class="form-control text-capitalize select2" name="designation" id="designation"
+                            data-title="Designation">
+                            <option value="" disabled selected></option>
+                            {% for data in designation_list %}
+                            <option value="{{data.id}}">{{data.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group">
+                        <label class="form-label" for="user">Employee</label>
+                        <select class="form-control select2 user" id="user" name="user" data-title="Employee">
+                            <option value="" disabled selected></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="attendance_date">Attendance Date</label>
+                        <input type="text" data-title="Attendance Date" class="form-control datepicker" 
+                            name="attendance_date" id="attendance_date" autocomplete="off" required />
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-info btn-block submit_button"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-block btn-success export_button"><i class="fas fa-download"></i></button>
+                    </div>
+                </div>
+            </div> 
+            <div class="wrapper1">
+                <div class="div1" id="div1"></div>
+            </div>
+            <div class="wrapper2">
+                <div class="div2">
+                    <div class="table-responsive" id="attendance-data"></div>
+                </div>
+            </div>       
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'admin/js/table_to_excel.js' %}"></script>
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.div1').width($('table').width());
+    $('.wrapper1').on('scroll', function (e) {
+        $('.table-responsive').scrollLeft($('.wrapper1').scrollLeft());
+    }); 
+    $('.table-responsive').on('scroll', function (e) {
+        $('.wrapper1').scrollLeft($('.table-responsive').scrollLeft());
+    });
+    $(".export_button").click(function() {
+        let table = document.getElementById("attendance-table");
+        if(table && table.getElementsByTagName('tbody')[0].getElementsByTagName('tr').length){
+            TableToExcel.convert(table, {
+                name: `monthly_attendance_report.xlsx`, sheet: { name: 'Monthly Attendance Report' }
+            });
+        } else{ toasterMsg('warning', 'At least Search by Company Field to export!', 5000); }
+    });
+    $('.datepicker').daterangepicker({
+        showDropdowns: true,
+        autoUpdateInput: false,
+        opens: "left",
+        locale: { format: 'DD/MM/YYYY' }
+    }).on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + "-" + picker.endDate.format('DD/MM/YYYY'));
+        $(this).parent().addClass("focused");
+        var duration = moment.duration((picker.endDate).diff(picker.startDate));
+        $(this).closest('td').siblings(".num_days").text(duration.days() + 1);
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+        $(this).closest('td').siblings(".num_days").text('');
+    });
+
+    $("#user").select2({
+        minimumInputLength  : 3,
+        placeholder         : "Employee",
+        allowClear          : true,
+        ajax: {
+            url             : "{% url 'hr:get_employee_data' %}",
+            dataType        : "json",
+            data            : function(term, page) { return { 
+                                    q : term, company : $("#company").val(),
+                                    department : $("#department").val(),
+                                    designation : $("#designation").val() }; 
+                            },
+            processResults  : function (data) { return { results: data.employee_list }; }
+        },
+    });
+    
+    $("body").on("click", ".submit_button", function(e){
+        $("#attendance-data").html("");
+        let company = $("#company").val();
+        if (company){
+            $.ajax({
+                type    : "POST",
+                url     : '{% url "hr:get_monthly_report_data" %}',
+                data    : { company : $("#company").val(),
+                            department : $("#department").val(),
+                            designation : $("#designation").val(),
+                            employee : $("#user").val(),
+                            attendance_date : $("#attendance_date").val() 
+                        },
+                success : function (data) {
+                    $("#attendance-data").html(data);
+                }
+            });
+        } else { toasterMsg('warning', 'At least Search by Company!', 5000); }
+    });
+</script>
+{% endblock %}

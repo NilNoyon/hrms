@@ -1,0 +1,97 @@
+<div class="modal fade" id="viewRecruitModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form class="floating-labels" id="view_mp_budget_form" method="POST" action="{% url "hr:recruit_approval" %}"  enctype="multipart/form-data">{% csrf_token %}
+                <div class="modal-header mb-2">
+                    <h4 class="mb-0 mp_budget_head">Recruitment View</h4>
+                    <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="mainDiv">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="budget_year"><b>Recruit Year: </b> {{recruit.recruit_year}} </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="company"><b>Company: </b> {{recruit.company}} </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Department: </b> {{recruit.department}} </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Designation: </b> {{recruit.designation}} </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Recruitment Type: </b> {{recruit.get_recruitment_type_display}} </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Replacement Of: </b> {{recruit.replacement_of|default_if_none:"N/A"}} </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Name: </b> {{recruit.name}} </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Negotiated Salary: </b> {{recruit.negotiated_salary}} </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mb-0">
+                                    <label for="department"><b>Interviewer Comments: </b> {{recruit.interviewr_comments}} </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    {% if approval %}
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <textarea class="form-control notes" id="notes" rows="2"  placeholder="Notes:" name="notes"></textarea>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6"></div>
+                            <div class="col-md-2">
+                                <input type="hidden" name="recruitment_id" value="{{recruit.id}}">
+                                <input type="hidden" name="submit_type" id="submit_type" value="">
+                                <button type="submit" class="btn btn-sm btn-block btn-rounded btn-success item-add-btn submit-btn" value="approve" name="btnSave"><span class="btn-label"><i class="fa fa-check"></i></span> Approved </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-sm btn-block btn-rounded btn-danger item-add-btn submit-btn" value="reject" name="btnSave"><span class="btn-label"><i class="fa fa-check"></i></span> Reject </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(".submit-btn").on('click', function(){
+    $("#submit_type").val(this.value)
+})
+</script>

@@ -1,0 +1,220 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} Policy Master {% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0"> {{ action.name }} Policy</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <div class="btn-group" role="group" aria-label="First group">
+                <a href="/hr/pf-policy-master-add/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#add_Pf_policy" role="tab">{{action.name}}</a>
+        </li>
+        <li class="nav-item"> 
+            <a class="nav-link  {% if option %} active {% endif %}" data-toggle="tab" href="#list" role="tab">List</a>
+        </li>
+    </ul>
+    <div class="tab-content tabcontent-border">
+        <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="add_Pf_policy" role="tabpanel">
+          <form class="floating-labels" method="post">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label class="form-label">Policy Heading</label>
+                      <select class="form-control select2" id="pf_policy_heading" name="pf_policy_heading" data-title="Policy Heading" required>
+                        <option value="" disabled selected>Select Policy Heading</option>
+                        <option value="1 to 3" {% if pf_policy_master.pf_policy_heading == "1 to 3" %} selected {% endif %}>1 to 3</option>
+                        <option value="3 to 99" {% if pf_policy_master.pf_policy_heading == "3 to 99" %} selected {% endif %}>3 to 99</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label class="form-label">Effective Year From</label>
+                      <select class="form-control select2" id="effictive_year_from" name="effictive_year_from" data-title="Effective Year From" required>
+                        <option value="" disabled selected>Select Year From</option>
+                        <option value="1" {% if pf_policy_master.effictive_year_from == "1" %} selected {% endif %}>1</option>
+                        <option value="3" {% if pf_policy_master.effictive_year_from == "3" %} selected {% endif %}>3</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label class="form-label">To Less Than</label>
+                      <select class="form-control select2" id="to_less_then" name="to_less_then" data-title="To Less Than" required>
+                        <option value="" disabled selected>Select to Less Than</option>
+                        <option value="3" {% if pf_policy_master.to_less_then == "3" %} selected {% endif %}>3</option>
+                        <option value="99" {% if pf_policy_master.to_less_then == "99" %} selected {% endif %}>99</option>
+                      </select>
+                    </div>
+                  </div>
+  
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="company_percentage" name="company_percentage"
+                          value="{{pf_policy_master.company_percentage }}">
+                        <span class="bar"></span>
+                        <label for="company_percentage">Company Percentage(%)</label>
+                      </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="button-group">
+
+                    </div>
+
+                  </div>
+                  <div class="col-md-3 ">
+                    <div class="button-group">
+                      <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span>
+                        {{action.btnTxt}}
+                      </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="tab-pane p-20 {% if option %} active {% endif %}" id="list" role="tabpanel">
+          <table class="table display table-border card-table table-vcenter" style="width:100%">
+            <thead>
+              <tr>
+                <th class="d-sm-table-cell">Policy ID</th> 
+                <th class="d-sm-table-cell">Policy Heading</th> 
+                <th class="d-sm-table-cell">Effictive Year From</th>
+                <th class="d-md-table-cell">To Less Then</th>
+                <th class="d-sm-table-cell">Company Percentage(%)</th>
+                <th class="d-sm-table-cell">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for data in pf_policy_master_list %}
+              <tr>
+                <td class="">{{ data.id }}</td>
+                <td class="">{{ data.pf_policy_heading }}</td>
+                <td class="">{{ data.effictive_year_from }}</td>
+                <td class="">{{ data.to_less_then }}</td>
+                <td class="">{% if data.company_percentage > 0 %}{{ data.company_percentage }} {% else %}N/A{% endif %}</td>
+                <td class="text-left">
+                  <a href="/hr/pf-policy/{{data.id}}/update/" class="h4 m-r-10 text-success">
+                    <span class="icon"><i class="ti-pencil-alt"></i></span>
+                  </a>
+                  {% if  data.isDelete == True%}
+                      <a href="#"  onclick="deletePfPolicyMaster('{{data.id}}')" class="h4 text-danger">
+                        <span class="icon"><i class="ti-trash" title="Delete Pf Policy"></i></span>
+                      </a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  $('.employee-update-switch').on('click', function (e) {
+   var id = $(this).data('id');
+   $.ajax({
+     url:"",
+     type: "GET", // http method
+     data: { id: id },
+     dataType: 'json',
+     success: function (data) {
+     },
+   });
+ });
+
+  $(document).ready(function () {
+
+    $('table.display').DataTable({
+
+    "order": [[ 0, 'desc' ], [ 1, 'desc' ]],
+    responsive:true,
+    paging: true,
+
+    bInfo: false
+ });
+});
+
+  function deletePfPolicyMaster(id) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'mr-2 btn btn-danger',
+        },
+        buttonsStyling: false,
+    })    
+    Swal.fire({
+        title: "Confirmation",
+        text: "Do you want to delete this?",
+        type: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        reverseButtons: true,
+    }).then((result) => {
+        if (result.value) { 
+          var id_url = "/hr/pf-policy/"+id.toString()+"/delete/";
+          $.ajax({
+              url: id_url,
+              type: 'POST',
+              dataType: 'json',
+              async: false,
+              data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success: function (data) {
+                  $("#"+id.toString()).remove();
+                  Swal.fire({
+                      type: 'danger',
+                      title: 'pf Deleted',
+                      text: data,
+                  });
+                  location.reload();
+              },
+              error: function (data) {
+                  Swal.fire({
+                  type: 'error',
+                  title: 'Something Went Wrong!',
+                  text: data,
+              })
+              }
+          });
+      } 
+  });
+}
+</script>
+
+{% endblock %}

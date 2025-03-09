@@ -1,0 +1,280 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load filter %}
+
+{% block page_title %}Helpdesk {% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6 align-self-center">
+            <h4 class="text-themecolor mb-0">Helpdesk</h4>
+          </div>
+        </div>
+      </div>
+      <div class="card-body custom-color rounded-lg p-3 custom-rl pt-0">
+        <form class="floating-labels" method="post" id="issueForm" enctype="multipart/form-data" action="{% url 'desk:issue_dashboard' %}" >
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-7">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="description" class="form-label">Please describe your problem in details</label>
+                    <textarea rows="2" class="form-control" id="description" name="description" required></textarea>
+                    <span class="bar"></span>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="input-group">
+                    <div class="custom-file mb-4">
+                      <input type="file" class="custom-file-input" id="attachment" name="attachment" multiple="">
+                      <label class="custom-file-label" for="attachment">Upload</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <b>Notes:</b> <br>
+              * Any IT <span class="text-info" title="Purchase Requisition" style="cursor:pointer;">PR</span> will take 7 working days to forward to supply chain<br>
+              * Hardware/OS related issue takes 2 working days<br>
+              * Mail/internet/software related issue takes 1 day
+              <div class="button-group text-center mt-3">
+                <button type="button" class="btn btn-sm waves-effect waves-light btn-rounded btn-success mx-auto flo" id="btnIssueSubmit" style="width:70%;">
+                  <span class="btn-label"><i class="fa fa-check"></i></span>
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        <hr>
+        <form class="floating-labels" id="issue_filter" method="post" action="/helpdesk/search-issue">{% csrf_token %}
+          <div class="row mb-3">
+            <div class="col-md-6 align-self-center">
+              <h4 class="text-themecolor mb-0">Issue List</h4>
+            </div>
+            {% if request.session.hd_role == "3" or request.session.hd_role == "4" %}
+            <div class="col-md-6 align-self-center">
+              <select class="select2 form-control custom-select" id="issue_type" name="issue_type" data-title="Issue Type" required>
+                <option value="1" {% if issue_type == "1" %} selected {% endif %}>Unassigned</option>
+                <option value="2" {% if issue_type == "2" %} selected {% endif %}>Assigned</option>
+                <option value="3" {% if issue_type == "3" %} selected {% endif %}>Self Desk</option>
+              </select>
+            </div>
+            {% endif %}
+            {% if request.session.hd_role == "2" %}
+            <div class="col-md-6 align-self-center">
+              <select class="select2 form-control custom-select" id="resolver_issue_type" name="resolver_issue_type" data-title="Select Issue Status" required>
+                <option value="" selected disabled>Select Issue Status</option>
+                <option value="2" {% if resolver_issue_type == "2" %} selected {% endif %}>Assigned</option>
+                <option value="3" {% if resolver_issue_type == "3" %} selected {% endif %}>Running</option>
+                <option value="4" {% if resolver_issue_type == "4" %} selected {% endif %}>Solved</option>
+              </select>
+            </div>
+            {% endif %}
+          </div>
+        </form>
+        <div class="">
+          <table id="issue_table" class="table table-border card-table table-vcenter" style="width:100%">
+            <thead>
+              <tr>
+                <th class="d-sm-table-cell">Issue ID</th>
+                <th class="d-md-table-cell" style="width:40%">Description</th>
+                <th class="d-md-table-cell">Issuer</th>
+                <th class="d-md-table-cell">Issue Date</th>
+                <th class="d-md-table-cell">Status</th>
+                {% if request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+                <th class="d-md-table-cell">Assign</th>
+                {% endif %}
+                <th class="d-lg-table-cell">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for issue in issues %}
+              <tr id="row_{{issue.id}}">
+                <td class="">{{ issue.ref }}</td>
+                <td style="width:25%">
+                  <span class="issue_desc_{{issue.id}}_show">{{ issue.description|truncatewords:10 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|wordcount > 10 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('issue_desc_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                  <span class="issue_desc_{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('issue_desc_{{issue.id}}');" style="color:blue;"></i></span>
+                </td>
+                <td>
+                    {% if request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+                      <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer_id }}" class='user_info' data-target="#myModal">
+                    <b>{{ issue.issuer.name }}</b></a>
+                    {% else %}
+                      {{ issue.issuer.name }}
+                    {% endif %}  
+                </td>
+                <td class="">{{ issue.created_at }}</td>
+                <td class="text-left" id="status_{{issue.id}}" >
+                  {{issue.get_status_display }}
+                  
+                  {% if issue.status == "4" and issue.resolver_note %} 
+                  <br>
+                  <span class="resolve_{{issue.id}}_show"><b>Note: </b>{{ issue.resolver_note|truncatewords:8 }} {% if issue.resolver_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('resolve_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                  <span class="resolve_{{issue.id}}_hide" style="display:none"><b>Note: </b>{{ issue.resolver_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('resolve_{{issue.id}}');" style="color:blue;"></i></span>
+                  {% elif issue.status == "2" and issue.assign_note %} 
+                  <br>
+                  <span class="assign_{{issue.id}}_show"><b>Note: </b>{{ issue.assign_note|truncatewords:8 }} {% if issue.assign_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('assign_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                  <span class="assign_{{issue.id}}_hide" style="display:none"><b>Note: </b>{{ issue.assign_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('assign_{{issue.id}}');" style="color:blue;"></i></span>
+                  {% elif issue.status == "3" and issue.feedback_note %} 
+                  <br>
+                  <span class="feedback_{{issue.id}}_show"><b>Note: </b>{{ issue.feedback_note|truncatewords:8 }} {% if issue.feedback_note|wordcount > 8 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('feedback_{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+                  <span class="feedback_{{issue.id}}_hide" style="display:none"><b>Note: </b>{{ issue.feedback_note}} <i class='fas fa-arrow-circle-up' onclick="close_td('feedback_{{issue.id}}');" style="color:blue;"></i></span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if issue.status == "1" and request.session.hd_role == "3" or issue.status == "1" and request.session.hd_role == "4" %}
+                  <div class="form-group">
+                    <select class="form-control select2" id="resolver_{{issue.id}}" name="{{issue.id}}" data-title="Resolver" required>
+                      <option value="" disabled selected></option>
+                      {% for data in resolver_list %}
+                        <option value="{{data.id}}">{{data.name}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  {% else %}
+                      {% if issue.status == "2" or issue.status == "3" %} 
+                        {{ issue.assigned_to_name.name }} Assgned at {{ issue.assigned_at }}
+                      {% elif issue.status == "4" %} 
+                        {{ issue.assigned_to_name.name }} Solved at {{ issue.resolved_at }}
+                      {% endif %}
+                  {% endif %}
+                </td>
+                {% if request.session.hd_role == "3" or request.session.hd_role == "4" or request.session.hd_role == "2" %}
+                <td width="20%">
+                  {% if issue.status == "1" and request.session.hd_role == "3" or issue.status == "1" and request.session.hd_role == "4" %}
+                  <button onclick="assignResolver('{{issue.id}}')" class="btn waves-effect waves-light btn-rounded btn-outline-info">
+                    Assign
+                  </button>
+                  <button onclick="issueAssignModal('{{issue.id}}')" class="btn waves-effect waves-light btn-rounded btn-outline-info">
+                    Note
+                  </button>
+                  <button onclick="issueCancelModal('{{issue.id}}')" class="btn waves-effect waves-light btn-rounded btn-outline-warning">
+                    Cancel
+                  </button>
+                  {% elif request.session.id == issue.assigned_to %}
+                    {% if issue.status == "2" %}
+                      <div id="btnResolve_{{issue.id}}">
+                        <button type="submit" id="start_{{issue.id}}" class="btn waves-effect waves-light btn-rounded btn-outline-warning" onClick="issueResolve('{{issue.id}}','3')">Start
+                        </button>
+                      </div>
+                    {% elif issue.status == "3" %}
+                      <button type="submit" class="btn waves-effect waves-light btn-rounded btn-outline-info" onClick="issueFeedbackModal('{{issue.id}}')">Feedback
+                      </button>
+                      <button type="submit" class="btn waves-effect waves-light btn-rounded btn-outline-success" onClick="issueCompleteModal('{{issue.id}}')">Done
+                      </button>
+                    {% endif %}
+                  {% endif %}
+                </td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="myModalLabel"></h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body text-center">
+                              <p><img class=" img-fluid" id="emp_photo" src=""
+                                      alt="card image"></p>
+                              <h5 class="card-title" id="emp_name"></h5>
+                              <h6 class="card-title" id="location"></h6>
+                              <p class="card-text" id="department"></p>
+                              <p class="card-text" id="designation"></p>
+                              <p class="card-text" id="email"></p>
+                              <p class="card-text" id="phone"></p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="complete" tabindex="-1" role="dialog" aria-labelledby="complete" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h4 class="modal-title" id="issueModalTitle">Issue Complete</h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body">
+                              <div class="row floating-labels mt-1">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label for="note" class="form-label">Note</label>
+                                    <textarea rows="2" class="form-control" id="note" name="resolver_note"></textarea>
+                                    <span class="bar"></span>
+                                  </div>
+                                  <div id="btnIssueDone"></div>                                
+                                </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+
+<script src="{% static 'dist/js/desk.js' %}"></script>
+<script>
+  let table = $('#issue_table').DataTable({
+              dom: "<'row top'<'col-md-8 heading'><'col-md-4 mt-2'f>>t<'row'<'col-4'><'col-8'p>>",
+              ordering: true,
+              paging: false,
+              pageLength: 50,
+              lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+              responsive: true,
+              "order": [[ 4, "asc" ]],
+              fixedHeader: {
+                  header: false
+              },
+              language: {
+                  paginate: {
+                      previous: "<",
+                      next: ">",
+                  }
+              },
+              scrollY: '50vh'
+          });
+  // Reset Filter
+  $clone = $("#issue_filter").clone()
+  $("#issue_filter").remove();
+  $clone.appendTo(".heading");
+  $(".heading").children().show();
+  
+  $(document).ready(function() {
+      var method = '{{method_chk}}';
+      if(method == "post") window.location.href = "/helpdesk/";
+  });
+</script>
+{% endblock %}

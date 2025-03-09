@@ -1,0 +1,186 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load humanize %}
+{% load sc_filters %}
+{% block page_title %}Salary Cycle{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="mb-1">Salary Cycle List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                    <div class="table-responsive">
+                        <table class="table table-border table-striped card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="d-sm-table-cell">SL.</th>
+                                    <th>Company</th>
+                                    <th>Emp. Category</th>
+                                    <th>Cycle</th>
+                                    <th>Status</th>
+                                    <th class="d-sm-table-cell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sc in object_list %}
+                                <tr>
+                                    <td class="">{{ forloop.counter }}</td>
+                                    <td>{{ sc.company.short_name }}</td>
+                                    <td>{{ sc.employee_category.value }}</td>
+                                    <td>{{ sc.start_date|ordinal }} - {{ sc.end_date|ordinal }}</td>
+                                    <td>
+                                        <label class="mx-auto mb-0">
+                                            <input type="checkbox" data-id="{{sc.id}}" data-type="status" {% if sc.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                                class="js-switch shift-update-switch" data-color="#009efb" data-size="mini" />
+                                        </label>
+                                    </td>
+                                    <td class="text-left">
+                                        <a class="h4 m-r-10 text-success" href="{% url 'hr:hr_salary_cycle_update' sc.id %}">
+                                            <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                        </a>
+                                        <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:hr_salary_cycle_delete' sc.id %}">
+                                            <span class="icon"><i class="ti-trash"></i></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-header pl-0">
+                    <div class="row">
+                        <div class="col-9 align-self-center">
+                            <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                        </div>
+                        {% if instance %}
+                        <div class="col-3 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <a href="{% url 'hr:hr_salary_cycle_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                            <i class="ti-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required />
+                                <option value="" disabled selected></option>
+                                {% for company in companies %}
+                                <option value="{{company.id}}" {% if instance.company_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee_category">Employee Category</label>
+                            <select class="form-control text-capitalize select2" name="employee_category" id="employee_category" data-title="Employee Category" required />
+                                <option value="" disabled selected></option>
+                                {% for ec in employee_categories %}
+                                <option value="{{ec.id}}" {% if instance.employee_category_id == ec.id %}selected{% endif%}>{{ec.value}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="start_date">Start Date</label>
+                                    <select class="form-control text-capitalize select2" name="start_date" id="start_date" data-title="Start Date" required />
+                                        <option value="" disabled selected></option>
+                                        {% for n in 32|times %}
+                                            {% if not forloop.first %}
+                                                <option value="{{n}}" {% if instance.start_date == n %}selected{% endif%}>{{n|ordinal}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="end_date">End Date</label>
+                                    <select class="form-control text-capitalize select2" name="end_date" id="end_date" data-title="End Date" required />
+                                        <option value="" disabled selected></option>
+                                        {% for n in 32|times %}
+                                            {% if not forloop.first %}
+                                                <option value="{{n}}" {% if instance.end_date == n %}selected{% endif%}>{{n|ordinal}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="status" class="mb-2">
+                                    <input type="checkbox" id="status" name="status" class="js-switch" {% if instance.status.title == "Active" or not instance %}checked{% endif %} data-color="#009efb" data-size="mini"/> Status
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+    $(".card-table").DataTable({});
+
+    {% comment %} Delete Salary Cycle {% endcomment %}
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        Swal.fire({
+            text                : 'Do you want to delete this HRSalaryCycle from list?',
+            type                : 'question',
+            confirmButtonText   : 'Yes',
+            confirmButtonColor  : "#00c292",
+            showCancelButton    : true,
+            cancelButtonText    : 'No',
+            cancelButtonColor   : "#e46a76",
+            reverseButtons      : false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+    {% comment %} Delete Salary Cycle {% endcomment %}
+
+    $('body').on('click', '.shift-update-switch', function (e) {
+        var id     = $(this).data('id');
+        $.ajax({
+           url : "{% url 'hr:cycle_update_status' %}",
+           type: "POST", dataType: 'json', data: { id:id },
+           success: function (data) {
+               toasterMsg("success", "This Shift successfully updated!", 5000);
+           },
+        });
+    });
+
+</script>
+{% endblock %}

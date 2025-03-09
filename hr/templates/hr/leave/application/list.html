@@ -1,0 +1,315 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load data_load %}
+{% block page_title %}Leave Application{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .switchery-mini{margin-right:10px;}
+    .card-body .card{
+        border-radius: 0 0 1rem 1rem;
+        --tw-shadow: 0 10px 27px 0 rgba(0,0,0,0.05);
+        --tw-shadow-colored: 0 10px 27px 0 var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="mb-1">Leave Application</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link active" data-toggle="tab" href="#apply">Apply <span class="badge badge-danger py-0 rounded-pill ml-2">{{ pending }}</span></a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#MyLA">My Aplications <span class="badge badge-danger py-0 rounded-pill ml-2">{{ checked }}</span></a> 
+                </li>
+                {% if has_approval or request.session.user_roles|is_role_assigned:'Admin, Super Admin' %}
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#pending">Pending <span class="badge badge-danger py-0 rounded-pill ml-2">{{ checked }}</span></a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#approved">Approved <span class="badge badge-danger py-0 rounded-pill ml-2">{{ checked }}</span></a> 
+                </li>
+                {% endif %}
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabcontent-border">
+                <div class="tab-pane active p-20" id="apply" role="tabpanel" style="min-height: 60vh;">
+                    <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="leave_type">Leave Type</label>
+                                    <select class="form-control text-capitalize select2" name="leave_type" id="leave_type" data-title="Leave Type" required>
+                                        <option value="" disabled selected></option>
+                                        {% for l in leaves %}
+                                        <option value="{{l.id}}" {% if instance.leave_type_id == l.id %}selected{% endif%} data-balance="{{l.remaining_days}}">{{l.text}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control remaining_days bg-transparent text-center" id="remaining_days" name="remaining_days" readonly>
+                                    <span class="bar"></span>
+                                    <label for="remaining_days">Remaining Days</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control bg-transparent datepicker text-center" id="leave_days" name="leave_days" required
+                                        value="{% if instance.start_date %}{{ instance.start_date|date:'d/m/Y'|upper }} - {{ instance.end_date|date:'d/m/Y'|upper }}{% endif %}" autocomplete="off">
+                                    <span class="bar"></span>
+                                    <label for="leave_days">Duration</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" step="1" min="0" class="form-control num_days bg-transparent text-center" id="num_days" name="num_days" value="{{ instance.num_of_days }}" required readonly>
+                                    <span class="bar"></span>
+                                    <label for="num_days">Total Days</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" data-title="Avail Place" id="avail_place" name="avail_place" value="{{ instance.avail_place }}" />
+                                    <span class="bar"></span>
+                                    <label for="avail_place">Avail Place</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="2" class="form-control bg-transparent" id="reason" name="reason">{{ instance.reason }}</textarea>
+                            <span class="bar"></span>
+                            <label for="reason">Reason</label>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <div class="custom-file mb-1">
+                                        <input type="file" class="custom-file-input" accept="image/png, image/PNG, image/gif, image/GIF, image/jpg, image/jpeg, image/pdf, image/PDF" id="attachment" name="attachment" multiple="">
+                                        <label class="custom-file-label" for="attachment">Attachment</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-1">
+                                <div class="form-group mt-2">
+                                    <label for="is_post_approved">
+                                        <input type="checkbox" id="is_post_approved" name="is_post_approved" class="js-switch mr-4" {% if instance.is_post_approved %}checked{% endif %} data-color="#009efb" data-size="mini"/> Post Approval
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 ml-auto mt-2">
+                                <div class="button-group">
+                                <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success receive-goods">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr />
+                    
+                    <div class="row">
+                        {% for al in allocated_leaves %}
+                            <div class="col-md-3 mx-auto">
+                                <div class="card text-center border">
+                                    <div class="card-header bg-light">
+                                        <h4 class="mb-0">{{ al.leave.leave_type.description }}</h4>
+                                    </div>
+                                    <div class="card-body pt-0">
+                                        <h3 class="text-dark font-weight-bold">{{ al.total_balance }} Day/s Remaining</h3>
+                                        <div class="row mt-3 font-weight-bold">
+                                            <div class="col-md pt-0 text-success">
+                                                <p>Total</p>
+                                                <h4>{{ al.total_days }}</h4>
+                                            </div>
+                                            <div class="col-md pt-0 border-left text-warning">
+                                                <p>Availed</p>
+                                                <h4>{{ al.availed_days }}</h4>
+                                            </div>
+                                            <div class="col-md pt-0 border-left text-info">
+                                                <p>Applied</p>
+                                                <h4>{{ al.applied_days }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                </div>
+                <div class="tab-pane p-20" id="MyLA" role="tabpanel" style="min-height: 60vh;">
+                    <table id="myLA-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_leave_applications_for_dataTable' 'myLA' has_approval %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th style="width: 150px">Application No.</th>
+                                <th style="width: 150px">Leave Type</th>
+                                <th style="width: 150px">Duration</th>
+                                <th style="width: 150px">Num. of Days</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 100px">Applied at</th>
+                                <th style="width: 50px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane p-20" id="pending" role="tabpanel" style="min-height: 60vh;">
+                    <table id="pending-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_leave_applications_for_dataTable' 'pending' has_approval %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th style="width: 150px">Application No.</th>
+                                <th style="width: 150px">Applicant</th>
+                                <th style="width: 150px">Leave Type</th>
+                                <th style="width: 150px">Duration</th>
+                                <th style="width: 150px">Num. of Days</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 150px">Applied By</th>
+                                <th style="width: 100px">Applied at</th>
+                                <th style="width: 50px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane p-20" id="approved" role="tabpanel" style="min-height: 60vh;">
+                    <table id="approved-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_leave_applications_for_dataTable' 'approved' has_approval %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th style="width: 150px">Application No.</th>
+                                <th style="width: 150px">Applicant</th>
+                                <th style="width: 150px">Leave Type</th>
+                                <th style="width: 150px">Duration</th>
+                                <th style="width: 150px">Num. of Days</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 150px">Applied By</th>
+                                <th style="width: 100px">Applied at</th>
+                                <th style="width: 50px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+{% include 'hr/leave/application/datatable_common_func.html' %}
+
+<script>
+    $('.datepicker').daterangepicker({
+        autoUpdateInput: false,
+        showDropdowns: true,
+        opens: "left",
+        locale: { format: 'DD/MM/YYYY' }
+    }).on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + " - " + picker.endDate.format('DD/MM/YYYY'));
+        $(this).parent().addClass("focused");
+        var duration = (picker.endDate).diff((picker.startDate), 'days'); //moment.duration((picker.endDate).diff(picker.startDate));
+        $(this).closest('form').find(".num_days").val(duration + 1).parent().addClass("focused");
+    }).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+        $(this).closest('form').find(".num_days").val('').parent().removeClass("focused");
+        $(this).parent().removeClass("focused");
+    });
+    
+    var myTable = null, pendingTable = null, approvedTable = null;
+    $(document).ready(function () {
+        LeavedataTableFunc(myTable, "#MyLA", "#myLA-table", {})
+        LeavedataTableFunc(pendingTable, "#pending", "#pending-table", {})
+        LeavedataTableFunc(approvedTable, "#approved", "#approved-table", {})
+    });
+
+    
+
+    $("body").on("click", ".approve-btn", function(){
+        var leave_id = $(this).data("id");
+        Swal.fire({
+            text: "Do you want to approve this Leave Application?",
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: "#00c292",
+            cancelButtonText: 'No',
+            cancelButtonColor: "#e46a76",
+            reverseButtons: false
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type    : "POST",
+                    url     : '{% url "hr:leave_application_approval" %}',
+                    data    : { 'id':leave_id, 'status':'approve' },
+                    success : function (data) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Successfully Aproved',
+                            showConfirmButton: false
+                        })
+                        setTimeout(function(){ location.reload(); }, 2000);
+                    }
+                });
+            }
+        });
+    })
+
+    $("body").on("click", ".reject-btn", function(){
+        var leave_id = $(this).data("id");
+        Swal.fire({
+            text: "Do you want to reject this Leave Application?",
+            input: 'textarea',
+            inputPlaceholder: "Write the reason why you are rejecting...",
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            confirmButtonColor: "#00c292",
+            cancelButtonText: 'Cancel',
+            cancelButtonColor: "#e46a76",
+            reverseButtons: false,
+            closeOnConfirm: false,
+            showLoaderOnConfirm: true,
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type    : "POST",
+                    url     : '{% url "hr:leave_application_approval" %}',
+                    data    : { "notes" : result.value, 'id':leave_id, 'status':'reject' },
+                    success : function (data) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Successfully Rejected',
+                            showConfirmButton: false
+                        })
+                        setTimeout(function(){ location.reload(); }, 2000);
+                    }
+                });
+            }
+        });
+    })
+
+    $("#leave_type").on("select2:select", function(e){
+        var balance = $(e.params.data.element).data('balance');
+        $("#remaining_days").val(balance).parent().addClass("focused");
+        $("#num_days").attr('max', balance);
+    }).on("select2:unselect", function(e){
+        $("#remaining_days").val('').parent().removeClass("focused");
+        $("#num_days").attr('max', '');
+    });
+    
+</script>
+{% endblock %}

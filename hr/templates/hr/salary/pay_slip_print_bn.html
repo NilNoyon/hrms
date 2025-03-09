@@ -1,0 +1,361 @@
+{% load static %}
+{% load math-filters %}
+{% load sc_filters %}
+
+<!doctype html>
+<html lang="en" dir="ltr">
+    <head>
+        <title>মজুরী রশিদ</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta http-equiv="Content-Language" content="en" />
+        <meta name="msapplication-TileColor" content="#2d89ef">
+        <meta name="theme-color" content="#4188c9">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+
+        {% block css %}
+        <link href="{% static 'dist/css/style.css' %}" rel="stylesheet" />
+        <link href="{% static 'node_modules/bootstrap/dist/css/bootstrap.min.css' %}" />
+        <style>
+            body{
+                font-size: 12px !important;
+            }
+            .bold-text{
+                font-weight: 900 !important;"
+            }
+            .table-borderless th,
+            .table-borderless td,
+            .table-borderless thead th,
+            .table-borderless tbody+tbody {
+                border: 0 !important;
+            }
+            @page {
+                size: A4;
+                margin: 6mm 4mm;
+            }
+        </style>
+        {% endblock %}
+    </head>
+    <body>
+        <div class="page">
+            <div class="row">
+                {% for d in data %}
+                <div class="col-6 mt-2 mb-0">
+                    <h5 class="text-center" style="font-size: 14px !important;font-weight: 900 !important;">{{company.name}}</h5>
+                    <h6 class="text-center" style="font-size: 12px !important;font-weight: 800 !important;">মজুরী রশিদ - {{month}}/{{year|convert_to_bangla}}</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="p-1" colspan="3" style="width:60%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">আইডি</th>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">: {{d.employee.personal.employee_id}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">নাম</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.personal.name_bn}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">পদবি</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.designation.name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">যোগদান তারিখ</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.joining_date|date:"d"|convert_to_bangla}}/{{d.joining_month}}/{{d.employee.joining_date|date:"Y"|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">মোট দিন</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.total_days|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">কর্ম দিবস</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.working_day|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">অন্যান্য ছুটি</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.holidays|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">সাপ্তাহিক ছুটি</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.weekends|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">ছুটি</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.with_pay|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">বিনা বেতনে ছুটি</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.without_pay|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="p-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%">ডিপার্টমেন্ট</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%">: {{d.employee.department.short_name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">সেকশন</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.section.short_name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">ইউনিট</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.unit.value}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">সুইং লাইন</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.line.name}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">গ্রেড</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.employee.grade}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">অর্ধ-দিবস ছুটি</th>
+                                            <th class="border-0 pl-1 py-0">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">উপস্থিত দিন</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.present_days|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">অনুপস্থিত দিন</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.absent_days|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">ওটি ঘন্টা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.ot_hrs|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">ওটি হার</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.ot_rate|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th style="width:15%" class="pl-1 py-0 bold-text">ক) মজুরী</th>
+                                <th class="py-0 pl-1" colspan="2" style="width:45%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">মূল মজুরী</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.basic|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">বাড়ী ভাড়া</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.hrent|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">খাদ্য ভাতা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.food|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%;vertical-align:top;">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">চিকিৎসা ভাতা</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.medical|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        {% if d.employee.employee_category.value|lower == "staff" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">অন্যান্য ভাতা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.other|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        {% elif d.employee.employee_category.value|lower == "worker" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">যাতায়াত ভাতা</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.conveyance|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0 bold-text" style="width:50%;">মোট মজুরী</th>
+                                            <th class="border-0 pl-1 py-0 bold-text" style="width:50%;">: {{d.employee.salary|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" class="pl-1 py-0 bold-text">খ) ভাতা</th>
+                                <th class="py-0 pl-1" colspan="2" style="width:45%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">হাজিরা বোনাস</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.attendance|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">রাত্রিকালীন ভাতা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.night|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">হলিডে ভাতা</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.holiday|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">বকেয়া মজুরী</th>
+                                            <th class="border-0 pl-1 py-0">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">প্রণোদনা ভাতা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.incentive|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">উৎসব ভাতা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.festival|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%;vertical-align:top;">
+                                    <table class="table table-borderless mb-0">
+                                        {% if d.employee.employee_category.value|lower == "worker" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">অন্যান্য ভাতা</th>
+                                            <th class="border-0 pl-1 py-0">: {{d.other|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">টিফিন বিল</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.tiffin|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">শিফট ভাতা</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">প্রাত্যহিক ভাতা</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">মোট ভাতা</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">: {{d.total_payable|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" colspan="3" class="pl-1 py-1 bold-text">গ) ওভার টাইম</th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">ওটি মজুরী</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">: {{d.ot|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" colspan="3" class="pl-1 py-1 bold-text">ঘ) মোট প্রদেয়</th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">ক + খ + গ</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">: {{d.employee.salary|add:d.total_payable|add:d.ot|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" class="pl-1 py-1 bold-text">ঙ) কর্তন</th>
+                                <th class="py-0 pl-1" colspan="2" style="width:45%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">অনুপস্থিতি</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.absent|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        {% if d.employee.employee_category.value|lower == "staff" %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:60%">ট্যাক্স</th>
+                                            <th class="border-0 pl-1 py-0" style="width:40%">: {{d.itds|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">ওয়েজলি</th>
+                                            <th class="border-0 pl-1 py-0">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0">বিনা বেতনে ছুটি</th>
+                                            <th class="border-0 pl-1 py-0">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                                <th class="py-1 pl-1" colspan="3" style="width:40%;vertical-align:top;">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">অগ্রিম</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">বাকি</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{ 0|convert_to_bangla }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">ঋণ</th>
+                                            <th class="border-0 pl-1 py-0" style="width:50%;">: {{d.loan|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">মোট কর্তন</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%;">: {{d.total_deduction|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:15%" colspan="3" class="pl-1 py-1 bold-text">সর্বমোট প্রদেয়</th>
+                                <th class="py-0 pl-1" colspan="3" style="width:40%">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">ঘ - ঙ</th>
+                                            <th class="border-0 pl-1 py-1 bold-text" style="width:50%">: {{d.net_payable|bdt_currency|convert_to_bangla}}</th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="width:100%" class="pl-1 py-1" colspan="6">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <th style="width:25%" class="pl-1 py-1">ওভার টাইম</th>
+                                            <th class="py-0" colspan="5" style="width:75%">
+                                                : ( মূল মজুরী / {{208|convert_to_bangla}} ) * {{2|convert_to_bangla}} * ওটি ঘন্টার পরিমান।
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:25%" class="pl-1 py-1">অনুপস্থিতি কর্তন</th>
+                                            <th class="py-0" colspan="5" style="width:75%">
+                                                : ( মূল মজুরী / {{30|convert_to_bangla}} ) * অনুপস্থিত দিনের পরিমান।
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th class="pl-1 py-1" colspan="6" style="width:100%">
+                                                এটি একটি কম্পিউটার প্রিন্টেড মজুরী রশিদ, তাই স্বাক্ষরের প্রয়োজন নেই।
+                                            </th>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-center mb-1">Powered by E-BIT, Esquire Technology Limited</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% block scripts %}
+        <script type="text/javascript">
+            setTimeout(function(){
+                window.print();
+                setTimeout(window.close, 50);
+            }, 300);
+        </script>
+        {% endblock %}
+    </body>
+</html>

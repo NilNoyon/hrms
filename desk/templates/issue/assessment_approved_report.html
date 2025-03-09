@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Device Assessment Approved Form</title>  
+    <style type="text/css"> 
+        table{margin:0px;padding:0px;}     
+        @page{
+            size:A4 portrait;
+            margin:1.5cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0.5cm;
+                margin-left: 1.5cm;
+                height: 1cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td width="42%">
+                <p style="text-align:right;padding:5px;"><img style="width:70px;height:70px;" src="https://ebs.esquire.com.bd/assets/images/esquire-logo.png"></p>	
+                <!-- <p style="text-align:right;padding:5px;"><img style="width:70px;height:70px;" src="{{host}}/assets/images/esquire-logo.png"></p>	 -->
+             </td>
+            <td>
+                <h1 style="text-align:left;font-family: Cambria Math, serif;margin:0px;padding-top:10px;font-size:24px;color:#304050;line-height:25px;">Esquire Group</h1>
+                <h4 style="text-align:left;margin:0px;font-size:17px;color:#304050;">ICT Device Assessment</h4>
+            </td>
+        </tr>
+    </table>
+    <br><br>
+    <table> 
+        <tr>
+            <td colspan="3" style="font-size: 20px;font-weight: bold;">Employee Details</td>
+        </tr>
+    </table> 
+    <table> 
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <th style="width:100px;text-align:left;padding-top:3px;font-size:13px;">Name</th>
+                        <td style="font-size:12px;padding-top:3px;">: {{assessment.assessment_for}}</td>
+                    </tr>
+                    <tr>
+                        <th style="width:100px;text-align:left;padding-top:3px;font-size:13px;">Employee ID</th>
+                        <td style="font-size:12px;padding-top:3px;">: {{assessment.assessment_for.employee_id}}</td>
+                    </tr>
+                    <tr>
+                        <th style="width:100px;text-align:left;padding-top:3px;font-size:13px;">Email</th>
+                        <td style="font-size:12px;padding-top:3px;">: {{assessment.assessment_for.email}}</td>
+                    </tr>
+                </table>    
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <th style="width:100px;text-align:left;padding-top:3px;font-size:13px;">Department</th>
+                        <td style="font-size:12px;padding-top:3px;">: {{assessment.assessment_for.department}}</td>
+                    </tr>
+                    <tr>
+                        <th style="width:100px;text-align:left;padding-top:3px;font-size:13px;">Designation</th>
+                        <td style="font-size:12px;padding-top:3px;">: {{assessment.assessment_for.designation}}</td>
+                    </tr>
+                    <tr>
+                        <th style="width:100px;text-align:left;padding-top:3px;font-size:13px;">Sitting Location</th>
+                        <td style="font-size:12px;padding-top:3px;">: {{assessment.assessment_for.official_info.location}}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <br>
+    <h1 style="font-size: 20px;font-weight: bold;padding: 0px;margin: 0px;">Device Details:</h1>
+    <p style="font-size:12px"><b>Device: </b>{{assessment.device}}</p>
+    <p style="font-size:12px"><b>Device Type: </b>{{assessment.device_type}}</p>
+    <p style="font-size:12px">Is there any need for after office-hour communication by mail? <b>{% if assessment.question1 %} Yes {% else %} No {% endif %}</b></p>
+    <p style="font-size:12px">Does S/he frequently interact with suppliers/customers/others? <b>{% if assessment.question2 %} Yes {% else %} No {% endif %}</b></p>
+    <p style="font-size:12px">Does S/he duty keep him/her out of the office? <b>{% if assessment.question3 %} Yes {% else %} No {% endif %}</b></p>
+    <p style="font-size:12px"><b>Note: </b>{{assessment.note|safe}}</p><br>
+    <h1 style="font-size: 20px;font-weight: bold;padding: 0px;margin: 0px;">Remarks:</h1>
+    {% if assessment.issuer_dpt_head_note %}<p style="font-size:12px"><b>Department Head: </b>{{assessment.issuer_dpt_head_note|safe}}</p>{% endif %}
+    {% if assessment.ict_head_note %}<p style="font-size:12px"><b>ICT Head: </b>{{assessment.ict_head_note|safe}}</p>{% endif %}
+    <!-- {% if assessment.ed_note %}<p style="font-size:12px"><b>ED: </b>{{assessment.ed_note}}</p>{% endif %} -->
+    {% if assessment.ceo_note %}<p style="font-size:12px"><b>CEO: </b>{{assessment.ceo_note|safe}}</p>{% endif %}
+    {% if assessment.status == "6" and assessment.canceled_note %}<p style="font-size:12px"><b>Cancel Note: </b>{{assessment.canceled_note|safe}}. Canceled by {{assessment.canceled_by}} at {{assessment.canceled_at}}</p>{% endif %}
+    <br>
+    <table style="margin-top:100px;" width="100%">
+        <tr>
+            <td style="padding-top:15px;">
+                <center>
+                    {% if assessment.assessment_by_name.official_info.signature %}
+                        <img style="width:80px;height:40px;" src="https://ebs.esquire.com.bd/assets/uploads/{{assessment.assessment_by_name.official_info.signature}}">  <br>
+                        <!-- <br><br>Prepared <br> -->
+                    {% else %}
+                    <br><br>Prepared <br>
+                    {% endif %}
+                    <span style="font-size:8px">{{assessment.created_at}}</span>   <br>
+                    ___________________________ <br> 
+                    <span>{{assessment.assessment_by_name}}</span><br>
+                    <span>Prepared By</span>
+                </center>
+            </td>
+            {% if assessment.issuer_dpt_approve_at %}
+                <td style="padding-top:15px;">
+                    <center>
+                        {% if assessment.head_of_assessment_name.official_info.signature %}
+                            <img style="width:80px;height:40px;" src="https://ebs.esquire.com.bd/assets/uploads/{{assessment.head_of_assessment_name.official_info.signature}}">  <br>
+                            <!-- <br><br>Approved <br> -->
+                        {% else %}
+                        <br><br>Approved <br>
+                        {% endif %}
+                        <span style="font-size:8px"> {{assessment.issuer_dpt_approve_at}}</span>  <br> 
+                        ___________________________ <br> 
+                        <span>{{assessment.head_of_assessment_name}}</span><br>
+                        <span>Department Head</span>
+                    </center>
+                </td>
+            {% endif %}
+            {% if assessment.ict_dpt_approve_at %}
+                <td style="padding-top:15px;">
+                    <center>
+                        {% if assessment.head_of_ict_name.official_info.signature %}
+                            <img style="width:80px;height:40px;" src="https://ebs.esquire.com.bd/assets/uploads/{{assessment.head_of_ict_name.official_info.signature}}">  <br>
+                            <!-- <br><br>Approved <br> -->
+                        {% else %}
+                        <br><br>Approved <br>
+                        {% endif %}
+                        <span style="font-size:8px"> {{assessment.ict_dpt_approve_at}}</span>  <br> 
+                        ___________________________<br> 
+                        <span>{{assessment.head_of_ict_name}}</span><br>
+                        <span>{{assessment.head_of_ict_name.designation}}</span>
+                    </center>
+                </td>
+            {% endif %}
+            <!-- {% if assessment.ed_approve_at %}
+                <td style="padding-top:15px;">
+                    <center>
+                    {% if assessment.ed_name.official_info.signature %}
+                        <img style="width:80px;height:40px;" src="{{host}}/assets/uploads/{{assessment.ed_name.official_info.signature}}">  <br>
+                    {% else %}
+                        <br><br><br>Approved <br>
+                    {% endif %}
+                        <span style="font-size:8px"> {{assessment.ed_approve_at}}</span>  <br> 
+                        ___________________________ <br> 
+                        <span>{{assessment.ed_name}}</span><br>
+                        <span>ED</span>
+                    </center>
+                </td>
+            {% endif %} -->
+            {% if assessment.ceo_approve_at %}
+                <td style="padding-top:15px;">
+                    <center>
+                        {% if assessment.ceo_name.official_info.signature %}
+                            <img style="width:80px;height:40px;" src="https://ebs.esquire.com.bd/assets/uploads/{{assessment.ceo_name.official_info.signature}}">  <br>
+                            <!-- <br><br>Approved <br> -->
+                        {% else %}
+                        <br><br> Approved<br>
+                        {% endif %}
+                        <span style="font-size:8px"> {{assessment.ceo_approve_at}}</span>  <br> 
+                        ____________________________<br> 
+                        <span>{{assessment.ceo_name}}</span><br>
+                        <span>CEO</span>
+                    </center>
+                </td>
+            {% endif %}
+        </tr>
+    </table>
+    <div id="footerContent" style="text-align: center;"><i>This is generated by EBS</i></div>
+</body>
+</html>

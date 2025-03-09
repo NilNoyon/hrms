@@ -1,0 +1,214 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}PF Transfer Log{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+     .dataTables_scroll{
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255/var(--tw-bg-opacity));
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: 0.5rem !important;
+        margin-top:18px;
+        padding:2rem !important;
+    }
+</style>  
+{% endblock %}
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Employee Transfer Log</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/hr/employee-transfer/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+      <div class="table-responsive">
+          <table id="users-table" class="table table-border card-table table-vcenter transfer-table" data-url="{% url 'hr:get_employee_transfer_list_filter' %}">
+            <thead>
+                <tr>
+                  <th class="d-sm-table-cell">Employee ID</th>
+                  <th class="d-sm-table-cell">Name</th>
+                  <th class="d-sm-table-cell">Company</th>
+                  <th class="d-sm-table-cell">From Department</th>
+                  <th class="d-sm-table-cell">To Department</th>
+                  <th class="d-sm-table-cell">From Designation</th>
+                  <th class="d-sm-table-cell">To Designation</th>
+                  <th class="d-sm-table-cell">Joining Date</th>
+                  <th class="d-md-table-cell">Contact Number</th>
+                </tr>
+              </thead>
+          </table>
+        </div>
+        <div class="reset">
+        <div class="form-group" style="display: none;">
+            <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+      </div>
+      <div class="form-group companys" style="display: none;">
+        <select class="form-control text-capitalize" id="companys" name="company" >
+            <option value="" >All Company</option>
+            {% for data in company_list %}
+                <option value="{{data.id}}" >{{data.name}}</option>
+            {% endfor %}
+        </select>
+      </div>
+      <div class="form-group multi-date" style="display: none;">
+        <label for="multi-date">Joining Date</label>
+        <input type="text" class="form-control text-capitalize multidate remove_border" id="multi-date" name="joining_date" placeholder="Select Joining Date ..." autocomplete="off">
+      </div>
+      <div class="input-group search_box" style="display: none;">
+        <input type="text" class="form-control remove_border" id="search_box" name="search_box" placeholder="Employee Id/Name/Contact No">
+        <div class="input-group-append">
+            <button class="btn btn-info" type="button"><i class="fa fa-search"></i></button>
+        </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+
+<script src="{% static 'node_modules/moment/moment.js' %}"></script> 
+<script src="{% static 'node_modules/dropify/dist/js/dropify.min.js' %}"></script> 
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script> 
+
+<script>
+    var completedTable = null;
+    $(document).ready(function () {
+        
+        loadDataTable({});
+    });
+
+
+    var company    = '';
+    var search_text = '';
+    var start_date  = '';
+    var end_date    = ''; 
+
+    function loadDataTable(data){
+        if (completedTable) {
+            completedTable.destroy();
+        }
+        let url = $(".transfer-table").data("url");
+
+        completedTable = $(".transfer-table").DataTable({
+            dom      : "<'custom-color rounded-lg p-3'<'row top'<'col-md-1 reset_btn'><'col-md-2 company'><'col-md-2 date'><'col-md-3 search_area'>>>t",
+            ordering: false,
+            paging: true,
+            iDisplayLength: 25,
+            pageLength: 5,
+            autoWidth: false,
+            scrollY: '365',
+            scroller: true,
+            deferRender: true,
+            serverSide: true,
+            processing: true,
+            responsive:true,
+            ajax:{
+                type: "POST",
+                url: url,
+                data: data,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                dataSrc: ""
+            },
+
+            initComplete:function( settings, json){
+                if( Object.keys(data).length > 0 ){
+                    $("#companys").select2("destroy").val(data.company).select2()
+                    //$("#pfs").select2("destroy").val(data.designation).select2() 
+                    $("#search_box").val(data.search_text).focus()
+
+                    if(data.start_date != undefined && data.start_date != ''){
+                        s_date = data.start_date.split("-").join("/");
+                        e_date = data.end_date.split("-").join("/");
+                        multi_date = s_date + " - " + e_date;
+                        $('.multidate').val(multi_date);
+                        $('.multidate').data('daterangepicker').setStartDate(s_date);
+                        $('.multidate').data('daterangepicker').setEndDate(e_date);
+                    }else{ $('.multidate').val(multi_date); }
+                }
+                $('.dataTables_scrollBody').on('scroll', function (e) {
+                  $parent = $(this).parent();
+                  $parent.children('.dataTables_scrollHead').scrollLeft($parent.children('.dataTables_scrollBody').scrollLeft());
+                });
+            }
+        });
+
+        $(".reset").children().clone().appendTo(".dataTables_wrapper .reset_btn");
+        $(".dataTables_wrapper .reset_btn").children().show();
+
+
+        $(".companys").clone().appendTo(".dataTables_wrapper .company");
+        $(".dataTables_wrapper .company .companys").show();
+        $(".dataTables_wrapper .company .companys #companys").select2();
+
+        //$(".designations").clone().appendTo(".dataTables_wrapper .designation");
+        //$(".dataTables_wrapper .designation .designations").show();
+        //$(".dataTables_wrapper .designation .designations #designations").select2();
+
+        $(".search_box").clone().appendTo(".dataTables_wrapper .search_area");
+        $(".dataTables_wrapper .search_area .search_box").show();
+
+        $(".top").on("click", ".reset_button", function(){
+            company = multi_date = search_text = '';
+            $(".multidate").val('');
+            loadDataTable({});
+        }); 
+
+
+        $("#companys").on("select2:select select2:unselecting", function(){
+            company = $(this).val();
+            setData();
+        })
+
+        //$("#designations").on("select2:select select2:unselecting", function(){
+            //designation = $(this).val();
+            //setData();
+        //})
+
+
+        // Date Range Picker
+        $(".multidate").clone().appendTo(".dataTables_wrapper .date");
+        $(".dataTables_wrapper .date .multidate").show();
+        $('.multidate').daterangepicker({
+            singleDatePicker: false,
+            showDropdowns   : true,
+            autoUpdateInput : false,
+            locale          : {
+                cancelLabel : 'Clear',
+                format      : 'YYYY/MM/DD'
+            },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            start_date      = picker.startDate.format('YYYY-MM-DD');
+            end_date        = picker.endDate.format('YYYY-MM-DD');
+            setData();
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            start_date      = null;
+            end_date        = null;
+            setData();
+        });
+        $(".search_box").on("click", ".btn", function(){
+            search_text = $("#search_box").val();
+            setData();
+        }); 
+    }
+
+    function setData(){
+        data = {'company':company,'start_date':start_date,'end_date':end_date,'search_text':search_text}
+        loadDataTable(data);
+    }
+
+</script>
+{% endblock %}

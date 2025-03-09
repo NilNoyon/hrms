@@ -26,6 +26,24 @@ class Status(models.Model):
         else : return None
 
 
+class Company(models.Model):
+    name                = models.CharField(max_length = 100, unique=True)
+    short_name          = models.CharField(max_length = 10, blank=True) #need to unique = true later
+    address             = models.CharField(max_length = 100, blank=True)
+    phone_no            = models.CharField(max_length = 15, blank=True)
+    email               = models.EmailField(max_length = 80, blank=True)
+    url                 = models.CharField(max_length = 20, blank=True)
+    licence_no          = models.CharField(max_length = 50, blank=True)
+    status              = models.BooleanField(default = True)
+
+    class Meta:
+        db_table = 'company'
+        verbose_name = "Companies"
+        verbose_name_plural = "Companies" 
+
+    def __str__(self):
+        return '%s' % (self.name)
+
 class Branch(models.Model):
     name                = models.CharField(max_length = 100, unique=True)
     short_name          = models.CharField(max_length = 10, blank=True) #need to unique = true later
@@ -34,14 +52,15 @@ class Branch(models.Model):
     email               = models.EmailField(max_length = 80, blank=True)
     fax                 = models.CharField(max_length = 20, blank=True)
     licence_no          = models.CharField(max_length = 50, blank=True)
-    branch_head         = models.ForeignKey("general.Users", related_name="unit_head", on_delete = models.SET_NULL, blank=True, null=True, default=925)  #this is the Branch Head PK from user table of this company    
+    branch_head         = models.ForeignKey("general.Users", related_name="unit_head", on_delete = models.SET_NULL, blank=True, null=True)  #this is the Branch Head PK from user table of this company    
+    company             = models.ForeignKey(Company, related_name="company", on_delete = models.SET_NULL, blank=True, null=True)  #this is the Branch Head PK from user table of this company    
     status              = models.BooleanField(default = True)
     weekends            = ArrayField(models.CharField(max_length=100), null=True, blank=True, size=100) # Weekend day
 
     class Meta:
         db_table = 'branch'
-        verbose_name = "brnaches"
-        verbose_name_plural = "branches" 
+        verbose_name = "Brnaches"
+        verbose_name_plural = "Branches" 
 
     def __str__(self):
         return '%s' % (self.name)

@@ -1,0 +1,542 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Man Power Budget{% endblock %}
+
+{% block add_css %}
+<style>
+    .dataTables_wrapper .select2-container .select2-selection--single .select2-selection__rendered,
+    .dataTables_wrapper .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .dataTables_wrapper .select2-container--default .select2-selection--single,
+    .dataTables_wrapper .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+</style>
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row"> 
+                <div class="col-md-8 align-self-center"><h4 class="text-themecolor mb-0">Man Power Budget</h4></div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                               <a href="#" class="btn btn-sm btn-success create_mp_budget" title="Man Power Budget"><i class="ti-plus"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link active" data-toggle="tab" href="#pending">Pending  <span class="label label-rounded label-info float-right" style="width: 50px; text-align:center">{{ total_pending }}</span></a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#approved">Approved  <span class="label label-rounded label-info float-right" style="width: 50px; text-align:center">{{ total_approved }}</span></a> 
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabcontent-border">
+                <div class="tab-pane active p-20" id="pending" role="tabpanel">
+                    <table id="pending-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_mp_budget_for_datatable' 'pending' %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Budget Year</th>
+                                <th style="width: 150px">Company</th>
+                                <th style="width: 150px">Department</th>
+                                <th style="width: 150px">MP Limit</th>
+                                <th style="width: 150px">MP Value Limit</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 150px">Created by</th>
+                                <th style="width: 100px">Created at</th>
+                                <th style="width: 200px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="tab-pane p-20" id="approved" role="tabpanel">
+                    <table id="approved-table" class="table table-striped card-table table-vcenter" data-url="{% url 'hr:get_mp_budget_for_datatable' 'approved' %}">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Budget Year</th>
+                                <th style="width: 150px">Company</th>
+                                <th style="width: 150px">Department</th>
+                                <th style="width: 150px">MP Limit</th>
+                                <th style="width: 150px">MP Value Limit</th>
+                                <th style="width: 150px">Status</th>
+                                <th style="width: 150px">Created by</th>
+                                <th style="width: 100px">Created at</th>
+                                <th style="width: 200px"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+                   
+        </div>
+    </div>
+    <!-- Extra Filter Requisition List -->
+    <div class="reset">
+        <div class="form-group" style="display: none;">
+            <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+    </div>
+    <div class="budget_years">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize budget_year_field" name="budget_year" id="budget_year_id">
+                <option value="" selected>Budget Year</option>
+                {% for y in budget_year %}
+                <option value="{{y.budget_year}}">{{y.budget_year}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="companies">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize company_field" name="company">
+                <option value="" selected>All Company</option>
+                {% for c in company_list %}
+                <option value="{{c.id}}">{{c.short_name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="departments">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize department_field" name="department">
+                <option value="" selected>All Department</option>
+                {% for d in all_department %}
+                    <option value="{{d.id}}">{{d.name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+
+    <div class="statuses">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize status_field" name="status">
+                <option value="" selected>All Status</option>
+                <option value="1">Approved By CEO</option>
+                <option value="2">Approved By MD</option>
+                <option value="3">Raised</option>
+                <option value="4">Rejected</option>
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="multi-date">
+        <div class="form-group" style="display: none;">
+            <input type="text" class="form-control date_field" name="to_date" placeholder="Select Date Range..." autocomplete="off">
+        </div>
+    </div>
+    <div class="search_box">
+        <div class="input-group" style="display: none;">
+            <input type="text" class="form-control search_field" name="search_box" placeholder="IOU No ">
+            <div class="input-group-append">
+                <button class="search_btn btn btn-info" type="button"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+    <!-- Extra Filter Requisition List -->
+<div id="viewDIV">
+</div>
+
+{% include 'hr/mp_budget/form_modal.html' %}
+
+{% endblock %}
+
+{% block page_js %}
+    {% include 'inc/js/enforceMinMax.html' %}
+    {% include 'inc/profile_modal.html' %}
+    {% include 'inc/scrollerDT.html' %}
+    <script src="{% static 'node_modules/moment/moment.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+    <script>
+        $(document).ready(function () {
+            {% if not hr_roles %}
+            $("#mpBudgetModal #department").select2({readonly:'readonly'})
+            {% endif %}
+        });
+
+        $("#mpBudgetModal #department").on("select2:select", function(){
+            checkDptBudget('create','#mpBudgetModal');
+        })
+
+        $("#mpBudgetEditModal #department").on("select2:select", function(){
+            checkDptBudget('update','#mpBudgetEditModal');
+        })
+
+        function checkDptBudget(operation,modalID){
+            $.ajax({
+                url: '{% url "hr:check_exists_mp_budget" %}',
+                type: 'POST',
+                data: {
+                    'operation':operation,'budget_year': $("#budget_year").val(), 'company':$("#company").val(),'department':$("#department").val()
+                },
+                success: function(data){
+                    if(data === 'exists'){
+                        $(".submit-btn").hide()
+                        toasterMsg("warning", "This department budget already submitted!", 5000);
+                    }
+                    else{$(".submit-btn").show()}
+                }
+
+            });
+        }
+        
+        function checkDuplicateDesignation(el,modalID){
+            let department = $("#"+modalID+" #department").val()
+            if(department){
+                checkDptBudget("create")
+                let designation_id = $(el).val();
+                let count = 0;
+                $('#'+modalID+' .designation').each(function(index, item){
+                    if(designation_id==$(this).val()){
+                        count += 1;
+                    }
+                })
+                if(count > 1){
+                    toasterMsg("warning", "This designation already exists!", 5000);
+                }
+            }else{
+                $("#"+modalID+" #department").focus()
+                toasterMsg("warning", "Please select department!", 5000);
+            }
+        }
+
+        function copyRow(el, modalID){
+            $('.designationRow select').each(function (index, item) {
+                if ($(item).data('select2')) {
+                    $(item).select2('destroy');
+                    $(item).removeAttr('data-select2-id');
+                    $(item).children().removeAttr('data-select2-id');
+                }
+            });
+            let trID = parseInt($(el).attr('id').split('_')[1])+1
+            $duplicate = $(el).closest('.designationRow').clone()
+            $duplicate.find('.addRow').attr('id', "addRow_"+trID)
+            $duplicate.find('.designation').attr('id', "designation_"+trID).attr('name', "designation["+trID+"]").val('').trigger('change')
+            $duplicate.find('.personlimit').attr('id', "personlimit_"+trID).attr('name', "person_limit["+trID+"]").val('')
+            $duplicate.find('.valuelimit').attr('id', "valuelimit_"+trID).attr('name', "value_limit["+trID+"]").val('')
+            $duplicate.find('.serial').val(trID)
+            $("#mainDiv").append($duplicate)
+            $(".designation").select2({
+                dropdownParent      : $('#'+modalID),
+                placeholder         : "Designation",
+                dropdownPosition: 'above',
+                allowClear          : true,
+                tags                : true,
+            });
+            
+            $("#"+modalID+" .addRow").hide()
+            $("#"+modalID+" .addRow").last().show()
+            window.scrollTo(0,99999);
+       
+        }
+
+        function removeRow(el,option,modalID){
+            if (option == "edit"){
+                Swal.fire({
+                    text: "Do you want to delete this?",
+                    type: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    confirmButtonColor: "#00c292",
+                    cancelButtonText: 'No',
+                    cancelButtonColor: "#e46a76",
+                    reverseButtons: false
+                }).then((result) => {
+                    if(result.value){
+                        $.ajax({
+                            url: '{% url "hr:delete_mp_budget" %}',
+                            type: 'POST',
+                            data: {
+                                'id': $(el).data('id'),
+                            },
+                            success: function(data){
+                                if(data = 'success'){
+                                    toasterMsg("success", "Deleted!", 5000);
+                                    $(el).closest('.designationRow').remove()
+                                    $(".designation").select2({
+                                        dropdownParent      : $('#'+modalID),
+                                        placeholder         : "Designation",
+                                        dropdownPosition: 'above',
+                                        allowClear          : true,
+                                        tags                : true,
+                                    });
+                                
+                                    $("#"+modalID+" .addRow").hide()
+                                    $("#"+modalID+" .addRow").last().show()
+                                }else{
+                                    toasterMsg("warning", "Something went wrong!", 5000);
+                                }
+                            }
+            
+                        });
+                    }
+                });
+            }else{
+                toasterMsg("success", "Deleted!", 5000);
+                $(el).closest('.designationRow').remove()
+                $(".designation").select2({
+                    dropdownParent      : $('#'+modalID),
+                    placeholder         : "Designation",
+                    dropdownPosition: 'above',
+                    allowClear          : true,
+                    tags                : true,
+                });
+                $("#"+modalID+" .addRow").hide()
+                $("#"+modalID+" .addRow").last().show()
+
+            }
+            
+        }
+       
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+        var pendingTable = null;
+        var approvedTable = null;
+        $(document).ready(function () {
+            dataTableFunc(pendingTable, '#pending', "#pending-table", {})
+            dataTableFunc(approvedTable, '#approved', '#approved-table', {})
+        });
+
+
+        function dataTableFunc(dataTable, root, table, data){
+            if (dataTable) { dataTable.destroy(); }
+            let url = $(table).data("url");
+            dataTable = $(table).DataTable({
+                dom             : "<'row top pending'<'col-md-1 reset_btn'><'col-md-2 budget_year'><'col-md-2 company'><'col-md-2 department'><'col-md-2 status'><'col-md-3 date'>>t",
+                ordering        : false,
+                paging          : true,
+                iDisplayLength  : 25,
+                pageLength      : 5,
+                autoWidth       : false,
+                scrollY         : '365',
+                scroller        : true,
+                deferRender     : true,
+                serverSide      : true,
+                processing      : true,
+                ajax:{
+                    type        : "POST",
+                    url         : url,
+                    data        : data,
+                    dataSrc     : ""
+                },
+                initComplete:function( settings, json){
+                    if( Object.keys(data).length > 0 ){
+                        if(data.budget_year != null){ $(root + " .budget_year_field").select2("destroy").val(data.budget_year).select2(); }
+                        if(data.company != null){ $(root + " .company_field").select2("destroy").val(data.company).select2(); }
+                        if(data.department != null){ $(root + " .department_field").select2("destroy").val(data.department).select2(); }
+                        if(data.status != null){ $(root + " .status_field").val(data.status) }
+                       
+                        multi_date = ''
+
+                        if(data.start_date != undefined && data.start_date != ''){
+                            s_date = data.start_date.split("-").join("/");
+                            e_date = data.end_date.split("-").join("/");
+                            multi_date = s_date + " - " + e_date;
+                            $(root + ' .date_field').val(multi_date);
+                            $(root + ' .date_field').data('daterangepicker').setStartDate(s_date);
+                            $(root + ' .date_field').data('daterangepicker').setEndDate(e_date);
+                        }else{ $(root + ' .date_field').val(multi_date); }
+                        
+                        if(data.search_text.length > 0){ $(root + " .search_field").val(data.search_text).focus() };
+                    }
+                }
+            });
+
+            // Reset Filter
+            $(".reset").children().clone().appendTo(root + " .reset_btn");
+            $(root + " .reset_btn").children().show();
+            $(root).on("click", ".reset_button", function(){
+                dataTableFunc(dataTable, root, table, {});
+            });
+
+            // Company Filter
+            $(".budget_years").children().clone().appendTo(root + " .budget_year");
+            $(root + " .budget_year").children().show();
+            $(root + " .budget_year .budget_year_field").select2();
+            $(root + " .budget_year .budget_year_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+            // Company Filter
+            $(".companies").children().clone().appendTo(root + " .company");
+            $(root + " .company").children().show();
+            $(root + " .company .company_field").select2();
+            $(root + " .company .company_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+
+            // Company Filter
+            $(".departments").children().clone().appendTo(root + " .department");
+            $(root + " .department").children().show();
+            $(root + " .department .department_field").select2();
+            $(root + " .department .department_field").on("select2:select select2:unselecting", function(){
+                setData(dataTable, root, table);
+            });
+            
+            // Status Filter
+            $(".statuses").children().clone().appendTo(root + " .status");
+            $(root + " .status").children().show();
+            $(root + " .status_field").on("change", function(){
+                setData(dataTable, root, table);
+            });
+            
+            // Date Range Picker
+            $(".multi-date").children().clone().appendTo(root + " .date");
+            $(root + " .date").children().show();
+            $(root + " .date_field").daterangepicker({
+                singleDatePicker: false,
+                showDropdowns   : true,
+                autoUpdateInput : false,
+                locale          : {
+                    cancelLabel : 'Clear',
+                    format      : 'YYYY/MM/DD'
+                },
+            }).on('apply.daterangepicker', function(ev, picker) {
+                start_date      = picker.startDate.format('YYYY-MM-DD');
+                end_date        = picker.endDate.format('YYYY-MM-DD');
+                setData(dataTable, root, table, start_date, end_date)
+            }).on('cancel.daterangepicker', function(ev, picker) {
+                start_date      = '';
+                end_date        = '';
+                setData(dataTable, root, table, start_date, end_date)
+            });
+
+         
+            
+        }
+
+        function setData(dataTable, root, table, start_date='', end_date=''){
+            data = {
+                'budget_year'   :   $(root + " .budget_year_field").val(),
+                'company'       :   $(root + " .company_field").val(),
+                'department'    :   $(root + " .department_field").val(),
+                'status'        :   $(root + " .status_field").val(), 
+                'start_date'    :   start_date, 
+                'end_date'      :   end_date,
+            }
+            dataTableFunc(dataTable, root, table, data);
+        }
+      
+        $("body").on("click", ".create_mp_budget", function(e){
+            $('#viewDIV').html('');
+            $(".designationRow").show();
+            $("#mp_budget_form").attr('action', "{% url "hr:mp_budget_create" %}")
+            $(".mp_budget_head").text('Man Power Budget');
+            $('#mpBudgetModal').modal('show');
+            $("#mpBudgetModal .designation").select2({
+                dropdownParent      : $('#mpBudgetModal'),
+                placeholder         : "Designation",
+                dropdownPosition: 'above',
+                allowClear          : true,
+                tags                : true,
+            });
+
+            $("#mpBudgetModal .designation").on("select2:open", function (e) {
+                $(this).parent().addClass('focused');
+                let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                $placeholder.hide();
+            }).on("select2:close", function (e) {
+                let val = $(this).val();
+                if (val == null) {
+                    $(this).parent().removeClass('focused');
+                    let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                    $placeholder.show();
+                }
+            }).on("select2:clearing", function (e) {
+                $(this).parent().removeClass('focused');
+                let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                $placeholder.show();
+            })
+            $("#mpBudgetModal .addRow").hide()
+            $("#mpBudgetModal .addRow").last().show()
+        });
+
+        $("body").on("click", ".view_mp_budget", function(e){
+            $.ajax({
+                url: '{% url "hr:mpb_view" %}',
+                async:false,
+                type: 'POST',
+                data: {
+                    'budget_year': $(this).data('budget_year'),'department_id': $(this).data('department'),
+                },
+                success: function(data){
+                    $('#viewDIV').append(data);
+                    $('#viewMPBudgetModal').modal('show');
+                }
+            })
+        })
+
+
+        $("body").on("click", ".edit_mp_budget", function(e){
+            {% comment %} $("#mp_budget_form")[0].reset(); {% endcomment %}
+            $("#mp_budget_form")[0].reset();
+            $('#viewDIV').html('');
+            $.ajax({
+                url: '{% url "hr:get_mp_budget_details" %}',
+                async: false,
+                type: 'POST',
+                data: {
+                    'budget_year': $(this).data('budget_year'),'department_id': $(this).data('department'),
+                },
+                success: function(data){
+                    $('#viewDIV').append(data);
+                    $(".mp_budget_head").text('Man Power Budget Update');
+                    $('#mpBudgetEditModal').modal('show');
+                    $('#company').select2();
+                    $('#department').select2();
+                    $('#budget_year').parent().addClass('focused');
+                    $('.designationRow select').select2();
+                }
+
+            });
+
+            $("#mpBudgetEditModal .designation").select2({
+                dropdownParent      : $('#mpBudgetEditModal'),
+                placeholder         : "Designation",
+                dropdownPosition: 'above',
+                allowClear          : true,
+                tags                : true,
+            });
+
+            $("#mpBudgetEditModal .designation").on("select2:open", function (e) {
+                $(this).parent().addClass('focused');
+                let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                $placeholder.hide();
+            }).on("select2:close", function (e) {
+                let val = $(this).val();
+                if (val == null) {
+                    $(this).parent().removeClass('focused');
+                    let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                    $placeholder.show();
+                }
+            }).on("select2:clearing", function (e) {
+                $(this).parent().removeClass('focused');
+                let $placeholder = $(this).siblings().find('.select2-selection__placeholder');
+                $placeholder.show();
+            })
+
+            $("#mpBudgetEditModal .addRow").hide()
+            $("#mpBudgetEditModal .addRow").last().show()
+        });
+
+    </script>
+{% endblock %}

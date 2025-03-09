@@ -1,0 +1,56 @@
+
+<!-- Extra Filter Requisition List -->
+<div class="reset">
+    <div class="form-group" style="display: none;">
+        <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+</div>
+<div class="companies">
+    <div class="form-group" style="display: none;">
+        <select class="form-control text-capitalize company_field" name="company">
+            <option value="" selected>All Company</option>
+            {% for c in company %}
+            <option value="{{c.id}}">{% strip_single_quote_tag c.short_name %}</option>
+            {% endfor %}
+        </select>
+        <span class="bar"></span>
+    </div>
+</div>
+<div class="order_types">
+    <div class="form-group" style="display: none;">
+        <select class="form-control order_type_field" name="order_type">
+            <option value="" disabled selected>Order Type</option>
+            <option value="1">Sample</option>
+            <option value="2">Bulk</option>
+        </select>
+        <span class="bar"></span>
+    </div>
+</div>
+<div class="multi-date">
+    <div class="form-group" style="display: none;">
+        <input type="text" class="form-control date_field" name="to_date" placeholder="Select Date Range..." autocomplete="off">
+    </div>
+</div>
+
+<div class="buyers">
+    <div class="form-group" style="display: none;">
+        <select class="form-control buyer_field" name="buyer">
+        </select>
+        <span class="bar"></span>
+    </div>
+</div>
+
+<div class="search_box">
+    <div class="input-group" style="display: none;">
+        <input type="text" class="form-control search_field" name="search_box" placeholder="Search by order no..." title="Search by lab reques no...">
+        <div class="input-group-append">
+            <button class="search_btn btn btn-info" type="button"><i class="fa fa-search"></i></button>
+        </div>
+    </div>
+</div>
+<div class="download">
+    <div class="form-group" style="display: none;">
+        <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+    </div>
+</div>
+    <!-- Extra Filter Requisition List -->

@@ -1,0 +1,54 @@
+<div class="table-responsive">
+    <table class="table table-border table-striped table-vcenter" id="holiday" style="width:100%">
+        <thead>
+            <tr class="text-center">
+                <th class="d-sm-table-cell">#SL.</th>
+                <th width="50%">Title</th>
+                <th>Duration</th>
+                <th>Num of Days</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ys in yearly_setups %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td width="50%">
+                    <div class="form-group mb-0">
+                        <input type="hidden" name="setup" value="{{ys.setup_id}}" />
+                        <input type="hidden" name="holiday[{{ys.setup_id}}]" value="{{ys.holiday_id|default_if_none:""}}" />
+                        <input type="text" class="form-control bg-transparent" id="name_{{ys.setup_id}}" name="name[{{ys.setup_id}}]" value="{{ ys.title }}" />
+                        <span class="bar"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group mb-0">
+                        {% if ys.fixed %}
+                        <input type="text" class="form-control bg-transparent text-center" id="duration_{{ys.setup_id}}" name="duration[{{ys.setup_id}}]" readonly
+                            value="{% if ys.start_date %}{{ ys.start_date|date:'d/m/Y'|upper }}{% endif %}" autocomplete="off">
+                        {% else %}
+                        <input type="text" class="form-control bg-transparent datepicker text-center" id="duration_{{ys.setup_id}}" name="duration[{{ys.setup_id}}]" 
+                            value="{% if ys.start_date %}{{ ys.start_date|date:'d/m/Y'|upper }} - {{ ys.end_date|date:'d/m/Y'|upper }}{% endif %}" autocomplete="off">
+                        {% endif %}
+                        <span class="bar"></span>
+                    </div>
+                </td>
+                <td class="text-center num_days">{{ys.num_of_days|default_if_none:""}}</td>
+                <td class="text-center" style="position: relative;">
+                    <label class="mt-3 ml-n3">
+                        <input type="checkbox" {% if ys.status.title|lower == "active" %}checked{% endif %} id="status_{{ys.setup_id}}"
+                            name="status[{{ys.setup_id}}]" class="js-switch holiday-setup-update-switch" data-color="#009efb" data-size="mini" />
+                    </label>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="row">
+    <div class="col-md-3 ml-auto align-self-center">
+        <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+        </button>
+    </div>
+</div>

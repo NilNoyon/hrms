@@ -1,0 +1,196 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Device Assessment List{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card border-danger">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6 align-self-center">
+            <h4 class="text-themecolor mb-0">Device Assessment List</h4>
+          </div>
+          {% if request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
+            <div class="col-md-6 align-self-center text-right">
+              <div class="d-flex justify-content-end align-items-center">
+                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                  <div class="btn-group" role="group" aria-label="First group">
+                    <a href="/helpdesk/device-assessment-entry/" class="btn btn-sm btn-success" title="Custom Button"><i class="ti-plus"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="">
+          <table id="assessment_table" class="table table-border card-table table-vcenter data-table" style="width:100%">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th colspan="2">Note</th>
+                <th>Type</th>
+                <th>Device</th>
+                <th>Status</th>
+                <th>View</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in assessment_list %}
+              <tr id="assess_row_{{user.id}}">
+                <td><a href="#aboutModal" data-toggle="modal" data-id="{{ user.assessment_for_id }}" class='user_info' data-target="#myModal">{{ user.assessment_for }}</a></td>
+                <td colspan="2" style="width:30%">
+                  <span class="{{user.id}}_show">{{ user.note|truncatewords:10 }} {% if user.note|wordcount > 10 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('{{user.id}}');" style="color:blue;"></i> {% endif %}</span> 
+                  <span class="{{user.id}}_hide" style="display:none">{{ user.note}} <i class='fas fa-arrow-circle-up' onclick="close_td('{{user.id}}');" style="color:blue;"></i></span>
+                </td>
+                <td>{{ user.device_type }}</td>
+                <td>{{ user.device }}</td>
+                <td>{{ user.get_status_display }}</td>
+                <td >
+                  <a href="#" data-toggle="modal" data-id="{{ user.id }}" class='assessment_view'>
+                    <span class="icon"><i class="ti-eye"></i></span>
+                  </a>
+                </td>
+                <td>
+                    {% if user.status != "5" and user.status != "6" %}
+                      {% if user.status == "1" and user.head_of_assessment == request.session.id or user.status == "2" and user.head_of_ict == request.session.id or user.status == "4" and user.ceo == request.session.id %}
+                        <button type="button" id="assessment_{{user.id}}" class="btn waves-effect waves-light btn-rounded btn-outline-info" onClick="assessmentApproveModal('{{user.id}}','{{user.status}}','{{user.device_type}}', '{{user.head_of_assessment}}')">Approve/Reject
+                        </button>
+                      {% endif %}
+                    {% endif %}
+                    {% if user.status == "5" or user.status == "6" %}
+                      <a href="/helpdesk/device-assessment/{{user.id}}/report/" target='_blank'>
+                        <span class="icon"><i class="ti-download"></i></span>
+                      </a>
+                    {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="assessmentView" tabindex="-1" role="dialog" aria-labelledby="assessmentView" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="assessmentView">Device Assessment Detail</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table table-border card-table table-vcenter data-table">
+              <tr>
+                <th>Reviewer</th>
+                <th>Date</th>
+                <th>Note</th>
+              </tr>
+              <tbody id="review"></tbody>            
+            </table>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="myModalLabel"></h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body text-center">
+                              <p><img class=" img-fluid" id="emp_photo" src=""
+                                      alt="card image"></p>
+                              <h5 class="card-title" id="emp_name"></h5>
+                              <h6 class="card-title" id="company"></h6>
+                              <p class="card-text" id="department"></p>
+                              <p class="card-text" id="designation"></p>
+                              <p class="card-text" id="email"></p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="approve" tabindex="-1" role="dialog" aria-labelledby="approve" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+              <h4 class="modal-title" id="approve">Device Assessment Approval</h4>
+          </div>
+          <div class="modal-body">
+            <div class="image-flip">
+              <div class="mainflip flip-0">
+                  <div class="frontside">
+                      <div class="card">
+                          <div class="card-body">
+                              <div class="row floating-labels mt-1">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label for="note" class="form-label">Note</label>
+                                    <textarea rows="2" class="form-control" id="note" name="resolver_note"></textarea>
+                                    <span class="bar"></span>
+                                  </div>
+                                  <div id="btnAssessmentApprove"></div>
+                                </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+
+<script src="{% static 'dist/js/desk.js' %}"></script>
+<script src="{% static 'dist/js/moment.min.js' %}"></script>
+<script>
+  function assessmentApproveModal(obj, status,assessment_type,emp_dept_head) {
+      $('#approve').modal('show');
+      var ict_dept_head = "{{ict_dpt_head}}";
+      var user_id = "{{request.session.id}}";
+
+      var btn = ``
+      if(assessment_type != "Service" || ict_dept_head != user_id) {
+        btn += `
+          <button class="btn waves-effect waves-light btn-rounded btn-success" onClick="assessmentApprove('`+ obj.toString() + `',`+ status + `,'Approve')">Approve
+            </button>
+        `
+        }
+      btn += `
+          <button class="btn waves-effect waves-light btn-rounded btn-danger" onClick="assessmentApprove('`+ obj.toString() + `',`+ status + `,'Reject')">Reject
+          </button>
+        `
+      if(((status == 2) && (ict_dept_head == user_id)) || ((assessment_type == "Service") && (ict_dept_head == user_id)) || (emp_dept_head == ict_dept_head)) {
+        btn += `
+        <button class="btn waves-effect waves-light btn-rounded btn-info" onClick="assessmentApprove('`+ obj.toString() + `',`+ status + `,'Finish')">Finish
+        </button>
+      `
+      } 
+      $("#btnAssessmentApprove").html(btn);
+  }
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-from general.models import Users
+# from general.models import Users
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
@@ -133,7 +133,7 @@ class Notification(models.Model):
     level = models.CharField(max_length=20, choices=level_types, default='info')
 
     recipient = models.ForeignKey(
-        Users,
+        'general.Users',
         blank=False,
         related_name='notification',
         on_delete=models.CASCADE

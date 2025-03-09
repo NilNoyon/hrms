@@ -1,0 +1,132 @@
+<div class="modal fade" id="recruitModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form class="floating-labels" id="recruit_form" method="POST" action="{% url "hr:recruitment_create" %}"  enctype="multipart/form-data">{% csrf_token %}
+                <div class="modal-header mb-2">
+                    <h4 class="mb-0 recruit_head">Recruitment</h4>
+                    <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="mainDiv">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="recruit_year">Recruit Year</label>
+                                    <input class="form-control validation" type="number" id="recruit_year" data-title="Recruit Year" name="recruit_year" value="{% now 'Y' %}" required/>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="company">Company</label>
+                                    <select class="form-control text-capitalize select2 validation" data-title="Company" name="company" id="company">
+                                        <option value="" disabled selected>All Company</option>
+                                        {% for c in company_list %}
+                                        <option value="{{c.id}}" {% if company_id == c.id %} selected {% elif recruit.company_id == c.id %} selected {% endif %}>{{c.short_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department">Department</label>
+                                    <select class="form-control text-capitalize select2 validation" data-title="Department" name="department" id="department">
+                                        <option value="" disabled selected>All Department</option>
+                                        {% for d in department_list %}
+                                        <option value="{{d.id}}" {% if department_id == d.id %} selected {% elif recruit.department_id == c.id %} selected {% endif %}>{{d.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="designation">Designation</label>
+                                    <select class="form-control text-capitalize select2 designation validation" name="designation" id="designation" data-title="Designation" onchange="checkDesignationWiseMPbudget(this);" required>
+                                        <option value="" disabled selected>All Designation</option>
+                                        {% for d in designation_list %}
+                                        <option value="{{d.id}}" >{{d.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="recruitment_type">Recruit Type</label>
+                                    <select class="form-control text-capitalize select2 recruitment_type" name="recruitment_type" id="recruitment_type" required>
+                                        <option value="" disabled selected>Recruit Type</option>
+                                        <option value="1" {% if recruit.recruitment_type == "1" %} selected {% endif %}>New</option>
+                                        <option value="2" {% if recruit.recruitment_type == "2" %} selected {% endif %}>Replacement</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 cls_replacement_of">
+                                <div class="form-group mb-0">
+                                    <label for="replacement_of">Replacement Of</label>
+                                    <select class="form-control text-capitalize replacement_of" name="replacement_of" id="replacement_of">
+                                        <option value="" disabled selected>Replacement Of</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="name">Name</label>
+                                    <input class="form-control" type="text" id="name" value="{{recruit.name}}" data-title="Name" name="name" required/>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="negotiated_salary">Negotiated Salary</label>
+                                    <input class="form-control validation" type="number" id="negotiated_salary" min="0.001" onkeyup="enforceMinMax(this);" value="{{recruit.negotiated_salary}}" data-title="Negotiated Salary" name="negotiated_salary" required/>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="interviewr_comments">Interviewer Comments</label>
+                                    <textarea class="form-control" id="interviewr_comments" rows="1" data-title="Interviewer Comments" name="interviewr_comments"> {{recruit.interviewr_comments}}</textarea>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="skip_ceo_approval">
+                                    <input type="checkbox" id="skip_ceo_approval"  name="skip_ceo_approval" checked /> Skip CEO Approval 
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3"></div>
+                        <div class="col-md-2">
+                            <input type="hidden" name="recruitment_id" id="recruitment_id" value="">
+                            <input type="hidden" name="submit_type" id="submit_type" value="">
+                            <button type="submit" class="btn btn-sm btn-block btn-rounded btn-success item-add-btn submit-btn" value="submit" name="btnSave"><span class="btn-label"><i class="fa fa-check"></i></span> Submit </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-sm btn-block btn-rounded btn-info item-add-btn submit-btn" value="save" name="btnSave"><span class="btn-label"><i class="fa fa-check"></i></span> Save </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% include 'inc/js/enforceMinMax.html' %}
+
+<script>
+    
+$(".submit-btn").on('click', function(){
+    $("#submit_type").val(this.value)
+
+})
+</script>

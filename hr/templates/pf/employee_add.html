@@ -1,0 +1,425 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} Employee {% endblock %}
+{% block add_css %}
+  <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+  <div class="card border-danger">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-md-6 align-self-center">
+          <h4 class="text-themecolor mb-0"> {{ action.name }} Employee</h4>
+        </div>
+        <div class="col-md-6 align-self-center text-right">
+          <div class="d-flex justify-content-end align-items-center">
+            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+              <div class="btn-group" role="group" aria-label="First group">
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+              <a class="nav-link {% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#add_employee" role="tab">Employee Add</a>
+
+          </li>
+          <li class="nav-item"> 
+              <a class="nav-link {% if option %} active {% endif %}" data-toggle="tab" href="#list" role="tab">Employee List</a>
+          </li> 
+        </ul>
+        <div class="tab-content tabcontent-border">
+          <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="add_employee" role="tabpanel">
+            <form class="floating-labels mt-3" method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-9">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="employee_id" name="employee_id" required value="{{ employee.employee_id }}">
+                        <span class="bar"></span>
+                        <label for="employee_id">Employee ID</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="employee_name" name="name" required value="{{ employee.name }}">
+                        <span class="bar"></span>
+                        <label for="employee_name">Name</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="email" class="form-control" id="employee_email" name="email" required value="{{ employee.email }}">
+                        <span class="bar"></span>
+                        <label for="employee_email">Email</label>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="company">Company</label>
+                        <select class="form-control text-capitalize select2" id="company" name="company" data-title="Company" required>
+                          <option value="" disabled selected></option>
+                          {% for data in company_list %}
+                              <option value="{{data.id}}" {% if employee.company_id == data.id %} selected {% endif %}>{{data.name}}
+                              </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="department">Department</label>
+                        <select class="form-control text-capitalize select2" name="department" data-title="Department" required>
+                          <option value="" disabled selected></option>
+                          {% for data in department_list %}
+                          <option value="{{data.id}}" {% if employee.department_id == data.id %} selected {% endif %}>
+                            {{data.name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Designation</label>
+                        <select class="form-control text-capitalize select2" name="designation" data-title="Designation" required>
+                          <option value="" disabled selected></option>
+                          {% for data in designation_list %}
+                          <option value="{{data.id}}" {% if employee.designation_id == data.id %} selected {% endif %}>
+                            {{data.name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+    
+                    <!-- <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Branch</label>
+                        <select class="form-control text-capitalize select2" name="branch" data-title="Branch"
+                          required>
+                          <option value="" disabled selected></option>
+                          {% for data in branch_list %}
+                          <option value="{{data.id}}" {% if employee.branch == data.id %} selected {% endif %}>
+                            {{data.name}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div> -->
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="father_name" name="father_name" value="{{ employee.father_name|default_if_none:"" }}">
+                        <span class="bar"></span>
+                        <label for="father_name">Father's Name</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="permanent_address" name="permanent_address"
+                          value="{{ employee.permanent_address|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="permanent_address">Permanent Address</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="contact_address" name="contact_address" value="{{ employee.contact_address|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="contact_address">Contact Address</label>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                          <input type="text" class="form-control joining_date" id="joining_date" name="joining_date" {% if employee.joining_date %} value={{employee.joining_date|date:'d-M-Y'}} {% endif %}>
+                          <span class="bar"></span>
+                          <label for="joining_date">Joining Date</label>
+                      </div>
+                    </div> 
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="phone_no">Phone</label>
+                        <input type="text" id="phone_no" name="phone_no" class="form-control" {% if employee.phone_no %} value="{{ employee.phone_no }}" {% endif %} required name="phone_no">
+                        <span class="bar"></span>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="salary">Salary</label>
+                        <input type="number" id="salary" name="salary" class="form-control" {% if employee.salary %} value="{{ employee.salary }}" {% endif %} name="salary">
+                        <span class="bar"></span>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="faxNo">Fax</label>
+                          <input type="number" id="faxNo" class="form-control" {% if employee.faxNo %} value="{{ employee.faxNo }}" {% endif %} name="faxNo">
+                        <span class="bar"></span>
+                      </div>
+                    </div>
+                
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for='pabx'>PABX</label>
+                        <input type="number" id='pabx' class="form-control" {% if employee.pabx %} value="{{ employee.pabx }}" {% endif %} name="pabx">
+                        <span class="bar"></span>
+                      </div>
+                    </div>
+
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Report To</label>
+                        <select class="select2 form-control custom-select" name="reporting_to" data-title="Report To" required>
+                          <option value="" disabled selected></option>
+                          {% for data in dept_head_list %}
+                            <option value="{{data.id}}" {% if data.id == employee.reporting_to_id %} selected {% endif %}>{{data.name}}({{data.employee_id}})</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Sitting Location </label>
+                        <select class="form-control select2" id="location" name="location" data-title="Location" required>
+                          <option value="" disabled selected>Select your sitting location</option>
+                          <option value="Head Office" {% if employee.location == "Head Office" %} selected {% endif %}>Head Office</option>
+                          <option value="EKCL" {% if employee.location == "EKCL" %} selected {% endif %}>EKCL</option>
+                          <option value="EKCL1" {% if employee.location == "EKCL1" %} selected {% endif %}>EKCL1</option>
+                          <option value="EDIL" {% if employee.location == "EDIL" %} selected {% endif %}>EDIL</option>
+                          <option value="SFM" {% if employee.location == "SFM" %} selected {% endif %}>SFM</option>
+                          <option value="Tamanna Tex" {% if employee.location == "Tamanna Tex" %} selected {% endif %}>Tamanna Tex</option>
+                          <option value="Fiza Tex" {% if employee.location == "Fiza Tex" %} selected {% endif %}>Fiza Tex</option>
+                          <option value="EPL" {% if employee.location == "EPL" %} selected {% endif %}>EPL</option>
+                          <option value="EAL" {% if employee.location == "EAL" %} selected {% endif %}>EAL</option>
+                          <option value="L'Esquire" {% if employee.location == "L'Esquire" %} selected {% endif %}>L'Esquire
+                          <option value="BBL Onik Tower" {% if employee.location == "BBL Onik Tower" %} selected {% endif %}>BBL Onik Tower
+                          <option value="Square Hospitals" {% if employee.location == "Square Hospitals" %} selected {% endif %}>Square Hospitals
+                          <option value="Mohammadpur" {% if employee.location == "Mohammadpur" %} selected {% endif %}>Mohammadpur
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Blood Group</label>
+                        <select class="form-control select2" id="blood_group" name="blood_group" data-title="Blood Group" required>
+                          <option value="N/A" selected>N/A</option>
+                          <option value="A+" {% if employee.blood_group == "A+" %} selected {% endif %}>A+</option>
+                          <option value="A-" {% if employee.blood_group == "A-" %} selected {% endif %}>A-</option>
+                          <option value="B+" {% if employee.blood_group == "B+" %} selected {% endif %}>B+</option>
+                          <option value="B-" {% if employee.blood_group == "B-" %} selected {% endif %}>B-</option>
+                          <option value="AB+" {% if employee.blood_group == "AB+" %} selected {% endif %}>AB+</option>
+                          <option value="AB-" {% if employee.blood_group == "AB-" %} selected {% endif %}>AB-</option>
+                          <option value="O+" {% if employee.blood_group == "O+" %} selected {% endif %}>O+</option>
+                          <option value="O-" {% if employee.blood_group == "O-" %} selected {% endif %}>O-</option>
+                          <option value="Bombay" {% if employee.blood_group == "Bombay" %} selected {% endif %}>Bombay</option>
+                          <option value="INRA" {% if employee.blood_group == "INRA" %} selected {% endif %}>INRA</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="nominee_id" name="nominee_id" value="{{ employee.nominee_id|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="nominee_id">Nominee's ID</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="nominee_name" name="nominee_name" value="{{ employee.nominee_name|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="nominee_name">Nominee's Name</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="relation" name="relation" value="{{ employee.relation|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="relation">Relation</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="nominee_address" name="nominee_address" value="{{ employee.nominee_address|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="nominee_address">Nominee's Address</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="share_of_right" name="share_of_right" value="{{ employee.share_of_right|default:"" }}">
+                        <span class="bar"></span>
+                        <label for="share_of_right">Share Of Right</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label" for="employee_type">Employee Type</label>
+                        <select class="select2 form-control custom-select" name="employee_type" id="employee_type" data-title="Employee Type">
+                          <option value="" disabled selected></option>
+                          {% for et in employee_type_list %}
+                            <option value="{{et.id}}" {% if et.id == employee.employee_type_id %} selected {% endif %}>{{et.value}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="form-label" for="employee_category">Employee Category</label>
+                        <select class="select2 form-control custom-select" name="employee_category" id="employee_category" data-title="Employee Category">
+                          <option value="" disabled selected></option>
+                          {% for ec in employee_category_list %}
+                            <option value="{{ec.id}}" {% if ec.id == employee.employee_category_id %} selected {% endif %}>{{ec.value}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-3 mb-5">
+                      <label class="mt-2">
+                        <input type="checkbox" {% if employee.status == False %} unchecked {% else %} checked {% endif %} name="status"
+                          class="js-switch" data-color="#009efb" data-size="mini" />
+                        Status
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="row">
+                    <div class="col-md-12">
+                      Employee's Photo
+                      <div class="form-group">
+                        <input type="file" name="photo" class="dropify" data-height="150" data-show-remove="false"
+                          {% if employee.photo %} data-default-file="/assets/uploads{{employee.photo}}" {% else %} data-default-file="{% static 'images/users/employee.png'%}" {% endif %}>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      Frist Nominee's Photo
+                      <div class="form-group">
+                        <input type="file" name="nominee_photo" class="dropify" data-height="150" data-show-remove="false"
+                          {% if employee.nominee_photo %} data-default-file="/assets/uploads{{employee.nominee_photo}}" {% else %} data-default-file="{% static 'images/users/employee_nominee.png'%}" {% endif %}>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        Signature
+                        <input type="file" name="signature" class="dropify" data-height="80" data-show-remove="false" {% if employee.signature %} data-default-file="/assets/uploads{{employee.signature}}" {% endif %}>
+                      </div>
+                    </div> 
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3 ml-auto mt-2">
+                  <div class="button-group">
+                    <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                      <span class="btn-label"><i class="fa fa-check"></i></span>
+                      {{action.btnTxt}}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="tab-pane p-20 {% if option %} active {% endif %}" id="list" role="tabpanel">
+            <table class="table display table-border card-table table-vcenter">
+              <thead>
+                <tr>
+                  <th class="d-sm-table-cell">Employee ID</th>
+                  <th class="d-md-table-cell">Name</th>
+                  <th class="d-sm-table-cell">Company</th>
+                  <th class="d-md-table-cell">Department</th>
+                  <th class="d-md-table-cell">Designation</th>
+                  <th class="d-md-table-cell">Joining Date</th>
+                  <th class="d-md-table-cell">Status</th>
+                  <th class="d-lg-table-cell"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for data in employee_list %}
+                <tr>
+                  <td class="">{{ data.employee_id }}</td>
+                  <td class="">{{ data.name }}</td>
+                  <td class="d-sm-table-cell">{{ data.company }}</td>
+                  <td class="">{{ data.department }}</td>
+                  <td class="">{{ data.designation }}</td>
+                  <td class="">{{ data.joining_date|date:"d-M-Y" }}</td>
+                  <td class="text-center">
+                    <label class="mx-auto">
+                      <input type="checkbox" data-id="{{ data.employee_id }}" {% if data.status == 1 %} checked {% endif %} name="status" class="js-switch employee-update-switch" data-color="#009efb" data-size="mini" />
+                    </label>
+                  </td>
+                  <td class="text-left">
+                    <a href="/hr/employee/{{ data.employee_id }}/update/" class="h4 m-r-10 text-success">
+                      <span class="icon"><i class="ti-pencil-alt"></i></span>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+$('.joining_date').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    locale: {
+        format: 'DD-MMM-YYYY'
+    },
+    autoUpdateInput: false
+}).on("apply.daterangepicker", function (e, picker) {
+    picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+  $(document).ready(function () {
+
+      $('table.display').DataTable({
+      ordering: true,
+      responsive:true,
+      paging: true,
+
+      bInfo: false
+
+});
+
+});
+  $('.employee-update-switch').on('click', function (e) {
+   var id = $(this).data('id');
+   $.ajax({
+     url: "{% url 'hr:updateEmployeeStatus' %}",
+     type: "GET", // http method
+     data: { employee_id: id },
+     dataType: 'json',
+     success: function (data) {
+     },
+   });
+ });
+</script>
+{% endblock %}

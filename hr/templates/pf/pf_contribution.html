@@ -1,0 +1,186 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}PF Contribution{% endblock %}
+{% block add_css %}
+<link href="{% static 'dist/css/month_picker.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .show-grid .row {
+        margin-bottom: 15px;
+    }
+
+    .show-grid [class^=col-] {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .floating-labels .custom-control-label {
+        position: relative;
+        cursor: context-menu;
+    }
+
+    .floating-labels .custom-label {
+        position: relative;
+    }
+
+    .custom-control-label {
+        padding-top: 3px !important;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card mt-0 pt-0">
+    <div class="card-header">
+        <div class="row">
+          <div class="col-md-6 align-self-center">
+            <h4 class="text-themecolor mb-0">PF Monthly Contribution</h4>
+          </div>
+          <div class="col-md-6 align-self-center text-right">
+            <div class="d-flex justify-content-end align-items-center">
+              <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group" role="group" aria-label="First group">
+                  <a href="/hr/pf-contribution-log/" class="btn btn-sm btn-info" title="Custom Button"><i
+                      class="ti-view-list-alt"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="card-body show-grid pt-0">
+        <form id="pf_contribution" method="POST" class="floating-labels custom-color rounded-lg p-3">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="pf">Provident Fund</label>
+                        <select class="form-control text-capitalize select2" id="pf" name="pf"
+                            data-title="Provident Fund" required>
+                            <option value="" disabled selected></option>
+                                {% for data in pf_list %}
+                                    <option value="{{data.id}}">{{data.pf_heading}}
+                                    </option>
+                                {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="entry_date" id="entry_date" required
+                            placeholder="Month" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="empName" name="empName" value="">
+                        <span class="bar"></span>
+                        <label for="empName">Vouchar No</label>
+                    </div>
+                </div>
+                <div class="col-md-4 ">
+                    <div class="row">
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="roundUp" class="custom-control-input">
+                            <label class="custom-control-label" for="roundUp">Round Up</label>
+                        </div>
+                        <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" id="miscellionous" class="custom-control-input">
+                            <label class="custom-control-label" for="miscellionous">Miscellionous</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 border">
+                    <div class="row mb-0  p-4">
+                        <div class="offset-md-2 col-md-4 font-weight-bold py-2 ">Total Employee</div>
+                        <div class=" col-md-6 font-weight-bold py-2 " id='total_employee'>0</div>
+                        <div class="offset-md-2 col-md-4 font-weight-bold py-2">Employee Contribution</div>
+                        <div class="col-md-6 font-weight-bold py-2" id="emp_amount">0</div>
+                        <div class="offset-md-2 col-md-4 font-weight-bold py-2">Company Contribution</div>
+                        <div class="col-md-6 font-weight-bold py-2" id="company_amount">0</div>
+                        <div class="offset-md-2 col-md-4 font-weight-bold py-2">Miscellionous</div>
+                        <div class="col-md-6 font-weight-bold py-2">0</div>
+                        <div class="offset-md-2 col-md-5 py-4">
+                            <div class="button-group">
+                                <button
+                                    class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success save-btn"
+                                    type="submit" data-name="save" id="generate" onclick="test()">
+                                    <!-- <span class="btn-label"><i class="fa fa-check"></i></span> -->
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6"></div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script src="{% static 'dist/js/month_picker.js' %}"></script>
+<script>
+    function test(){
+        alert('Please confirm to generate monthly contributions!')
+        {% comment %} Swal.fire(
+            'Are you confirm to generate monthly contribution!',
+            'You clicked the button!',
+            'success'
+       ) {% endcomment %}
+    }
+    $('.singledate').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true
+    });
+    $("#entry_date").datepicker({
+        format: "mm-yyyy",
+        viewMode: "months",
+        minViewMode: "months",
+        autoclose: true,
+    });
+
+
+    $('#pf,#entry_date').on('change', function () {
+        let pf = $('#pf').val()
+        let entry_date = $('#entry_date').val()
+        if(pf && entry_date){  
+            $.ajax({ 
+                cache: false, 
+                url: "{% url 'hr:get_contribution' %}", 
+                type: "POST", 
+                data: { pf : pf, entry_date : entry_date },
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                success: function (data) {
+                    console.log(data)
+                    $('#total_employee').html(data["total_employee"]);
+                    $('#emp_amount').html(data["emp_amount"]);
+                    $('#company_amount').html(data["company_amount"]);
+                    if(data['msg']){
+                        $.toast({
+                            heading: "",
+                            text: data["msg"],
+                            position: 'top-right',
+                            loaderBg: '#00FF00',
+                            icon: data['icon'],
+                            hideAfter: 5000,
+                            stack: false
+                        });
+                    }
+                },
+    
+                error: function (xhr, desc, err) { 
+                  
+                } 
+            }); 
+        } 
+    });
+</script>
+{% endblock %}

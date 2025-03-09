@@ -1,0 +1,169 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load data_load %}
+{% load mathfilters %}
+{% block page_title %}Loan Schedule{% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .table th,
+    .table td {
+        border: 1px solid #aaa !important;
+    }
+
+    .table>tbody>tr>td,
+    .table>tbody>tr>th,
+    .table>thead>tr>td,
+    .table>thead>tr>th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .text-themecolor,
+    .card-header {
+        vertical-align: middle;
+
+    }
+
+    .form-group {
+        vertical-align: middle;
+        margin: 0.2rem;
+    }
+
+    .row .bg {
+        border: 1px solid #aaa !important;
+        padding-left: 4px;
+        margin-left: 3px;
+        margin-right: 3px;
+    }
+
+    .row .bg1 {
+        border-top: 1px solid #aaa !important;
+        border-left: 1px solid #aaa !important;
+        border-right: 1px solid #aaa !important;
+        padding-left: 4px;
+        margin-left: 3px;
+        margin-right: 3px;
+    }
+
+    /* Designing for scroll-bar */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        border-radius: 5px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+    }
+
+    .-field::before {
+        content: "*";
+        color: red;
+    }
+
+    .form-control {
+        min-height: 30px;
+        padding: 0.150rem 0.50rem;
+        font-size: 0.700rem;
+    }
+
+    .btn {
+        padding: .5em;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<!-- Row -->
+<div class="row" style="font-size: 1em">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 align-self-center">
+                        <h4 class="text-themecolor mb-0">Loan schedule</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <div class="row custom-color rounded-lg p-3 mr-0 ml-0">
+                    <div class="col-sm-3 col-md-12">
+                        <div class="row bg1">
+                            <div class="col-sm-2 col-md-2">
+                                <div class="form-group">
+                                    Employee : {{loan_instance.employee.employee_id}}
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-md-3">
+                                <div class="form-group">
+                                    Loan Amount : {{loan_instance.loan_amount}}
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-md-2">
+                                <div class="form-group">
+                                    Interest Rate : {{loan_instance.interest_rate}}
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-md-2">
+                                <div class="form-group">
+                                    EMI No of Date : {{loan_instance.emi_months}}
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-md-2">
+                                <div class="form-group">
+                                    Total Installment Amount/Months : {{loan_instance.per_month_emi_amount}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row bg">
+                            <div class="col-sm-3 col-md-3">
+                                <div class="form-group">
+                                    Installment Mode : {{loan_instance.installment_mode}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-4">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr style="font-weight:bold;">
+                                        <th>Month & Year Of EMI</th>
+                                        <th>Due Loan Amount</th>
+                                        <th>EMI Loan Amount</th>
+                                        <th>EMI Interest Amount</th>
+                                        <th>Installment Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in loan_list %}
+                                     <tr>
+                                         <td class="">{{data.employee}}</td>
+                                         <td class="">{{data.due_loan_counter}}</td>
+                                         <td class="">{{data.due_interest_counter}}</td>
+                                         <td class="">{{data.installment_amount}}</td>
+                                         <td class="">{{data.emi_months}}</td>
+                                     </tr>
+
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>                 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+
+<script src="{% static 'dist/js/mnm/bom.js' %}"></script>
+
+{% endblock %}

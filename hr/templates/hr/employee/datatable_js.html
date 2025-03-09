@@ -1,0 +1,184 @@
+{% include 'inc/profile_modal.html' %}
+{% include 'inc/scrollerDT.html' %}
+<script>
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        msg = "Do you want to delete this item from list?"
+        Swal.fire({
+            text: msg,
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: "#00c292",
+            cancelButtonText: 'No',
+            cancelButtonColor: "#e46a76",
+            reverseButtons: false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+
+
+    var completeTable = null;
+    $(document).ready(function () { dataTableFunc(completeTable, '#completed_rec', '#receive-table', {}) });
+    function dataTableFunc(dataTable, root, table, data){
+        if (dataTable) { dataTable.destroy(); }
+        let url = $(table).data("url");
+        dataTable = $(table).DataTable({
+            dom             : "<'row top pending'<'col-md-1 reset_btn'><'col-md-2 company'><'col-md-2 order_type'><'col-md-2 buyer'><'col-md-2 date'><'col-md-2 search_area'><'col-md-1 py-2 font-weight-bold text-right total'>>t",
+            ordering        : false,
+            paging          : true,
+            iDisplayLength  : 25,
+            pageLength      : 5,
+            autoWidth       : false,
+            scrollY         : '365',
+            scroller        : true,
+            scrollX        : true,
+            deferRender     : true,
+            serverSide      : true,
+            processing      : true,
+            ajax:{
+                type        : "POST",
+                url         : url,
+                data        : data,
+                dataSrc     : function(json){
+                    $(".total").html("Total : "+json.total_item);
+                    return json.data_list;
+                }
+            },
+            initComplete:function( settings, json){
+                if( Object.keys(data).length > 0 ){
+                    if(data.company != null){ $(root + " .company_field").select2("destroy").val(data.company).select2(); }
+                    if(data.order_type != null){ $(root + " .order_type_field").select2("destroy").val(data.order_type).trigger("change").select2(); }
+            
+ 
+                    if(data.buyer != null){
+                        $(root + " .buyer_field").select2("destroy")
+                            .append("<option value="+data.buyer+">"+data.buyer_text+"</option>");
+                        setBuyer(root + " .buyer_field")
+
+                    }
+
+                    if(data.subcategory != null){
+                        $(root + " .subcategory_field").select2("destroy")
+                            .append("<option value="+data.subcategory+" selected>"+data.subcategory_text+"</option>")
+                            .select2({placeholder: "Sub-Category"});
+                    }
+
+                    if(data.item != null){
+                        $(root + " .item_field").select2("destroy")
+                            .append("<option value="+data.item+">"+data.item_text+"</option>");
+                        setItem(root + " .item_field")
+
+                    }
+
+                    multi_date = ''
+                    if(data.start_date != undefined && data.start_date != ''){
+                        s_date = data.start_date.split("-").join("/");
+                        e_date = data.end_date.split("-").join("/");
+                        multi_date = s_date + " - " + e_date;
+                        $(root + ' .date_field').val(multi_date);
+                        $(root + ' .date_field').data('daterangepicker').setStartDate(s_date);
+                        $(root + ' .date_field').data('daterangepicker').setEndDate(e_date);
+                    }else{ $(root + ' .date_field').val(multi_date); }
+
+                    if(data.search_text.length > 0){ $(root + " .search_field").val(data.search_text).focus() };
+                }
+            }
+        });
+
+    
+        // Reset Filter
+        $(".reset").children().clone().appendTo(root + " .reset_btn");
+        $(root + " .reset_btn").children().show();
+        $(root).on("click", ".reset_button", function(){
+            dataTableFunc(dataTable, root, table, {});
+        });
+
+        // Company Filter
+        $(".companies").children().clone().appendTo(root + " .company");
+        $(root + " .company").children().show();
+        $(root + " .company .company_field").select2();
+        $(root + " .company .company_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Order Type Filter
+        $(".order_types").children().clone().appendTo(root + " .order_type");
+        $(root + " .order_type").children().show();
+        $(root + " .order_type .order_type_field").select2();
+        $(root + " .order_type .order_type_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Buyer Filter
+        $(".buyers").children().clone().appendTo(root + " .buyer");
+        $(root + " .buyer").children().show();
+        setBuyer(root + " .buyer_field")
+        $(root + " .buyer_field").on("change", function(){
+            setData(dataTable, root, table);
+        });
+
+
+        // Date Range Picker
+        $(".multi-date").children().clone().appendTo(root + " .date");
+        $(root + " .date").children().show();
+        $(root + " .date_field").daterangepicker({
+            singleDatePicker: false,
+            showDropdowns   : true,
+            autoUpdateInput : false,
+            opens           : "left",
+            locale          : {
+                cancelLabel : 'Clear',
+                format      : 'YYYY/MM/DD'
+            },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            start_date      = picker.startDate.format('YYYY-MM-DD');
+            end_date        = picker.endDate.format('YYYY-MM-DD');
+            setData(dataTable, root, table, start_date, end_date)
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            start_date      = '';
+            end_date        = '';
+            setData(dataTable, root, table, start_date, end_date)
+        });
+
+        // Search Text Filter
+        $(".search_box").children().clone().appendTo(root + " .search_area");
+        $(root + " .search_area").children().show();
+        $(root + " .search_area").on("click", ".search_btn", function(){
+            setData(dataTable, root, table);
+        });
+        $(".download").children().clone().appendTo(root + " .download");
+        $(root + " .download").children().show();
+    }
+
+    function setData(dataTable, root, table, start_date='', end_date=''){
+        data = {
+            'company'       :   $(root + " .company_field").val(),
+            'order_type'    :   $(root + " .order_type_field").val(),
+            'buyer'         :   $(root + " .buyer_field").val(),
+            'buyer_text'    :  $(root + " .buyer_field option:selected").text(),
+            'start_date'    :   start_date,
+            'end_date'      :   end_date,
+            'search_text'   :   $(root + " .search_field").val()
+        }
+        dataTableFunc(dataTable, root, table, data);
+    }
+
+    function setBuyer(field){
+        $(field).select2({
+            // Getting Users from select2 field from database
+            minimumInputLength  : 3,
+            placeholder         : "Buyer",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'yd:get_buyer' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) {return { results: data.buyer_list }; }
+            }
+        });
+    }
+</script>

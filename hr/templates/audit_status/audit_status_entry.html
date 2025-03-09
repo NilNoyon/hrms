@@ -1,0 +1,281 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %} Audit Certifications {% endblock %}
+{% block add_css %}
+  <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card border-danger">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-6 align-self-center">
+            <h4 class="text-themecolor mb-0">Audit Certifications</h4>
+          </div>
+          <div class="col-md-6 align-self-center text-right">
+            <div class="d-flex justify-content-end align-items-center">
+              <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group" role="group" aria-label="First group">
+                  <div class="btn-group" role="group" aria-label="First group">
+                    <a href="/hr/audit-entry/" class="btn btn-sm btn-success" title="Add Audit License"><i class="ti-plus"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"> 
+                <a class="nav-link {% if option %} deactive {% else %} active {% endif %}" data-toggle="tab" href="#list" role="tab">List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link  {% if option %} active {% endif %}" data-toggle="tab" href="#add_Pf_policy" role="tab">{{action.name}}</a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane p-20 {% if option %} active {% endif %}" id="add_Pf_policy" role="tabpanel">
+              <form class="floating-labels mt-3" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="form-group">
+                          <label for="company">Company</label>
+                          <select class="form-control text-capitalize select2" id="company" name="company"
+                            data-title="Company" required>
+                            <option value="" disabled selected></option>
+                            {% for data in company_list %}
+                               <option value="{{data.id}}" {% if instance.company_id == data.id %} selected {% endif %}>{{data.name}}
+                               </option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="name_of_buyer">Name of Buyer/Certification</label>
+                                <input type="text" class="form-control" id="name_of_buyer" name="name_of_buyer" data-title="Name of Buyer/Certification" {% if instance.name_of_buyer %} value={{instance.name_of_buyer}}{% endif %} required >
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <label class="form-label">Type of Audit</label>
+                              <select class="form-control select2" id="type_of_audit" name="type_of_audit" data-title="Type of Audit" required>
+                                <option value="" disabled selected></option>
+                                <option value="Social Compliance" {% if instance.type_of_audit  == "Social Compliance" %} selected {% endif %}>Social Compliance</option>
+                                <option value="Security" {% if instance.type_of_audit == "Security" %} selected {% endif %}>Security</option>
+                                <option value="Tracebility Audit" {% if instance.type_of_audit == "Tracebility Audit" %} selected {% endif %}>Tracebility Audit</option>
+                                <option value="Certification" {% if instance.type_of_audit == "Certification" %} selected {% endif %}>Certification</option>
+                                <option value="Enviroment" {% if instance.type_of_audit == "Enviroment" %} selected {% endif %}>Enviroment</option>
+                                <option value="Quality" {% if instance.type_of_audit == "Quality" %} selected {% endif %}>Quality</option>
+                                <option value="OHAS" {% if instance.type_of_audit == "OHAS" %} selected {% endif %}>OHAS</option>
+                                <option value="ILO" {% if instance.type_of_audit == "ILO" %} selected {% endif %}>ILO</option>
+                                <option value="COC" {% if instance.type_of_audit == "COC" %} selected {% endif %}>COC</option>
+                                <option value="COP" {% if instance.type_of_audit == "COP" %} selected {% endif %}>COP</option>
+                                <option value="Social" {% if instance.type_of_audit == "Social" %} selected {% endif %}>Social</option>
+                                <option value="COC" {% if instance.type_of_audit == "COC" %} selected {% endif %}>COC</option>
+                                <option value="Safety Audit" {% if instance.type_of_audit == "Safety Audit" %} selected {% endif %}>Safety Audit</option>
+                              </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <input type="text" class="form-control last_audit_date" id="last_audit_date" name="last_audit_date" {% if instance.last_audit_date %} value={{instance.last_audit_date|date:'d-M-Y'}}{% endif %} required>
+                              <span class="bar"></span>
+                              <label for="last_audit_date">Last Audit Date</label>
+                            </div>
+                        </div>
+      
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <input type="text" class="form-control expire_date" id="expire_date" name="expire_date" {% if instance.expire_date %} value={{instance.expire_date|date:'d-M-Y'}}{% endif %} required>
+                              <span class="bar"></span>
+                              <label for="expire_date">Expire Date</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                          <div class="form-group">
+                            <label class="form-label">Audit By</label>
+                            <select class="form-control select2" id="audit_by" name="audit_by" data-title="Audit By" required>
+                              <option value="" disabled selected>Audit By</option>
+                              <option value="Frist Party" {% if instance.audit_by  == "Frist Party" %} selected {% endif %}>Frist Party</option>
+                              <option value="Second Party" {% if instance.audit_by == "Second Party" %} selected {% endif %}>Second Party</option>
+                              <option value="Third Party" {% if instance.audit_by == "Third Party" %} selected {% endif %}>Third Party</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="present_rating">Present Rating</label>
+                                <input type="text" class="form-control" id="present_rating" name="present_rating" data-title="Present Rating" {% if instance.present_rating %} value={{instance.present_rating}}{% endif %} required >
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <label class="form-label">Category</label>
+                              <select class="form-control select2" id="category" name="category" data-title="Category" required>
+                                <option value="" disabled selected></option>
+                                <option value="Certification Audit" {% if instance.category  == "Certification Audit" %} selected {% endif %}>Certification Audit</option>
+                                <option value="Buyer Audit" {% if instance.category == "Buyer Audit" %} selected {% endif %}>Buyer Audit</option>
+                              </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="remarks">Remarks</label>
+                                <input type="text" class="form-control" id="remarks" name="remarks" data-title="Remarks" {% if instance.remarks %} value={{instance.remarks}}{% endif %} >
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                File <input type="file" id="attachment" name="attachment" data-height="80">
+                            </div>
+                        </div>
+
+                      <div class="col-md-10">
+                        <div class="button-group">
+                        </div>
+                      </div>
+
+                      <div class="col-md-2 ">
+                        <div class="button-group">
+                          <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>
+                            {{action.btnTxt}}
+                          </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="tab-pane p-20 {% if option %} deactive {% else %} active {% endif %}" id="list" role="tabpanel">
+              <table class="table display table-border card-table table-vcenter" style="width:100%">
+                <thead>
+                  <tr>
+                    <th class="d-sm-table-cell">Company</th>
+                    <th class="d-sm-table-cell">Name of Buyer/Certification</th> 
+                    <th class="d-sm-table-cell">Type of Audit</th> 
+                    <th class="d-sm-table-cell">Last Audit Date</th>
+                    <th class="d-md-table-cell">Expire Date</th>
+                    <th class="d-sm-table-cell">Audit By</th>
+                    <th class="d-sm-table-cell">Present Rating</th>
+                    <th class="d-sm-table-cell">Category</th>
+                    <th class="d-sm-table-cell">Attachments</th>
+                    <th class="d-sm-table-cell">Remarks</th>
+                    <th class="d-sm-table-cell">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for data in audit_status_list %}
+                  <tr>
+                    <td class="">{{ data.company }}</td>
+                    <td class="">{{ data.name_of_buyer }}</td>
+                    <td class="">{{ data.type_of_audit }}</td>
+                    <td class="">{{ data.last_audit_date }}</td>
+                    <td class="">{{ data.expire_date }}</td>
+                    <td class="">{{ data.audit_by }}</td>
+                    <td class="">{{ data.present_rating }}</td>
+                    <td class="">{{ data.category }}</td>
+                    {% if data.attachment %}
+                    <td>
+                      <a href="/assets/uploads/{{ data.attachment}}" target="_blank">
+                        <i class="fas fa-download" title="Download Lien Letter"></i>
+                      </a>
+                    </td>  
+                    {% else %}
+                      <td><p>No File</P></td>
+                    {% endif %}
+                    <td class="">{{ data.remarks|default:"N/A" }}</td>
+                    <td class="text-left">
+                      <a href="/hr/audit/{{data.id}}/update/" class="h4 m-r-10 text-success">
+                        <span class="icon"><i class="ti-pencil-alt"></i></span>
+                      </a>
+                      <a href="/hr/audit-view/{{data.id}}/view/" class="h4 m-r-10 text-success">
+                        <span class="icon"><i class="icon-eye"></i></span>
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+
+    var nowDate = new Date();
+    var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+    $('.last_audit_date').daterangepicker({
+      singleDatePicker: true,
+      showDropdowns: true,
+      locale: {
+          format: 'DD-MMM-YYYY'
+      },
+      autoUpdateInput: false
+  }).on("apply.daterangepicker", function (e, picker) {
+      picker.element.val(picker.startDate.format(picker.locale.format));
+  });
+
+  var nowDate = new Date();
+  var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+  $('.expire_date').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    locale: {
+        format: 'DD-MMM-YYYY'
+    },
+    autoUpdateInput: false
+    }).on("apply.daterangepicker", function (e, picker) {
+    picker.element.val(picker.startDate.format(picker.locale.format));
+    });
+
+
+  $('.employee-update-switch').on('click', function (e) {
+   var id = $(this).data('id');
+   $.ajax({
+     url:"",
+     type: "GET", // http method
+     data: { id: id },
+     dataType: 'json',
+     success: function (data) {
+     },
+   });
+ });
+
+  $(document).ready(function () {
+
+    $('table.display').DataTable({
+      responsive:true,
+    "ordering": true,
+
+    paging: true,
+
+    bInfo: false
+ });
+});
+</script>
+
+{% endblock %}

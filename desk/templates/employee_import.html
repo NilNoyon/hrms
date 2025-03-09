@@ -1,0 +1,66 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} Employee {% endblock %}
+
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0"> Import Employee</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/helpdesk/employee-list/" class="btn btn-sm btn-info" title="Custom Button"><i
+                  class="ti-view-list-alt"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <form class="floating-labels" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                File <input type="file" id="import_file" name="import_file" class="dropify" data-height="60"> 
+                <!-- <input type="text" name="import_file" id="hidden_file">  -->
+            </div>
+        </div>
+        <div class="col-md-3 mt-5">
+          <div class="button-group">
+            <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+              <span class="btn-label"><i class="fa fa-check"></i></span>
+              Import
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3 mt-5">
+            <a href="/assets/images/Employee_information.xls" class="h4 m-r-10 text-danger">
+                <span class="icon"><i class="fas fa-download"></i></span> Download Template
+            </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+<script>
+  // $('#import_file').change(function (e) {
+  //   var geekss = $('#import_file')[0].files; 
+  //   alert(geekss + ' is the selected file.');  
+  //   $("#hidden_file").val($(this).val().toString());
+  //   // var fullPath = document.getElementById('import_file').value;
+  //     // alert(fullPath);
+  // });
+</script>
+{% endblock %}
+

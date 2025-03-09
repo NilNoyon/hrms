@@ -1,0 +1,2799 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}create employee{% endblock %}
+
+{% block add_css %}
+<!-- page css -->
+
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<link href="{% static 'dist/css/pages/tab-page.css' %}" rel="stylesheet">
+<link href="{% static 'dist/icons/font-awesome/css/fontawesome.min.css' %}" rel="stylesheet">
+<link href="{% static 'dist/css/bootstrap3-editable/bootstrap-editable.css' %}"
+    rel="stylesheet" />
+
+<link href="{% static 'node_modules/bootstrap-switch/bootstrap-switch.min.css' %}" rel="stylesheet">
+<link href="{% static 'dist/css/pages/bootstrap-switch.css' %}" rel="stylesheet">
+<style>
+    .btn-light {
+        color: #f8f9fa;
+        background-color: #ccc;
+        border-color: #f8f9fa;
+        display: block;
+        position: absolute;
+        top: 25%;
+        margin-top: -12px;
+    }
+    .error {
+        display: none !important
+    }
+
+    input:focus,
+    button:focus,
+    .form-control:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .form-control:disabled,
+    .form-control[readonly] {
+        background-color: #fff;
+    }
+
+    ul>li.disabled>a {
+        color: #777;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-center {
+        justify-content: center;
+    }
+
+    .wizard .nav-tabs {
+        position: relative;
+        margin-bottom: 0;
+        border-bottom-color: transparent;
+    }
+
+    .wizard>div.wizard-inner {
+        position: relative;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .connecting-line {
+        height: 2px;
+        background: #e0e0e0;
+        position: absolute;
+        width: 75%;
+        margin: 0 auto;
+        left: 0;
+        right: 0;
+        top: 15px;
+        z-index: 1;
+    }
+
+    .wizard .nav-tabs>li.active>a,
+    .wizard .nav-tabs>li.active>a:hover,
+    .wizard .nav-tabs>li.active>a:focus {
+        color: #555555;
+        cursor: default;
+        border: 0;
+        border-bottom-color: transparent;
+    }
+
+    span.round-tab {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        display: inline-block;
+        border-radius: 50%;
+        background: #fff;
+        z-index: 2;
+        position: absolute;
+        left: 0;
+        text-align: center;
+        font-size: 16px;
+        color: #0e214b;
+        font-weight: 500;
+        border: 1px solid #ddd;
+    }
+
+
+    span.round-tab i {
+        color: #555555;
+
+    }
+
+    .wizard li.active span.round-tab {
+        background: #0db02b;
+        color: #fff;
+        border-color: #0db02b;
+    }
+
+    .wizard li.active span.round-tab i {
+        color: #5bc0de;
+    }
+
+    .wizard .nav-tabs>li.active>a i {
+        color: #0db02b;
+    }
+
+    .wizard .nav-tabs>li {
+        width: 25%;
+    }
+
+    .wizard li:after {
+        content: " ";
+        position: absolute;
+        left: 46%;
+        opacity: 0;
+        margin: 0 auto;
+        bottom: 0px;
+        border: 5px solid transparent;
+        border-bottom-color: red;
+        transition: 0.1s ease-in-out;
+    }
+
+    .wizard .nav-tabs>li a {
+        width: 30px;
+        height: 30px;
+        margin: 20px auto;
+        border-radius: 100%;
+        padding: 0;
+        background-color: transparent;
+        position: relative;
+        top: 0;
+    }
+
+    .wizard .nav-tabs>li a i {
+        position: absolute;
+        top: -15px;
+        font-style: normal;
+        font-weight: 400;
+        white-space: nowrap;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .wizard .nav-tabs>li a:hover {
+        background: transparent;
+    }
+
+    .wizard .tab-pane {
+        position: relative;
+        padding-top: 20px;
+    }
+
+    .wizard h3 {
+        margin-top: 0;
+    }
+
+    /* .prev-step,
+    .next-step {
+        font-size: 13px;
+        padding: 8px 24px;
+        border: none;
+        border-radius: 4px;
+        margin-right: 30px;
+    } */
+
+    .form-control[disabled],
+    .form-control[readonly],
+    fieldset[disabled] .form-control {
+        background-color: #fdfdfd;
+    }
+
+    legend {
+        display: none
+    }
+
+    .content .tab-content .wizard .wizard-inner .ul .li .disabled a {
+        color: #999;
+        cursor: default;
+    }
+
+    .floating-labels .form-control:focus {
+        border-bottom: 1px solid #c1c1c1;
+    }
+
+    .btn-inverse {
+        display: none
+    }
+
+    .grayout {
+        opacity: 0.6;
+        /* Real browsers */
+        filter: alpha(opacity=60);
+        /* MSIE */
+    }
+
+
+    .profile-pic-wrapper {
+        width: 25%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pic-holder {
+        text-align: center;
+        position: relative;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    .pic-holder .pic {
+        height: 100%;
+        width: 100%;
+        -o-object-fit: cover;
+        object-fit: cover;
+        -o-object-position: center;
+        object-position: center;
+    }
+
+    .pic-holder .upload-file-block,
+    .pic-holder .upload-loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(90, 92, 105, 0.7);
+        color: #f8f9fc;
+        font-size: 12px;
+        font-weight: 600;
+        opacity: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .pic-holder .upload-file-block {
+        cursor: pointer;
+    }
+
+    .pic-holder.uploadInProgress .upload-file-block {
+        display: none;
+    }
+
+    .pic-holder.uploadInProgress .upload-loader {
+        opacity: 1;
+    }
+
+    /* Snackbar css */
+    .snackbar {
+        visibility: hidden;
+        min-width: 250px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 14px;
+        transform: translateX(-50%);
+    }
+
+    .snackbar.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    .tab-pane {
+        border-top-color: white
+    }
+
+    .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: transparent !important;
+  }
+    @-webkit-keyframes fadein {
+        from {
+            bottom: 0;
+            opacity: 0;
+        }
+
+        to {
+            bottom: 30px;
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadein {
+        from {
+            bottom: 0;
+            opacity: 0;
+        }
+
+        to {
+            bottom: 30px;
+            opacity: 1;
+        }
+    }
+
+    @-webkit-keyframes fadeout {
+        from {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        to {
+            bottom: 0;
+            opacity: 0;
+        }
+    }
+
+    @keyframes fadeout {
+        from {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        to {
+            bottom: 0;
+            opacity: 0;
+        }
+    }
+
+    .btn-toolbar {
+        display: block;
+    }
+   
+    @media (max-width: 767px) {
+        .wizard .nav-tabs>li a i {
+            display: none;
+        }
+    }
+
+    .autosize {
+        resize: none;
+        overflow: hidden;
+      }
+</style>
+
+{% endblock %}
+{% block content %}
+<!-- Row -->
+
+<div class="card border-danger">
+    <div class="card-header">
+        <h4 class="text-themecolor mb-0">Employee</h4>
+    </div>
+    <div class="card-body content">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#home" role="tab"><span
+                        class="hidden-sm-up"><i class="ti-home"></i></span> <span class="hidden-xs-down">
+                        Create Employee
+                    </span></a>
+            </li>
+            <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#profile" role="tab"><span
+                        class="hidden-sm-up"><i class="ti-user"></i></span> <span class="hidden-xs-down">
+                        All Employee
+                    </span></a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border p-2">
+            <div class="tab-pane active p-20" id="home" role="tabpanel">
+                <div class="wizard  mt-5">
+                    <div class="wizard-inner">
+                        <div class="connecting-line"></div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active " id="accounts_information">
+                                <a href="#step1" data-toggle="tab" role="tab" aria-expanded="true"><span
+                                        class="round-tab">1 </span> <i class="pl-4">Personal</i></a>
+                            </li>
+                            <li role="presentation" class="disabled " id="companys_information">
+                                <a data-toggle="tab" role="tab" aria-expanded="false"><span class="round-tab">2</span>
+                                    <i class="grayout pl-4">Official</i></a>
+                            </li>
+                            <li role="presentation" class="disabled" id="personals_information">
+                                <a href="#step3" data-toggle="tab" aria-controls="step3" role="tab"><span
+                                        class="round-tab">3</span> <i class="grayout pl-4">Nominee</i></a>
+                            </li>
+                            <li role="presentation" class="disabled" id="final">
+                                <a href="#step4" data-toggle="tab" aria-controls="step4" role="tab"><span
+                                        class="round-tab">4</span> <i class="grayout pl-4">Finish</i></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <form role="form" class="form-horizontal floating-labels mt-2" id="myform">
+                        <div class="tab-content" id="main_form">
+                            <fieldset id="account_information" class="tab-pane active" role="tabpanel">
+                                <legend>1.Personal Info </legend>
+                                <div class="row mb-0 pb-0">
+                                    <div class="col-md-3 card-body pb-0">
+                                        <div class="" style="text-align: center;padding-left:50px;">
+                                            <div class="pic-holder">
+                                                <img id="profilePic" name="profilePic" class="pic" src="{% static "images/avatar.jpeg" %}">
+                                                <label for="newProfilePhoto" class="upload-file-block">
+                                                    <div class="text-center">
+                                                        <div class="mb-2">
+                                                            <i class="fas fa-camera fa-2x"></i>
+                                                        </div>
+                                                        <div class="text-uppercase">Upload <br /> Profile Photo
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                                <Input class="uploadProfileInput" type="file" name="profile_pic"
+                                                    id="newProfilePhoto" accept="image/*" style="display: none;" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mt-2">
+                                            <input type="number" class="form-control" placeholder="" id="phone"
+                                                name="phone" required>
+                                            <label for="phone">Personal Phone Number </label>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="mark" name="mark"
+                                                required>
+                                            <label for="mark">Identification Mark </label>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="" id="children"
+                                                name="children" required>
+                                            <label for="children">Number Of Children</label>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-9 card-body pb-0">
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder="" id="first"
+                                                        name="first" value="" required>
+                                                    <label for="first">First Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder="" id="last"
+                                                        name="last" required>
+                                                    <label for="last">Last Name</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder="" id="father"
+                                                        name="father" required>
+                                                    <label for="father">Father Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder="" id="mother">
+                                                    <label for="mother">Mother Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder="" id="Sspouse">
+                                                    <label for="Sspouse">Spouse Name</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md mt-2">
+                                                <div class="form-group">
+                                                    <label for="blood">Blood Group</label>
+                                                    <select class="form-control custom-select text-capitalize select2"
+                                                        name="blood" data-title="Blood Group" id="blood" required>
+                                                        <option value="" disabled selected></option>
+                                                        <option value="top1">O+</option>
+                                                        <option value="top2">O-</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <label for="gender">Gender</label>
+                                                    <select class="form-control custom-select text-capitalize select2"
+                                                        name="gender" data-title="Gender" id="gender"
+                                                        placeholder="Gender" required>
+                                                        <option value="" disabled selected></option>
+                                                        <option value="female">Female</option>
+                                                        <option value="male">Male</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <label for="religion">Religion</label>
+                                                    <select
+                                                        class="form-control custom-select text-capitalize select2 po_color"
+                                                        name="religion" data-title="Religion" id="religion"
+                                                        placeholder="Option" required>
+                                                        <option value="" disabled selected></option>
+                                                        <option value="top1">Islam</option>
+                                                        <option value="top2">Hindu</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <label for="idType">Id Type</label>
+                                                    <select
+                                                        class="form-control custom-select text-capitalize select2 po_color"
+                                                        name="idType" data-title="Id Type" id="idType" required>
+                                                        <option value="" disabled selected></option>
+                                                        <option value="top1">one</option>
+                                                        <option value="top2">two</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <label for="maritialStatus">Maritial Status</label>
+                                                    <select
+                                                        class="form-control custom-select text-capitalize select2 po_color"
+                                                        name="maritialStatus" data-title="Maritial Status"
+                                                        id="maritialStatus" placeholder="Option" required>
+                                                        <option value="" disabled selected></option>
+                                                        <option value="top1">Married</option>
+                                                        <option value="top2">Unmarried</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            {% comment %} <div class="col-md mt-2">
+                                                <div class="form-group">
+                                                    <div class="controls">
+                                                        <input type="text" class="form-control singledate" id="date"
+                                                            name="date" value=""
+                                                            data-validation-regex-regex="(^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$)"
+                                                            data-validation-regex-message="Enter Valid Email" required>
+                                                    </div>
+                                                    <label for="date">Date Of Birth</label>
+                                                </div>
+                                            </div> {% endcomment %}
+                                            <div class="col-md mt-2">
+                                                <div class="form-group">
+                                                  <input type="text" class="form-control singledate" id="dob" name="dob">
+                                                  <span class="bar"></span>
+                                                  <label for="dob">Date Of Birth</label>
+                                                </div>
+                                              </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <input type="number" class="form-control" placeholder="" id="age"
+                                                        name="age" required>
+                                                    <label for="age">Age </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder=""
+                                                        id="nationality" name="nationality" required>
+                                                    <label for="nationality">Nationality </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md  mt-2">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control" placeholder="" id="id"
+                                                        name="id" required>
+                                                    <label for="id">ID Number </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mx-0 m-0">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <div class="controls">
+                                                <textarea id="permanent" name="permanent" class="form-control autosize"
+                                                    required></textarea>
+                                            </div>
+                                            <label for="permanent">Permanent Address</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <div class="controls">
+                                                <textarea id="present" name="present" class="form-control"
+                                                    required></textarea>
+                                            </div>
+                                            <label for="present">Present Address</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            
+                                <div class="row">
+                                    <div class="col-md-4 ml-auto mt-2">                              
+                                        <div class="button-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <button type="reset" class="btn btn-sm btn-block waves-effect float-right waves-light btn-rounded btn-warning">
+                                                        <span class="btn-label"><i class="fa fa-refresh"></i></span>
+                                                        Refresh
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn">
+                                                        <span class="btn-label"><i class="fa fa-check"></i></span>
+                                                        Submit
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>                                 
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset id="company_information" class="tab-pane" role="tabpanel">
+                                <legend>2.Official Info </legend>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="companyOff">Company</label>
+                                            <select class="form-control  custom-select text-capitalize select2 po_color"
+                                                id="companyOff" name="companyOff" data-title="Company"
+                                                placeholder="gender" required>
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="sittingLocationOff">Sitting Location</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="sittingLocationOff" name="sittingLocationOff"
+                                                data-title="Sitting Location" placeholder="gender" required>
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="department">Department</label>
+                                            <select
+                                                class="form-control custom-select custom-select text-capitalize select2 po_color"
+                                                id="department" name="department" data-title="Department"
+                                                required>
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="designation">Designation</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="designation" name="designation" data-title="Designation"
+                                                required>
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="section">Section</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="section" name="section" data-title="Section">
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="line">Line</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="line" name="line" data-title="Line">
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="floor">Floor</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="floor" name="floor" data-title="Floor">
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="unit">Unit</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="unit" name="unit" data-title="Unit">
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="shift">Shift</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="shift" name="shift" data-title="Shift">
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">dddd</option>
+                                                <option value="maleOff">ddd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" placeholder="" id="officialMail"
+                                                name="officialMail" required>
+                                            <label for="officialMail">Official Mail</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="punchcardno"
+                                                name="punchcardno" required>
+                                            <label for="punchcardno">Punch Card No</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="employeeid"
+                                                name="employeeid" required>
+                                            <label for="employeeid">Employee Id</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="employmentType">Employment Type</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                id="employmentType" name="employmentType"
+                                                data-title="Employment Type" required>
+                                                <option value="" disabled selected></option>
+                                                <option value="femaleOff">Female</option>
+                                                <option value="maleOff">Male</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="gross"
+                                                name="gross" required>
+                                            <label for="gross">Gross</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="initialGrade"
+                                                name="initialGrade" required>
+                                            <label for="initialGrade">Initial Grade</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="grade"
+                                                name="grade">
+                                            <label for="grade">Grade</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="weeklyOff">Weekly Off</label>
+                                            <select class="form-control select2 poo_color" multiple data-title="Color" required name="color"
+                                            id="color_1">
+                                                <!-- <option value="" disabled selected></option> -->
+                                                <option value="top1">ddd</option>
+                                                <option value="top2">dddd</option>
+                                            </select>
+                                         
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+
+                                        <div class="form-group">
+                                            <input type="text" class="form-control singledateJoin" placeholder=""
+                                                id="dateOfJoining" name="dateOfJoining">
+                                            <label for="dateOfJoining">Date Of Joining</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="employeeType">Employee Type</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                name="employeeType" data-title="Employee Type" id="employeeType"
+                                                required>
+                                                <option value="" disabled selected></option>
+                                                <option value="top1">O+</option>
+                                                <option value="top2">O-</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="provision">Provision(Month)</label>
+                                            <select class="form-control custom-select text-capitalize select2 po_color"
+                                                name="provision" data-title="Provision(Month)" id="provision"
+                                                required>
+                                                <option value="" disabled selected></option>
+                                                <option value="top1">Three</option>
+                                                <option value="top2">Six</option>
+                                                <option value="top2">Twelve</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="" id="tin" name="tin"
+                                                required>
+                                            <label for="tin">TIN</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 fake-checkbox">
+                                        <div class="form-group">
+                                            <label for="transportOff">Transport
+                                                <input id="transportOff" type="checkbox">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 fake-checkbox2">
+                                        <div class="form-group">
+                                            <label for="pfFacilityOff">PF Facility
+                                                <input id="pfFacilityOff" type="checkbox">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 fake-checkbox3">
+                                        <div class="form-group">
+                                            <label for="overTimeOff">Over Time
+                                                <input id="overTimeOff" type="checkbox">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 ml-auto mt-2">                              
+                                        <!-- <div class="button-group"> -->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <button type="reset" class="btn btn-sm btn-block waves-effect float-right waves-light btn-rounded btn-warning">
+                                                        <span class="btn-label"><i class="fa fa-refresh"></i></span>
+                                                        Refresh
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="button" id="previous" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info prev-step">
+                                                        <span class="btn-label"><i class="fa fa-refresh"></i></span>
+                                                        Previous
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn1">
+                                                        <span class="btn-label"><i class="fa fa-check"></i></span>
+                                                        Submit
+                                                    </button>
+                                                </div>
+                                            <!-- </div> -->
+                                        </div>                                 
+                                    </div>
+                                </div>
+                              
+                            </fieldset>
+                            <fieldset id="personal_information" class="tab-pane" role="tabpanel">
+                                <legend>3.Nominee Info </legend>
+                                <div class="col-md-12 col-sm-12 col-xs-12 forms-container">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-body">
+
+                                                    <div id="education_fields"></div>
+                                                    <div class="col-md-12">
+                                                    <div class="row">
+                                                       
+                                                        <div class="col-sm-2 nopadding">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" id="nameNom"
+                                                                    name="nameNom[]" value="" placeholder="name">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2 nopadding">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" id="nidNom"
+                                                                    name="nidNom[]" value="" placeholder="nid">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2 nopadding">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" id="ageNom"
+                                                                    name="ageNom[]" value="" placeholder="age">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3 nopadding">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" id="phoneNom"
+                                                                    name="phoneNom[]" value="" placeholder="phone">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3 nopadding">
+                                                            <div class="form-group">
+                                                                <button class="btn btn-success" type="button"
+                                                                    onclick="education_fields();"><i
+                                                                        class="fa fa-plus"></i></button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 ml-auto mt-2">                                                                        
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <button type="reset" class="btn btn-sm btn-block waves-effect float-right waves-light btn-rounded btn-warning">                                                         
+                                                            Refresh
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <button type="button" id="previous2" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info prev-step ">                                                         
+                                                            Previous
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn2">
+                                                            <span class="btn-label"><i class="fa fa-check"></i></span>
+                                                            Submit
+                                                        </button>
+                                                    </div>
+                                         
+                                                </div>                                 
+                                        </div>
+                                    </div>
+                                    <!-- <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="d-flex justify-content-end">
+                                                <button class="btn btn-danger float-right ml-2  mr-2 "
+                                                    type="reset">Refresh</button>
+                                                <button type="button" class="btn btn-primary next mr-2 prev-step"
+                                                    id="previous2">Previous</button>
+                                                <button type="button" class="btn btn-success next"
+                                                    id="saveBtn2">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                            </fieldset>
+                            <fieldset id="step4" class="tab-pane" role="tabpanel">
+                                <div class="card-body">
+                                    <form>
+                                        <div class="table-responsive">
+                                            <table style="clear: both" class="table table-borderless" id="user">
+                                                <tbody>
+                                                    <tr class="border">
+                                                        <td colspan="6" class="text-center font-weight-bold">
+                                                            Personal Information</td>
+                                                    </tr>
+                                                    <tr>
+                                                     
+                                                        <td width="25%"><span class="mr-2">First Name :</span>
+                                                            <a href="javascript:void(0)" id="inline-firstname"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter firstname">superuser</a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Last Name :</span><a href="javascript:void(0)" id="inline-lastname"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter lastname">superuser</a></td>
+                                                    
+                                                        <td width="25%"><span class="mr-2">Father Name :</span>
+                                                            <a href="javascript:void(0)" id="inline-fathername"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter your fathername">father</a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">Mother Name :</span>
+                                                            <a href="javascript:void(0)" id="inline-mothername"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter your mothername">mather</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>                                                   
+                                                        <td width="25%"><span class="mr-2">Spouse Name :</span>
+                                                            <a href="javascript:void(0)" id="inline-spousename"
+                                                                data-type="text" data-pk="1" data-value=""
+                                                                data-title="Enter your spousename">spousename</a>
+                                                        </td>
+                                                        
+                                                        <td width="25%"><span class="mr-2">Blood Group :</span>
+                                                            <a href="javascript:void(0)" id="inline-bloodgroup"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-title="Blood Group"></a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">Gender :</span><a href="javascript:void(0)" id="inline-gender"
+                                                            data-type="select" data-pk="1" data-value=""
+                                                            data-title="Gender"></a></td>
+                                                  
+                                                    <td width="25%"><span class="mr-2">Religion :</span><a href="javascript:void(0)" id="inline-religion"
+                                                            data-type="select" data-pk="1" data-value=""
+                                                            data-title="Religion"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                       
+                                                      
+                                                        
+                                                        <td width="25%"><span class="mr-2">Id Type :</span>
+                                                            <a href="javascript:void(0)" id="inline-idtype"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Id Type"></a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">Maritial Status :</span>
+                                                            <a href="javascript:void(0)" id="inline-maritialstatus"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Select Maritial Status"></a>
+                                                        </td>
+                                                     
+                                                        <td width="25%"><span class="mr-2">Date Of Birth :</span>
+                                                            <a href="javascript:void(0)" id="inline-dob"
+                                                                data-type="combodate" data-value="2015-09-24"
+                                                                data-format="YYYY-MM-DD" data-viewformat="DD/MM/YYYY"
+                                                                data-template="D / MMM / YYYY" data-pk="1"
+                                                                data-title="Select Date of birth"></a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Phone Number :</span>
+                                                            <a href="javascript:void(0)" id="inline-phonenumber"
+                                                                data-type="number" data-pk="1"
+                                                                data-title="Enter Phone Number">Number</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                     
+                                                      
+                                                    </tr>
+                                                    <tr>
+                                                    
+                                                        <td width="25%"><span class="mr-2">Age :</span>
+                                                            <a href="javascript:void(0)" id="inline-age"
+                                                                data-type="number" data-pk="1"
+                                                                data-title="Enter Age">Age</a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Identification Mark :</span>
+                                                            <a href="javascript:void(0)" id="inline-identificationmark"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Identification mark">mark</a>
+                                                        </td>
+                                                     
+                                                        <td width="25%"><span class="mr-2">Number Of Children :</span>
+                                                            <a href="javascript:void(0)" id="inline-noofcldrn"
+                                                                data-type="number" data-pk="1"
+                                                                data-title="Enter Number Of Children">Children</a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">Id Number :</span>
+                                                            <a href="javascript:void(0)" id="inline-idnum"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Id Number">Number</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="25%"><span class="mr-2">Nationality :</span>
+                                                            <a href="javascript:void(0)" id="inline-nationality"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Nationality">Nationality</a>
+                                                        </td>
+                                                       
+                                                       
+                                                        <td width="25%"> <span class="mr-2">Permanent Address :</span><a href="javascript:void(0)" id="inline-peraddr"
+                                                                data-type="textarea" data-pk="1"
+                                                                data-placeholder="Your Permanent Address here..."
+                                                                data-title="Enter Permanent Address">awesome
+                                                                user!</a></td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Present Address :</span><a href="javascript:void(0)" id="inline-preaddr"
+                                                                data-type="textarea" data-pk="1"
+                                                                data-placeholder="Your Present Address here..."
+                                                                data-title="Enter Present Address">awesome
+                                                                user!</a></td>
+                                                                
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table style="clear: both" class="table table-borderless" id="user">
+                                                <tbody>
+                                                    <tr  class="border">
+                                                        <td colspan="6" class="text-center font-weight-bold">
+                                                            Official Information</td>
+                                                    </tr>
+                                                    <tr>
+                                                       
+                                                        <td width="25%"> <span class="mr-2">Company :</span><a href="javascript:void(0)" id="inline-companyOff"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-title="Enter companyOff">superuser</a></td>
+                                                       
+                                                        <td width="25%"> <span class="mr-2">Sitting Location :</span><a href="javascript:void(0)" id="inline-location"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-title="Enter lastname">superuser</a></td>
+                                                    
+                                                        <td width="25%"> <span class="mr-2">Department :</span>
+                                                            <a href="javascript:void(0)" id="inline-departmentOff"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-title="Enter your Department">Department</a>
+                                                        </td>
+                                                        <td width="25%"> <span class="mr-2">Designation :</span>
+                                                            <a href="javascript:void(0)" id="inline-designationOff"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-title="Enter your Designation">Designation</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                      
+                                                       
+                                                      
+                                                        <td width="25%"> <span class="mr-2">Section :</span>
+                                                            <a href="javascript:void(0)" id="inline-sectionOff"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-value=""
+                                                                data-title="Enter your Section">Section</a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"> <span class="mr-2">Line :</span>
+                                                            <a href="javascript:void(0)" id="inline-lineOff"
+                                                                data-type="select" data-pk="1" data-value=""
+                                                                data-title="Line"></a>
+                                                        </td>
+                                                        <td width="25%"> <span class="mr-2">Floor :</span><a href="javascript:void(0)" id="inline-floorOff"
+                                                            data-type="select" data-pk="1" data-value=""
+                                                            data-title="Floor"></a></td>
+                                                  
+                                                    <td width="25%"><span class="mr-2">Unit :</span><a href="javascript:void(0)" id="inline-unitOff"
+                                                            data-type="select" data-pk="1" data-value=""
+                                                            data-title="Unit"></a></td>
+                                                    </tr>
+                                                    <tr>
+                                                       
+                                                      
+                                                      
+                                                        <td width="25%"><span class="mr-2">Shift :</span>
+                                                            <a href="javascript:void(0)" id="inline-shiftOff"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Shift"></a>
+                                                        </td>
+                                                        <td width="25%"> <span class="mr-2">Shop :</span>
+                                                            <a href="javascript:void(0)" id="inline-shopOff"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Shop"></a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Punch Card No :</span>
+                                                            <a href="javascript:void(0)" id="inline-punchCardNoOff"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Punch Card No"></a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Employee Id :</span>
+                                                            <a href="javascript:void(0)" id="inline-employeeIdOff"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Employee Id">Employee Id</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                       
+                                                        <td width="25%"><span class="mr-2">Employee Type :</span>
+                                                            <a href="javascript:void(0)" id="inline-employeeTypeOff"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Enter Employee Type">Employee
+                                                                Type</a>
+                                                        </td>
+                                                      
+                                                        <td width="25%"><span class="mr-2">Gross :</span>
+                                                            <a href="javascript:void(0)" id="inline-grossOff"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Gross">Gross</a>
+                                                        </td>
+                                                       
+                                                        <td width="25%"><span class="mr-2">Initial Grade :</span>
+                                                            <a href="javascript:void(0)" id="inline-initialGradeOff"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Initial Grade">Initial
+                                                                Grade</a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">Grade :</span>
+                                                            <a href="javascript:void(0)" id="inline-gradeOff"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Grade">Grade</a>
+                                                        </td>
+                                                       
+                                                    </tr>
+                                                    <tr>
+                                                      
+                                                   
+                                                        <td width="25%"><span class="mr-2">Weekly Off :</span>
+                                                            <a href="javascript:void(0)" id="inline-weeklyOff"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Enter Weekly Off">Weekly Off</a>
+                                                        </td>
+                                                       
+                                                        <td width="25%"> <span class="mr-2">Date Of Joining :</span>
+                                                            <a href="javascript:void(0)" id="inline-dateOfJoiningOff"
+                                                                data-type="date" data-value="" data-pk="1"
+                                                                data-title="Enter Weekly Off">Weekly Off</a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">Employment Type :</span>
+                                                            <a href="javascript:void(0)" id="inline-employmentTypeOff"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Enter Employment Type">Employment
+                                                                Type</a>
+                                                        </td>
+                                                       
+                                                        <td width="25%"><span class="mr-2">Provision :</span>
+                                                            <a href="javascript:void(0)" id="inline-provisionOff"
+                                                                data-type="select" data-value="" data-pk="1"
+                                                                data-title="Enter Provision">Provision</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                       
+                                                      
+                                                       
+                                                        <td width="25%"><span class="mr-2">Official Mail :</span>
+                                                            <a href="javascript:void(0)" id="inline-officialMailOff"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Official Mail">Official
+                                                                Mail</a>
+                                                        </td>
+                                                        <td width="25%"><span class="mr-2">TIN :</span>
+                                                            <a href="javascript:void(0)" id="inline-tin"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter Tin">Tin</a>
+                                                        </td>
+                                                        <td width="25%">
+                                                            <div class="custom-control custom-checkbox d-flex">
+                                                                <input type="checkbox" id="inline-transport"
+                                                                    class="custom-control-input">
+                                                                <label class="custom-control-label fake-checkbox"
+                                                                    for="inline-transport">Transport</label>
+                                                            </div>
+
+                                                        </td>
+                                                        <td width="25%">
+                                                            <div class="custom-control custom-checkbox d-flex">
+                                                                <input type="checkbox" id="inline-pfFacility"
+                                                                    class="custom-control-input">
+                                                                <label class="custom-control-label fake-checkbox"
+                                                                    for="inline-pfFacility">PF Facility</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                      
+                                                       
+                                                        <td width="25%">
+                                                            <div class="custom-control custom-checkbox d-flex">
+                                                                <input type="checkbox" id="inline-isHead"
+                                                                    class="custom-control-input">
+                                                                <label class="custom-control-label fake-checkbox"
+                                                                    for="inline-isHead">Is Head</label>
+                                                            </div>
+                                                        </td>
+                                                        <td width="25%">
+                                                            <div class="custom-control custom-checkbox d-flex">
+                                                                <input type="checkbox" id="inline-overTime"
+                                                                    class="custom-control-input">
+                                                                <label class="custom-control-label fake-checkbox"
+                                                                    for="inline-overTime">Over Time</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table style="clear: both" class="table table-borderless" id="user">
+                                                <tbody>
+                                                    <tr  class="border">
+                                                        <td colspan="6" class="text-center font-weight-bold">
+                                                            Nominee Information</td>
+                                                    </tr>
+                                                    <tr>
+                                                     
+                                                        <td width="25%"><span class="mr-2">Name :</span><a href="javascript:void(0)" id="inline-nameNom"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter firstnameNom">superuser</a>
+                                                        </td>
+                                                      
+                                                        <td width="25%">Nid :<span class="mr-2"></span><a href="javascript:void(0)" id="inline-nidNom"
+                                                                data-type="text" data-pk="1"
+                                                                data-title="Enter lastnameNom">superuser</a>
+                                                        </td>
+                                                    
+                                                        <td width="25%">Age : <span class="mr-2"></span>
+                                                            <a href="javascript:void(0)" id="inline-ageNom"
+                                                                data-type="number" data-pk="1"
+                                                                data-title="Enter your fathernameNom">father</a>
+                                                        </td>
+                                                        <td width="25%"> Phone No : <span class="mr-2"></span>
+                                                            <a href="javascript:void(0)" id="inline-phoneNoNom"
+                                                                data-type="number" data-pk="1"
+                                                                data-title="Enter your mothernameNom">mather</a>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </form>
+                                </div>
+                              
+                                <div class="row">
+                                    <div class="col-md-4 ml-auto mt-2">                                                                        
+                                            <div class="row">                                              
+                                                <div class="col-md-6">
+                                                    <button type="button" id="previous3" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info prev-step next">                                                         
+                                                        Previous
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="saveBtn3">
+                                                        <span class="btn-label"><i class="fa fa-check"></i></span>
+                                                        Submit
+                                                    </button>
+                                                </div>                                    
+                                            </div>                                 
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tab-pane  p-20 " id="profile" role="tabpanel">
+                
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm" style="font-size: .70em">
+                            <tr style="font-weight:bold;">
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Father Name</th>
+                                <th>Mother Name</th>
+                                <th>Spouse Name</th>
+                                <th>Blood Group</th>
+                                <th>Gender</th>
+                                <th>Religion</th>
+                                <th>Id Type</th>
+                                <th>Maritial Status</th>
+                                <th colspan="2">Date Of Birth
+                                </th>
+                            </tr>
+                            <tbody id="tableToModify">
+                                <tr class="duplicateMe" id="row_1">
+                                    <td class="option" id="td_2">
+                                        <div class="form-group">
+                                        </div>
+                                    </td>
+                                    <td id="td_3"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block page_js %}
+<!-- for js -->
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script type="text/javascript" src="{% static 'dist/js/additional-methods.js' %}"></script>
+<script type="text/javascript" src="{% static 'dist/js/bootstrap3-editable/bootstrap-editable.min.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-switch/bootstrap-switch.min.js' %}"></script>
+
+
+<script>
+    autosize();
+    function autosize(){
+        var text = $('.autosize');
+    
+        text.each(function(){
+            $(this).attr('rows',1);
+            resize($(this));
+        });
+    
+        text.on('input', function(){
+            resize($(this));
+        });
+        
+        function resize ($text) {
+            $text.css('height', 'auto');
+            $text.css('height', $text[0].scrollHeight+'px');
+        }
+    }
+
+</script>
+
+
+
+<script>
+    //profile image
+    $(document).on("change", ".uploadProfileInput", function () {
+        var triggerInput = this;
+        var currentImg = $(this).closest(".pic-holder").find(".pic").attr("src");
+        var holder = $(this).closest(".pic-holder");
+        var wrapper = $(this).closest(".profile-pic-wrapper");
+        $(wrapper).find('[role="alert"]').remove();
+        var files = !!this.files ? this.files : [];
+        if (!files.length || !window.FileReader) {
+            return;
+        }
+        if (/^image/.test(files[0].type)) {
+            // only image file
+            var reader = new FileReader(); // instance of the FileReader
+            reader.readAsDataURL(files[0]); // read the local file
+
+            reader.onloadend = function () {
+                $(holder).addClass("uploadInProgress");
+                $(holder).find(".pic").attr("src", this.result);
+                $(holder).append(
+                    '<div class="upload-loader"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>'
+                );
+
+                // Dummy timeout; call API or AJAX below
+                setTimeout(() => {
+                    $(holder).removeClass("uploadInProgress");
+                    $(holder).find(".upload-loader").remove();
+                    // If upload successful
+                    if (Math.random() < 0.9) {
+                        $(wrapper).append(
+                            '<div class="snackbar show" role="alert"><i class="fa fa-check-circle text-success"></i> Profile image updated successfully</div>'
+                        );
+
+                        // Clear input after upload
+                        $(triggerInput).val("");
+
+                        setTimeout(() => {
+                            $(wrapper).find('[role="alert"]').remove();
+                        }, 3000);
+                    } else {
+                        $(holder).find(".pic").attr("src", currentImg);
+                        $(wrapper).append(
+                            '<div class="snackbar show" role="alert"><i class="fa fa-times-circle text-danger"></i> There is an error while uploading! Please try again later.</div>'
+                        );
+
+                        // Clear input after upload
+                        $(triggerInput).val("");
+                        setTimeout(() => {
+                            $(wrapper).find('[role="alert"]').remove();
+                        }, 3000);
+                    }
+                }, 1500);
+            };
+        } else {
+            $(wrapper).append(
+                '<div class="alert alert-danger d-inline-block p-2 small" role="alert">Please choose the valid image.</div>'
+            );
+            setTimeout(() => {
+                $(wrapper).find('role="alert"').remove();
+            }, 3000);
+        }
+    });
+</script>
+
+
+<script type="text/javascript">
+    $(function () {
+        //edit input
+        $('#inline-firstname').editable({
+            type: 'text',
+            pk: 1,
+            name: 'firstname',
+            title: 'Enter firstname',
+            mode: 'inline'
+        });
+
+        $('#inline-sex').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'Male'
+            }, {
+                value: 2,
+                text: 'Female'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+
+        $('#inline-lastname').editable({
+            type: 'text',
+            pk: 1,
+            name: 'lastname',
+            title: 'Enter lastname',
+            mode: 'inline'
+        });
+        $('#inline-fathername').editable({
+            type: 'text',
+            pk: 1,
+            name: 'fathername',
+            title: 'Enter fathername',
+            mode: 'inline'
+        });
+        $('#inline-mothername').editable({
+            type: 'text',
+            pk: 1,
+            name: 'mothername',
+            title: 'Enter mothername',
+            mode: 'inline'
+        });
+        $('#inline-spousename').editable({
+            type: 'text',
+            pk: 1,
+            name: 'spousename',
+            title: 'Enter spousename',
+            mode: 'inline'
+        });
+        $('#inline-phonenumber').editable({
+            type: 'text',
+            pk: 1,
+            name: 'phonenumber',
+            title: 'Enter phonenumber',
+            mode: 'inline'
+        });
+        $('#inline-age').editable({
+            type: 'text',
+            pk: 1,
+            name: 'age',
+            title: 'Enter age',
+            mode: 'inline'
+        });
+        $('#inline-identificationmark').editable({
+            type: 'text',
+            pk: 1,
+            name: 'identificationmark',
+            title: 'Enter identificationmark',
+            mode: 'inline'
+        });
+        $('#inline-noofcldrn').editable({
+            type: 'text',
+            pk: 1,
+            name: 'noofcldrn',
+            title: 'Enter noofcldrn',
+            mode: 'inline'
+        });
+        $('#inline-idnum').editable({
+            type: 'text',
+            pk: 1,
+            name: 'idnum',
+            title: 'Enter idnum',
+            mode: 'inline'
+        });
+        $('#inline-nationality').editable({
+            type: 'text',
+            pk: 1,
+            name: 'nationality',
+            title: 'Enter nationality',
+            mode: 'inline'
+        });
+
+        $('#inline-bloodgroup').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-gender').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'Male'
+            }, {
+                value: 2,
+                text: 'Female'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-religion').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'Islam'
+            }, {
+                value: 2,
+                text: 'Hindu'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-idtype').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'ddd'
+            }, {
+                value: 2,
+                text: 'ddd'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-maritialstatus').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'Married'
+            }, {
+                value: 2,
+                text: 'Unmarried'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-dob').editable({
+            mode: 'inline'
+        });
+        $('#inline-peraddr').editable({
+            showbuttons: 'bottom',
+            mode: 'inline'
+        });
+        $('#inline-preaddr').editable({
+            showbuttons: 'bottom',
+            mode: 'inline'
+        });
+
+        $('#inline-status').editable({
+            mode: 'inline'
+        });
+
+        $('#inline-group').editable({
+            showbuttons: false,
+            mode: 'inline'
+        });
+
+        //office
+        //inline
+        $('#inline-companyOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-location').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+
+
+        $('#inline-departmentOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-designationOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-sectionOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-lineOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-floorOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-unitOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-shiftOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-shopOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-punchCardNoOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'punchCardNoOff',
+            title: 'Enter punchCardNoOff',
+            mode: 'inline'
+        });
+        $('#inline-employeeIdOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'employeeIdOff',
+            title: 'Enter employeeIdOff',
+            mode: 'inline'
+        });
+
+        $('#inline-employeeTypeOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'O+'
+            }, {
+                value: 2,
+                text: 'A+'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+
+        $('#inline-grossOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'grossOff',
+            title: 'Enter grossOff',
+            mode: 'inline'
+        });
+        $('#inline-initialGradeOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'initialGradeOff',
+            title: 'Enter initialGradeOff',
+            mode: 'inline'
+        });
+        $('#inline-gradeOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'gradeOff',
+            title: 'Enter gradeOff',
+            mode: 'inline'
+        });
+        $('#inline-tin').editable({
+            type: 'text',
+            pk: 1,
+            name: 'tin',
+            title: 'Enter tin',
+            mode: 'inline'
+        });
+
+
+
+        $('#inline-weeklyOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'Male'
+            }, {
+                value: 2,
+                text: 'Female'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-employmentTypeOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'employmentTypeOff',
+            title: 'Enter employmentTypeOff',
+            mode: 'inline'
+        });
+        $('#inline-provisionOff').editable({
+            prepend: "not selected",
+            mode: 'inline',
+            source: [{
+                value: 1,
+                text: 'ddd'
+            }, {
+                value: 2,
+                text: 'ddd'
+            }],
+            display: function (value, sourceData) {
+                var colors = {
+                    "": "#98a6ad",
+                    1: "#5fbeaa",
+                    2: "#5d9cec"
+                },
+                    elem = $.grep(sourceData, function (o) {
+                        return o.value == value;
+                    });
+
+                if (elem.length) {
+                    $(this).text(elem[0].text).css("color", colors[value]);
+                } else {
+                    $(this).empty();
+                }
+            }
+        });
+        $('#inline-officialMailOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'officialMailOff',
+            title: 'Enter officialMailOff',
+            mode: 'inline'
+        });
+        $('#inline-tinOff').editable({
+            type: 'text',
+            pk: 1,
+            name: 'tinOff',
+            title: 'Enter tinOff',
+            mode: 'inline'
+        });
+
+
+        //inline
+        $('#inline-nameNom').editable({
+            type: 'text',
+            pk: 1,
+            name: 'nameNom',
+            title: 'Enter nameNom',
+            mode: 'inline'
+        });
+        $('#inline-nidNom').editable({
+            type: 'text',
+            pk: 1,
+            name: 'nidNom',
+            title: 'Enter nidNom',
+            mode: 'inline'
+        });
+        $('#inline-ageNom').editable({
+            type: 'text',
+            pk: 1,
+            name: 'ageNom',
+            title: 'Enter ageNom',
+            mode: 'inline'
+        });
+        $('#inline-phoneNoNom').editable({
+            type: 'text',
+            pk: 1,
+            name: 'phoneNoNom',
+            title: 'Enter phoneNoNom',
+            mode: 'inline'
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //editable submit button color change
+        $(".editable").on('click', function(e){
+         
+            $(".editable-buttons").find('.editable-submit').addClass("btn-light btn-rounded").removeClass("btn-info");
+            $(".editable-input").find('.editable-clear-x').addClass("btn-lg");
+            editable-clear-x
+        });
+
+        $("button").find(".editable-submit").addClass('btn-light btn-rounded').removeClass('btn-info');
+        $(".poo_color").select2({
+            tags: true,
+        });
+        $('.nav-tabs > li a[title]').tooltip();
+        //Wizard
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target);
+            if (target.parent().hasClass('disabled')) {
+                return false;
+            }
+        });
+        function nextTab(elem) {
+            $(elem).next().find('a[data-toggle="tab"]').click();
+        }
+        function prevTab(elem) {
+            $(elem).prev().find('a[data-toggle="tab"]').click();
+        }
+
+        //for remove opaciti from nav-tabs
+        $("#saveBtn1").on("click", function (e) {
+
+            $("#companys_information i").removeClass("grayout")
+        });
+        $("#saveBtn2").on("click", function (e) {
+
+            $("#companys_information i").removeClass("grayout")
+            $("#personals_information i").removeClass("grayout")
+        });
+       
+
+        //for ui li fade
+        $("ul.nav-tabs li.grayout").on("click", function (e) {
+
+            $(this).removeClass("grayout")
+        });
+
+        //for select error text hide
+        $("select").on("select2:close", function (e) {
+            $(this).valid();
+        });
+       
+        $('.fake-checkbox4').click(function () {
+            // Check if fake-checkbox has class checked-state, then remove the class checked-state and vice versa.  
+            if ($(this).hasClass('checked-state')) {
+                console.log("checked-state1")
+                $(this).removeClass('checked-state');
+                $("#officialMail").prop("checked", false);
+
+            } else {
+                console.log("checked-state dddd1")
+                $(this).addClass('checked-state');
+                $("#officialMail").prop("checked", true);
+
+            }
+        });
+        $('.fake-checkbox').click(function () {
+            if ($(this).hasClass('checked-state')) {
+                console.log("checked-state2")
+                $(this).removeClass('checked-state');
+                $("#transportOff").prop("checked", false);
+
+            } else {
+                console.log("checked-state dddd2")
+                $(this).addClass('checked-state');
+                $("#transportOff").prop("checked", true);
+
+            }
+        });
+        $('.fake-checkbox1').click(function () {
+            var checkbox = $('#taxOff');
+            if (checkbox.is(':checked')) {
+
+                checkbox.removeAttr('checked');
+                //alert('Unchecked');
+            } else {
+                checkbox.attr('checked', 'checked');
+                //alert('Checked');
+            }
+            if ($(this).hasClass('checked-state')) {
+                console.log("checked-state2")
+                $(this).removeClass('checked-state');
+
+                $("#taxOff").prop("checked", false);
+
+            } else {
+                console.log("checked-state dddd3")
+                $(this).addClass('checked-state');
+
+                $("#taxOff").prop("checked", true);
+
+            }
+        });
+        $('.fake-checkbox2').click(function () {
+            if ($(this).hasClass('checked-state')) {
+                console.log("checked-state4")
+                $(this).removeClass('checked-state');
+
+                $("#pfFacilityOff").prop("checked", false);
+
+            } else {
+                console.log("checked-state dddd4")
+                $(this).addClass('checked-state');
+
+                $("#pfFacilityOff").prop("checked", true);
+
+            }
+        });
+        $('.fake-checkbox3').click(function () {
+            if ($(this).hasClass('checked-state')) {
+                console.log("checked-state4")
+                $(this).removeClass('checked-state');
+
+                $("#overTimeOff").prop("checked", false);
+
+            } else {
+                console.log("checked-state dddd4")
+                $(this).addClass('checked-state');
+
+                $("#overTimeOff").prop("checked", true);
+
+            }
+        });
+        $('#uploads').hide();
+        $('#taxOff').change(function () {
+            $('#uploads').toggle()
+        });
+
+
+        $(".next").click(function () {
+            var form = $("#myform");
+            form.validate({
+                errorElement: 'div',
+                errorClass: 'text-danger',
+                highlight: function (element, errorClass, validClass) {
+
+                    //$(element).closest('.form-group').addClass("has-error");
+                    var elem = $(element);
+                    if (elem.attr('readonly') == 'readonly') {
+                        if (elem.hasClass("input-group-addon")) {
+                            $("#" + elem.attr("id")).parent().addClass(errorClass);
+                        } else {
+                            $(element).addClass(errorClass).removeClass(validClass);
+                        }
+                    } else {
+                        if (elem.hasClass("select2-hidden-accessible")) {
+                            $("#select2-" + elem.attr("id") + "-container").parent().addClass(errorClass);
+                        } else {
+                            $(element).addClass(errorClass).removeClass(validClass);
+                        }
+                    }
+                },
+                unhighlight: function (element, errorClass, validClass) {
+                    //$(element).closest('.form-group').removeClass("has-error");
+                    var elem = $(element);
+                    if (elem.attr('readonly') == 'readonly') {
+                        if (elem.hasClass("input-group-addon")) {
+                            $("#" + elem.attr("id")).parent().removeClass(errorClass);
+                        } else {
+                            $(element).addClass(errorClass).removeClass(validClass);
+                        }
+                    } else {
+                        if (elem.hasClass("select2-hidden-accessible")) {
+                            $("#select2-" + elem.attr("id") + "-container").parent().removeClass(errorClass);
+                        } else {
+                            $(element).removeClass(errorClass).addClass(validClass);
+                        }
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    var elem = $(element);
+
+                    if (elem.hasClass("select2-hidden-accessible")) {
+                        element = $("#select2-" + elem.attr("id") + "-container").parent().parent().parent();
+                        error.insertAfter(element);
+                    } else {
+                        error.insertAfter(element);
+                    }
+
+                },
+                rules: {
+                    username: {
+                        required: true,
+                        usernameRegex: true,
+                        minlength: 6,
+                    },
+                    first: {
+                        required: true,
+                    },
+                    last: {
+                        required: true,
+                    },
+                    father: {
+                        required: true,
+                    },
+                    phone: {
+                        required: true,
+                    },
+                    permanent: {
+                        required: true,
+                    },
+                    present: {
+                        required: true,
+                    },
+                    age: {
+                        required: true,
+                    },
+                    mark: {
+                        required: true,
+                    },
+                    children: {
+                        required: true,
+                    },
+                    id: {
+                        required: true,
+                    },
+                    nationality: {
+                        required: true,
+                    },
+                    blood: {
+                        required: true,
+                    },
+                    gender: {
+                        required: true,
+                    },
+                    religion: {
+                        required: true,
+                    },
+                    idType: {
+                        required: true,
+                    },
+                    maritialStatus: {
+                        required: true,
+                    },
+
+
+
+                    companyOff: {
+                        required: true,
+                    },
+                    sittingLocationOff: {
+                        required: true,
+                    },
+                    department: {
+                        required: true,
+                    },
+                    designation: {
+                        required: true,
+                    },
+
+
+                    officialMail: {
+                        required: true,
+                    },
+                    punchcardno: {
+                        required: true,
+                    },
+                    employeeid: {
+                        required: true,
+                    },
+                    employmentType: {
+                        required: true,
+                    },
+                    gross: {
+                        required: true,
+                    },
+                    initialGrade: {
+                        required: true,
+                    },
+
+
+                    dateOfJoining: {
+                        required: true,
+                    },
+                    employmentType: {
+                        required: true,
+                    },
+                    provision: {
+                        required: true,
+                    },
+                    tin: {
+                        required: true,
+                    }
+
+                },
+                messages: {
+                    tin: {
+                        required: "required",
+                    },
+                    first: {
+                        required: "required",
+                    },
+                    last: {
+                        required: "required",
+                    },
+                    father: {
+                        required: "required",
+                    },
+                    phone: {
+                        required: "required",
+                    },
+                    permanent: {
+                        required: "required",
+                    },
+                    present: {
+                        required: "required",
+                    },
+                    age: {
+                        required: "required",
+                    },
+                    mark: {
+                        required: "required",
+                    },
+                    children: {
+                        required: "required",
+                    },
+                    id: {
+                        required: "required",
+                    },
+                    blood: {
+                        required: "required",
+                    },
+                    nationality: {
+                        required: "required",
+                    },
+                    blood: {
+                        required: "required",
+                    },
+                    gender: {
+                        required: "required",
+                    },
+                    religion: {
+                        required: "required",
+                    },
+                    idType: {
+                        required: "required",
+                    },
+                    maritialStatus: {
+                        required: "required",
+                    },
+
+                    //second tab
+                    companyOff: {
+                        required: "required",
+                    },
+                    sittingLocationOff: {
+                        required: "required",
+                    },
+                    department: {
+                        required: "required",
+                    },
+                    designation: {
+                        required: "required",
+                    },
+
+
+                    officialMail: {
+                        required: "required",
+                    },
+                    punchcardno: {
+                        required: "required",
+                    },
+                    employeeid: {
+                        required: "required",
+                    },
+                    employmentType: {
+                        required: "required",
+                    },
+                    gross: {
+                        required: "required",
+                    },
+                    initialGrade: {
+                        required: "required",
+                    },
+
+
+
+                    dateOfJoining: {
+                        required: "required",
+                    },
+                    employeeType: {
+                        required: "required",
+                    },
+                    provision: {
+                        required: "required",
+                    },
+
+
+                }
+            });
+            if (form.valid() === true) {
+                if ($('#account_information').is(":visible")) {
+                    var active = $('.wizard .nav-tabs li.active');
+                    active.next().removeClass('disabled');
+                    nextTab(active);
+                    //alert('000')  
+              
+                     $('#accounts_information').removeClass('active');
+                    $('#companys_information').addClass('active');
+                    current_fs = $('#account_information');
+                    next_fs = $('#company_information');
+                } else if ($('#company_information').is(":visible")) {
+                    var active = $('.wizard .nav-tabs li.active');
+                    active.next().removeClass('disabled');
+                    nextTab(active);
+                    //alert('00')
+                    $('#companys_information').removeClass('active');
+                    $('#personals_information').addClass('active');
+                    current_fs = $('#company_information');
+                    next_fs = $('#personal_information');
+                } else if ($('#personal_information').is(":visible")) {
+                    var active = $('.wizard .nav-tabs li.active');
+                    active.next().removeClass('disabled');
+                    nextTab(active);
+                    //alert('00')
+                    $('#personals_information').removeClass('active');
+                    $('#final').addClass('active');
+                    current_fs = $('#personal_information');
+                    next_fs = $('#step4');
+                }
+
+                next_fs.show();
+                current_fs.hide();
+
+
+            }
+
+        });
+      
+        $('#previous').click(function () {
+            $('#accounts_information').addClass('active');
+            $('#companys_information').removeClass('active');
+            //alert(10) 
+            current_fs = $('#company_information');
+            next_fs = $('#account_information');
+            $('#account_information').find("button#saveBtn").text("Update");
+            hide_fs = $('#personal_information');
+            hide_fs.hide();
+
+            next_fs.show();
+            current_fs.hide();
+
+        });
+
+        $('#previous2').click(function() {
+            $('#companys_information').addClass('active');
+            $('#personals_information').removeClass('active');
+            $('#final').removeClass('active');
+            var active = $('.wizard .nav-tabs li.active');
+            prevTab(active);
+            //alert(12) 
+            $('#company_information').find("button#saveBtn1").text("Update");
+            current_fs = $('#personal_information');
+            next_fs = $('#company_information');
+            hide_fs = $('#account_information');
+            hide_fs = $('#step4');
+            hide_fs.hide();
+
+            next_fs.show();
+            current_fs.hide();
+        });
+
+        $('#previous3').click(function () {
+            $('#personals_information').addClass('active');
+            
+            $('#final').removeClass('active');
+            var active = $('.wizard .nav-tabs li.active');
+            prevTab(active);
+            //alert(1) 
+            $('#personal_information').find("button#saveBtn2").text("Update");
+            current_fs = $('#step4');
+            next_fs = $('#personal_information');
+            hide_fs = $('#company_information');
+            hide_fs.hide();
+
+            next_fs.show();
+            current_fs.hide();
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+
+        // Single Date Range Picker
+        $('.singledate').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            locale: {
+                format: 'DD-MMM-YYYY'
+            },
+            autoUpdateInput: false
+        });
+        $('.singledateJoin').daterangepicker({
+            autoUpdateInput: false,
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+
+        $('.singledateOff').daterangepicker({
+            autoUpdateInput: false,
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+        $('.singledateNom').daterangepicker({
+            autoUpdateInput: false,
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+        var input = document.getElementById("submit_personal");
+        input.addEventListener("keyup", function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("myBtn").click();
+            }
+        });
+    })
+
+</script>
+<script>
+    var room = 1;
+
+    function education_fields() {
+
+        room++;
+        var objTo = document.getElementById('education_fields')
+        var divtest = document.createElement("div");
+        divtest.setAttribute("class", "form-group removeclass" + room);
+        var rdiv = 'removeclass' + room;
+        divtest.innerHTML = '<div class="row"><div class="col-sm-2 nopadding"><div class="form-group"> <input type="text" class="form-control" id="nameNom" name="nameNom[]" value="" placeholder="name"></div></div><div class="col-sm-2 nopadding"><div class="form-group"> <input type="text" class="form-control" id="nidNom" name="nidNom[]" value="" placeholder="nid"></div></div><div class="col-sm-2 nopadding"><div class="form-group"> <input type="text" class="form-control" id="ageNom" name="ageNom[]" value="" placeholder="Age"></div></div><div class="col-sm-3 nopadding"><div class="form-group"> <input type="text" class="form-control" id="phoneNom" name="phoneNom[]" value="" placeholder="Phone"></div></div><div class="form-group"> <button class="btn btn-danger" type="button" onclick="remove_education_fields(' + room + ');"> <i class="fa fa-minus"></i> </button></div></div></div></div><div class="clear"></div></row>';
+
+        objTo.appendChild(divtest)
+    }
+
+    function remove_education_fields(rid) {
+        $('.removeclass' + rid).remove();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,393 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load data_load %}
+
+{% block page_title %}Salary Process View{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/icheck/skins/all.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/html5-editor/bootstrap-wysihtml5.css' %}" rel="stylesheet" />
+<style>
+    .wrapper1{ width: 100%; overflow-x: auto; overflow-y: hidden;}
+    .wrapper2 { width: 100%; overflow: hidden;}
+    .wrapper1 { height: 20px; }
+    .div1 { height: 20px; }
+    .div2 { position:relative; }
+    .sticky-col {
+        position: -webkit-sticky;
+        position: sticky;
+        background-color: white !important;
+    }
+    .name-col {
+        width: 120px;
+        min-width: 120px;
+        max-width: 120px;
+        left: 0px;
+    }
+    .first-col {
+        width: 150px;
+        min-width: 150px;
+        max-width: 150px;
+        left: 120px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Salary Process View</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <a href="javascript:void(0)" class="btn btn-sm btn-success export_button mr-2"><i class="fas fa-download"></i></a>
+                            <a href="{% url 'hr:salary_process2' %}" class="btn btn-sm btn-info" title="Salary Process List"><i class="ti-view-list-alt"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+            <div class="row my-3">
+                <div class="col">
+                    <b>Salary Month : {{ month }}, {{ salary_process.year }}</b>
+                </div>
+                <div class="col text-center">
+                    <b>Status : {{ salary_process.status.title }}</b>
+                </div>
+                <div class="col text-right">
+                    <b>No. of Employee : {{ salary_process.employees.count }}</b>
+                </div>
+            </div>
+            
+            <div class="wrapper1">
+                <div class="div1" id="div1"></div>
+            </div>
+            <div class="wrapper2">
+                <div class="div2">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered custom-table table-nowrap mb-0" id="salary-table">
+                            <thead>
+                            <tr class="text-center">
+                                <th colspan="8">Personal Informations</th>
+                                <th colspan="4">Salary Breakdowns</th>
+                                <th colspan="7">Month Informations</th>
+                                <th colspan="1">Payable</th>
+                                {% comment %} <th rowspan="2">Total Payable (BDT)</th> {% endcomment %}
+                                <th colspan="3">Deduction</th>
+                                <th rowspan="2">Net Payable (BDT)</th>
+                            </tr>
+                            <tr class="text-center">
+                                <th class="sticky-col name-col">Employee ID</th>
+                                <th class="sticky-col first-col">Name</th>
+                                <th class="">Company</th>
+                                <th class="">Department</th>
+                                <th class="">Designation</th>
+                                {% comment %} <th class="">Cost Center</th>
+                                <th class="">Grade</th> {% endcomment %}
+                                <th class="">Staff Category</th>
+                                <th class="">DOJ</th>
+                                <th class="">Gross Salary</th>
+                                <th class="">Basic</th>
+                                <th class="">House Rent</th>
+                                <th class="">Medical</th>
+                                {% comment %} <th class="">Conveyance</th>
+                                <th class="">Food Allowance</th> {% endcomment %}
+                                <th class="">Others Allowance</th>
+                                <th class="">Total Days</th>
+                                <th class="">Working Day</th>
+                                <th class="">Present</th>
+                                <th class="">Absent</th>
+                                <th class="">With Pay</th>
+                                <th class="">W/Pay</th>
+                                <th class="">Holiday/ Weekend</th>
+                                {% comment %} <th class="">OT Hours</th> {% endcomment %}
+                                <th class="">Salary</th>
+                                {% comment %} <th class="">Over Time</th>
+                                <th class="">Holiday</th>
+                                <th class="">Night</th>
+                                <th class="">Attendance</th>
+                                <th class="">Incentive</th>
+                                <th class="">Festival</th>
+                                <th class="">Arrear</th>
+                                <th class="">Tifin Bill</th> {% endcomment %}
+                                <th class="">Loan</th>
+                                <th class="">Absent</th>
+                                {% comment %} <th class="">Others</th> {% endcomment %}
+                                <th class="">ITDS</th>
+                                {% comment %} <th class="">PF</th> {% endcomment %}
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp in emp_data %}
+                                <tr class="text-right">
+                                    <td class="text-left sticky-col name-col">{{emp.employee_id}}</td>
+                                    <td class="text-left sticky-col first-col">{{emp.name}}</td>
+                                    <td class="text-left">{{emp.company}}</td>
+                                    <td class="text-left">{{emp.department}}</td>
+                                    <td class="text-left">{{emp.designation}}</td>
+                                    {% comment %} <td class="text-left">{{emp.cost_center}}</td>
+                                    <td class="text-left">{{emp.grade|default_if_none:""}}</td> {% endcomment %}
+                                    <td class="text-left">{{emp.employee_category}}</td>
+                                    <td class="text-center">{{emp.joining_date}}</td>
+                                    <td>{{emp.salary}}</td>
+                                    <td>{{emp.basic}}</td>
+                                    <td>{{emp.hrent}}</td>
+                                    <td>{{emp.medical}}</td>
+                                    {% comment %} <td>{{emp.conveyance}}</td>
+                                    <td>{{emp.food}}</td> {% endcomment %}
+                                    <td>{{emp.other}}</td>
+                                    <td>{{emp.total_days}}</td>
+                                    <td>{{emp.working_day}}</td>
+                                    <td>{{emp.present}}</td>
+                                    <td>{{emp.absent_days}}</td>
+                                    <td>{{emp.with_pay}}</td>
+                                    <td>{{emp.without_pay}}</td>
+                                    <td>{{emp.holiday_n_weekends}}</td>
+                                    {% comment %} <td>{{emp.ot_hrs}}</td> {% endcomment %}
+                                    <td>{{emp.salary_payable}}</td>
+                                    {% comment %} <td>{{emp.ot}}</td>
+                                    <td>{{emp.holiday}}</td>
+                                    <td>{{emp.night}}</td>
+                                    <td>{{emp.attendance}}</td>
+                                    <td>{{emp.incentive}}</td>
+                                    <td>{{emp.arrear}}</td>
+                                    <td>{{emp.tiffin}}</td>
+                                    <td>{{emp.total_payable}}</td> {% endcomment %}
+                                    <td>{{emp.loan}}</td>
+                                    <td>{{emp.absent}}</td>
+                                    {% comment %} <td>{{emp.others}}</td> {% endcomment %}
+                                    <td>{{emp.itds}}</td>
+                                    {% comment %} <td>{{emp.pf}}</td> {% endcomment %}
+                                    <td>{{emp.net_payable}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div> 
+                </div> 
+            </div> 
+            <div class="row mt-4">
+                {% if salary_process.notes|length > 0 %}
+                    <div class="col-md">
+                        <b>Note</b> &nbsp; : &nbsp; {{ salary_process.notes|safe }}
+                    </div>
+                {% endif %}
+                {% if salary_process.recommend_notes|length > 0 %}
+                    <div class="col-md">
+                        <b>Recommended by Note</b> &nbsp; : &nbsp; {{ salary_process.recommend_notes|safe }}
+                    </div>
+                {% endif %}
+                {% if salary_process.check_notes|length > 0 %}
+                    <div class="col-md">
+                        <b>Checked by Note</b> &nbsp; : &nbsp; {{ salary_process.check_notes|safe }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="row mt-4">
+                {% if salary_process.approve_notes|length > 0 %}
+                    <div class="col-md-6">
+                        <b>Approved by Note</b> &nbsp; : &nbsp; {{ salary_process.approve_notes|safe }}
+                    </div>
+                {% endif %}
+                {% if salary_process.acknowledge_notes|length > 0 %}
+                    <div class="col-md-6">
+                        <b>Acknowledged by Note</b> &nbsp; : &nbsp; {{ salary_process.acknowledge_notes|safe }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if salary_process.status.title|lower != 'rejected' %}
+            <div class="row mt-4">
+                <div class="col-md" align="center">
+                    {% if salary_process.submitted_at %}
+                    <p>Prepared By</p>
+                    {{ salary_process.created_by.signature }}
+                    <br>
+                    <h6 class="small mt-2">{{ salary_process.submitted_at|date:'d-M-Y h:i A'|upper }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{salary_process.created_by.name}}</h6>
+                    <p class="small">{{salary_process.created_by.designation}}</p>
+                    {% endif %}
+                </div>
+                {% if salary_process.created_by_id != salary_process.recommend_by_id %}
+                <div class="col-md" align="center">
+                    {% if salary_process.recommend_by_id %}
+                    <p>Recommended By</p>
+                    {{ salary_process.recommend_by.signature }}
+                    <br>
+                    <h6 class="small mt-2">{{ salary_process.recommend_reject_date|date:'d-M-Y h:i A'|upper }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{salary_process.recommend_by.name}}</h6>
+                    <p class="small">{{salary_process.recommend_by.designation}}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <div class="col-md" align="center">
+                    {% if salary_process.check_by_id %}
+                    <p>Checked By</p>
+                    {{ salary_process.check_by.signature }}
+                    <br>
+                    <h6 class="small mt-2">{{ salary_process.check_reject_date|date:'d-M-Y h:i A'|upper }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{salary_process.check_by.name}}</h6>
+                    <p class="small">{{salary_process.check_by.designation}}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md" align="center">
+                    {% if salary_process.approve_by_id %}
+                    <p>Approved By</p>
+                    {{ salary_process.approve_by.signature }}
+                    <br>
+                    <h6 class="small mt-2">{{ salary_process.approve_reject_date|date:'d-M-Y h:i A'|upper }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{salary_process.approve_by.name}}</h6>
+                    <p class="small">{{salary_process.approve_by.designation}}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md" align="center">
+                    {% if salary_process.acknowledge_by_id %}
+                    <p>Acknowledged By</p>
+                    {{ salary_process.acknowledge_by.signature }}
+                    <br>
+                    <h6 class="small mt-2">{{ salary_process.acknowledge_reject_date|date:'d-M-Y h:i A'|upper }}</h6>
+                    <hr style="width: 50% !important; ">
+                    <h6>{{salary_process.acknowledge_by.name}}</h6>
+                    <p class="small">{{salary_process.acknowledge_by.designation}}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% comment %} Approvals {% endcomment %}
+            {% variable_assign_tag 0 as approval %}
+            {% if request.session.employee_id|ifinlistSTR:'EC00007156,HC01000038,LE01000084' and salary_process.status.title|lower == 'started' %}
+            {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'submitted' as sp_status %}
+            {% elif request.session.is_head and salary_process.status.title|lower == 'submitted' %}
+            {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'recommended' as sp_status %}
+            {% elif user_level == 3 and salary_process.status.title|lower == 'recommended' %}
+            {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'checked' as sp_status %}
+            {% elif request.session.user_roles|lower|is_role_assigned:"cfo" and salary_process.status.title|lower == 'checked' %}
+            {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'approved' as sp_status %}
+            {% elif request.session.user_roles|lower|is_role_assigned:"finance" and salary_process.status.title|lower == 'approved' %}
+            {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'acknowledged' as sp_status %}
+            {% endif %}
+            {% if approval %}
+            <form class="floating-labels" action="" method="post" id="spForm">
+                {% csrf_token %}
+                <div class="row" style="margin-top: 50px !important">
+                    <input id="sp_reject_notes" type="hidden" name="reject_notes" value="" />
+                    <input id="sp_rejected" type="hidden" name="rejected" value="0" />
+                    <input id="sp_status" type="hidden" name="status" value="{{sp_status}}" />
+                    <div class="col-md-12">
+                        <div class="form-group mb-2">
+                            <textarea class="form-control tinymce" id="sp_notes" name="notes" rows="2">{% if sp_status == 'submitted' %}{{salary_process.notes}}{% endif %}</textarea>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 ml-auto mt-3">
+                        <button type="button" id="approve-btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> {% if sp_status != 'submitted' %}Approve{% else %}Submit{% endif %}
+                        </button>
+                    </div>
+                    {% if sp_status != 'submitted' %}
+                    <div class="col-md-2 mt-3">
+                        <button type="button" id="reject-btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-danger">
+                            <span class="btn-label"><i class="fas fa-times"></i></span> Reject
+                        </button>
+                    </div> {% endif %}
+                </div>
+            </form>
+            {% endif %}
+            {% comment %} Approvals {% endcomment %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block page_js %}
+    {% comment %} For File uploads wysuhtml5 Plugin JavaScript {% endcomment %}
+    <script src="{% static 'node_modules/tinymce/tinymce.min.js' %}"></script>
+    <script src="{% static 'admin/js/table_to_excel.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.div1').width($('table').width());
+            $('.wrapper1').on('scroll', function (e) {
+                $('.table-responsive').scrollLeft($('.wrapper1').scrollLeft());
+            }); 
+            $('.table-responsive').on('scroll', function (e) {
+                $('.wrapper1').scrollLeft($('.table-responsive').scrollLeft());
+            });
+
+            $(".export_button").click(function() {
+                let table = document.getElementById("salary-table");
+                TableToExcel.convert(table, {
+                    name: `salary_report.xlsx`, sheet: { name: 'Salary Report' }
+                });
+            });
+
+            if ($(".tinymce").length > 0) {
+                tinymce.init({
+                    selector: "textarea.tinymce",
+                    theme: "modern",
+                    height: 120,
+                    menubar: true,
+                    plugins: [
+                        "advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
+                        "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+                        "save table contextmenu directionality emoticons template paste textcolor"
+                    ],
+                    toolbar: "bold underline | forecolor backcolor | numlist",
+
+                });
+            }
+
+            
+            $("#approve-btn").on("click", function(e){
+                Swal.fire({
+                    text: "Do you want to submit this?",
+                    type: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    confirmButtonColor: "#00c292",
+                    cancelButtonText: 'No',
+                    cancelButtonColor: "#e46a76",
+                    reverseButtons: false
+                }).then((result) => {
+                    if (result.value) {
+                        $('#spForm').submit();
+                    }
+                });
+            });
+            $("#reject-btn").on("click", function(e){
+                Swal.fire({
+                    text: "Do you want to reject this?",
+                    input: 'textarea',
+                    inputPlaceholder: "Write the reason why you are rejecting...",
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    confirmButtonColor: "#00c292",
+                    cancelButtonText: 'Cancel',
+                    cancelButtonColor: "#e46a76",
+                    reverseButtons: false,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                }).then((result) => {
+                    if (result.value) {
+                        $("#sp_reject_notes").val(result.value);
+                        $("#sp_rejected").val(1);
+                        $('#spForm').submit();
+                    }
+                });
+            });
+        });
+    </script>
+    {% comment %} For File uploads wysuhtml5 Plugin JavaScript {% endcomment %}
+{% endblock %}

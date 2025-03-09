@@ -1,0 +1,49 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %} Import Employee {% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Import Employee</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:employee_add' %}" class="btn btn-sm btn-info" title="Add New">
+                                    <i class="ti-view-list-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form class="floating-labels mt-3" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 offset-md-3">
+                        <div class="form-group">
+                            <input type="file" id="import_file" name="import_file" class="dropify" data-height="200" required>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                <span class="btn-label"><i class="fa fa-check"></i></span> Import
+                            </button>
+                        </div>
+                        <small class="form-text text-muted text-center mt-5">
+                            <a href="{% static 'dummy/employee-template.xlsx' %}?v=1.3" class="h4">
+                                <span class="icon"><i class="fas fa-download"></i></span> Download Template
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

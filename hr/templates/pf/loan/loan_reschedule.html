@@ -1,0 +1,258 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }}{% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Loan Reschedule</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/hr/pf-emp-enroll-list/" class="btn btn-sm btn-info" title="Custom Button"><i
+                  class="ti-view-list-alt"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0"> 
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link {% if request.session.employee_loan == 'save_loan' or request.session.employee_loan == 'update_loan' %} active {% endif %}" data-toggle="tab" href="#loan_setup" role="tab"> {{action.name}} </a>
+        </li>
+    </ul>
+    <div class="tab-content tabcontent-border">
+          <div class="tab-pane p-20 {% if request.session.employee_loan == 'save_loan' or request.session.employee_loan == 'update_loan' %} active {% endif %}" id="loan_setup" role="tabpanel">
+            <form class="floating-labels mt-3" method="POST">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                          <input type="text" class="form-control" id ="employee" name= "employee" required  "{% if loan_instance.employee %} value="{{ loan_instance.employee.employee_id }}--{{loan_instance.employee.name}}" {% endif %}  {% if loan_instance %} value="{{ loan_instance.employee.employee_id }}" {% endif %}" readonly>
+                          {% comment %} <input type="text" class="form-control" id="employee" name="employee" required
+                            value="{{ instance.employee_id }}"> {% endcomment %}
+                          <span class="bar"></span>
+                          <label for="employee">Employee</label>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-group">
+    
+                        <input type="text" class="form-control date_of_recheduling" id="date_of_recheduling" name="date_of_recheduling" {% if loan_instance.date_of_recheduling %} value={{loan_instance.date_of_recheduling|date:'d-M-Y'}}{% endif %} required>
+      
+                        <span class="bar"></span>
+      
+                        <label for="date_of_recheduling">Date of Rescheduling</label>
+      
+                      </div>
+                    </div> 
+
+                    <div class="col-md-4">
+                      <div class="form-group">       
+                        <input type="text" class="form-control emi_start_date" id="emi_start_date" name="emi_start_date" required>        
+                        <span class="bar"></span>       
+                        <label for="emi_start_date">Start Date of Loan Payment</label>         
+                      </div>
+                    </div> 
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="interest_rate" name="interest_rate"
+                          value ={{loan_instance.interest_rate}}  required readonly>
+                        <span class="bar"></span>
+                        <label for="interest_rate">Rate of Interest on PF(%)</label>
+                      </div>
+                    </div>
+
+                    {% comment %} <div class="col-md-4">
+                      <div class="form-group">
+                        <label class="form-label">Loan Type</label>
+                        <select class="form-control select2" id="loan_type" name="loan_type" data-title="Loan Type" required>
+                          <option value="" disabled selected>Loan Type</option>
+                          <option value="Personal Loans" {% if loan_instance.loan_type == "Personal Loans" %} selected {% endif %}>Personal Loans</option>
+                          <option value="Auto Loans" {% if loan_instance.loan_type == "Auto Loans" %} selected {% endif %}>Auto Loans</option>
+                          <option value="Mortgage Loans" {% if loan_instance.loan_type == "Mortgage Loans" %} selected {% endif %}>Mortgage Loans</option>
+                          <option value="Home Equity Loans" {% if loan_instance.loan_type == "Home Equity Loans" %} selected {% endif %}>Home Equity Loans</option>
+                          <option value="Family Loans" {% if loan_instance.loan_type == "Family Loans" %} selected {% endif %}>Family Loans</option>
+                        </select>
+                      </div>
+                    </div> {% endcomment %}
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="due_loan_amount" name="due_loan_amount"
+                          value="{{loan_instance.due_loan_amount}}">
+                        <span class="bar"></span>
+                        <label for="due_loan_amount">Due Loan Amount</label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="due_interest_amount" name="due_interest_amount"
+                          value="{{loan_instance.due_interest_amount}}" readonly>
+                        <span class="bar"></span>
+                        <label for="due_interest_amount">Due Interest Amount</label>
+                      </div>
+                    </div>
+    
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="emi_months" name="emi_months" 
+                          value="{{ loan_instance.emi_months }}" title="this is number field" readonly>
+                        <span class="bar"></span>
+                        <label for="emi_months">EMI Payment No of Months</label>
+                      </div>
+                    </div>
+    
+                    {% comment %} <div class="col-md-4">
+                        <div class="form-group">
+                          <input type="number" class="form-control" id="intarest_total_amnount" name="intarest_total_amnount" required
+                            value="{{ loan_instance.intarest_total_amnount }}" readonly>
+                          <span class="bar"></span>
+                          <label for="intarest_total_amnount">Total Interest Amount</label>
+                        </div>
+                    </div> {% endcomment %}
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label class="form-label">Installment Mode</label>
+                        <select class="form-control select2" id="installment_mode" name="installment_mode" data-title="Installment Mode" required>
+                          <option value="" disabled selected>Installment Mode</option>
+                          <option value="Fixed" {% if loan_instance.installment_mode == "Fixed" %} selected {% endif %}>Fixed</option>
+                          <option value="Varible" {% if loan_instance.installment_mode == "Varible" %} selected {% endif %}>Varible</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="no_of_due_month" name="no_of_due_month" 
+                          value="{{ loan_instance.no_of_due_month }}" title="this is number field" readonly>
+                        <span class="bar"></span>
+                        <label for="no_of_due_month">EMI Payment No of Months</label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                          <input type="number" class="form-control" id="rescheduled_monthly_loan_amount" name="rescheduled_monthly_loan_amount" 
+                            value="{{ loan_instance.rescheduled_monthly_loan_amount }}" readonly>
+                          <span class="bar"></span>
+                          <label for="rescheduled_monthly_loan_amount">Rescheduled Monthly Loan Amount</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="rescheduled_monthly_interest_amount" name="rescheduled_monthly_interest_amount" 
+                          value="{{ loan_instance.rescheduled_monthly_interest_amount }}" readonly>
+                        <span class="bar"></span>
+                        <label for="rescheduled_monthly_interest_amount">Rescheduled Monthly Interest Amount</label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="no_of_due_month" name="no_of_due_month" required
+                          value="{{ loan_instance.no_of_due_month }}" title="this is number field" readonly>
+                        <span class="bar"></span>
+                        <label for="no_of_due_month">EMI Payment No Due Months</label>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <div class="col-md-4">
+                        </div>
+                        <div class="col-md-3 ml-auto mt-2">
+                          <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>
+                            {{action.btnTxt}}
+                          </button>
+                        </div>
+                        <div class="col-md-4">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form> 
+          </div>
+      </div>
+  </div>
+</div>
+  
+
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+  var nowDate = new Date();
+  var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+  $('.date_of_recheduling').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    {% comment %} maxDate: today, {% endcomment %}
+    locale: {
+        format: 'DD-MMM-YYYY'
+    },
+    autoUpdateInput: false
+}).on("apply.daterangepicker", function (e, picker) {
+    picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+$(document).ready(function () {
+
+  $('table.display').DataTable({
+
+  "order": [[ 0, 'desc' ], [ 1, 'desc' ]],
+  responsive:true,
+  paging: true,
+
+  bInfo: false
+});
+});
+
+$('.emi_start_date').daterangepicker({
+  singleDatePicker: true,
+  showDropdowns: true,
+  {% comment %} minDate: today, {% endcomment %}
+  locale: {
+      format: 'DD-MMM-YYYY'
+  },
+  autoUpdateInput: false
+}).on("apply.daterangepicker", function (e, picker) {
+  picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+
+{% comment %} $('#employee').on('change', function () { 
+  if($('#employee option:selected').length > 0){  
+      $.ajax({ 
+          cache: false, 
+          url: "{% url 'hr:get_loan_info' %}", 
+          type: "POST", 
+          data: { employee : $(this).val() }, 
+          success: function (data) {
+            $('#interest_rate').val(data["interest_rate"]);
+            $('#interest_rate').parent().addClass('focused');
+          },
+          error: function (xhr, desc, err) { 
+            errorMsg(err) 
+          } 
+     }); 
+  } 
+}); {% endcomment %}
+</script>
+{% endblock %}

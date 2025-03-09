@@ -1,0 +1,205 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} Employee {% endblock %}
+
+{% block content %}
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0"> {{ action.name }} Employee</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/helpdesk/employee-list/" class="btn btn-sm btn-info" title="Custom Button"><i
+                  class="ti-view-list-alt"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <form class="floating-labels custom-color rounded-lg p-3" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-9">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="text" class="form-control" id="employee_id" name="employee_id" required
+                  value="{{ employee.employee_id }}">
+                <span class="bar"></span>
+                <label for="employee_id">Employee ID</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="text" class="form-control" id="employee_name" name="name" required
+                  value="{{ employee.name }}">
+                <span class="bar"></span>
+                <label for="employee_name">Name</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="email" class="form-control" id="employee_email" name="email" required
+                  value="{{ employee.email }}">
+                <span class="bar"></span>
+                <label for="employee_email">Email</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="company">Company</label>
+                <select class="form-control text-capitalize select2" id="company" name="company"
+                  data-title="Company" required>
+                  <option value="" disabled selected></option>
+                  {% for data in company_list %}
+                  <option value="{{data.short_name}}" {% if employee.company == data.short_name %} selected {% endif %}>{{data.name}}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="department">Department</label>
+                <select class="form-control text-capitalize select2" name="department" data-title="Department"
+                  required>
+                  <option value="" disabled selected></option>
+                  {% for data in department_list %}
+                  <option value="{{data.name}}" {% if employee.department == data.name %} selected {% endif %}>
+                    {{data.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="form-label">Designation</label>
+                <select class="form-control text-capitalize select2" name="designation" data-title="Designation"
+                  required>
+                  <option value="" disabled selected></option>
+                  {% for data in designation_list %}
+                  <option value="{{data.name}}" {% if employee.designation == data.name %} selected {% endif %}>
+                    {{data.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="form-label">Report To</label>
+                <select class="select2 form-control custom-select" name="report_to" data-title="Report To" required>
+                  <option value="" disabled selected></option>
+                  {% for data in dept_head_list %}
+                  <option value="{{data.employee_id}}" {% if data.employee_id == employee.report_to %} selected {% endif %}>{{data.name}}({{data.employee_id}})</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="text" class="form-control" {% if employee.phone %} value="{{ employee.phone }}" {% endif %}
+                  name="phone">
+                <span class="bar"></span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="form-label">PABX</label>
+                <input type="number" class="form-control" {% if employee.pabx %} value="{{ employee.pabx }}" {% endif %}
+                  name="pabx">
+                <span class="bar"></span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="form-label">Sitting Location </label>
+                <select class="form-control select2" id="location" name="location" data-title="Sitting Location" required>
+                  <option value="" disabled selected>Select your sitting location</option>
+                  <option value="Head Office" {% if employee.location == "Head Office" %} selected {% endif %}>Head Office</option>
+                  <option value="Factory" {% if employee.location == "Factory" %} selected {% endif %}>Factory</option>
+                  <option value="EKCL" {% if employee.location == "EKCL" %} selected {% endif %}>EKCL</option>
+                  <option value="EKCL1" {% if employee.location == "EKCL1" %} selected {% endif %}>EKCL1</option>
+                  <option value="EDIL" {% if employee.location == "EDIL" %} selected {% endif %}>EDIL</option>
+                  <option value="SFM" {% if employee.location == "SFM" %} selected {% endif %}>SFM</option>
+                  <option value="Tamanna Tex" {% if employee.location == "Tamanna Tex" %} selected {% endif %}>Tamanna Tex</option>
+                  <option value="Fiza Tex" {% if employee.location == "Fiza Tex" %} selected {% endif %}>Fiza Tex</option>
+                  <option value="EPL" {% if employee.location == "EPL" %} selected {% endif %}>EPL</option>
+                  <option value="EAL" {% if employee.location == "EAL" %} selected {% endif %}>EAL</option>
+                  <option value="L'Esquire" {% if employee.location == "L'Esquire" %} selected {% endif %}>L'Esquire
+                  <option value="BBL Onik Tower" {% if employee.location == "BBL Onik Tower" %} selected {% endif %}>BBL Onik Tower
+                  <option value="Square Hospitals" {% if employee.location == "Square Hospitals" %} selected {% endif %}>Square Hospitals
+                  <option value="Mohammadpur" {% if employee.location == "Mohammadpur" %} selected {% endif %}>Mohammadpur
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label class="form-label">Blood Group</label>
+                <select class="form-control select2" id="blood_group" name="blood_group" data-title="Blood Group" required>
+                  <option value="N/A" selected>N/A</option>
+                  <option value="A+" {% if employee.blood_group == "A+" %} selected {% endif %}>A+</option>
+                  <option value="A-" {% if employee.blood_group == "A-" %} selected {% endif %}>A-</option>
+                  <option value="B+" {% if employee.blood_group == "B+" %} selected {% endif %}>B+</option>
+                  <option value="B-" {% if employee.blood_group == "B-" %} selected {% endif %}>B-</option>
+                  <option value="AB+" {% if employee.blood_group == "AB+" %} selected {% endif %}>AB+</option>
+                  <option value="AB-" {% if employee.blood_group == "AB-" %} selected {% endif %}>AB-</option>
+                  <option value="O+" {% if employee.blood_group == "O+" %} selected {% endif %}>O+</option>
+                  <option value="O-" {% if employee.blood_group == "O-" %} selected {% endif %}>O-</option>
+                  <option value="Bombay" {% if employee.blood_group == "Bombay" %} selected {% endif %}>Bombay</option>
+                  <option value="INRA" {% if employee.blood_group == "INRA" %} selected {% endif %}>INRA</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3 mb-5">
+              <label class="mt-2">
+                <input type="checkbox" {% if employee.status == False %} unchecked {% else %} checked {% endif %} name="status"
+                  class="js-switch" data-color="#009efb" data-size="mini" />
+                Status
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-md-12">
+              Photo
+              <div class="form-group">
+                <input type="file" name="photo" class="dropify" data-height="150" data-show-remove="false"
+                  {% if employee.photo %} data-default-file="/assets/uploads{{employee.photo}}" {% else %} data-default-file="{% static 'images/users/employee.png'%}" {% endif %}>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                Signature
+                <input type="file" name="signature" class="dropify" data-height="80" data-show-remove="false" {% if employee.signature %} data-default-file="/assets/uploads{{employee.signature}}" {% endif %}>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 ml-auto mt-2">
+          <div class="button-group">
+            <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+              <span class="btn-label"><i class="fa fa-check"></i></span>
+              {{action.btnTxt}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load filter %}
+{% load sc_filters %}
+
+{% block page_title %}{{ action.name }} Device Assessment {% endblock %}
+
+{% block content %}
+<style>
+    .bootstrap-tagsinput {
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        border: 0px solid #c1c1c1;
+        border-bottom: 1px solid #c1c1c1;
+    }
+
+    .twitter-typeahead {
+        width: auto;
+    }
+
+    .floating-labels .custom-control-label {
+        position: relative;
+        cursor: context-menu;
+    }
+
+    .floating-labels .custom-label {
+        position: relative;
+    }
+</style>
+
+<div class="card border-danger">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 align-self-center">
+                <h4 class="text-themecolor mb-0">New Device Assessment Entry</h4>
+            </div>
+            <div class="col-md-6 align-self-center text-right">
+                <div class="d-flex justify-content-end align-items-center">
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        <div class="btn-group" role="group" aria-label="First group">
+                            <a href="/helpdesk/device-assessment-list/" class="btn btn-sm btn-info" title="Custom Button"><i
+                                    class="ti-view-list-alt"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body custom-color rounded-lg p-3 custom-rl">
+        <form class="floating-labels" method="post" id="dev_form">
+            {% csrf_token %}
+            <input type="hidden" name="hd_issue" value="{{hd_issue.id}}" />
+            <div class="row">
+                <div class="col-md-8 mt-4">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="assessment_for">Employee</label>
+                                        <select class="form-control text-capitalize select2" id="assessment_for" name="assessment_for" data-title="Employee" required>
+                                            <option value="" disabled selected></option>
+                                            {% for data in employee_list %}
+                                                <option value="{{data.id}}">{{data.name}}({{data.employee_id}})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="device">Device</label>
+                                        <select class="form-control text-capitalize select2" id="device" name="device"
+                                            data-title="Device">
+                                            <option value="">Select Device</option>
+                                            {% for data in device_list %}
+                                                <option value="{{data.device_name}}">{{data.device_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label for="item">Inventory Item</label>
+                                <select class="form-control text-capitalize select2" id="item" name="item"
+                                    data-title="Inventory Item" multiple>
+                                    {% for item in item_list %}
+                                        <option value="{{item.id}}">{{item}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label class="custom-label mr-3">Type : </label>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="new_type" name="device_type" value="New" checked
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="new_type">New</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="replace_type" value="Replace" name="device_type"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="replace_type">Replace</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="Used_type" value="Used" name="device_type"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="Used_type">Used</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="handover_type" value="Handover" name="device_type"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="handover_type">Handover</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="Service_type" value="Service" name="device_type"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="Service_type">Service</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label class="custom-label mr-3">Is there any need for after office-hour communication
+                                    by mail:
+                                </label>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="q11" name="question1" checked
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="q11">Yes</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="q12" name="question1" class="custom-control-input">
+                                    <label class="custom-control-label" for="q12">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label class="custom-label mr-3">Does S/he frequently interact with
+                                    suppliers/customers/others?
+                                </label>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="q21" name="question2" checked
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="q21">Yes</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="q22" name="question2" class="custom-control-input">
+                                    <label class="custom-control-label" for="q22">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label class="custom-label mr-3">Does S/he duty keep him/her out of the office?
+                                </label>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="q31" name="question3" checked
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="q31">Yes</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="q32" name="question3" class="custom-control-input">
+                                    <label class="custom-control-label" for="q32">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <textarea rows="4" class="form-control tinymce" id="note" name="note"></textarea>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" id="user_profile" style="display:none">
+                    <div class="image-flip">
+                        <div class="mainflip flip-0">
+                            <div class="frontside">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <p><img class=" img-fluid" id="emp_photo" src=""
+                                                alt="card image"></p>
+                                        <h4 class="card-title" id="emp_name"></h4>
+                                        <h5 class="card-title" id="company"></h5>
+                                        <p class="card-text" id="department"></p>
+                                        <p class="card-text" id="designation"></p>
+                                        <p class="card-text" id="reporting_to"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if hd_issue %}
+                    <div class="mt-4">
+                        <h4 class="font-weight-bold">Issue Ref : {{hd_issue.ref}} {% if hd_issue.attachment %} | {% for a in hd_issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}</h4>
+                        <p>{{hd_issue.description}}</p>
+                        {% for assm in hd_issue.deviceassessments_set.all %}
+                        <a class="btn btn-link d-block text-info font-weight-bold" href="{% url 'desk:assessment_approved_report' assm.id %}" target="_blank">Device Assesment Generated <br /> Status : {{assm.get_status_display}}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% variable_assign_tag True as hstatus %}
+            {% if hd_issue.deviceassessments_set.count > 0 %}
+            {% variable_assign_tag False as hstatus %}
+            {% endif %}
+            {% if hstatus %}
+            <div class="row">
+                <div class="col-md-3 ml-auto mt-2">
+                    <div class="button-group">
+                        <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success" id="submit_ass">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+ 
+
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/tinymce/tinymce.min.js' %}"></script>
+<script>
+    if ($(".tinymce").length > 0) {
+        tinymce.init({
+            selector: "textarea.tinymce",
+            theme: "modern",
+            height: 120,
+            menubar: false,
+            plugins: [
+                "advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
+                "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+                "save table contextmenu directionality emoticons template paste textcolor"
+            ],
+            toolbar: "bold underline | forecolor backcolor | numlist",
+
+        });
+    }
+
+    $("#assessment_for").change(function() {
+        $.ajax({
+            url: "{% url 'desk:getUser' %}",
+            type: "POST", // http method
+            data: {
+            emp_id: $(this).val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+            if (data['photo'] != "None") $("#emp_photo").attr("src", "/assets/uploads/"+data['photo']);
+            else $("#emp_photo").attr("src", "/assets/images/users/user.png");
+            $("#emp_photo").addClass("img-fluid");
+            $("#user_profile").show();
+            $("#emp_name").html(data['user'][0].name);
+            $("#company").html(data['user'][0].company__name);
+            $("#department").html(data['user'][0].department__name);
+            $("#designation").html(data['user'][0].designation__name);
+            $("#reporting_to").html("<b>Dept. Head: </b>"+data['user'][0].reporting_to__name+"("+data['user'][0].reporting_to__employee_id+")");
+            },
+        });
+    });
+
+    $("#assessment_for").val('{{hd_issue.issuer_id}}').trigger("change");
+
+    $('body').on('click', '#submit_ass', function (e) {
+        if ($("#device").val() || $("#item").val()){
+            $("#dev_form").submit();
+        } else {
+            toasterMsg("warning", "Device / Item Missing. One of them must be selected!");
+        }
+    });
+</script>
+{% endblock %}

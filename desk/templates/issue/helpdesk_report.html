@@ -1,0 +1,145 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load filter %}
+
+{% block page_title %}Helpdesk {% endblock %}
+
+{% block add_css %}
+
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  .custom-height {
+    min-height: calc(100vh - (280px)) !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Helpdesk Report</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">
+    <form class="floating-labels custom-color rounded-lg p-3" method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-3 align-self-center">
+            <div class='input-group mb-0'>
+                <input type='text'placeholder="Date" class="form-control linkedCalendars" {% if issueDateRange %} value="{{issueDateRange}}" {% else %} value="" {% endif %} autocomplete="off" name="issueDateRange" id='issueDateRange' />
+                <span class="bar"></span>
+            </div>         
+        </div>
+        <div class="col-md-3 align-self-center">
+            <div class="form-group mb-0">
+                {% comment %} <label for="resolver" class="form-label">Resolver</label> {% endcomment %}
+                <select class="form-control select2" id="resolver" name="resolver" data-title="Resolver">
+                    <option value="" disabled selected></option>
+                    {% for data in resolver_list %}
+                    <option value="{{data.id}}" {% if resolver == data.id %} selected {% endif %}>{{data.name}}</option>
+                    {% endfor %}
+                </select> 
+                <span class="bar"></span>
+            </div>
+        </div>
+        <div class="col-md-2 align-self-center">
+            <div class="form-group mb-0">
+                {% comment %} <label for="issue_type" class="form-label">Issue Type</label> {% endcomment %}
+                <select class="select2 form-control custom-select" id="issue_type" name="issue_type" data-title="Issue Type">
+                    <option value="" disabled selected>Unassigned</option>
+                    <option value="1" {% if issue_type == "1" %} selected {% endif %}>Unassigned</option>
+                    <option value="2" {% if issue_type == "2" %} selected {% endif %}>Assigned</option>
+                    <option value="3" {% if issue_type == "3" %} selected {% endif %}>Running</option>
+                    <option value="4" {% if issue_type == "4" %} selected {% endif %}>Solved</option>
+                </select>
+                <span class="bar"></span>
+            </div>
+        </div>
+        <div class="col-md-2 align-self-center ml-auto">
+            <div class="text-center mb-0 mt-1">
+                <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mx-auto flo" id="btnIssueSubmit">
+                    <span class="btn-label"><i class="fa fa-search"></i></span>
+                    Search
+                </button>
+            </div>
+        </div>
+        {% if issues %}
+          <div class="col-md-2 align-self-center">
+            <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-outline-info">
+              Total: {{ issues.count }}
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    </form>
+    <div class="table-responsive custom-color custom-height rounded-lg p-3 mt-3">
+      <table id="issue_table" class="table table-border card-table table-vcenter" style="width:100%">
+        <thead>
+          <tr>
+            <th class="d-sm-table-cell">Issue ID</th>
+            <th class="d-md-table-cell" style="width:25%">Description</th>
+            <th class="d-md-table-cell">Issuer</th>
+            <th class="d-md-table-cell">Issue Date</th>
+            <th class="d-md-table-cell">Resolve Date</th>
+            <th class="d-md-table-cell">Resolver</th>
+            <th class="d-md-table-cell">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for issue in issues %}
+          <tr id="row_{{issue.id}}">
+            <td class="">{{ issue.ref }}</td>
+            <td style="width:25%">
+              <span class="{{issue.id}}_show">{{ issue.description|truncatechars:50 }} {% if issue.attachment %} {% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %} {% if issue.description|length > 50 %} <i class='fas fa-arrow-circle-down' onclick="expand_td('{{issue.id}}');" style="color:blue;"></i> {% endif %} </span>
+              <span class="{{issue.id}}_hide" style="display:none">{{ issue.description}} {% if issue.attachment %}{% for a in issue.attachment|comma_split %}<a href="/assets/uploads/{{a}}" target="_blank"><i class='icon-link'></i> </a> {% endfor %} {% endif %}<i class='fas fa-arrow-circle-up' onclick="close_td('{{issue.id}}');" style="color:blue;"></i></span>
+            </td>
+            <td>
+              <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.issuer_id}}" class="user_info text-info" data-target="#userModal">
+                {{ issue.issuer }}</a>  
+            </td>
+            <td class="">{{ issue.created_at|date:"d-b-Y h:i A"|upper }}</td>
+            <td class="">{% if issue.resolved_at %}{{ issue.resolved_at|date:"d-b-Y h:i A"|upper }}{% endif %}</td>
+            <td class="">
+              <a href="#aboutModal" data-toggle="modal" data-id="{{ issue.assigned_to}}" class="user_info text-info" data-target="#userModal">
+                {{ issue.assigned_to_name }}</a>
+            </td>
+            <td class="text-left">{{issue.get_status_display }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-danger text-center font-weight-bold">No Issue Found!</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'dist/js/desk.js' %}"></script>
+<script src="{% static 'dist/js/moment.min.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.linkedCalendars').daterangepicker({
+        linkedCalendars: true,
+        autoUpdateInput:false, 
+        autoApply: false,
+    });
+
+    $('.linkedCalendars').on('cancel.daterangepicker', function(ev, picker) {
+        $('.linkedCalendars').val('');
+    });
+
+    $('input[name="issueDateRange"]').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    })
+</script>
+{% endblock %}

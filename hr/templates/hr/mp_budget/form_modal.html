@@ -1,0 +1,112 @@
+<div class="modal fade mt-5" id="mpBudgetModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <form class="floating-labels" id="mp_budget_form" method="POST" action="{% url "hr:mp_budget_create" %}"  enctype="multipart/form-data">{% csrf_token %}
+                <div class="modal-header mb-2">
+                    <h4 class="mb-0 mp_budget_head">Man Power Budget</h4>
+                    <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="mainDiv" style="min-height:100px;max-height:400px;overflow-y: scroll;overflow-x: hidden;">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="budget_year">Budget Year</label>
+                                    <input class="form-control" type="number" id="budget_year" data-title="Budget Year" name="budget_year" value="{% now 'Y' %}" required/>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="company">Company</label>
+                                    <select class="form-control text-capitalize select2  bg-transparent" name="company" id="company" {% if not hr_roles %} disabled {% endif %}>
+                                        <option value="" disabled selected>All Company</option>
+                                        {% for c in company_list %}
+                                        <option value="{{c.id}}" {% if company_id == c.id %} selected {% endif %}>{{c.short_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label for="department">Department</label>
+                                    <select class="form-control text-capitalize select2 bg-transparent" name="department" id="department" {% if not hr_roles %} disabled {% endif %}>
+                                        <option value="" disabled selected>All Department</option>
+                                        {% for d in department_list %}
+                                        <option value="{{d.id}}" {% if department_id == d.id %} selected {% endif %}>{{d.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <b>Designation</b>
+                            </div>
+                            <div class="col-md-3">
+                                <b>Person Limit</b>
+                            </div>
+                            <div class="col-md-4">
+                                <b>Value Limit</b>
+                            </div>
+                            <div class="col-md-1">  </div>
+                        </div>
+                        
+                        <div class="row mb-4 designationRow">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <input class="form-control serial" type="hidden" id="serial_1" name="serial" value="1"/>
+                                    <select class="form-control text-capitalize select2 designation" name="designation[1]" id="designation_1" onchange="checkDuplicateDesignation(this,'mpBudgetModal');" required>
+                                        <option value="" disabled selected>All Designation</option>
+                                        {% for d in designation_list %}
+                                        <option value="{{d.id}}">{{d.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <input class="form-control personlimit" type="number" id="personlimit_1" min="1" max="5000" onkeyup="enforceMinMax(this);" placeholder="Person Limit" name="person_limit[1]" required/>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <input class="form-control valuelimit" type="number" id="valuelimit_1" min="1" max="2147483646" onkeyup="enforceMinMax(this);" placeholder="Value Limit" name="value_limit[1]" required/>
+                                    <span class="bar"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group mt-4">
+                                    <a href="#" class="text-success addRow mt-4" onclick="copyRow(this,'mpBudgetModal');" id="addRow_1"><i class="fa fa-plus"></i></a>&nbsp;
+                                    <a href="#" class="text-danger removeRow mt-4" onclick="removeRow(this,'create','mpBudgetModal');" id="removeRow_1"><i class="fa fa-trash"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-2">
+                            <input type="hidden" name="submit_type" id="submit_type" value="">
+                            <button type="submit" class="btn btn-sm btn-block btn-rounded btn-success item-add-btn submit-btn" value="submit" name="btnSave"><span class="btn-label"><i class="fa fa-check"></i></span> Submit </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-sm btn-block btn-rounded btn-info item-add-btn submit-btn" value="save" name="btnSave"><span class="btn-label"><i class="fa fa-check"></i></span> Save </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(".submit-btn").on('click', function(){
+    $("#submit_type").val(this.value)
+})
+
+</script>

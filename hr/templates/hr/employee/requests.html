@@ -1,0 +1,86 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Employee Update Requests{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-8 align-self-center">
+                <h4 class="text-themecolor mb-0">Employee Update Requests</h4>
+            </div>
+            <div class="col-md-4 align-self-center text-right"></div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="">
+            <table id="users-table" class="table table-border card-table table-vcenter scrollerDT" data-url="{% url 'hr:get_update_requests_for_dataTable' %}">
+                <thead>
+                    <tr class="text-center">
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Request for</th>
+                        <th>Requested By</th>
+                        <th>Requested At</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div id="modal-update-request-info"></div>
+                <div class="row">
+                    <input type="hidden" id="request_id">
+                    <div class="col-md-5 offset-md-1 mt-2">
+                        <button data-val="update" type="button" class="update-request btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Update
+                        </button>                 
+                    </div>
+                    <div class="col-md-5 mt-2">
+                        <button data-val="reject" type="button" class="update-request btn btn-sm btn-block waves-effect waves-light btn-rounded btn-danger">
+                            <span class="btn-label"><i class="fa fa-close"></i></span> Reject
+                        </button>                 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/scrollerDT.html' %}
+{% include 'inc/profile_modal.html' %}
+<script>
+    $("body").on('click', '.update_info', function() {
+        $("#request_id").val($(this).data('id'));
+        $.ajax({
+            type: "POST", dataType: 'json',
+            data: {request_id: $(this).data('id')},
+            url : "{% url 'hr:get_update_request_info' %}",
+            success: function (data) {
+                if(data.msg != ''){ toasterMsg("warning", data.msg, 5000); }
+                else{ $("#modal-update-request-info").html(data.html); }
+            }
+        });
+    });
+    $("body").on('click', '.update-request', function() {
+        $.ajax({
+            type: "POST", dataType: 'json', url : "{% url 'hr:update_request_info' %}",
+            data: {request_id: $("#request_id").val(), 'rstatus': $(this).data('val')},
+            success: function (data) { toasterMsg("success", data.msg, 3000); 
+            $("#infoModal").hide(); setTimeout(function(){location.reload();},3000);}
+        });
+    });
+</script>
+{% endblock %}

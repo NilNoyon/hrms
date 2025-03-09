@@ -1,0 +1,210 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Attendance Entry{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Attendance Entry</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'hr:attendance_list' %}" class="btn btn-sm btn-info" title="Custom Button"><i class="ti-view-list-alt"></i></a>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form class="" method="post" id="form">
+                {% csrf_token %}
+                <div class="row floating-labels">
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <select class="form-control text-capitalize select2" name="company" id="company"
+                                data-title="Company">
+                                <option value="" disabled selected></option>
+                                {% for data in company_list %}
+                                <option value="{{data.id}}">{{data.short_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select class="form-control text-capitalize select2" name="department" id="department"
+                                data-title="Department">
+                                <option value="" disabled selected></option>
+                                {% for data in department_list %}
+                                <option value="{{data.id}}">{{data.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label class="form-label">Designation</label>
+                            <select class="form-control text-capitalize select2" name="designation" id="designation"
+                                data-title="Designation">
+                                <option value="" disabled selected></option>
+                                {% for data in designation_list %}
+                                <option value="{{data.id}}">{{data.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label class="form-label" for="user">User</label>
+                            <select class="form-control text-capitalize select2 user" id="user" name="user" data-title="User">
+                                <option value="" disabled selected></option>
+                                {% for data in user_list %}
+                                <option value="{{data.id}}">{{data.name}}({{data.employee_id}})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <label for="attendance_date">Attendance Date</label>
+                            <input type="text" data-title="Attendance Date" class="form-control singledate" 
+                                name="attendance_date" id="attendance_date" required />
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-group">
+                            <button type="button" id="btnSetAccessControl" class="btn btn-info btn-block">Search</button>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-border floating-labels">
+                    <thead>
+                        <tr class="text-center">
+                            <th>Employee</th>
+                            <th>Designation</th>
+                            <th width="13%">Shift</th>
+                            <th width="13%">Location</th>
+                            <th width="13%">In Time</th>
+                            <th width="13%">Out Time</th>
+                            <th width="13%">Home Office</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="py-0">
+                                {{ user.employee_id }} - {{ user.name }}
+                                <input type="hidden" name="users" value="{{user.id}}" />
+                            </td>
+                            <td>
+                                {{ user.designation.name }}
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <select class="form-control text-capitalize select2" name="shift[{{user.id}}]" id="shift"
+                                        data-title="Shift">
+                                        <option value="" disabled selected></option>
+                                        {% for shift in shifts %}
+                                        <option value="{{shift.id}}">{{shift.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <select class="form-control text-capitalize select2" name="location[{{user.id}}]" id="location"
+                                        data-title="Location">
+                                        <option value="" disabled selected></option>
+                                        {% for location in locations %}
+                                        <option value="{{location.id}}">{{location.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <input type="time" data-title="In Time" class="form-control timeonly" 
+                                        name="in_time[{{user.id}}]" id="in_time" placeholder="In Time" />
+                                    <span class="bar"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <input type="time" data-title="Out Time" class="form-control timeonly" 
+                                        name="out_time[{{user.id}}]" id="out_time" placeholder="Out Time" />
+                                    <span class="bar"></span>
+                                </div>
+                            </td>
+                            <td class="text-center" style="position: relative; display: flex; justify-content: center; align-items: center;">
+                                <label class="mx-auto mt-2">
+                                    <input type="checkbox" data-id="{{user.id}}" name="outside_office[{{user.id}}]" class="js-switch user-update-switch" 
+                                        data-color="#009efb" data-size="mini" />
+                                </label>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-md-3 ml-auto mt-2">
+                        <div class="button-group">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success receive-goods">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        var d = new Date(), nowDate = new Date(d.setDate(d.getDate()-1));
+        var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+        $('.singledate').daterangepicker({
+            singleDatePicker: true,
+            autoUpdateInput : false,
+            minDate : today,
+            locale  : {format: 'DD-MMM-YYYY'},
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+        });
+
+        $('.timeonly').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            timePicker: true,
+            timePicker24Hour: true,
+            timePickerIncrement: 1,
+            timePickerSeconds: true,
+            autoUpdateInput : false,
+            locale: { format: 'HH:mm:ss' }
+        }).on('show.daterangepicker', function (ev, picker) {
+            picker.container.find(".calendar-table").hide();
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            picker.element.val('');
+            $(this).parent().removeClass("focused");
+        });
+    });
+</script>
+{% endblock %}

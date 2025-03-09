@@ -1,0 +1,187 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load humanize %}
+
+{% block page_title %}Pay Slip{% endblock %}
+
+{% block add_css %}
+    <style>
+        table#payslip-table tbody td:nth-child(n+6) {
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-12 align-self-center">
+        <h4 class="text-themecolor mb-0">Pay Slip</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+    <form class="floating-labels mt-2" id="report_form" method="post" action='{% url "hr:get_payslip_report" %}'>
+      {% csrf_token %}
+      <input type="hidden" id="report_type" name="report_type" value="print" />
+      <input type="hidden" id="report_format" name="report_format" value="bn" />
+      <div class="row">
+        <div class="col-md">
+            <div class="form-group mb-3">
+                <label for="route_type">Year</label>
+                <select class="form-control text-capitalize select2" name="year" id="year" data-title="year" required />
+                    {% for y in years %}
+                        <option value="{{y}}">{{y}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-group mb-3">
+                <label for="month">Month</label>
+                <select class="form-control text-capitalize select2" name="month" id="month" data-title="Month" required />
+                    {% for m in months %}
+                        <option value="{{m.0}}">{{m.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>  
+        <div class="col-md">
+            <div class="form-group mb-3">
+                <label for="company">Company</label>
+                <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required />
+                    <option value="" disabled selected></option>
+                    {% for company in companies %}
+                    <option value="{{company.id}}">{{company.short_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-3">
+              <label for="company">Department</label>
+              <select class="form-control text-capitalize select2" name="department" id="department" data-title="Department">
+                  <option value="" disabled selected></option>
+                  {% for department in departments %}
+                  <option value="{{department.id}}">{{department.title}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-3">
+              <label for="company">Designation</label>
+              <select class="form-control text-capitalize select2" name="designation" id="designation"
+                  data-title="Designation">
+                  <option value="" disabled selected></option>
+                  {% for data in designation_list %}
+                  <option value="{{data.id}}">{{data.name}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-3">
+              <label for="employee_category">Employee Category</label>
+              <select class="form-control text-capitalize select2" name="employee_category" id="employee_category" data-title="Employee Category" />
+                  <option value="" disabled selected></option>
+                  {% for ec in employee_categories %}
+                  <option value="{{ec.id}}">{{ec.value}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md-9 mt-2">
+            <div class="form-group mb-0">
+                <label class="form-label" for="user">Employee</label>
+                <select class="form-control select2 user" id="user" name="user" data-title="Employee" multiple>
+                </select>
+            </div>
+        </div> 
+        <div class="col-md-3 mt-2">
+            <div class="row">
+                <div class="col-md">
+                    <button type="button" class="btn btn-block waves-effect waves-light btn-outline-success submit_button">
+                        <span class="btn-label"><i class="fas fa-search"></i></span>
+                    </button>
+                </div> 
+                <div class="col-md">
+                    <button class="btn btn-block btn-outline-warning waves-effect waves-light export_button" data-val="BN" type="button">
+                        <span class="btn-label">BN <i class="ti-printer"></i></span>
+                    </button>
+                </div> 
+                <div class="col-md">
+                    <button class="btn btn-block btn-outline-warning waves-effect waves-light export_button" data-val="EN" type="button">
+                        <span class="btn-label">EN <i class="ti-printer"></i></span>
+                    </button>
+                </div>  
+            </div>  
+        </div>  
+      </div>   
+    </form>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered custom-table table-nowrap mb-0 hide" id="payslip-table">
+            <thead>
+              <tr class="text-center">
+                  <th class="">Employee ID</th>
+                  <th class="">Company</th>
+                  <th class="">Department</th>
+                  <th class="">Designation</th>
+                  <th class="">Staff Category</th>
+                  <th class="">Gross Salary</th>
+                  <th class="">Allowance Payable</th>
+                  <th class="">Deduction Amount</th>
+                  <th class="">Net Payable (BDT)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>      
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script>
+    $("body").on("click", ".submit_button", function(e){
+        $("#payslip-table").hide();
+        $.ajax({type: "POST",
+            url     : '{% url "hr:get_payslip_report" %}',
+            data    : { year: $("#year").val(),
+                user       : $("#user").val(), 
+                month       : $("#month").val(), 
+                company     : $("#company").val(),
+                department  : $("#department").val(),
+                employee_category : $("#employee_category").val(),
+                report_type : 'view'
+            }, success : function (data) {
+                $("#payslip-table").show();
+                $("#payslip-table tbody").empty().html(data['report_data']);
+            }
+        });
+    });
+    $("body").on("click", ".export_button", function(e){
+        $("#report_form").attr('target', '_blank');
+        $("#report_format").val($(this).data('val'));
+        validateForm($("#report_form"));
+    });
+
+    $("#user").select2({
+        minimumInputLength  : 3,
+        placeholder         : "Employee",
+        allowClear          : true,
+        ajax: {
+            url             : "{% url 'hr:get_employee_data' %}",
+            dataType        : "json",
+            data            : function(term, page) { return { 
+                q : term, company : $("#company").val(),
+                department : $("#department").val() }; 
+            }, processResults  : function (data) { 
+                return { results: data.employee_list }; }
+        },
+    });
+</script>
+{% endblock %}

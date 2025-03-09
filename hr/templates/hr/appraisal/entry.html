@@ -1,0 +1,92 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load humanize %}
+
+{% block page_title %}Appraisal Request{% endblock %}
+
+{% block add_css %}
+    <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-12 align-self-center">
+        <h4 class="text-themecolor mb-0">Appraisal Request</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+    <form class="floating-labels mt-3" method="post" id="form">
+        {% csrf_token %}
+        <input type="hidden" name="last_appraisal_id" value="{{appraisal.id}}">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input class="form-control single_date" id="last_date_of_appraisal" name="last_date_of_appraisal" value="{{appraisal.last_date_of_appraisal|date:'d/m/Y'|default:""}}">
+                    <span class="bar"></span>
+                    <label for="last_date_of_appraisal">Last Appraisal Date :</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <input class="form-control" id="last_increment_amount" name="last_increment_amount" value="{{appraisal.last_increment_amount|default:""}}">
+                    <span class="bar"></span>
+                    <label for="last_increment_amount">Last Increment Amount :</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <textarea rows="4" class="form-control bg-transparent" id="strengths" name="strengths" required>{{appraisal.strengths}}</textarea>
+                    <span class="bar"></span>
+                    <label for="strengths">Strengths :</label>
+                </div>
+            </div>
+    
+            <div class="col-md-6">
+                <div class="form-group">
+                    <textarea rows="4" class="form-control bg-transparent" id="improvement_areas" name="improvement_areas" required>{{appraisal.improvement_areas}}</textarea>
+                    <span class="bar"></span>
+                    <label for="improvement_areas">Improvement Areas :</label>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <textarea rows="4" class="form-control bg-transparent" id="self_justification" name="self_justification" required>{{appraisal.self_justification}}</textarea>
+                    <span class="bar"></span>
+                    <label for="self_justification">Self Justification :</label>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row">
+            <div class="col-md-3 ml-auto mt-2">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+  </div>
+</div>
+{% endblock %}
+
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.single_date').daterangepicker({
+        singleDatePicker: true,
+        autoUpdateInput: false,
+        locale: { format: 'DD/MM/YYYY' },
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+    });
+</script>
+{% endblock %}

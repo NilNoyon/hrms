@@ -1,0 +1,217 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}{{ action.name }} Pf Master {% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-6 align-self-center">
+        <h4 class="text-themecolor mb-0">Employee Enrollment</h4>
+      </div>
+      <div class="col-md-6 align-self-center text-right">
+        <div class="d-flex justify-content-end align-items-center">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group" role="group" aria-label="First group">
+              <a href="/hr/pf-emp-enroll-list/" class="btn btn-sm btn-info" title="Custom Button"><i
+                  class="ti-view-list-alt"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0">  
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+          <a class="nav-link {% if request.session.employee_pf == 'save_pf' or request.session.employee_pf == 'update_pf' %} active {% endif %}" data-toggle="tab" href="#add_Pf_Employee" role="tab"> {{action.name}} </a>
+      </li>
+    </ul>
+    <div class="tab-content tabcontent-border">
+        <div class="tab-pane p-20 {% if request.session.employee_pf == 'save_pf' or request.session.employee_pf == 'update_pf' %} active {% endif %}" id="add_Pf_Employee" role="tabpanel">
+          <form class="floating-labels mt-3" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row">
+                  <div class="col-md-4">
+                      <div class="form-group">
+                          <input type="text" class="form-control" id ="employee" required  "{% if instance.employee_id %} value="{{ instance.employee_id }}--{{instance.name}}" readonly {% endif %} {% if pf_instance %} value="{{ pf_instance.employee_id }}" {% endif %}" readonly>
+                          <span class="bar"></span>
+                          <label for="employee">Employee</label>
+                      </div>
+                  </div>
+
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="basis_of_contribution" name="basis_of_contribution" required
+                          value="On Basic Salary" readonly>
+                        <span class="bar"></span>
+                        <label for="basis_of_contribution">Basis of PF Computation</label>
+                      </div>
+                  </div>
+
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="basic_gross_salary" name="basic_gross_salary" required
+                        {% if instance.salary %} value="{{ instance.salary }}" readonly {% endif %} {% if pf_instance %} value="{{ pf_instance.employee.salary }}" readonly {% endif %}>
+                        <span class="bar"></span>
+                        <label for="salary">Basic/Gross Salary</label>
+                      </div>
+                  </div>
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="policy">Policy</label>
+                        <select class="form-control text-capitalize select2" id="policy" name="policy" data-title="Policy" required >
+                          <option value="" disabled selected></option>
+                          {% for data in policy_list %}
+                            <option value="{{data.id}}" {% if pf_instance.policy_id == data.id %} selected {% endif %}>{{data.pf_policy_heading}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <label for="pf">Provident Fund</label>
+                        <select class="form-control text-capitalize select2" id="pf" name="pf" data-title="Provident Fund" required>
+                          <option value="" disabled selected></option>
+                          {% for data in pf_list %}
+                            <option value="{{data.id}}" {% if pf_instance.pf_id == data.id %} selected {% endif %}>{{data.pf_heading}} </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+  
+                      <input type="text" class="form-control date_Pf_membership" id="date_Pf_membership" name="date_Pf_membership" {% if pf_instance.date_Pf_membership %} value={{pf_instance.date_Pf_membership|date:'d-M-Y'}}{% endif %} required>
+    
+                      <span class="bar"></span>
+    
+                      <label for="date_Pf_membership">PF Membership Date</label>
+    
+                    </div>
+                  </div>  
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <input type="number" class="form-control" id="rate_employee_contribution" name="rate_employee_contribution"
+                        value="10" readonly>
+                      <span class="bar"></span>
+                      <label for="rate_employee_contribution">Rate of Employee's Contribution</label>
+                    </div>
+                  </div>
+  
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <input type="number" class="form-control" id="rate_company_contribution" name="rate_company_contribution"
+                        value ="{{pf_instance.rate_company_contribution}}" readonly required>
+                      <span class="bar"></span>
+                      <label for="rate_company_contribution">Rate of Company's Contribution</label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <input type="number" class="form-control" id="emp_opening_contribution" name="emp_opening_contribution" required
+                        value="{{ pf_instance.emp_opening_contribution }}" title="this is number field">
+                      <span class="bar"></span>
+                      <label for="emp_opening_contribution">Opening Balance of Employee's Contribution</label>
+                    </div>
+                  </div>
+  
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="company_opening_contribution" name="company_opening_contribution" required
+                          value="{{ pf_instance.company_opening_contribution }}">
+                        <span class="bar"></span>
+                        <label for="company_opening_contribution">Opening Balance of Company's Contribution</label>
+                      </div>
+                  </div>
+
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="emp_opening_balance_interest" name="emp_opening_balance_interest" required
+                          value="{{ pf_instance.emp_opening_balance_interest }}">
+                        <span class="bar"></span>
+                        <label for="emp_opening_balance_interest">Opening Balance of Interest(Employee)</label>
+                      </div>
+                  </div>
+
+                  <div class="col-md-4">
+                      <div class="form-group">
+                        <input type="number" class="form-control" id="company_opening_balance_interest" name="company_opening_balance_interest" required
+                          value="{{ pf_instance.company_opening_balance_interest }}">
+                        <span class="bar"></span>
+                        <label for="company_opening_balance_interest">Opening Balance of Interest(Company)</label>
+                      </div>
+                  </div>
+                  <div class="col-md-4 mb-5">
+                    <label class="mt-2">
+                      <input type="checkbox" {% if instance.status == 1 %} checked {%endif%} {% if pf_instance.status_id == 6 %} checked {% else  %} unchecked {%endif%} name="status"
+                          data-color="#009efb" data-size="mini" />
+                      Status
+                    </label>
+                  </div>
+
+                  <div class="col-md-12">
+                      <div class="col-md-4">
+    
+                      </div>
+                      <div class="col-md-3 ml-auto mt-2">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                          <span class="btn-label"><i class="fa fa-check"></i></span>
+                          {{action.btnTxt}}
+                        </button>
+                      </div>
+                      <div class="col-md-4">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form> 
+        </div>
+        </div>
+    </div>
+  </div>
+</div>
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+
+ 
+  var nowDate = new Date();
+  var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+  $('.date_Pf_membership').daterangepicker({
+    singleDatePicker: true,
+    showDropdowns: true,
+    maxDate: today,
+    locale: {
+        format: 'DD-MMM-YYYY'
+    },
+    autoUpdateInput: false
+}).on("apply.daterangepicker", function (e, picker) {
+    picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+$(document).ready(function () {
+$('#policy').change ( function () { 
+  if($(this).val() == 31){
+     $("#rate_company_contribution").val(0);
+     $("#rate_company_contribution").parent().addClass('focused');
+  } 
+  else{
+    $("#rate_company_contribution").val(10);
+    $("#rate_company_contribution").parent().addClass('focused');
+  }
+});
+});
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,155 @@
+{% load sc_filters %}
+{% load humanize %}
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="table-responsive p-3">
+            <table class="table table-border table-striped card-table table-vcenter" id="setup" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="d-sm-table-cell">SL.</th>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Fixed</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Last Updated</th>
+                        <th class="d-sm-table-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for setup in setup_list %}
+                    <tr>
+                        <td class="">{{ forloop.counter }}</td>
+                        <td>{{ setup.name }}</td>
+                        <td>{{ setup.date|ordinal|default_if_none:"" }} {{ setup.get_month_display|default_if_none:"" }}</td>
+                        <td>
+                            <label class="mx-auto">
+                                <input type="checkbox" data-id="{{setup.id}}" data-type="fixed" {% if setup.fixed %}checked{% endif %} name="fixed" 
+                                    class="js-switch holiday-setup-update-switch" data-color="#009efb" data-size="mini" />
+                            </label>
+                        </td>
+                        <td>
+                            <label class="mx-auto">
+                                <input type="checkbox" data-id="{{setup.id}}" data-type="status" {% if setup.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                    class="js-switch holiday-setup-update-switch" data-color="#009efb" data-size="mini" />
+                            </label>
+                        </td>
+                        <td>
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ setup.created_by_id }}" class='user_info text-info' data-target="#userModal">{{ setup.created_by.name }}</a>
+                        </td>
+                        <td>
+                            <a href="#aboutModal" data-toggle="modal" data-id="{{ setup.updated_by_id }}" class='user_info text-info' data-target="#userModal">{{ setup.updated_by.name }}</a>
+                        </td>
+                        <td class="text-left">
+                            <a class="h4 m-r-10 text-success" href="{% url 'hr:holiday_setup_update' setup.id %}">
+                                <span class="icon"><i class="ti-pencil-alt"></i></span>
+                            </a>
+                            <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'hr:holiday_setup_delete' setup.id %}">
+                                <span class="icon"><i class="ti-trash"></i></span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-3 border-left">
+        <div class="card border-danger bg-white">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ saction_name }}</h4>
+                    </div>
+                    {% if sinstance %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'hr:holiday_setup_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                        <i class="ti-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="floating-labels" method="post" id="form" action="{{ saction_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control bg-transparent" id="name" name="name" data-title="Name" value="{{ sinstance.name }}" required />
+                        <span class="bar"></span>
+                        <label for="name">Name</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="form-group">
+                                <label for="route_type">Date</label>
+                                <select class="form-control text-capitalize select2" name="date" id="date" data-title="Date" />
+                                    <option value="" disabled selected></option>
+                                    {% for n in 32|times %}
+                                        {% if not forloop.first %}
+                                            <option value="{{n}}" {% if sinstance.date == n %}selected{% endif%}>{{n|ordinal}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-group">
+                                <label for="month">Month</label>
+                                <select class="form-control text-capitalize select2" name="month" id="month" data-title="Month" />
+                                    <option value="" disabled selected></option>
+                                    {% for m in months %}
+                                        <option value="{{m.0}}" {% if sinstance.month == m.0 %}selected{% endif%}>{{m.1}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>   
+                    </div>
+                    <div class="row"> 
+                        <div class="col-md">
+                            <div class="form-group">
+                                <label class="">
+                                    <input type="checkbox" name="fixed" id="fixed" class="js-switch" 
+                                        data-color="#009efb" data-size="mini" {% if sinstance.fixed %}checked{% endif %} />
+                                    Fixed
+                                </label>
+                            </div>
+                        </div> 
+                        <div class="col-md">
+                            <div class="form-group">
+                                <label class="">
+                                    <input type="checkbox" name="status" id="status" class="js-switch" data-color="#009efb" 
+                                        data-size="mini" {% if sinstance.status.title|lower == 'active' or not instance %}checked{% endif %} />
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="submit_btn" class="mt-4 btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('body').on('click', '.holiday-setup-update-switch', function (e) {
+         var id     = $(this).data('id');
+         var stype  = $(this).data('type');
+         $.ajax({
+            url : "{% url 'hr:holiday_setup_update_fixed_status' %}",
+            type: "POST", dataType: 'json', data: { id:id, stype:stype },
+            success: function (data) {
+                toasterMsg("success", "This Holiday successfully updated!", 5000);
+            },
+         });
+   });
+</script>

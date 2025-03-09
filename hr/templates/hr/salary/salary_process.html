@@ -1,0 +1,172 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load humanize %}
+
+{% block page_title %}Salary Process{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-12 align-self-center">
+        <h4 class="text-themecolor mb-0">Salary Process</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+    <form class="floating-labels mt-2" method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md">
+          <div class="form-group mb-3">
+              <label for="company">Company</label>
+              <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required />
+                  <option value="" disabled selected></option>
+                  {% for company in companies %}
+                  <option value="{{company.id}}">{{company.short_name}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-3">
+              <label for="company">Department</label>
+              <select class="form-control text-capitalize select2" name="department" id="department" data-title="Department" required />
+                  <option value="" disabled selected></option>
+                  {% for department in departments %}
+                  <option value="{{department.id}}">{{department.title}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-3">
+              <label for="employee_category">Employee Category</label>
+              <select class="form-control text-capitalize select2" name="employee_category" id="employee_category" data-title="Employee Category" required />
+                  <option value="" disabled selected></option>
+                  {% for ec in employee_categories %}
+                  <option value="{{ec.id}}">{{ec.value}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+            <div class="form-group mb-3">
+                <label for="route_type">Year</label>
+                <select class="form-control text-capitalize select2" name="year" id="year" data-title="year" required />
+                    {% for y in years %}
+                        <option value="{{y}}">{{y}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-group mb-3">
+                <label for="month">Month</label>
+                <select class="form-control text-capitalize select2" name="month" id="month" data-title="Month" required />
+                    {% for m in months %}
+                        <option value="{{m.0}}">{{m.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>   
+        <div class="col-md">
+          <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success mt-2">
+            <span class="btn-label"><i class="fa fa-check"></i></span> Execute
+          </button>
+        </div>   
+      </div>   
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script>
+
+  function deleteSlabData(id) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'mr-2 btn btn-danger'
+        },
+        buttonsStyling: false,
+    })    
+    swalWithBootstrapButtons.fire({
+        title: "Do you want to delete this salary slab?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.value) {
+
+            var id_url = "/hr/slab/"+id.toString()+"/delete/";
+            $.ajax({
+                url: id_url,
+                type: 'POST',
+                dataType: 'json',
+                async: false,
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $("#"+id.toString()).remove();
+                    Swal.fire({
+                        type: 'success',
+                        title: 'Salary Slab Deleted',
+                        text: data,
+                    });
+                },
+                error: function (data) {
+                    Swal.fire({
+                    type: 'error',
+                    title: 'Something Went Wrong!',
+                    text: data,
+                })
+                }
+            });
+        } 
+    });
+  }
+  $("#grosssalary").on('keyup',function() {
+
+    var elements = document.getElementsById("slab_heads_name");
+    var names = '';
+      for(var i = 0; i < elements.length; i++) {
+          names += elements[i].name;
+      }
+      document.write(names);
+        
+        });
+  
+  function removeRow(src) {
+      var tableRows = document.getElementById(src).querySelectorAll('tr');
+      tableRows.forEach(function(row){
+          if((/^\s*$/).test(row.innerText)){
+              row.parentNode.removeChild(row);
+          }
+      });
+  }
+
+  removeRow('breakdown-table');
+
+  const table = document.querySelector('table');
+
+  let headerCell = null;
+
+  for (let row of table.rows) {
+    const firstCell = row.cells[0];
+    
+    if (headerCell === null || firstCell.innerText !== headerCell.innerText) {
+      headerCell = firstCell;
+    } else {
+      headerCell.rowSpan++;
+      firstCell.remove();
+    }
+  }
+</script>
+{% endblock %}
