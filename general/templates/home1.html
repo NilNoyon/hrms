@@ -266,7 +266,7 @@
                         </div>
                         <div id="dash-board-panel">
                             <div class="card-header">
-                                <h5 style="text-align: center;">Plan vs Achievement as on home1<input type="text" class="singledate bg-transparent" style="border: none;padding-bottom: 10px;" value="{{ operation_bulletin_ekcl.date }}" id="efficiency_date" name="date"></h5>
+                                <h5 style="text-align: center;">Plan vs Achievement as on home1<input type="text" class="singledate bg-transparent" style="border: none;padding-bottom: 10px;" value="" id="efficiency_date" name="date"></h5>
                             </div>
                             <div hidden class="loading" id="loaderModal"></div>
                             <div class="row pb-4 custom-card">
@@ -404,13 +404,13 @@
         
         
         const spinner = document.getElementById("loaderModal");
-        let hide_bulleting_data = "{{hide_bulleting_data|safe}}"
+        let hide_bulleting_data = ""
 
         function getDashBoardData(date){
         
             $('#dash-board-panel').empty();
             $.ajax({
-                url : "{% url "get_dashboard_info" %}",
+                url : "#",
                 type: "POST",
                 data: { date : date},
                 dataType: 'html',

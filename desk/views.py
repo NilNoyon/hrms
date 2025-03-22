@@ -51,7 +51,7 @@ def issue_dashboard(request):
                 if myfile.size < settings.DATA_UPLOAD_LIMIT: 
                     ext = os.path.splitext(myfile.name)[-1].lower()
                     fs = FileSystemStorage()
-                    filename = "helpdesk/"+year+'/'+month+'/'+day +'/'+ref+'-'+str(i)+ext
+                    filename = "supportdesk/"+year+'/'+month+'/'+day +'/'+ref+'-'+str(i)+ext
                     fs.save(filename, myfile)
                     attachment += filename
                     if i != len(files): attachment+= ","
@@ -68,7 +68,7 @@ def issue_dashboard(request):
                 if n_recipient:
                     n_model = 'Issue'
                     n_verb = 'You have A Complain'
-                    n_description = issue_obj.issuer.name+" sent you a complain. Please Check on helpdesk Complain No: #"+issue_obj.ref
+                    n_description = issue_obj.issuer.name+" sent you a complain. Please Check on supportdesk Complain No: #"+issue_obj.ref
                     n_is_repeated = False
                     n_sender = Users.objects.get(id=request.session.get("id"))
                     n_action_url = reverse('desk:issue_dashboard')
@@ -85,7 +85,7 @@ def issue_dashboard(request):
         solved_issue_list = Issue.objects.filter(status = "4").exclude(assigned_to = int(request.session.get("id"))).order_by('-resolved_at','-id')
         textile_issue_list = Issue.objects.filter(fabric_order_no__isnull = False).exclude(assigned_to = int(request.session.get("id"))).order_by('-resolved_at','-id')
         # solved_issue_list = Issue.objects.filter(status = "4").order_by('-resolved_at','-id')
-        # resolver_list = Users.objects.filter(Q(helpdesk_role = 2)|Q(helpdesk_role = 3))
+        # resolver_list = Users.objects.filter(Q(supportdesk_role = 2)|Q(supportdesk_role = 3))
         # context = {'issues': issues, 'resolver_list':resolver_list,'method_chk':method_chk}
         # return render(request, 'issue/issue_entry.html', context)
     # elif int(request.session.get("hd_role")) == 1: #this is for resolver dashboard filtering
@@ -183,7 +183,7 @@ def issue_dashboard_old(request):
         for myfile in files:
             ext = os.path.splitext(myfile.name)[-1].lower()
             fs = FileSystemStorage()
-            filename = "helpdesk/"+year+'/'+month+'/'+day +'/'+ref+'-'+str(i)+ext
+            filename = "supportdesk/"+year+'/'+month+'/'+day +'/'+ref+'-'+str(i)+ext
             fs.save(filename, myfile)
             attachment += filename
             if i != len(files): attachment+= ","
@@ -194,7 +194,7 @@ def issue_dashboard_old(request):
             method_chk = "post"
             
             if issue_obj:
-                hd_manager = Users.objects.filter(helpdesk_role = "3").first()
+                hd_manager = Users.objects.filter(supportdesk_role = "3").first()
                 
                 if hd_manager:
                     # Send Notification
@@ -202,8 +202,8 @@ def issue_dashboard_old(request):
                     n_recipient     = get_object_or_404(Users,id = hd_manager.id)
                     n_action_url    = reverse('desk:issue_dashboard')
                     n_model         = 'Issue'
-                    n_verb          = 'HelpDesk New Issue'
-                    n_description   = "1 new issue(" + issue_obj.ref + ") raised in HelpDesk"
+                    n_verb          = 'supportdesk New Issue'
+                    n_description   = "1 new issue(" + issue_obj.ref + ") raised in supportdesk"
                     n_is_repeated   = False
                     notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                 
@@ -214,14 +214,13 @@ def issue_dashboard_old(request):
                     n_recipient     = get_object_or_404(Users,id = ict_dpt_head.id)
                     n_action_url    = reverse('desk:issue_dashboard')
                     n_model         = 'Issue'
-                    n_verb          = 'HelpDesk Issue'
-                    n_description   = "1 new issue raised in HelpDesk"
+                    n_verb          = 'supportdesk Issue'
+                    n_description   = "1 new issue raised in supportdesk"
                     n_is_repeated   = True
                     notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                     
-                    subject = "EBS #" + issue_obj.ref + " - Issue Raised on Helpdesk"
-                    msg = "Issue has been raised <a href=https://ebs.esquire.com.bd/helpdesk/"+">"+"#" + issue_obj.ref +"</a> <br>Description: " + issue_obj.description+"<br><br>Issuer Name: "+str(issue_obj.issuer)+"<br>Issuer Email: "+str(issue_obj.issuer.email)+"<br>Issuer ID: "+str(issue_obj.issuer.employee_id)+"<br>Issuer Department: "+str(issue_obj.issuer.department)+"  <br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
-                    # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
+                    subject = "EBS #" + issue_obj.ref + " - Issue Raised on Supportdesk"
+                    msg = "Issue has been raised <a href=/supportdesk/"+">"+"#" + issue_obj.ref +"</a> <br>Description: " + issue_obj.description+"<br><br>Issuer Name: "+str(issue_obj.issuer)+"<br>Issuer Email: "+str(issue_obj.issuer.email)+"<br>Issuer ID: "+str(issue_obj.issuer.employee_id)+"<br>Issuer Department: "+str(issue_obj.issuer.department)+"  <br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                     mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, [ict_dpt_head.email])
                     mail.content_subtype = "html"
                     mail.send()
@@ -232,7 +231,7 @@ def issue_dashboard_old(request):
 
     if int(request.session.get("hd_role")) == 4 or int(request.session.get("hd_role")) == 3: #if the user is manager or department head
         issues = Issue.objects.filter(Q(status = "1")).order_by('-id')
-        resolver_list = Users.objects.filter(Q(helpdesk_role = 2)|Q(helpdesk_role = 3))
+        resolver_list = Users.objects.filter(Q(supportdesk_role = 2)|Q(supportdesk_role = 3))
         context = {'issues': issues, 'resolver_list':resolver_list,'method_chk':method_chk}
         return render(request, 'issue/issue_entry.html', context)
     elif int(request.session.get("hd_role")) == 2: #this is for resolver dashboard filtering
@@ -257,7 +256,7 @@ def search_issue(request):
                 else:
                     issues = Issue.objects.filter(Q(issuer_id = int(request.session.get("id")))|Q(assigned_by = int(request.session.get("id")))|Q(assigned_to = int(request.session.get("id")))).order_by('status','-id')
 
-                resolver_list = Users.objects.filter(helpdesk_role = 2)
+                resolver_list = Users.objects.filter(supportdesk_role = 2)
                 context = {'issues': issues, 'issue_type':issue_type, 'resolver_list':resolver_list}
                 return render(request, 'issue/issue_entry.html', context)
             elif "resolver_issue_type" in request.POST:
@@ -266,15 +265,15 @@ def search_issue(request):
                 context = {'issues': issues, 'resolver_issue_type':resolver_issue_type}
                 return render(request, 'issue/issue_entry.html', context)
         else:   
-            return redirect('/helpdesk/')
+            return redirect('/supportdesk/')
     else:
         messages.warning(request, "You have no access for this action!")    
-        return redirect('/helpdesk/')
+        return redirect('/supportdesk/')
 
 @login
-def helpdesk_report(request):
+def supportdesk_report(request):
     if int(request.session.get("hd_role")) == 4 or request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin":
-        resolver_list = Users.objects.filter(Q(helpdesk_role = 2)|Q(helpdesk_role = 3)).order_by('name')
+        resolver_list = Users.objects.filter(Q(supportdesk_role = 2)|Q(supportdesk_role = 3)).order_by('name')
         if request.method == 'POST':
             issue_type  = request.POST.get('issue_type')
             resolver    = request.POST.get('resolver')
@@ -322,14 +321,14 @@ def helpdesk_report(request):
                 'issue_type':issue_type,
                 'resolver_list':resolver_list,
                 }
-            return render(request, 'issue/helpdesk_report.html', context)
+            return render(request, 'issue/supportdesk_report.html', context)
         
         context = {'resolver_list':resolver_list}
-        return render(request, 'issue/helpdesk_report.html', context)
+        return render(request, 'issue/supportdesk_report.html', context)
         
     else:
         messages.warning(request, "You have no access for this page!")    
-        return redirect('/helpdesk/')
+        return redirect('/supportdesk/')
 
 @login
 def phonebook(request):
@@ -355,17 +354,16 @@ def issue_assign(request):
                 if len(str(request.POST['assign_note'])) > 0: assign_note = "<br>Assign Note: "+ request.POST['assign_note']
                 else: assign_note = ""
                 subject = "EBS #" + issue.ref + " - Issue assigned to you!"
-                msg = "You have been assigned for this issue.<br>" + issue.description+"<br> Here is your assigned issue <a href=https://ebs.esquire.com.bd/helpdesk/"+">"+"#" + issue.ref +"</a>"+assign_note+"<br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                msg = "You have been assigned for this issue.<br>" + issue.description+"<br> Here is your assigned issue <a href=/supportdesk/"+">"+"#" + issue.ref +"</a>"+assign_note+"<br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                 # Send Notification
                 n_sender        = get_object_or_404(Users,id = request.session.get("id"))
                 n_recipient     = get_object_or_404(Users,id = int(request.POST['assigned_to']))
                 n_action_url    = reverse('desk:issue_dashboard')
                 n_model         = 'Issue'
-                n_verb          = 'HelpDesk Issue'
-                n_description   = "1 new issue(" + issue.ref + ") assigned to you in HelpDesk"
+                n_verb          = 'supportdesk Issue'
+                n_description   = "1 new issue(" + issue.ref + ") assigned to you in supportdesk"
                 n_is_repeated   = False
                 notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
-                # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
                 mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, [issue.assigned_to_name().email])
                 mail.content_subtype = "html"
                 mail.send()
@@ -392,18 +390,17 @@ def issue_cancel(request):
             if len(str(request.POST['canceled_note'])) > 0: canceled_note = "<br>Cancel Note: "+ request.POST['canceled_note']
             else: canceled_note = ""
             subject = "EBS #" + issue.ref + " - Issue Canceled!"
-            msg = "Your issue has canceled.<br>" + issue.description+"<br> Here is your canceled issue <a href=https://ebs.esquire.com.bd/helpdesk/"+">"+"#" + issue.ref +"</a>"+canceled_note+"<br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+            msg = "Your issue has canceled.<br>" + issue.description+"<br> Here is your canceled issue <a href=https://#/supportdesk/"+">"+"#" + issue.ref +"</a>"+canceled_note+"<br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
             # Send Notification
             n_sender        = get_object_or_404(Users,id = request.session.get("id"))
             n_recipient     = get_object_or_404(Users,id = issue.issuer_id)
             n_action_url    = reverse('desk:issue_dashboard')
             n_model         = 'Issue'
-            n_verb          = 'HelpDesk Issue'
-            n_description   = "Your issue("+ issue.ref +") is canceled in HelpDesk"
+            n_verb          = 'supportdesk Issue'
+            n_description   = "Your issue("+ issue.ref +") is canceled in supportdesk"
             n_is_repeated   = False
             notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
             
-            # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
             # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, [issue.issuer.email])
             # mail.content_subtype = "html"
             # mail.send()
@@ -437,8 +434,8 @@ def issue_resolve(request):
             if issue.status == "3" and issue.assigned_to == int(request.session.get("id")):
                 message = '#' + issue.ref + ' - Issue has been started!'
             elif issue.status == "4" and issue.assigned_to == int(request.session.get("id")):
-                if len(resolve_note) > 0:msg = 'EBS #' + issue.ref + "- Issue has been solved by "+str(issue.assigned_to_name())+"<br><br>You have a note by "+str(issue.assigned_to_name())+" on your raised issue. Note: "+resolve_note+"<br> Here is your raised issue <a href=https://ebs.esquire.com.bd/helpdesk/"+">"+"#" + issue.ref +"</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
-                else: msg = 'EBS #' + issue.ref + "- Issue has been solved by "+str(issue.assigned_to_name())+".<br>Here is your raised issue <a href=https://ebs.esquire.com.bd/helpdesk/"+">"+"#" + issue.ref +"</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                if len(resolve_note) > 0:msg = 'EBS #' + issue.ref + "- Issue has been solved by "+str(issue.assigned_to_name())+"<br><br>You have a note by "+str(issue.assigned_to_name())+" on your raised issue. Note: "+resolve_note+"<br> Here is your raised issue <a href=https://#/supportdesk/"+">"+"#" + issue.ref +"</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                else: msg = 'EBS #' + issue.ref + "- Issue has been solved by "+str(issue.assigned_to_name())+".<br>Here is your raised issue <a href=https://#/supportdesk/"+">"+"#" + issue.ref +"</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                 subject = issue.ref + " - Issue Solved!"
                 # Send Notification
                 n_sender        = get_object_or_404(Users,id = request.session.get("id"))
@@ -452,7 +449,6 @@ def issue_resolve(request):
                 
                 if issue.issuer.email:
                     try:
-                        # issuer_mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
                         issuer_mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, [str(issue.issuer.email)])
                         issuer_mail.content_subtype = "html"
                         issuer_mail.send()
@@ -465,7 +461,7 @@ def issue_resolve(request):
                 # if issue.issuer.reporting_to and issue.issuer.reporting_to.email:
                 #     try:
                 #         subject = 'EBS #' + issue.ref + " - Issue Solved!"
-                #         msg = str(issue.issuer)+"'s issue has been solved by "+str(issue.assigned_to_name())+"<br> Issue detail: "+issue.description+"<br>Note: "+resolve_note+"<br> Here is the solved issue <a href=https://ebs.esquire.com.bd/helpdesk/"+">"+"#" + issue.ref +"</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                #         msg = str(issue.issuer)+"'s issue has been solved by "+str(issue.assigned_to_name())+"<br> Issue detail: "+issue.description+"<br>Note: "+resolve_note+"<br> Here is the solved issue <a href=https://#/supportdesk/"+">"+"#" + issue.ref +"</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                 #         # Send Notification
                 #         n_sender        = get_object_or_404(Users,id = request.session.get("id"))
                 #         n_recipient     = get_object_or_404(Users,id = issue.issuer.reporting_to_id)
@@ -476,7 +472,6 @@ def issue_resolve(request):
                 #         n_is_repeated   = True
                 #         notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                         
-                #         # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
                 #         mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, [str(issue.issuer.reporting_to.email)])
                 #         mail.content_subtype = "html"
                 #         mail.send()
@@ -500,7 +495,7 @@ def issue_feedback(request):
             if issue[0].issuer.email:
                 try:
                     subject = 'EBS #' + issue[0].ref + " - Issue Feedback!"
-                    msg = note+" <a href=https://ebs.esquire.com.bd/helpdesk/"+">Click Here for Detail</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                    msg = note+" <a href=https://#/supportdesk/"+">Click Here for Detail</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                     # Send Notification
                     n_sender        = get_object_or_404(Users,id = request.session.get("id"))
                     n_recipient     = get_object_or_404(Users,id = issue[0].issuer_id)
@@ -511,7 +506,6 @@ def issue_feedback(request):
                     n_is_repeated   = False
                     notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                     
-                    # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
                     # mail = EmailMessage(subject, msg, settings.EMAIL_HOST_USER, [str(issue[0].issuer.email)])
                     # mail.content_subtype = "html"
                     # mail.send()
@@ -551,12 +545,6 @@ def device_assessment_entry(request):
             ed = Users.objects.filter(designation__name = "Executive Director").first()
             if ed: ed = ed.id
             else: ed = None
-
-            # ceo = None
-            # if emp_company == "L'Esquire":
-            #     ceo = Users.objects.filter(designation__name = "Chief Executive Officer(L'Esquire)").first()
-            # else:    
-            #     ceo = Users.objects.filter(designation__name = "Chief Executive Officer").first()
             
             # if ceo: ceo = ceo.id
             
@@ -575,7 +563,7 @@ def device_assessment_entry(request):
             
             if assessment and assessment.head_of_assessment_name().email:
                 try:
-                    msg = "You have a 'Device Assessment' approval in pending state. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to approve or reject</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                    msg = "You have a 'Device Assessment' approval in pending state. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to approve or reject</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                     subject = "Device Assessment Approval"
                     # Send Notification
                     n_sender        = get_object_or_404(Users,id = request.session.get("id"))
@@ -587,7 +575,6 @@ def device_assessment_entry(request):
                     n_is_repeated   = False
                     notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                     
-                    # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
                     # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, [str(assessment.head_of_assessment_name().email)])
                     # mail.content_subtype = "html"
                     # mail.send()
@@ -607,7 +594,7 @@ def device_assessment_entry(request):
         return render(request, 'issue/device_assesment_entry.html', context)
     else:    
         messages.warning(request, "You have no access on this page!")
-        return redirect('/helpdesk/')
+        return redirect('/supportdesk/')
 
 @login
 def assessment_list(request):
@@ -738,7 +725,7 @@ def assessment_list(request):
             # if ed: ed = ed.id
             # else: ed = None
             
-            ceo = Users.objects.values_list('id',flat = True).filter(Q(designation__name = "Chief Executive Officer(L'Esquire)")|Q(designation__name = "Chief Executive Officer")|Q(designation__name = "Chief Executive Officer(EAL)"))
+            ceo = Users.objects.values_list('id',flat = True).filter(Q(designation__name = "Chief Executive Officer")|Q(designation__name = "Chief Executive Officer")|Q(designation__name = "Chief Executive Officer"))
             
             if request.session.get('role_text') == "Admin" or request.session.get('role_text') == "Super Admin":
                 assessment_list = DeviceAssessments.objects.all().order_by('status','-id')
@@ -763,7 +750,7 @@ def assessment_list(request):
             return render(request, 'issue/assessment_list.html', context)
     else:    
         messages.warning(request, "You have no access on this page!")
-        return redirect('/helpdesk/')
+        return redirect('/supportdesk/')
 
 @csrf_exempt
 @login
@@ -779,7 +766,7 @@ def assessment_approve(request):
                 
                 assessment_obj = DeviceAssessments.objects.filter(id = assessment).exclude(Q(status = "6")|Q(status = "5"))
                 if assessment_obj:
-                    msg = "You have a 'Device Assessment' approval in pending state. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to approve or reject</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                    msg = "You have a 'Device Assessment' approval in pending state. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to approve or reject</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                     subject = "Device Assessment Approval"
                     receiver_email = None
                     
@@ -797,7 +784,7 @@ def assessment_approve(request):
                         elif action == "Reject":
                             if assessment_obj[0].assessment_by_name().email: 
                                 receiver_email = assessment_obj[0].assessment_by_name().email
-                                msg = "Your 'Device Assessment' approval is rejected by employee's department head. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                                msg = "Your 'Device Assessment' approval is rejected by employee's department head. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                                 subject = "Device Assessment Approval Rejected"
 
                             assessment_obj.update(
@@ -826,7 +813,7 @@ def assessment_approve(request):
                         elif action == "Finish" and request.session.get("id") == ict_dpt_head: #Only when ICT head & Department head is same person
                             if assessment_obj[0].assessment_by_name().email: 
                                 receiver_email = assessment_obj[0].assessment_by_name().email
-                                msg = "Your device has been approved by ICT department head. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                                msg = "Your device has been approved by ICT department head. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                                 subject = "Device Assessment Approved"
 
                             #Email send to Nurnobi bhai temporarily for Stage requisition only
@@ -841,8 +828,8 @@ def assessment_approve(request):
                             n_is_repeated   = False
                             notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                             
-                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
-                            mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["shahadat@esquire.com.bd"])
+                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
+                            mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
                             mail.content_subtype = "html"
                             mail.send()
 
@@ -873,7 +860,7 @@ def assessment_approve(request):
                         elif action == "Finish":
                             if assessment_obj[0].assessment_by_name().email: 
                                 receiver_email = assessment_obj[0].assessment_by_name().email
-                                msg = "Your device has been approved by ICT department head. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                                msg = "Your device has been approved by ICT department head. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                                 subject = "Device Assessment Approved"
 
                             #Email send to Nurnobi bhai temporarily for Stage requisition only
@@ -898,8 +885,8 @@ def assessment_approve(request):
                             n_is_repeated   = False
                             notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                             
-                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
-                            mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["shahadat@esquire.com.bd"])
+                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
+                            mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
                             mail.content_subtype = "html"
                             mail.send()
 
@@ -910,7 +897,7 @@ def assessment_approve(request):
                         elif action == "Reject":
                             if assessment_obj[0].assessment_by_name().email: 
                                 receiver_email = assessment_obj[0].assessment_by_name().email
-                                msg = "Your 'Device Assessment' approval is rejected by employee's department head. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                                msg = "Your 'Device Assessment' approval is rejected by employee's department head. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                                 subject = "Device Assessment Approval Rejected"
 
                             assessment_obj.update(
@@ -945,8 +932,8 @@ def assessment_approve(request):
                         msg = "Device assessment of "+str(assessment_obj[0].assessment_by_name())+" for "+str(assessment_obj[0].assessment_for)+"("+str(assessment_obj[0].assessment_for.employee_id)+") has been approved by CEO. <br> Note: "+assessment_obj[0].note+"<br><br>Approved Note: "+note+"<br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                         n_recipient     = get_object_or_404(Users,employee_id = "EC00007363")
                         notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=msg, is_repeated=n_is_repeated)
-                        # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
-                        mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["shahadat@esquire.com.bd"])
+                        # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
+                        mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
                         mail.content_subtype = "html"
                         mail.send()
 
@@ -964,7 +951,7 @@ def assessment_approve(request):
                     #     elif action == "Reject":
                     #         if assessment_obj[0].assessment_by_name().email: 
                     #             receiver_email = assessment_obj[0].assessment_by_name().email
-                    #             msg = "Your 'Device Assessment' approval is rejected by ED. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                    #             msg = "Your 'Device Assessment' approval is rejected by ED. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                     #             subject = "Device Assessment Approval Rejected"
 
                     #         assessment_obj.update(
@@ -975,7 +962,7 @@ def assessment_approve(request):
                         if action == "Approve":
                             if assessment_obj[0].ceo_name().email: 
                                 receiver_email = assessment_obj[0].ceo_name().email
-                                msg = "Your device has been approved by CEO. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                                msg = "Your device has been approved by CEO. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                                 subject = "Device Assessment Approved"
 
                             #Email send to Nurnobi bhai temporarily for Stage requisition only
@@ -1000,8 +987,8 @@ def assessment_approve(request):
                             n_is_repeated   = False
                             notify.send(n_sender, recipient=n_recipient, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=n_is_repeated)
                                                         
-                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
-                            mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["shahadat@esquire.com.bd"])
+                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
+                            mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
                             mail.content_subtype = "html"
                             mail.send()
 
@@ -1012,7 +999,7 @@ def assessment_approve(request):
                         elif action == "Reject":
                             if assessment_obj[0].assessment_by_name().email: 
                                 receiver_email = assessment_obj[0].assessment_by_name().email
-                                msg = "Your 'Device Assessment' approval is rejected by CEO. <br> <a href=https://ebs.esquire.com.bd/helpdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
+                                msg = "Your 'Device Assessment' approval is rejected by CEO. <br> <a href=https://#/supportdesk/device-assessment-list/"+">Click here to view</a><br><br><br>**This is system generated e-mail. Please do not reply to this e-mail."
                                 subject = "Device Assessment Approval Rejected"
 
                             assessment_obj.update(
@@ -1032,7 +1019,7 @@ def assessment_approve(request):
 
                     if receiver_email:
                         try:
-                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
+                            # mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, ["#"])
                             mail = EmailMessage(subject, msg , settings.EMAIL_HOST_USER, [receiver_email])
                             mail.content_subtype = "html"
                             mail.send()
@@ -1094,4 +1081,4 @@ def getUser(request):
 @csrf_exempt
 def generate_sr_from_desk(request):
     
-    return JsonResponse({'url':'/helpdesk/device-assessment-list/'}, safe=False)
+    return JsonResponse({'url':'/supportdesk/device-assessment-list/'}, safe=False)

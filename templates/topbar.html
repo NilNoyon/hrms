@@ -189,9 +189,9 @@
 
    .bg-gradient-fuchsia {
         background-image: linear-gradient(310deg,#1E90FF,#1E90FF);
-        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-shadow: 0 .3125rem .625rem 0 #1E90FF;
+        --tw-ring-shadow: 0 0 #1E90FF;
+        --tw-ring-offset-shadow: 0 0 #1E90FF;
         --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
         box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
     }
@@ -268,16 +268,13 @@
         min-height: 65px;
         padding: 0px;
     }
-    .shadow-soft-xl{ 
-        
-    }
     .sidebar-nav>ul>li.active>a {
         border-color:#141727;
     }
     .topbar .top-navbar .profile-pic img {
         width: 30px;
     
-        --tw-shadow: 0 .3125rem .625rem 0 rgba(0,0,0,.12);
+        --tw-shadow: 0 .3125rem .625rem 0 #1E90FF;
         --tw-ring-shadow: 0 0 #0000;
         --tw-ring-offset-shadow: 0 0 #0000;
         --tw-shadow-colored: 0 .3125rem .625rem 0 var(--tw-shadow-color);
@@ -289,12 +286,11 @@
         font-size: 14px;
     }
     html body .navbar-dark .mailbox ul li .nav-link:hover {
-        color: #015178;
+        color: #1E90FF;
     }
     .profile-tab li a.nav-link.active,
     .customtab li a.nav-link.active {     
         color: #1E90FF;
-        {% comment %} Dark Cerulean {% endcomment %}
     }
     .horizontal-nav .sidebar-nav #sidebarnav>li>a {
         color: #015178;
@@ -442,7 +438,7 @@
             color: #015178 !important;
         }
         .sidebar-nav>ul>li>a i {
-            color: #141727 !important;
+            color: #1E90FF !important;
             font-size: 14px;
         }
     }
@@ -662,7 +658,7 @@
                                 {% regroup request.session.id|others_module_list by menu__module_name as module_list %}
                                 {% for module_name in module_list %}
                                 <li class="col-lg-2 megaMainMenu  text-center py-lg-2 pr-lg-2" >
-                                    <a class="waves-effect waves-dark menus text-center" style="color: #015178;padding-bottom: 0.7rem !important;padding-top: 0.7rem !important;" 
+                                    <a class="waves-effect waves-dark menus text-center" style="color: #1E90FF;padding-bottom: 0.7rem !important;padding-top: 0.7rem !important;" 
                                         aria-expanded="false" href="JavaScript:void(0)" data-module="{{module_name.list.0.menu_id}}">
                                         <div class="sub-menu-container">
                                             <div class="sub-menu-child magenta pr-lg-2">
