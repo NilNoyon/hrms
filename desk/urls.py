@@ -6,7 +6,7 @@ app_name = 'desk'
 urlpatterns = [
     path('', views.issue_dashboard, name='issue_dashboard'),
     path('search-issue', views.search_issue, name='search_issue'),
-    path('helpdesk-report', views.helpdesk_report, name='helpdesk_report'),
+    path('helpdesk-report', views.supportdesk_report, name='helpdesk_report'),
     path('phonebook/', views.phonebook, name='phonebook'),
 
     path('get-user/', views.getUser, name='getUser'),

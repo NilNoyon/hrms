@@ -195,17 +195,17 @@ class Common:
     
     def send_email(self, subject, message, recipients): # recipients will be the list [recipients] = ["email1","email2"]
         try:
-            from ebs import settings
+            from ngohrms import settings
             if settings.TEST_EMAIL: recipients = [str(settings.TEST_EMAIL)]
             mail = EmailMessage(subject, message , settings.EMAIL_HOST_USER, recipients)
             mail.content_subtype = "html"
-            if settings.DOMAIN_URL == 'https://ebs.esquire.com.bd/':
-                mail.send()
+            # if settings.DOMAIN_URL == '':
+            #     mail.send()
         except: pass
     
     def mssql_db_connect(self): #For Connection
         try:
-            from ebs import settings
+            from ngohrms import settings
             import pymssql
             conn = pymssql.connect(
                 host = settings.MS_SERVER, 

@@ -42,3 +42,29 @@ def add_float(value, arg):
     else:
         return float(value)
 add_float.is_safe = False
+
+@register.filter(name='sub_float')
+def sub_float(value, arg):
+    "Subtracts the arg from the value"
+    value = float(value) if value else 0
+    if arg:
+        return float(value) - float(arg)
+    else:
+        return float(value)
+sub_float.is_safe = False
+
+@register.filter(name='mul_float')
+def mul_float(value, arg):
+    "Multiplication the arg from the value"
+    return float(value or 0) * float(arg or 0)
+mul_float.is_safe = False
+
+@register.filter(name='div_float')
+def div_float(value, arg):
+    "Division the arg from the value"
+    return ((float(value) / float(arg)) if value and arg else 0)
+div_float.is_safe = False
+
+@register.filter(name='times') 
+def times(number):
+    return range(number)

@@ -79,10 +79,10 @@ def app_login(request):
                 return redirect("dashboard") if not next_url else redirect(next_url)
             else:
                 messages.warning(request, "Invalid password!")
-                return render(request, "login.html",{"employee_id":request.POST['employee_id']})
+                return render(request, "login1.html",{"employee_id":request.POST['employee_id']})
         else:
             messages.warning(request, "Invalid employee ID!")
-            return render(request, "login.html",{"employee_id":request.POST['employee_id']})
+            return render(request, "login1.html",{"employee_id":request.POST['employee_id']})
 
     return render(request, "login1.html")
 
@@ -713,8 +713,6 @@ def user_access_control_setup(request):
         # this is use for sync menulist from excel file
         #To read multiple sheet at once just follow this link, code needs to be change
         #https://pythoninoffice.com/read-multiple-excel-sheets-with-python-pandas/
-        # xl = pd.read_excel("https://ebs.esquire.com.bd/assets/MenuList.xls", "Sheet1") 
-        # Local sync menulist from excel file
         
         import_file =  open(os.path.join(settings.BASE_DIR, "assets/MenuList.xlsx"), "rb")
         xl = pd.ExcelFile(import_file, engine='openpyxl') 
@@ -921,9 +919,8 @@ def forgot_password(request):
                 encripted_token = md5_obj.hexdigest()
                 obj = ForgotPassword.objects.create(email = user_email, token=encripted_token)
                 if obj:
-                    msg = "<a href='https://ebs.esquire.com.bd/password/"+str(obj.token)+"/reset'>Please click this link to reset your password</a> <br><br>N.B. This is system generated email. Please do not reply."
-                    # mail = EmailMessage("EBS || Forgot Password", msg , settings.EMAIL_HOST_USER, ["nayem@esquire.com.bd"])
-                    mail = EmailMessage("EBS||Forgot Password", msg , settings.EMAIL_HOST_USER, [str(obj.email)])
+                    msg = "<a href='/password/"+str(obj.token)+"/reset'>Please click this link to reset your password</a> <br><br>N.B. This is system generated email. Please do not reply."
+                    mail = EmailMessage("HRM||Forgot Password", msg , settings.EMAIL_HOST_USER, [str(obj.email)])
                     mail.content_subtype = "html"
                     mail.send()
                     messages.info(request,"Password reset link has been sent to "+str(user_email)+". This link will valid for 30 minutes.")
