@@ -61,6 +61,7 @@ def app_login(request):
                         request.session['user_roles']           = request.session['secondary_role'] + [user[0].role.name]
                         request.session['secondary_company']    = user[0].secondary_company if user[0].secondary_company else []
                         request.session['company']              = str(user[0].branch.company.name)
+                        request.session['company_id']           = str(user[0].branch.company_id)
                         request.session['branch_id']            = str(user[0].branch_id)
                         request.session['department']           = str(user[0].department.name)
                 except Exception as e:
@@ -99,7 +100,7 @@ def app_logout(request):
 
 @login
 def dashboard(request):
-    try:
+    # try:
         from django.utils import timezone
         # menu = UserPermission.objects.filter(employee_id=request.session.get('employee_id'))
         try:
@@ -142,11 +143,12 @@ def dashboard(request):
             'total_user' :total_user,
             'active_users': active_users,
             'access_list': access_list,
+            'is_bulletin_data': False,
         }
         return render(request, 'home1.html', context )
-    except Exception as e:
-        messages.warning(request,str(e))
-        return render(request, 'home2.html' )
+    # except Exception as e:
+    #     messages.warning(request,str(e))
+    #     return render(request, 'home2.html' )
      
 
 def sewing_dashboard(request):
@@ -539,7 +541,7 @@ def syncUsers(request):
             #     Users.objects.filter(employee_id = u.employee_id).update(reporting_to_id = report_to, company_id = company.id)
     except Exception as msg:
         messages.warning(request, str(msg))
-        return redirect('desk:employee_list')
+        return redirect('hr:employee_add')
         
 @login
 def user_update(request, id):
@@ -652,9 +654,9 @@ def myProfile(request):
                     messages.warning(request, "%s : %s" % (field.name, error))
 
     context = { 'user': instance, 'blood_group_list' : EmployeeInfo.group_type,
-        'marital_status_list': CommonMaster.objects.filter(value_for=42), 
-        'gender_list' : CommonMaster.objects.filter(value_for=43),
-        'religion_list' : CommonMaster.objects.filter(value_for=6)}
+        'marital_status_list': CommonMaster.objects.filter(value_for=6), 
+        'gender_list'   : CommonMaster.objects.filter(value_for=7),
+        'religion_list' : CommonMaster.objects.filter(value_for=3)}
     return render(request, 'user/my_profile.html', context)
     
 @login

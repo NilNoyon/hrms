@@ -14,7 +14,7 @@ class EmployeeDetailsAdmin(admin.ModelAdmin):
      search_fields = ['branch__name','location__name','department__name','personal__employee_id', 'punch_id']
      list_filter   = ['branch',]
      list_per_page = 1000
-     raw_id_fields = ("branch", "division", "sub_section", "department", "branch","reporting_to", "designation", "section","building", "personal","shift", "employee_type", "employee_category", "skill_category", "created_by","updated_by", "status", "location", "cost_center", "unit", "attendance_bonus")
+     raw_id_fields = ("branch", "division", "sub_section", "department", "branch","reporting_to", "designation", "section", "personal","shift", "employee_type", "employee_category", "skill_category", "created_by","updated_by", "status", "location", "cost_center", "unit", "attendance_bonus")
 
      def name(self, obj):
           return str(obj.name) or "N/A"

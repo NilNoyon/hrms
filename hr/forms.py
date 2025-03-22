@@ -62,7 +62,7 @@ class EmployeeBankForm(forms.ModelForm):
 class ProvidentFundMasterForm(forms.ModelForm):
     class Meta:
         model = ProvidentFundMaster
-        fields = ('company','pf_heading','pf_registation_no','date_of_formation','basis_of_pf_computation','basis_of_accounting',
+        fields = ('branch','pf_heading','pf_registation_no','date_of_formation','basis_of_pf_computation','basis_of_accounting',
         'mode_of_loan_interest','rate_employee','rate_company','opening_balance_of_lapse_forfeiture','service_lenght',
         'income_distribution_mode','hight_limit_of_contribution','day_wise_contribution_calculation','ex_member_fund',
         'multipul_loan')
@@ -100,7 +100,7 @@ class EmployeeTransferForm(forms.ModelForm):
 class PfContributionForm(forms.ModelForm):
     class Meta:
         model = PFMonthlyContribution
-        fields = ('employee_pf','is_round','Voucher_no','emp_percent','company_percent','gross_salary','contribution_amount','entry_date','month','year')
+        fields = ('employee_pf','is_round','Voucher_no','emp_percent','branch_percent','gross_salary','contribution_amount','entry_date','month','year')
 
 class PFLoanForm(forms.ModelForm):
     class Meta:
@@ -232,7 +232,7 @@ class ShiftForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ShiftForm, self).__init__(*args, **kwargs)
-        self.fields['company'].required     = False
+        self.fields['branch'].required     = False
         self.fields['location'].required    = False
 
 # Attendance

@@ -24,9 +24,12 @@ SECRET_KEY = 'django-insecure-!!ykd+s+c!g46##_1k+z$t9q$1pz2hq(m!6h+!d4w_x1ta+=7&
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = ['*']
-
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Asia/Dhaka'
+USE_I18N = True
+USE_L10N = True
+USE_TZ   = False
 
 # Application definition
 
@@ -113,14 +116,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
