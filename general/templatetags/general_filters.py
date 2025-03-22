@@ -32,3 +32,13 @@ def string_to_list(value, separator=' '):
     "Collect a string with ' ' (space) separator and make them a list"
     return value.split(separator)
 string_to_list.is_safe = False
+
+@register.filter(name='add_float')
+def add_float(value, arg):
+    "Addition the arg from the value"
+    value = float(value) if value else 0
+    if arg:
+        return round(float(value) + float(arg), 6)
+    else:
+        return float(value)
+add_float.is_safe = False

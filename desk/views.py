@@ -335,7 +335,7 @@ def helpdesk_report(request):
 def phonebook(request):
     phonebook_list = EmployeeDetails.objects.filter(status = Status.name('active')
         ).exclude(Q(personal__employee_id='admin')|Q(employee_category__value__iexact='Worker')).order_by(
-        'company__short_name', 'department__name', 'personal__first_name')
+        'branch__short_name', 'department__name', 'personal__first_name')
     context = {'phonebook_list': phonebook_list}
     return render(request, 'phonebook.html', context)
 

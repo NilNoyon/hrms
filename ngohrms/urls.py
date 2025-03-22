@@ -23,8 +23,9 @@ urlpatterns = [
     path('', include('general.urls')),
     path('inbox/notifications/', include(notification.urls, namespace='notifications')),
     path('admin/', admin.site.urls),
-    # path('fixed-asset/', include('ngoasset.urls')),
-    # path('hr/', include('hr.urls')),
+    path('fixed-asset/', include('ngoasset.urls')),
+    path('hr/', include('hr.urls')),
+    path('supportdesk/', include('desk.urls')),
 ]
 admin.site.site_header  =  "XYZ NGO Admin"  
 admin.site.site_title  =  "XYZ NGO Admin"
@@ -34,5 +35,5 @@ from django.conf.urls import (
     handler400, handler403, handler404, handler500
 )
 
-# handler404 = "general.views.error_404"
-# handler500 = "general.views.error_500"
+handler404 = "general.views.error_404"
+handler500 = "general.views.error_500"

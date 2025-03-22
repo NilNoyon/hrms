@@ -249,7 +249,7 @@
                             <div class="relative overflow-hidden bg-cover rounded-xl image-bg" style="">
                                 <span class="absolute bg-center bg-cover bg-gradient-dark-gray opacity-80"></span>
                                 <div class="relative p-4" style=" color: white!important;">
-                                    <i>If You Fail to Plan, You Are Planning to Fail.</i><br>-Benjamin Franklin <br><br>
+                                    <i>Hard work never killed anybody, but why take a chance?</i><br>-Edgar Bergen, actor and comedian <br><br>
                                     <i>The man who asks a question is a fool for a minute, the man who does not ask is a fool for life.</i><br>-Confucius
                                 </div>
                             </div>
@@ -257,56 +257,56 @@
                     </div>
                 </div>
                 <div class="col-md-9 rounded-lg" id="right-panel">
-                    {% if not hide_bulleting_data %}
-                    <div class="my-box pr-3">
-                        <div class="progress">
-                            <div id="progrees-bar" class="progress-bar bg-success progress-bar-animated active" 
-                                style="width: 0%; height:30px; font-size: 18px;" role="progressbar" aria-valuenow="0" aria-valuemin="0">Loading...</div>
+                    {% if is_bulletin_data %}
+                        <div class="my-box pr-3">
+                            <div class="progress">
+                                <div id="progrees-bar" class="progress-bar bg-success progress-bar-animated active" 
+                                    style="width: 0%; height:30px; font-size: 18px;" role="progressbar" aria-valuenow="0" aria-valuemin="0">Loading...</div>
+                                </div>
+                        </div>
+                        <div id="dash-board-panel">
+                            <div class="card-header">
+                                <h5 style="text-align: center;">Plan vs Achievement as on home1<input type="text" class="singledate bg-transparent" style="border: none;padding-bottom: 10px;" value="{{ operation_bulletin_ekcl.date }}" id="efficiency_date" name="date"></h5>
                             </div>
-                    </div>
-                    <div id="dash-board-panel">
-                        <div class="card-header">
-                            <h5 style="text-align: center;">Plan vs Achievement as on home1<input type="text" class="singledate bg-transparent" style="border: none;padding-bottom: 10px;" value="{{ operation_bulletin_ekcl.date }}" id="efficiency_date" name="date"></h5>
+                            <div hidden class="loading" id="loaderModal"></div>
+                            <div class="row pb-4 custom-card">
+                                <div class="col-md-6"><div id="ALL_unit_bulletin_day" style="width: 100%; height: 400px;"></div></div>
+                                <div class="col-md-6"><div id="ALL_unit_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div></div>
+                            </div>
+                            <div class="row">
+                                <div id="EKCLALL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                                <div id="EKCLALL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div>
+                            <div class="row">
+                                <div id="EKCL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                                <div id="EKCL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div>
+                            <!-- <div class="row">
+                                <div id="FIZA_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                                <div id="FIZA_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div> -->
+                            <div class="row">
+                                <div id="TT_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                                <div id="TT_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div>
+                            <div class="row">
+                                <div id="LESQ_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                                <div id="LESQ_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div>
+                            <!-- <div class="row">
+                                <div id="Prod_FOB_pie" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div> -->
+                            <br><br>
+                            <h5 style="text-align: center;">Production Status on <input type="text" class="singledate" style="border: none;padding-bottom: 10px;" value="{{date}}" id="production_date" name="date"></h5>
+                            <div class="row">
+                                <div id="EKCL_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                                <div id="LESQ_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
+                            </div>
+                            <div class="row">
+                                <div id="EKCL_prod_details" class="col-md-12" style="width: 100%; height: 400px;"></div>
+                            </div>
                         </div>
-                        <div hidden class="loading" id="loaderModal"></div>
-                        <div class="row pb-4 custom-card">
-                            <div class="col-md-6"><div id="ALL_unit_bulletin_day" style="width: 100%; height: 400px;"></div></div>
-                            <div class="col-md-6"><div id="ALL_unit_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div></div>
-                        </div>
-                        <div class="row">
-                            <div id="EKCLALL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                            <div id="EKCLALL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div>
-                        <div class="row">
-                            <div id="EKCL_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                            <div id="EKCL_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div>
-                        <!-- <div class="row">
-                            <div id="FIZA_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                            <div id="FIZA_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div> -->
-                        <div class="row">
-                            <div id="TT_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                            <div id="TT_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div>
-                        <div class="row">
-                            <div id="LESQ_bulletin_day" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                            <div id="LESQ_bulletin_mtd" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div>
-                        <!-- <div class="row">
-                            <div id="Prod_FOB_pie" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div> -->
-                        <br><br>
-                        <h5 style="text-align: center;">Production Status on <input type="text" class="singledate" style="border: none;padding-bottom: 10px;" value="{{date}}" id="production_date" name="date"></h5>
-                        <div class="row">
-                            <div id="EKCL_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                            <div id="LESQ_prod" class="col-md-6" style="width: 100%; height: 400px;"></div>
-                        </div>
-                        <div class="row">
-                            <div id="EKCL_prod_details" class="col-md-12" style="width: 100%; height: 400px;"></div>
-                        </div>
-                    </div>
-                    <br>
+                        <br>
                     {% endif %}
                     <div class="card rounded-lg-sm chart-shadow">
                         <div class="rounded-lg-sm chart-shadow">
@@ -364,50 +364,45 @@
 {% endblock %}
 
 {% block page_js %}
-    {% comment %} <script type="text/javascript" src="{% static 'dist/js/jquery.countdown360.min.js' %}"></script>
-    <script>
+    {% comment %}
+        <script type="text/javascript" src="{% static 'dist/js/jquery.countdown360.min.js' %}"></script>
+        <script>
+            $(document).ready(function () {
+                var popup = $('#mainpopup');
+                var time = $(".will-close strong");
+                var closeSeconds = $("#mainpopup").attr("data-close");
+                var openSeconds = $("#mainpopup").attr("data-open");
+                var dataSrc = $("#mainpopup").attr("data-href");
 
-        $(document).ready(function () {
-
-            var popup = $('#mainpopup');
-            var time = $(".will-close strong");
-            var closeSeconds = $("#mainpopup").attr("data-close");
-            var openSeconds = $("#mainpopup").attr("data-open");
-            var dataSrc = $("#mainpopup").attr("data-href");
-
-            setTimeout(function (e) {
-                popup.modal('show');
-                time.html(closeSeconds);
-                setInterval(function () {
+                setTimeout(function (e) {
+                    popup.modal('show');
                     time.html(closeSeconds);
-                    closeSeconds--;
-                    if (closeSeconds < 0) {
-                        popup.modal('hide');
-                    }
-                }, 1000)
-            }, openSeconds * 1000);
+                    setInterval(function () {
+                        time.html(closeSeconds);
+                        closeSeconds--;
+                        if (closeSeconds < 0) {
+                            popup.modal('hide');
+                        }
+                    }, 1000)
+                }, openSeconds * 1000);
 
-            var countdown =  $("#countdown").countdown360({
-                radius      : 60,
-                seconds     : 10,
-                fontColor   : '#FFFFFF',
-                autostart   : false,
-                onComplete  : function () {}
+                var countdown =  $("#countdown").countdown360({
+                    radius      : 60,
+                    seconds     : 10,
+                    fontColor   : '#FFFFFF',
+                    autostart   : false,
+                    onComplete  : function () {}
+                });
+                countdown.start();
             });
-            countdown.start();
-        });
-    </script> {% endcomment %}
+        </script>
+    {% endcomment %}
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static 'node_modules/moment/moment.js' %}"></script>
     <script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
     <script type="text/javascript">
-        $.get("https://ipinfo.io", function(response) {
-            $.ajax({ url:"{% url 'update_ip' %}", type:"POST",
-                data: { ip:response.ip, user:"{{request.session.id}}"},
-                success: function(data){ console.log('updated'); }
-            });  
-        }, "json");
-
+        
+        
         const spinner = document.getElementById("loaderModal");
         let hide_bulleting_data = "{{hide_bulleting_data|safe}}"
 
@@ -436,6 +431,7 @@
                 }
             });
         }
+        
         {% comment %} Initial data {% endcomment %}
         if(hide_bulleting_data != 'True'){
             let date = "{{ operation_bulletin_ekcl.date|date:'M d, Y' }}";
