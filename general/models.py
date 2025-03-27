@@ -272,6 +272,7 @@ class CommonMaster(models.Model): #this common model/table will use for all smal
         ('7', 'Gender'),
         ('8', 'HR Employee Skills'),
         ('9', 'Salary Heads'),
+        ('10', 'Units'),
         
     )
     value_for      = models.CharField(max_length=50, choices=value_types)

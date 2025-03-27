@@ -6,7 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect, get_object_or_404
 from general.decorators import login, permission
 from django.views.decorators.csrf import csrf_exempt
-from general.models import CommonMaster, Company, Departments, Designations, Sections, Status, UserRoles, Users
+from general.models import *
 from hr.models import Building, EmployeeInfo,EmployeeDetails,EmployeeNominee,EmployeeBankInfo,EmployeeEducation,EmployeeExperience, Shift, HRSalaryBreakdown, HRSalarySlabMaster, HRFloor, EmployeeUpdateRequest, Location, HRAttendanceBonusRule, GEOLocation, Division, SubSection
 from hr.forms import EmployeeBankForm, EmployeeDetailsForm, EmployeeNomineeForm, ShiftForm, Pf_EmployeeForm
 from django.urls import reverse, reverse_lazy
@@ -21,7 +21,7 @@ ebs_bl_approval     = approval_log_logic.Approval()
 ebs_bl_common       = common_logic.Common()    
 
 def get_employee_code(company):
-    emp_details = EmployeeDetails.objects.filter(company_id=company.id).last()
+    emp_details = EmployeeDetails.objects.filter(branch_id=company.id).last()
     if emp_details and emp_details.personal.employee_id:
         splitted_id   = str(emp_details.personal.employee_id)[3:]
         emp_code = str("E") + str(int(splitted_id) + 1).rjust(6, '0')
@@ -175,7 +175,7 @@ def employee_official_info(request):
     confirmation_date   = datetime.strptime(confirmation_date, "%d/%m/%Y").date() if confirmation_date else None
     holiday             = None
     if company: 
-        company = Company.objects.get(id=int(company))
+        company = Branch.objects.get(id=int(company))
         holiday = company.weekends
     holidays = request.POST.get('holiday', '')
     if holidays : holiday = json.loads(holidays)
@@ -184,7 +184,7 @@ def employee_official_info(request):
     except          : 
         if skill_category: skill_category, created = CommonMaster.objects.get_or_create(value_for=46, value=skill_category)
         else : skill_category = None
-    data={'punch_id':punch_id, 'tin':tin, 'personal': personal_id, 'company':company.id, 'department': department, 'designation': designation, 'division': division, 'sub_section': sub_section, 'section': section, 'building': building, 'location':location, 'shift': shift, 'floor': floor,'cost_center': cost_center, 'unit': unit, 'line': line, 'office_mobile': office_mobile, 'pabx':pabx,'office_email': office_email, 'salary': salary, 'joining_date': joining_date, 'confirmation_date': confirmation_date,'has_pf': has_pf, 'initial_grade': grade, 'grade': grade, 'reporting_to': reporting_to,'employee_type': employee_type, 'employee_category': employee_category, 'skill_category': skill_category,'provision_month': provision_month, 'holiday': holiday, 'overtime': overtime, 'off_day_ot': off_day_ot,'income_tax' : income_tax, 'holiday_bonus': holiday_bonus, 'transport_facility': transport_facility,'created_by': request.session.get('id', None), 'status': status, 'attendance_bonus':attendance_bonus, 'tiffin_bill':tiffin_bill}
+    data={'punch_id':punch_id, 'tin':tin, 'personal': personal_id, 'branch':company.id, 'department': department, 'designation': designation, 'division': division, 'sub_section': sub_section, 'section': section, 'building': building, 'location':location, 'shift': shift, 'floor': floor,'cost_center': cost_center, 'unit': unit, 'line': line, 'office_mobile': office_mobile, 'pabx':pabx,'office_email': office_email, 'salary': salary, 'joining_date': joining_date, 'confirmation_date': confirmation_date,'has_pf': has_pf, 'initial_grade': grade, 'grade': grade, 'reporting_to': reporting_to,'employee_type': employee_type, 'employee_category': employee_category, 'skill_category': skill_category,'provision_month': provision_month, 'holiday': holiday, 'overtime': overtime, 'off_day_ot': off_day_ot,'income_tax' : income_tax, 'holiday_bonus': holiday_bonus, 'transport_facility': transport_facility,'created_by': request.session.get('id', None), 'status': status, 'attendance_bonus':attendance_bonus, 'tiffin_bill':tiffin_bill}
     if emp_official: 
         if EmployeeDetails.objects.filter(employee_id=employee_id).exclude(id=emp_official.id).exists():
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
@@ -434,14 +434,14 @@ def employee_edit(request, id):
     template_name = "hr/employee/edit.html"
     search_roles, company_query = {"Admin", "Management"}, Q(status=True)
     if not search_roles.intersection(request.session.get("user_roles")):
-        company_query &= Q(id__in=request.session.get("company_id_list"))
+        company_query &= Q(company_id=request.session.get("company_id"))
     context = {
         'personal':personal,
         'office':office,
         'bank':bank,
         'nominee':nominee,
         'is_user': user.status if user else False,
-        'company_list'      : Company.objects.filter(company_query).order_by('short_name'),
+        'company_list'      : Branch.objects.filter(company_query).order_by('short_name'),
         'location_list'     : Location.objects.filter(status=Status.name("Active")),
         'division_list'     : Division.objects.filter(status=Status.name("Active")).order_by('name'),
         'department_list'   : Departments.objects.filter(status=True).order_by('short_name', 'name'),
@@ -467,11 +467,11 @@ def get_employee_for_datatable(request):
     query, start, counter = Q(), request.POST.get('start', 0), request.POST.get('counter', 0)
     content, reset_data, end = '', False, int(start) + int(counter)
 
-    if company := request.POST.get('company', None) : query &= Q(company_id=company)
+    if company := request.POST.get('company', None) : query &= Q(branch_id=company)
     else :
         search_roles = {"Admin", "Management"}
         if not search_roles.intersection(request.session.get("user_roles")):
-            query &= Q(company_id__in=request.session.get("company_id_list"))
+            query &= Q(branch_id__in=request.session.get("branch_id_list"))
     if department  := request.POST.get('department', None)  : query &= Q(department_id=department)
     if designation := request.POST.get('designation', None) : query &= Q(designation_id=designation)
     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)

@@ -459,7 +459,7 @@
                                 <div class="form-group">
                                     <label for="employee_unit">Unit</label>
                                     <select class="form-control custom-select select2"
-                                        name="employee_unit" data-title="Unit" id="employee_unit" required>
+                                        name="employee_unit" data-title="Unit" id="employee_unit">
                                         <option value="" disabled selected></option>
                                         {% for i in unit_list %}
                                         <option value="{{i.id}}" {% if office.unit_id == i.id %} selected {% endif %}>{{i.value}}</option>
