@@ -137,7 +137,6 @@ LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-
 # Email configure
 # EMAIL_USE_TLS = True
 # EMAIL_HOST = ''
