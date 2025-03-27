@@ -122,7 +122,7 @@ def employee_add(request):
     if chk_permission and chk_permission.insert_action:
         search_roles, company_query = {"Admin", "Management"}, Q(status=True)
         if not search_roles.intersection(request.session.get("user_roles")):
-            company_query &= Q(company_id=request.session.get("company_id"))
+            company_query &= Q(id=request.session.get("branch_id"))
         context = {
             'company_list'      : Branch.objects.filter(company_query).order_by('short_name'),
             'division_list'     : Division.objects.filter(status=Status.name('active')).order_by('name'),
@@ -130,13 +130,13 @@ def employee_add(request):
             'designation_list'  : Designations.objects.filter(status=True).order_by('name'),
             'geo_location_list' : GEOLocation.objects.order_by('division_en', 'district_en', 'thana_en', 'post_office_en'),
             'shift_list'        : Shift.objects.filter(status=Status.name('active')),
-            'employee_type_list':CommonMaster.objects.filter(value_for=37, status=True),
-            'employee_category_list':CommonMaster.objects.filter(value_for=38, status=True),
-            'marital_status_list':CommonMaster.objects.filter(value_for=42, status=True),
-            'gender_list'       : CommonMaster.objects.filter(value_for=43, status=True),
+            'employee_type_list':CommonMaster.objects.filter(value_for=4, status=True),
+            'employee_category_list':CommonMaster.objects.filter(value_for=5, status=True),
+            'marital_status_list': CommonMaster.objects.filter(value_for=6, status=True),
+            'skill_category_list': CommonMaster.objects.filter(value_for=8, status=True),
+            'gender_list'       : CommonMaster.objects.filter(value_for=7, status=True),
             'unit_list'         : CommonMaster.objects.filter(value_for=44, status=True),
-            'skill_category_list':CommonMaster.objects.filter(value_for=46, status=True),
-            'religion_list'     : CommonMaster.objects.filter(value_for=6, status=True),
+            'religion_list'     : CommonMaster.objects.filter(value_for=3, status=True),
             'ab_rule_list'      : HRAttendanceBonusRule.objects.filter(status=Status.name('Active')),
             'provision_month'   : EmployeeDetails.provision_months, 'blood_group_list' : EmployeeInfo.group_type,
         }
@@ -261,8 +261,8 @@ def employee_update(request, employee_id):
                 company_list = Company.objects.filter(status=True)
                 department_list = Departments.objects.filter(status=True)
                 designation_list = Designations.objects.filter(status=True)
-                employee_type_list = CommonMaster.objects.filter(value_for=37)
-                employee_category_list = CommonMaster.objects.filter(value_for=38)
+                employee_type_list = CommonMaster.objects.filter(value_for=4)
+                employee_category_list = CommonMaster.objects.filter(value_for=5)
                 if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin":
                     employee_list = EmployeeInfo.objects.all()
                 else:
@@ -575,7 +575,7 @@ def import_employee(request):
                                 elif employee :
                                     if emp_details_update := EmployeeDetails.objects.filter(personal=employee_info, employee_id=employee_id).update(company=company, division=division, sub_section=sub_section, department=department, designation=designation, section=section, cost_center=cost_center, unit=unit, location=location, building=building, floor=floor, line=line, employee_category=employee_category, employee_type=employee_type, reporting_to=reporting_to, skill_category=skill_category, grade=grade, initial_grade=initial_grade, punch_id=punch_id, pabx=pabx, tin=tin, office_mobile=office_mobile, office_email=office_email, holiday=holiday, joining_date=joining_date, provision_month=provision_month, shift=shift, salary=salary, income_tax=income_tax, tiffin_bill=tiffin_bill, transport_facility=transport_facility, has_pf=has_pf, overtime=overtime, off_day_ot=off_day_ot, holiday_bonus=holiday_bonus, created_by=user, status=Status.name('active')) : employee_ids.append(employee_id)
                                 emp_details = EmployeeDetails.objects.filter(personal=employee_info).first()
-                                if str_from_xls(info['Is EBIT User?'][i]) == "Yes" : create_user(emp_details)
+                                if emp_details: create_user(emp_details)
                         elif employee_id and employee :
                             if sheet == "Nominee" :
                                 nominee_name    = str_from_xls(info['Nominee Name'][i])

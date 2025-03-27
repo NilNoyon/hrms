@@ -87,7 +87,7 @@ class AssetClassification(models.Model):
 
 class AssetSubClassification(models.Model):
      name           = models.CharField(max_length=100, unique=True)
-     classification =  models.ForeignKey(AssetClassification, on_delete=models.CASCADE, null=True, blank=True)
+     classification = models.ForeignKey(AssetClassification, on_delete=models.CASCADE, null=True, blank=True)
      class Meta:
           db_table = 'asset_subclassification'
 

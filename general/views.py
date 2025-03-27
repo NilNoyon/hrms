@@ -60,13 +60,14 @@ def app_login(request):
                         request.session['secondary_role']       = user[0].secondary_role if user[0].secondary_role else []
                         request.session['user_roles']           = request.session['secondary_role'] + [user[0].role.name]
                         request.session['secondary_company']    = user[0].secondary_company if user[0].secondary_company else []
+                        request.session['branch_id_list']       = request.session['secondary_company'] + [user[0].branch_id]
                         request.session['company']              = str(user[0].branch.company.name)
                         request.session['company_id']           = str(user[0].branch.company_id)
                         request.session['branch_id']            = str(user[0].branch_id)
                         request.session['department']           = str(user[0].department.name)
                 except Exception as e:
                         messages.warning(request, str(e))
-                        return render(request, "login.html",{"employee_id":request.POST['employee_id']})
+                        return render(request, "login1.html",{"employee_id":request.POST['employee_id']})
                 # try:
                 #      employee_info = EmployeeInfo.objects.get(employee_id=user[0].employee_id)
                 #      request.session['photo']        = str(employee_info.photo) if employee_info.photo else ''
@@ -575,7 +576,7 @@ def user_update(request, id):
                         messages.warning(request, "%s : %s" % (field.name, error))
         else:
             dept_head_list = Users.objects.filter(status=True)
-            company_list = Company.objects.filter(status=True)
+            company_list = Branch.objects.filter(status=True,company=instance.branch.company)
             department_list = Departments.objects.filter(status=True)
             designation_list = Designations.objects.filter(status=True)
             role_list = UserRoles.objects.filter(status=True)
@@ -587,7 +588,7 @@ def user_update(request, id):
                 'department_list': department_list,
                 'designation_list': designation_list,
                 'company_list': company_list,
-                'secondary_company_list': company_list.exclude(id = instance.company_id),
+                'secondary_company_list': company_list.exclude(id = instance.branch_id),
                 'role_list': role_list,
             }
             return render(request, 'user/form.html', context)

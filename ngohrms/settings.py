@@ -95,7 +95,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'ngohrms_db',
-        'USER': 'postgres',
+        'USER': 'myuser',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -137,6 +137,7 @@ LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+
 # Email configure
 # EMAIL_USE_TLS = True
 # EMAIL_HOST = ''
@@ -154,3 +155,6 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.ERROR: 'error',
 }
+
+try : from .local_settings import *
+except ImportError : pass

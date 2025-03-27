@@ -51,11 +51,11 @@
             </div>
             <div class="col-md-3">
               <div class="form-group">
-                <label for="company">Company</label>
-                <select class="form-control text-capitalize select2" id="company" name="company" data-title="Company" required>
+                <label for="company">Branch</label>
+                <select class="form-control text-capitalize select2" id="company" name="company" data-title="Brnach" required>
                   <option value="" disabled selected></option>
                   {% for data in company_list %}
-                  <option value="{{data.id}}" {% if user.company_id == data.id %} selected {% endif %}>{{data.name}}</option>
+                  <option value="{{data.id}}" {% if user.branch_id == data.id %} selected {% endif %}>{{data.name}}</option>
                   {% endfor %}
                 </select>
               </div>
