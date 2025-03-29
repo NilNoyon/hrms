@@ -161,12 +161,9 @@ class Users(models.Model):
     
     def sc_user_level(self):
         user_level = 0
-        if self.role.name == "Procurer"                             : user_level = 1
-        elif self.role.name == "SC Head"                            : user_level = 2
-        elif self.role.name == "Audit"                              : user_level = 3
-        elif 'management' in self.role.name.lower()                 : user_level = 6
-        elif 'admin' in self.role.name.lower()                      : user_level = 7
-        elif 'finance' in self.role.name.lower()                    : user_level = 8
+        if 'management' in self.role.name.lower()                   : user_level = 1
+        elif 'admin' in self.role.name.lower()                      : user_level = 2
+        elif 'finance' in self.role.name.lower()                    : user_level = 3
         return user_level
 
     class Meta:
