@@ -23,7 +23,7 @@ urlpatterns = [
     path('', include('general.urls')),
     path('inbox/notifications/', include(notification.urls, namespace='notifications')),
     path('admin/', admin.site.urls),
-    path('fixed-asset/', include('ngoasset.urls')),
+    # path('fixed-asset/', include('ngoasset.urls')),
     path('hr/', include('hr.urls')),
     path('supportdesk/', include('desk.urls')),
 ]
