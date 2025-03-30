@@ -17,6 +17,7 @@ def hr_salary_cycle_list(request):
             status  = request.POST.get('status', 0)
             request.POST['status'] = Status.name('Inactive') if status == 0 else Status.name('Active')
         except : pass
+        request.POST['branch'] = request.POST['company']
         form = HRSalaryCycleForm(request.POST)
         if form.is_valid():
             form.save()
@@ -29,8 +30,8 @@ def hr_salary_cycle_list(request):
     action_name     = "Add HRSalaryCycle"
     form            = HRSalaryCycleForm()
     context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list,
-                        'companies'  : Company.objects.filter(status = True).order_by('name'),
-                        'employee_categories' : CommonMaster.objects.filter(value_for=38) }
+                        'companies'  : Branch.objects.filter(status = True,company_id=request.session.get('company_id')).order_by('name'),
+                        'employee_categories' : CommonMaster.objects.filter(value_for=5) }
     return render(request, template_name, context)
     # else: return redirect(reverse("access_denied"))
 
@@ -42,6 +43,7 @@ def hr_salary_cycle_update(request, id):
         instance = get_object_or_404(HRSalaryCycle, id=id)
         if request.method == "POST":
             request.POST = request.POST.copy()
+            request.POST['branch'] = request.POST['company']
             try :
                 updated_by = HRSalaryCycle._meta.get_field('updated_by')
                 request.POST['updated_by'] = request.session.get('id')
@@ -64,8 +66,8 @@ def hr_salary_cycle_update(request, id):
         form            = HRSalaryCycleForm(instance=instance)
 
         context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list,
-                    'companies'  : Company.objects.filter(status = True).order_by('name'), 'instance':instance,
-                    'employee_categories' : CommonMaster.objects.filter(value_for=38) }
+                    'companies'  : Branch.objects.filter(status = True,company_id=request.session.get('company_id')).order_by('name'), 'instance':instance,
+                    'employee_categories' : CommonMaster.objects.filter(value_for=5) }
         return render(request, template_name, context)
     except : return redirect(reverse_lazy('hr:hr_salary_cycle_list'))
     # else: return redirect(reverse("access_denied"))

@@ -45,12 +45,12 @@
                     <div class="row">
                       <div class="col-md-3">
                         <div class="form-group">
-                          <label for="company">Company</label>
+                          <label for="company">Branch</label>
                           <select class="form-control text-capitalize select2" id="company" name="company"
-                            data-title="Company" required>
+                            data-title="Branch" required>
                             <option value="" disabled selected></option>
                             {% for data in company_list %}
-                               <option value="{{data.id}}" {% if instance.company_id == data.id %} selected {% endif %}>{{data.name}}
+                               <option value="{{data.id}}" {% if instance.branch_id == data.id %} selected {% endif %}>{{data.name}}
                                </option>
                             {% endfor %}
                           </select>
@@ -58,7 +58,7 @@
                       </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="name_of_buyer">Name of Buyer/Certification</label>
+                                <label for="name_of_buyer">Name of Certification</label>
                                 <input type="text" class="form-control" id="name_of_buyer" name="name_of_buyer" data-title="Name of Buyer/Certification" {% if instance.name_of_buyer %} value={{instance.name_of_buyer}}{% endif %} required >
                                 <span class="bar"></span>
                             </div>
@@ -126,7 +126,7 @@
                               <select class="form-control select2" id="category" name="category" data-title="Category" required>
                                 <option value="" disabled selected></option>
                                 <option value="Certification Audit" {% if instance.category  == "Certification Audit" %} selected {% endif %}>Certification Audit</option>
-                                <option value="Buyer Audit" {% if instance.category == "Buyer Audit" %} selected {% endif %}>Buyer Audit</option>
+                                <!-- <option value="Buyer Audit" {% if instance.category == "Buyer Audit" %} selected {% endif %}>Buyer Audit</option> -->
                               </select>
                             </div>
                         </div>

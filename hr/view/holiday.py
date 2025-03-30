@@ -73,8 +73,8 @@ def holiday_list(request):
 def holiday_calendar(request):
     template_name   = "hr/holiday/calendar.html"
     context = {
-        'company_list'  : Company.objects.filter(status = True).order_by('name'),
-        'user_company'  : Company.objects.filter(id=request.session.get('company_id')).first()
+        'company_list'  : Branch.objects.filter(status=True, company_id=request.session.get('company_id')).order_by('name'),
+        'user_company'  : Branch.objects.filter(id=request.session.get('branch_id')).first()
     }
     return render(request, template_name, context)
 
@@ -82,9 +82,9 @@ def holiday_calendar(request):
 def get_calendar_data(request):
     company_id, holidays, html = request.POST.get('company_id', None), [], ''
     holiday_list = Holiday.objects.filter(start_date__year=datetime.now().year,
-                     company_id=company_id, status=Status.name("active")).order_by('start_date')
+                     branch_id=company_id, status=Status.name("active")).order_by('start_date')
     holiday_indivs_list = HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year,
-                     holiday__company_id=company_id, status=Status.name("active")).order_by('holiday_date')
+                     holiday__branch_id=company_id, status=Status.name("active")).order_by('holiday_date')
     holidays.append({ 'name' : "Today", 
         'startYear' : datetime.today().strftime("%Y"), 'startMonth' : datetime.today().strftime("%m"), 
         'startDay' : datetime.today().strftime("%d"), 'endYear' : datetime.today().strftime("%Y"), 
@@ -116,7 +116,7 @@ def company_weekends(request):
                 w.save()
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
         
-    context = { 'company_list' : Company.objects.filter(status=True).order_by('name') }
+    context = { 'company_list' : Branch.objects.filter(status=True, company_id=request.session.get('company_id')).order_by('name') }
     return render(request, "hr/holiday/weekend.html", context)
 
 
@@ -124,7 +124,7 @@ def company_weekends(request):
 def get_weekend_data(request):
     company_id, html = request.POST.get('company_id', None), ''
     weekend_list = HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year, holiday__weekend=True,
-                    holiday__company_id=company_id, status=Status.name("active")).order_by('holiday_date')
+                    holiday__branch_id=company_id, status=Status.name("active")).order_by('holiday_date')
     for index, w in enumerate(weekend_list):
         html += """<div class="col-md-3">
                     <div class="input-group">

@@ -16,7 +16,7 @@
         <div class="card-header">
             <div class="row">
                 <div class="col-md-6 align-self-center">
-                    <h4 class="mb-1">Company wise Leave Allocation</h4>
+                    <h4 class="mb-1">Branch wise Leave Allocation</h4>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
                             <tr>
                                 <th class="pt-0">
                                     <div class="form-group mb-0">
-                                        <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" />
+                                        <select class="form-control text-capitalize select2" name="company" id="company" data-title="Branch" />
                                             <option value="" disabled selected></option>
                                             {% for company in companies %}
                                             <option value="{{company.id}}" {% if instance.company_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
