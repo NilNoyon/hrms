@@ -3,7 +3,7 @@ import os, time
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect,reverse, render
 from general.decorators import login, permission
-from general.models import CommonMaster, Company
+from general.models import CommonMaster, Company, Branch
 from hr.forms import License
 from hr.models import LicenseInfo
 from django.db.models import Q
@@ -23,6 +23,7 @@ def licinse_entry(request):
             request.POST = request.POST.copy()
             request.POST['issu_date'] = datetime.strptime(request.POST.get('issu_date'), "%d-%b-%Y").date() if request.POST.get('issu_date') else ''
             request.POST['expire_date'] = datetime.strptime(request.POST.get('expire_date'), "%d-%b-%Y").date() if request.POST.get('expire_date') else ''
+            request.POST['branch'] = request.POST.get('company')
             attachment = ""
             if bool(request.FILES.get('attachment', False)) == True:
                 attachment = request.FILES['attachment']
@@ -72,7 +73,7 @@ def licinse_entry(request):
                 
                 obj={
                     'id':data.id,
-                    'company':data.company,
+                    'company':data.branch,
                     'license_name': data.license_name,
                     'certificate_no' : data.certificate_no,
                     'issu_date' : data.issu_date,
@@ -83,8 +84,8 @@ def licinse_entry(request):
                 }
                 license_data_list.append(obj) 
 
-            license_name = CommonMaster.objects.filter(value_for = "28")
-            company_list = Company.objects.filter(status=True)
+            license_name = CommonMaster.objects.filter(value_for = "12")
+            company_list = Branch.objects.filter(status=True,company_id=request.session.get('company_id'))
             action = {'name': 'Add New', 'btnTxt': 'Submit'}
             context = {
                 'license_data_list' : license_data_list,
@@ -106,6 +107,7 @@ def license_entry_update(request, id):
                 request.POST = request.POST.copy()
                 request.POST['issu_date'] = datetime.strptime(request.POST.get('issu_date'), "%d-%b-%Y").date() if request.POST.get('issu_date') else ''
                 request.POST['expire_date'] = datetime.strptime(request.POST.get('expire_date'), "%d-%b-%Y").date() if request.POST.get('expire_date') else ''
+                request.POST['branch'] = request.POST.get('company')
                 form = License(request.POST, instance=instance)
                 if form.is_valid():
                     form.save()
@@ -145,7 +147,7 @@ def license_entry_update(request, id):
                     
                     obj={
                         'id':data.id,
-                        'company':data.company,
+                        'company':data.branch,
                         'license_name': data.license_name,
                         'certificate_no' : data.certificate_no,
                         'issu_date' : data.issu_date,
@@ -155,8 +157,8 @@ def license_entry_update(request, id):
                         'tenure' : tenure
                     }
                     license_data_list.append(obj) 
-                    license_name = CommonMaster.objects.filter(value_for = "28")
-                    company_list = Company.objects.filter(status=True)
+                    license_name = CommonMaster.objects.filter(value_for = "12")
+                    company_list = Branch.objects.filter(status=True,company_id=request.session.get('company_id'))
                     action = {'name': 'Update', 'btnTxt': 'Update'}
                     context = {
                         'instance': instance, 

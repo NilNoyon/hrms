@@ -41,7 +41,7 @@
                 <tr>
                   <th class="d-sm-table-cell">Employee ID</th>
                   <th class="d-sm-table-cell">Employee Name</th>
-                  <th class="d-sm-table-cell">Company</th>
+                  <th class="d-sm-table-cell">Branch</th>
                   <th class="d-sm-table-cell">Provident Fund</th>
                   <th class="d-sm-table-cell">Gross Salary</th>
                   <th class="d-sm-table-cell">Employee Rate(%)</th>
@@ -59,7 +59,7 @@
       </div>
       <div class="form-group companys" style="display: none;">
         <select class="form-control text-capitalize" id="companys" name="company" >
-            <option value="" >All Company</option>
+            <option value="" >All Branch</option>
             {% for data in conpany_list %}
                 <option value="{{data.id}}" >{{data.name}}</option>
             {% endfor %}

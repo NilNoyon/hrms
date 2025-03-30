@@ -5,7 +5,7 @@ from hr.views import *
 @csrf_exempt
 def get_employee_data(request):
     query       = Q()
-    if company := request.GET.get('company', None)          : query &= Q(company_id=company)
+    if company := request.GET.get('company', None)          : query &= Q(branch_id=company)
     if department := request.GET.get('department', None)    : query &= Q(department_id=department)
     if designation := request.GET.get('designation', None)  : query &= Q(designation_id=designation)
     if category_list := request.GET.getlist('category[]', None) : query &= Q(employee_category_id__in=category_list)

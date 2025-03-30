@@ -19,7 +19,7 @@
                             <thead>
                                 <tr>
                                     {% comment %} <th class="d-sm-table-cell">SL.</th> {% endcomment %}
-                                    <th>Company</th>
+                                    <th>Branch</th>
                                     <th>Leave</th>
                                     <th>E.Type</th>
                                     <th>E.Category</th>
@@ -33,7 +33,7 @@
                                 {% for leave in object_list %}
                                 <tr>
                                     {% comment %} <td class="">{{ forloop.counter }}</td> {% endcomment %}
-                                    <td>{{ leave.company.short_name }}</td>
+                                    <td>{{ leave.branch.short_name }}</td>
                                     <td>{{ leave.leave_type.short_title }}</td>
                                     <td>{{ leave.employee_type.value }}</td>
                                     <td>{{ leave.employee_category.value }}</td>
@@ -93,11 +93,11 @@
                     <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="company">Company</label>
-                            <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required />
+                            <label for="company">Branch</label>
+                            <select class="form-control text-capitalize select2" name="company" id="company" data-title="Branch" required />
                                 <option value="" disabled selected></option>
                                 {% for company in companies %}
-                                <option value="{{company.id}}" {% if instance.company_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
+                                <option value="{{company.id}}" {% if instance.branch_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
                                 {% endfor %}
                             </select>
                         </div>

@@ -5,7 +5,7 @@ from hr.views import *
 def attendance_list(request):
     template_name   = "hr/attendance/list.html"
     context         = {
-        'company_list'      : Company.objects.filter(status=1).order_by('short_name'),
+        'company_list'      : Branch.objects.filter(company_id=request.session.get('company_id')).order_by('short_name'),
         'designation_list'  : Designations.objects.filter(status = True).order_by('name'),
         'department_list'   : Departments.objects.filter(status = True).order_by('name'),
         'user_list'         : Users.objects.filter(status = True),
@@ -149,7 +149,7 @@ def my_job_card(request, employee_id="", start_date="", end_date=""):
         if month != 12 :
             end_date    = datetime(year, int(month) + 1, 1) - timedelta(days=1)
         else : end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
-        if salary_cycle:= HRSalaryCycle.objects.filter(company=employee.company, employee_category=employee.employee_category).first() :
+        if salary_cycle:= HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
             if salary_cycle.start_date != 1 : 
                 start_date  = datetime(year, month - 1, salary_cycle.start_date)
                 end_date    = datetime(year, month, salary_cycle.end_date)

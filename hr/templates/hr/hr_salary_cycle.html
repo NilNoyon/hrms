@@ -21,7 +21,7 @@
                             <thead>
                                 <tr>
                                     <th class="d-sm-table-cell">SL.</th>
-                                    <th>Company</th>
+                                    <th>Branch</th>
                                     <th>Emp. Category</th>
                                     <th>Cycle</th>
                                     <th>Status</th>
@@ -32,7 +32,7 @@
                                 {% for sc in object_list %}
                                 <tr>
                                     <td class="">{{ forloop.counter }}</td>
-                                    <td>{{ sc.company.short_name }}</td>
+                                    <td>{{ sc.branch.short_name }}</td>
                                     <td>{{ sc.employee_category.value }}</td>
                                     <td>{{ sc.start_date|ordinal }} - {{ sc.end_date|ordinal }}</td>
                                     <td>
@@ -83,11 +83,11 @@
                     <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="company">Company</label>
-                            <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required />
+                            <label for="company">Branch</label>
+                            <select class="form-control text-capitalize select2" name="company" id="company" data-title="Branch" required />
                                 <option value="" disabled selected></option>
                                 {% for company in companies %}
-                                <option value="{{company.id}}" {% if instance.company_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
+                                <option value="{{company.id}}" {% if instance.branch_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
                                 {% endfor %}
                             </select>
                         </div>

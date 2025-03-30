@@ -1376,9 +1376,9 @@ def employee_transfer_log(request):
         if request.session["role_text"].lower() in ["admin", "super admin","user"]: 
             employee_transfer_list = EmployeeTransfer.objects.all()
         else:
-            employee_transfer_list = EmployeeTransfer.objects.filter(employee__company_id = request.session.get('company_id'))
+            employee_transfer_list = EmployeeTransfer.objects.filter(employee__branch_id = request.session.get('branch_id'))
 
-        company_list = Company.objects.filter(status = True)
+        company_list = Branch.objects.filter(status = True, company_id=request.session.get('company_id'))
         context = {
             'emp_transfer_log' : employee_transfer_list,
             'company_list' : company_list
@@ -1502,7 +1502,7 @@ def employee_transfer(request):
                         return JsonResponse({"error": form.errors}, status=400)
             else:
                 employee_list      = EmployeeInfo.objects.all()
-                company_list       = Company.objects.filter(status=True)
+                company_list       = Branch.objects.filter(status = True, company_id=request.session.get('company_id'))
                 department_list    = Departments.objects.filter(status=True)
                 designation_list   = Designations.objects.filter(status=True)
                 employee_pf_list   = EmployeePF.objects.filter(status=Status.name('active'))
@@ -1573,8 +1573,8 @@ def pf_contribution_log(request):
         else:
             emp_contribution_log = PFMonthlyContribution.objects.filter(company_id = request.session.get('company_id'))
 
-        conpany_list  = Company.objects.filter(status = True)
-        pf_list            = ProvidentFundMaster.objects.all()
+        conpany_list  = Branch.objects.filter(status = True, company_id=request.session.get('company_id'))
+        pf_list       = ProvidentFundMaster.objects.all()
         context = {
             'conpany_list' : conpany_list,
             'pf_list'           : pf_list,

@@ -4,7 +4,7 @@ import time
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, reverse, render
 from general.decorators import login, permission
-from general.models import Company
+from general.models import Branch
 from django.db.models import Q
 from django.contrib import messages
 from django.core.files.storage import default_storage
@@ -26,6 +26,7 @@ def audit_status_entry(request):
             request.POST = request.POST.copy()
             request.POST['last_audit_date'] = datetime.strptime(request.POST.get('last_audit_date'), "%d-%b-%Y").date() if request.POST.get('last_audit_date') else ''
             request.POST['expire_date'] = datetime.strptime(request.POST.get('expire_date'), "%d-%b-%Y").date() if request.POST.get('expire_date') else ''
+            request.POST['branch'] = request.POST.get('company')
             attachment = ""
             if bool(request.FILES.get('attachment', False)) == True:
                 attachment = request.FILES['attachment']
@@ -51,9 +52,9 @@ def audit_status_entry(request):
             if request.session["role_text"].lower() in ["admin", "super admin","user"]: 
                    audit_status_list = AuditStatus.objects.all()
             else:
-                audit_status_list = AuditStatus.objects.filter(Q(company = request.session.get('company'))|
-                                    Q(company = request.session.get('company_short_name'))).exclude(employee_id = 'admin')
-            company_list = Company.objects.filter(status=True)
+                audit_status_list = AuditStatus.objects.filter(Q(branch = request.session.get('branch_id'))|
+                                    Q(branch = request.session.get('company_short_name'))).exclude(employee_id = 'admin')
+            company_list = Branch.objects.filter(status=True,company_id=request.session.get('company_id'))
             action = {'name': 'Add New', 'btnTxt': 'Submit'}
             context = {
                 'audit_status_list' : audit_status_list,
@@ -76,6 +77,7 @@ def audit_status_update(request, id):
                 request.POST = request.POST.copy()
                 request.POST['last_audit_date'] = datetime.strptime(request.POST.get('last_audit_date'), "%d-%b-%Y").date() if request.POST.get('last_audit_date') else ''
                 request.POST['expire_date'] = datetime.strptime(request.POST.get('expire_date'), "%d-%b-%Y").date() if request.POST.get('expire_date') else ''
+                request.POST['branch'] = request.POST.get('company')
                 form = AuditStatusForm(request.POST, instance=instance)
                 if form.is_valid():
                     form.save()
@@ -93,7 +95,7 @@ def audit_status_update(request, id):
                 else:
                     audit_status_list = AuditStatus.objects.filter(Q(company = request.session.get('company'))|
                                         Q(company = request.session.get('company_short_name'))).exclude(employee_id = 'admin')
-                company_list = Company.objects.filter(status=True)
+                company_list = Branch.objects.filter(status=True,company_id=request.session.get('company_id'))
                 action = {'name': 'Add New', 'btnTxt': 'Submit'}
                 context = {
                     'instance': instance, 
@@ -116,8 +118,8 @@ def audit_status_view(request, id):
     if request.session["role_text"].lower() in ["admin", "super admin","user"]: 
         audit_status_list = AuditStatus.objects.all()
     else:
-        audit_status_list = AuditStatus.objects.filter(Q(company = request.session.get('company'))|
-                            Q(company = request.session.get('company_short_name'))).exclude(employee_id = 'admin')
+        audit_status_list = AuditStatus.objects.filter(Q(branch = request.session.get('branch_id'))|
+                            Q(branch = request.session.get('branch_short_name'))).exclude(employee_id = 'admin')
     action = {'name': 'Add New', 'btnTxt': 'Submit'}
     context = {
         'instance': instance, 
