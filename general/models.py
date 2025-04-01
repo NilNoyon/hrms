@@ -161,12 +161,9 @@ class Users(models.Model):
     
     def sc_user_level(self):
         user_level = 0
-        if self.role.name == "Procurer"                             : user_level = 1
-        elif self.role.name == "SC Head"                            : user_level = 2
-        elif self.role.name == "Audit"                              : user_level = 3
-        elif 'management' in self.role.name.lower()                 : user_level = 6
-        elif 'admin' in self.role.name.lower()                      : user_level = 7
-        elif 'finance' in self.role.name.lower()                    : user_level = 8
+        if 'management' in self.role.name.lower()                   : user_level = 1
+        elif 'admin' in self.role.name.lower()                      : user_level = 2
+        elif 'finance' in self.role.name.lower()                    : user_level = 3
         return user_level
 
     class Meta:
@@ -272,6 +269,9 @@ class CommonMaster(models.Model): #this common model/table will use for all smal
         ('7', 'Gender'),
         ('8', 'HR Employee Skills'),
         ('9', 'Salary Heads'),
+        ('10', 'Units'),
+        ('11', 'Audit By'),
+        ('12', 'License Name'),
         
     )
     value_for      = models.CharField(max_length=50, choices=value_types)

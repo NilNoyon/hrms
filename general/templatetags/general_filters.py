@@ -68,3 +68,4 @@ div_float.is_safe = False
 @register.filter(name='times') 
 def times(number):
     return range(number)
+

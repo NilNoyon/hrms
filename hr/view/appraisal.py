@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from general.decorators import login, permission
-from general.models import Users, Status, Company
+from general.models import Users, Status, Company, Branch
 from datetime import timedelta, datetime
 from django.contrib import messages
 from notification.signals import notify
@@ -66,7 +66,7 @@ def appraisal_list(request):
     if chk_permission and chk_permission.view_action :
         user_id = request.session.get("id", "")
         reporting_users = Users.objects.filter(reporting_to=user_id)
-        chairman_user = Company.objects.filter(md_id=user_id).exists()
+        chairman_user = Branch.objects.filter(branch_head_id=user_id).exists()
         if reporting_users.count() == 0 and not chairman_user :
             messages.warning(request, 'You don\'t have any Reporting Users!')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

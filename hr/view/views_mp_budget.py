@@ -15,14 +15,14 @@ def mp_budget(request):
     template_name = "hr/mp_budget/form.html"
     user = Users.objects.filter(id=int(request.session.get('id'))).first()
     
-    if user.company.ceo_id == int(request.session.get('id')): approve_query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('approved')))
-    elif user.company.md_id == int(request.session.get('id')): approve_query = Q(status=Status.name('approved'))
-    else: approve_query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')),company=user.company,department=user.department)
+    if user.branch.branch_head == int(request.session.get('id')): approve_query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('approved')))
+    elif user.branch.branch_head == int(request.session.get('id')): approve_query = Q(status=Status.name('approved'))
+    else: approve_query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')),branch=user.branch,department=user.department)
     if is_role_assigned(request.session["user_roles"], "HR"): approve_query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')))
     
-    if user.company.ceo_id == int(request.session.get('id')): query = Q(status=Status.name('raised'))
-    elif user.company.md_id == int(request.session.get('id')): query = Q(status=Status.name('authorized'))
-    else: query = Q(Q(status=Status.name('reject'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')),company=user.company,department=user.department)
+    if user.branch.branch_head == int(request.session.get('id')): query = Q(status=Status.name('raised'))
+    elif user.branch.branch_head == int(request.session.get('id')): query = Q(status=Status.name('authorized'))
+    else: query = Q(Q(status=Status.name('reject'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')),branch=user.branch,department=user.department)
     if is_role_assigned(request.session["user_roles"], "HR"): query = Q(Q(status=Status.name('reject'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')))
     total_approved  = HRManPowerBudget.objects.filter(approve_query).order_by('budget_year','department',"-id").distinct('budget_year','department').count()
     total_pending  = HRManPowerBudget.objects.filter(query).order_by('budget_year','department',"-id").distinct('budget_year','department').count()
@@ -40,7 +40,7 @@ def mp_budget(request):
         designations = [{'id':i.designation_id, 'name': i.designation.name} for i in designation_list]
     budget_year = HRManPowerBudget.objects.distinct('budget_year')
     context={
-        'total_pending': total_pending, 'total_approved': total_approved,'company_list':Company.objects.all(),'company_id': int(request.session.get('company_id')), 'department_list':departments, 'department_id':emp_details.department_id if emp_details else None,'designation_list': designations,
+        'total_pending': total_pending, 'total_approved': total_approved,'company_list':Branch.objects.filter(company_id=request.session.get('company_id')),'company_id': int(request.session.get('branch_id')), 'department_list':departments, 'department_id':emp_details.department_id if emp_details else None,'designation_list': designations,
         'all_department': Departments.objects.all(),'budget_year':budget_year, 'hr_roles': is_role_assigned(request.session['user_roles'], 'HR')
     }
     return render(request, template_name, context)
@@ -52,7 +52,7 @@ def mp_budget_create(request):
         if request.POST.get('submit_type') == 'submit': status = Status.name('Raised')
         if request.POST.get('submit_type') == 'save': status = Status.name('Started')
         budget_year = request.POST.get('budget_year')
-        company = request.POST.get('company')
+        branch = request.POST.get('branch')
         department = request.POST.get('department')
         serial = request.POST.getlist('serial')
         serial = [int(i) for i in serial]
@@ -64,7 +64,7 @@ def mp_budget_create(request):
             person_limit = request.POST.get(f'person_limit[{i}]')
             value_limit = request.POST.get(f'value_limit[{i}]')
             data = {
-                'budget_year':budget_year,'company':company or user.company,'department': department or user.department,'designation':designation,
+                'budget_year':budget_year,'company':branch or user.branch,'department': department or user.department,'designation':designation,
                 'manpower_limit_qty':person_limit,'manpower_limit_value':value_limit,
                 'created_by':request.session.get('id'), 'status': status
             }
@@ -93,9 +93,9 @@ def mp_budget_create(request):
                 #     ebs_bl_approval.log_entry(mpb, mpb.budget_year, mpb.created_by, '', mpb.status, CommonMaster.get_or_create_name('Man Power Budget Raised and Approved By CEO'))
       
                 if mpb and mpb.status == Status.name('Started'):    ebs_bl_approval.log_entry(mpb, mpb.budget_year, mpb.created_by, '', mpb.status, CommonMaster.get_or_create_name('Man Power Budget Started'))
-                if mpb and mpb.created_by_id != mpb.company.md_id and mpb.created_by_id != mpb.company.ceo_id and  mpb.status == Status.name('Raised'):     
+                if mpb and mpb.branch and mpb.created_by_id != mpb.branch.branch_head_id and mpb.created_by_id != mpb.branch.branch_head_id and  mpb.status == Status.name('Raised'):     
                     ebs_bl_approval.log_entry(mpb, mpb.budget_year, mpb.created_by, '', mpb.status, CommonMaster.get_or_create_name('Man Power Budget Raised'))
-                    n_recipient     = mpb.company.ceo
+                    n_recipient     = mpb.branch.branch_head
                     n_sender        = mpb.created_by
                     n_action_url    = reverse('hr:mp_budget')
                     n_model         = 'Man Power Budget'
@@ -234,15 +234,15 @@ def mp_budget_edit(request):
 def get_mp_budget_for_datatable(request, tab_name=None):
     user = Users.objects.filter(id=int(request.session.get('id'))).first()
     if tab_name == "approved":
-        if user.company.ceo_id == int(request.session.get('id')): query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('approved')))
-        elif user.company.md_id == int(request.session.get('id')): query = Q(status=Status.name('approved'))
-        else: query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')),company=user.company,department=user.department)
+        if user.branch.branch_head == int(request.session.get('id')): query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('approved')))
+        elif user.branch.branch_head == int(request.session.get('id')): query = Q(status=Status.name('approved'))
+        else: query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')),branch=user.branch,department=user.department)
         if is_role_assigned(request.session["user_roles"], "HR"): query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')))
     
     if tab_name == "pending":
-        if user.company.ceo_id == int(request.session.get('id')): query = Q(status=Status.name('raised'))
-        elif user.company.md_id == int(request.session.get('id')): query = Q(status=Status.name('authorized'))
-        else: query = Q(Q(status=Status.name('reject'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')),company=user.company,department=user.department)
+        if user.branch.branch_head == int(request.session.get('id')): query = Q(status=Status.name('raised'))
+        elif user.branch.branch_head == int(request.session.get('id')): query = Q(status=Status.name('authorized'))
+        else: query = Q(Q(status=Status.name('reject'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')),branch=user.branch,department=user.department)
         if is_role_assigned(request.session["user_roles"], "HR"): query = Q(Q(status=Status.name('reject'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')))
     
     department     = request.POST.get('department', None)

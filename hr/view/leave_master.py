@@ -1,11 +1,11 @@
 from hr.views import *
 
 
-def leave_master_context(action_name='', instance=None):
+def leave_master_context(action_name='', instance=None, request=None):
     object_list         = HRLeaveMaster.objects.order_by('-id')
-    employee_types      = CommonMaster.objects.filter(value_for=37)
-    employee_categories = CommonMaster.objects.filter(value_for=38)
-    companies           = Company.objects.filter(status=True).order_by("short_name")
+    employee_types      = CommonMaster.objects.filter(value_for=4)
+    employee_categories = CommonMaster.objects.filter(value_for=5)
+    companies           = Branch.objects.filter(status=True, company_id=request.session.get('company_id')).order_by('name')
     leave_types         = HRLeaveType.objects.filter(status=Status.name('Active'))
     if instance :
         action_url      = reverse_lazy('hr:leave_master_update', kwargs={'id':instance.id})
@@ -22,7 +22,8 @@ def leave_master_list(request):
     # if chk_permission and chk_permission.view_action:
     if request.method == "POST":
         request.POST = request.POST.copy()
-        leave = HRLeaveMaster.objects.filter(company=request.POST['company'], leave_type=request.POST['leave_type'],
+        request.POST['branch'] = request.POST['company']
+        leave = HRLeaveMaster.objects.filter(branch=request.POST['branch'], leave_type=request.POST['leave_type'],
                     employee_category=request.POST['employee_category'], employee_type=request.POST['employee_type'])
         if leave.exists() :
             messages.warning(request, "Already exists!")
@@ -37,7 +38,7 @@ def leave_master_list(request):
         else : ebs_bl_common.form_errors(request, form)
 
     template_name   = "hr/leave/master.html"
-    context         = leave_master_context('Add Leave Master Data')
+    context         = leave_master_context('Add Leave Master Data','',request)
     return render(request, template_name, context)
     # else: return redirect(reverse("access_denied"))
 
@@ -65,7 +66,7 @@ def leave_master_update(request, id):
             else : ebs_bl_common.form_errors(request, form)
 
         template_name   = "hr/leave/master.html"
-        context         = leave_master_context("Update Leave Master Data", instance)
+        context         = leave_master_context("Update Leave Master Data", instance, request)
         return render(request, template_name, context)
     except : return redirect(reverse_lazy('hr:leave_master_list'))
     # else: return redirect(reverse("access_denied"))

@@ -497,7 +497,7 @@
                                 </div>
                             </div>
                             {% endif %}
-                            {% if request.session.employee_id|ifinlistSTR:'EC00007156,HC01000038,LE01000084' and details.salary and details.salary > 0 %}
+                            {% if request.session.employee_id and details.salary and details.salary > 0 %}
                             <div class="ribbon-wrapper">
                                 <div class="ribbon ribbon-default" style="width:150px;">Salary</div>
                                 <div class="row">

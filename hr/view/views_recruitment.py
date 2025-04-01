@@ -5,7 +5,7 @@ from hr.views import *
 @csrf_exempt
 def get_employee_data(request):
     query       = Q()
-    if company := request.GET.get('company', None)          : query &= Q(company_id=company)
+    if company := request.GET.get('company', None)          : query &= Q(branch_id=company)
     if department := request.GET.get('department', None)    : query &= Q(department_id=department)
     if designation := request.GET.get('designation', None)  : query &= Q(designation_id=designation)
     if category_list := request.GET.getlist('category[]', None) : query &= Q(employee_category_id__in=category_list)
@@ -23,13 +23,13 @@ def recruitment(request):
     template_name = "hr/recruitment/form.html"
     user = Users.objects.filter(id=int(request.session.get('id'))).first()
     
-    if user.company.ceo_id == int(request.session.get('id')): approve_query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('approved')), skip_ceo_approval=False)
-    elif user.company.md_id == int(request.session.get('id')): approve_query = Q(status=Status.name('approved'))
+    if user.branch.branch_head == int(request.session.get('id')): approve_query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('approved')), skip_ceo_approval=False)
+    elif user.branch.branch_head == int(request.session.get('id')): approve_query = Q(status=Status.name('approved'))
     else: approve_query = Q(Q(status=Status.name('approved'))|Q(status=Status.name('authorized')),created_by_id=int(request.session.get('id')))
     
     
-    if user.company.ceo_id == int(request.session.get('id')): query = Q(status=Status.name('raised'), skip_ceo_approval=False)
-    elif user.company.md_id == int(request.session.get('id')): query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('raised'), skip_ceo_approval=True))
+    if user.branch.branch_head == int(request.session.get('id')): query = Q(status=Status.name('raised'), skip_ceo_approval=False)
+    elif user.branch.branch_head == int(request.session.get('id')): query = Q(Q(status=Status.name('authorized'))|Q(status=Status.name('raised'), skip_ceo_approval=True))
     else: query = Q(Q(status=Status.name('rejected'))|Q(status=Status.name('raised'))|Q(status=Status.name('started')),created_by_id=int(request.session.get('id')))
     total_approved  = HREmployeeRecruitment.objects.filter(approve_query).order_by('recruit_year','department',"-id").count()
     total_pending  = HREmployeeRecruitment.objects.filter(query).order_by('recruit_year','department',"-id").count()
@@ -39,7 +39,7 @@ def recruitment(request):
         departments     = Departments.objects.all()
         designations    = Designations.objects.all()
     else:
-        emp_details =  EmployeeDetails.objects.filter(personal__employee_id=request.session.get('employee_id')).last()
+        emp_details   = EmployeeDetails.objects.filter(personal__employee_id=request.session.get('employee_id')).last()
         employee_list = EmployeeDetails.objects.filter(Q(id=emp_details.id)|Q(reporting_to=emp_details.id))
         department_list = employee_list.order_by('department').distinct('department')
         departments = [{'id':i.department_id, 'name': i.department.name} for i in department_list]
@@ -47,7 +47,7 @@ def recruitment(request):
         designations = [{'id':i.designation_id, 'name': i.designation.name} for i in designation_list]
     recruit_year = HREmployeeRecruitment.objects.distinct('recruit_year')
     context={
-        'total_pending': total_pending, 'total_approved': total_approved,'company_list':Company.objects.all(),'company_id': int(request.session.get('company_id')), 'department_list':departments, 'department_id':emp_details.department_id if emp_details else None,'designation_list': designations,
+        'total_pending': total_pending, 'total_approved': total_approved,'company_list':Branch.objects.filter(company_id=request.session.get('company_id')),'company_id': int(request.session.get('branch_id')) if request.session.get('branch_id') else '', 'department_list':departments, 'department_id':emp_details.department_id if emp_details else None,'designation_list': designations,
         'all_department': Departments.objects.all(),'recruit_year':recruit_year
     }
     return render(request, template_name, context)

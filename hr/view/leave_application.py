@@ -98,7 +98,7 @@ def get_leave_applications_for_dataTable(request, list_type='', has_approval=Fal
     elif list_type == "pending":
         if has_approval == 'True' :
             if user.is_department_head:
-                list_query &= Q(Q(Q(status=Status.name("Forwarded"), employee__department=user.department) & Q(Q(employee__company=user.company)|Q(employee__company_id__in=user.secondary_company))) | Q(status=Status.name("Raised"), employee__reporting_to=employee))
+                list_query &= Q(Q(Q(status=Status.name("Forwarded"), employee__department=user.department) & Q(Q(employee__branch=user.branch)|Q(employee__branch_id__in=user.secondary_company))) | Q(status=Status.name("Raised"), employee__reporting_to=employee))
             elif is_role_assigned(request.session.get('user_roles', []), "HR"): list_query &= Q(status=Status.name("Recommended"))
             else : list_query &= Q(status=Status.name("Raised"), employee__reporting_to=employee)
         else : list_query &= ~Q(status__in=[Status.name("Approved"), Status.name("Rejected")]) & Q(employee=employee)

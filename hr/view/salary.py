@@ -563,16 +563,16 @@ def get_salary_report(request):
 
 @login
 def pay_slip(request):
-    if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+    if request.session.get('employee_id', ''):
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
         elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
         else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
         context = { 'years' : year_list, 'months' : month_list,
-            'companies' : Company.objects.filter(status = True).order_by('name'),
+            'companies' : Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name'),
             'departments' : Departments.objects.filter(status=True).order_by('name'),
             'designation_list'  : Designations.objects.filter(status = True).order_by('name'),
-            'employee_categories' : CommonMaster.objects.filter(value_for=38).order_by('value')}
+            'employee_categories' : CommonMaster.objects.filter(value_for=5).order_by('value')}
         return render(request, 'hr/salary/pay_slip.html', context)
     else: return redirect('/access-denied')
 
@@ -581,8 +581,8 @@ def get_payslip_report(request):
     report_type, report_format, all_data = request.POST.get('report_type', None), request.POST.get('report_format', None), []
     report_data, query  = '', Q(status=Status.name("Active"))
     if company := request.POST.get('company', None)         : 
-        query &= Q(company_id=company)
-        company = Company.objects.filter(id=company).first()
+        query &= Q(branch_id=company)
+        company = Branch.objects.filter(id=company).first()
     if department := request.POST.get('department', None)   : query &= Q(department_id=department)
     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
     if employees := request.POST.getlist('user', []) : query &= Q(id__in=employees)

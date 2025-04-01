@@ -26,11 +26,8 @@ class EmployeeDetailsForm(forms.ModelForm):
         self.fields['punch_id'].required = False
         self.fields['personal'].required = False
         self.fields['section'].required = False
-        self.fields['building'].required = False
         self.fields['location'].required = False
         self.fields['shift'].required = False
-        self.fields['floor'].required = False
-        self.fields['line'].required = False
         self.fields['confirmation_date'].required = False
         self.fields['separation_date'].required = False
         self.fields['employee_type'].required = False

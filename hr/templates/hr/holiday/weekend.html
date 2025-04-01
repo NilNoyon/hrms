@@ -1,7 +1,7 @@
 {% extends "admin.html" %}
 {% load static %}
 {% load general_filters %}
-{% block page_title %}Company wise Weekends{% endblock %}
+{% block page_title %}Branch wise Weekends{% endblock %}
 
 {% block add_css %}
 <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
@@ -16,7 +16,7 @@
     <div class="card-header">
         <div class="row">
             <div class="col-md-12 align-self-center">
-                <h4 class="text-themecolor mb-0">Company wise Weekends</h4>
+                <h4 class="text-themecolor mb-0">Branch wise Weekends</h4>
             </div>
         </div>
     </div>
@@ -27,8 +27,8 @@
                 <div class="row">
                     <div class="col-md-3" id="company_field">
                         <div class="form-group">
-                            <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Company">
-                                <option value="">Company</option>
+                            <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Branch">
+                                <option value="">Branch</option>
                                 {% for c in company_list %}
                                 <option value="{{c.id}}">{{ c.name }}</option>
                                 {% endfor %}
