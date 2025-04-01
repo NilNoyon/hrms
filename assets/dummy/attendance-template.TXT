@@ -1,6 +1,0 @@
-Return(result="success" dev_id="6719019120000297" total="13136"
-time="2022-08-14 17:32:26" id="710036" name="" workcode="0" status="0" authority="0X11" card_src="from_check"
-time="2022-08-14 17:51:21" id="710036" name="" workcode="0" status="0" authority="0X11" card_src="from_check"
-time="2022-08-14 18:17:41" id="10040000002012" name="" workcode="0" status="0" authority="0X11" card_src="from_check"
-time="2022-08-14 18:17:46" id="10040000002016" name="" workcode="0" status="0" authority="0X11" card_src="from_check"
-)

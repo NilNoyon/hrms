@@ -1,5 +1,5 @@
-''' Django notification urls file '''
-# -*- coding: utf-8 -*-
+# ''' Django notification urls file '''
+#  -*- coding: utf-8 -*-
 from . import views
 from django.urls import re_path as pattern
 

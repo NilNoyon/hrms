@@ -8,10 +8,10 @@ from django.forms import model_to_dict
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
-from notification import settings
+# from notification import settings
 from notification.models import Notification
 from notification.utils import id2slug, slug2id
-from notification.settings import get_config
+# from notification.settings import get_config
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse
 
@@ -19,7 +19,7 @@ from django.http import JsonResponse
 class NotificationViewList(ListView):
     template_name = 'notifications/list.html'
     context_object_name = 'notifications'
-    paginate_by = settings.get_config()['PAGINATE_BY']
+    # paginate_by = settings.get_config()['PAGINATE_BY']
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
@@ -33,12 +33,12 @@ class AllNotificationsList(NotificationViewList):
         user = Users.objects.get(id=self.request.session.get('id'))
         notifications = Notification.objects.filter(recipient=user)
 
-        if settings.get_config()['SOFT_DELETE']:
-            qset = notifications.active()
-        else:
-            qset = notifications.all()
-        return qset
-
+        # if settings.get_config()['SOFT_DELETE']:
+        #     qset = notifications.active()
+        # else:
+        #     qset = notifications.all()
+        # return qset
+        return True
 
 class UnreadNotificationsList(NotificationViewList):
 
@@ -101,11 +101,11 @@ def delete(request, slug=None):
     notification = get_object_or_404(
         Notification, recipient=user, id=notification_id)
 
-    if settings.get_config()['SOFT_DELETE']:
-        notification.deleted = True
-        notification.save()
-    else:
-        notification.delete()
+    # if settings.get_config()['SOFT_DELETE']:
+    #     notification.deleted = True
+    #     notification.save()
+    # else:
+    #     notification.delete()
 
     _next = request.GET.get('next')
 

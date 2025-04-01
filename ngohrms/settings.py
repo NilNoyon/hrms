@@ -95,7 +95,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'ngohrms_db',
-        'USER': 'postgres',
+        'USER': 'myuser',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',

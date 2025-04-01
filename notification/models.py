@@ -6,12 +6,14 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from notification import settings as notification_settings
+from django.conf import settings
 from notification.signals import notify
 from notification.utils import id2slug
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 EXTRA_DATA = notification_settings.get_config()['USE_JSONFIELD']
+EXTRA_DATA = getattr(settings, 'USE_JSONFIELD', False)
 
 
 def is_soft_delete():
