@@ -495,7 +495,7 @@ def get_employee_for_datatable(request):
         for i in employee_list[int(start):int(end)]:
             employee_id     = i.personal.employee_id
             name            = i.personal.name
-            company         = i.company.short_name if i.company else "N/A"
+            branch          = i.branch.short_name if i.branch else "N/A"
             designation     = i.designation.name if i.designation else "N/A"
             joining_date    = i.joining_date.strftime("%d-%b-%Y").upper() if i.joining_date else ""
             division        = i.division.name if i.division else "N/A"
@@ -553,7 +553,7 @@ def get_incomplete_employees_for_datatable(request):
             gender          = i.gender.value if i.gender_id else "N/A"
             created_by      = ebs_bl_common.user_html(i.created_by, 15)
             created_at      = i.created_at.strftime("%d-%b-%Y %I:%M %p").upper() if i.created_at else ""
-            date_of_birth    = i.date_of_birth.strftime("%d-%b-%Y").upper() if i.date_of_birth else ""
+            date_of_birth   = i.date_of_birth.strftime("%d-%b-%Y").upper() if i.date_of_birth else ""
             status = "checked" if i.employee_status_id and i.employee_status.title.lower() == "active" else ""
             status = """<div class="form-group mb-0">
                             <label class="">

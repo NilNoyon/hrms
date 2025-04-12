@@ -36,7 +36,7 @@ bn_month_list = {
 
 @login
 def salary_process2(request):
-    if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+    if request.session.get('employee_id', '') in ['NGO00001001']:
         if request.method == "POST":
             ids, month, year = [], request.POST.get('month', None), request.POST.get('year', None)
             for emp_id in request.POST.getlist('emp_id', []):
