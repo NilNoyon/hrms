@@ -1483,3 +1483,27 @@ class PerformanceIndicator(models.Model):
 
      def __str__(self):
           return f"{self.indicator_name}: {self.score}"
+
+
+# cessation meaning the fact or process of ending or being brought to an end.
+class EmployeeCessation(CoreActionWithUpdate):
+     emolpoyee               = models.ForeignKey(EmployeeDetails, on_delete=models.CASCADE, related_name='cessation')
+     effective_from_date     = models.DateField(null=True, blank=True)
+     cessation_reason        = models.TextField(null=True, blank=True)
+     reporting_to            = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='reporting_to_cessation')
+     reporting_to_comments   = models.TextField(null=True, blank=True)
+     hr_admin                = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='hr_admin_cessation')
+     hr_admin_approved_at    = models.DateTimeField(null=True, blank=True)
+     hr_admin_comments       = models.TextField(null=True, blank=True)
+     letter                  = models.FileField(upload_to="letter", max_length = 120, blank=True, null=True)
+     letter_types            = (('1', 'Resignation'), ('2', 'Termination'))
+     letter_type             = models.CharField(max_length=10,choices=letter_types)
+
+     class Meta:
+          db_table            = 'hr_cessation'
+          verbose_name        = "HR Cessation"
+          verbose_name_plural = "HR Cessations"
+
+     def __str__(self):
+          return f"Cessation of {self.emolpoyee}"  
+     

@@ -487,21 +487,21 @@ def import_employee(request):
                                     present_address=present_address, present_address_bn=present_address_bn,
                                     employee_status=Status.name('active'), updated_by=user) : employee_ids.append(employee_id)
                         elif employee_id and employee_info and sheet == "Official" :
-                            if company := Branch.objects.filter(short_name__iexact=str_from_xls(info['Branch'][i], change_quote=False)).first() :
+                            if company := Branch.objects.filter(name__iexact=str_from_xls(info['Branch'][i], change_quote=False)).first() :
                                 division, sub_section, department, designation, section, unit, location, building, floor, line, pabx = None, None, None, None, None, None, None, None, None, None, None
                                 employee_category, employee_type, skill_category, initial_grade, grade, punch_id, tin = None, None, None, None, None, None, None
-                                if division_text     := str_from_xls(info['Division'][i]) :
-                                    if division_obj  := Division.objects.filter(name=division_text).first()  : 
-                                        division = division_obj
-                                        division.status = Status.name('Active')
-                                        division.save()
-                                    else : division   = Division.objects.create(name=division_text, status=Status.name('Active'))
-                                if sub_section_text     := str_from_xls(info['Subsection'][i]) :
-                                    if sub_section_obj  := SubSection.objects.filter(division=division, name=sub_section_text).first()  : 
-                                        sub_section = sub_section_obj
-                                        sub_section.status = Status.name('Active')
-                                        sub_section.save()
-                                    else : sub_section   = SubSection.objects.create(division=division, name=sub_section_text, status=Status.name('Active'))
+                                # if division_text     := str_from_xls(info['Division'][i]) :
+                                #     if division_obj  := Division.objects.filter(name=division_text).first()  : 
+                                #         division = division_obj
+                                #         division.status = Status.name('Active')
+                                #         division.save()
+                                #     else : division   = Division.objects.create(name=division_text, status=Status.name('Active'))
+                                # if sub_section_text     := str_from_xls(info['Subsection'][i]) :
+                                #     if sub_section_obj  := SubSection.objects.filter(division=division, name=sub_section_text).first()  : 
+                                #         sub_section = sub_section_obj
+                                #         sub_section.status = Status.name('Active')
+                                #         sub_section.save()
+                                #     else : sub_section   = SubSection.objects.create(division=division, name=sub_section_text, status=Status.name('Active'))
                                 if department_text     := str_from_xls(info['Department'][i]) :
                                     if department_obj  := Departments.objects.filter(name=department_text).first()  : department = department_obj
                                     else : department   = Departments.objects.create(name=department_text)
@@ -515,21 +515,21 @@ def import_employee(request):
                                         section.save()
                                     else : section      = Sections.objects.create(department=department, name=section_text, status=Status.name('Active'), created_by=user)
                                 # cost_center             = Company.objects.filter(short_name__iexact=str_from_xls(info['Cost Center'][i], change_quote=False)).first()
-                                if unit_text           := str_from_xls(info['Unit'][i]) :
-                                    if unit_obj        := CommonMaster.objects.filter(value_for=44, value=unit_text).first() : unit = unit_obj
-                                    else : unit         = CommonMaster.objects.create(value_for=44, value=unit_text)
+                                # if unit_text           := str_from_xls(info['Unit'][i]) :
+                                #     if unit_obj        := CommonMaster.objects.filter(value_for=44, value=unit_text).first() : unit = unit_obj
+                                #     else : unit         = CommonMaster.objects.create(value_for=44, value=unit_text)
                                 if location_text       := str_from_xls(info['Sitting Location'][i]) :
                                     if location_obj    := Location.objects.filter(name=location_text).first() : 
                                         location = location_obj
                                         location.status = Status.name('Active')
                                         location.save()
                                     else : location     = Location.objects.create(name=location_text, status=Status.name('Active'), created_by=user)
-                                if building_text       := str_from_xls(info['Building'][i]) :
-                                    if building_obj    := Building.objects.filter(location=location, name=building_text).first() : 
-                                        building = building_obj
-                                        building.status = Status.name('Active')
-                                        building.save()
-                                    else : building     = Building.objects.create(location=location, name=building_text, status=Status.name('Active'), created_by=user)
+                                # if building_text       := str_from_xls(info['Building'][i]) :
+                                #     if building_obj    := Building.objects.filter(location=location, name=building_text).first() : 
+                                #         building = building_obj
+                                #         building.status = Status.name('Active')
+                                #         building.save()
+                                #     else : building     = Building.objects.create(location=location, name=building_text, status=Status.name('Active'), created_by=user)
                                 
                                 if employee_category_text  := str_from_xls(info['Employee Category'][i]) :
                                     if employee_category_obj:= CommonMaster.objects.filter(value_for=5, value=employee_category_text).first() : employee_category = employee_category_obj
@@ -539,7 +539,7 @@ def import_employee(request):
                                     else : employee_type    = CommonMaster.objects.create(value_for=4, value=employee_type_text)
                                 reporting_to                = EmployeeDetails.objects.filter(personal__employee_id=str_from_xls(info['Reporting Boss Employee ID'][i])).last()
                                 if not reporting_to         :
-                                    reporting_to_dept_head  = Users.objects.filter(department=department, company=company, is_department_head=True, status=True).first()
+                                    reporting_to_dept_head  = Users.objects.filter(department=department, branch=company, is_department_head=True, status=True).first()
                                     if reporting_to_dept_head : reporting_to = EmployeeDetails.objects.filter(personal__employee_id=reporting_to_dept_head.employee_id).first()
                                 if skill_category_text     := str_from_xls(info['Skill Category'][i]) :
                                     if skill_category_obj  := CommonMaster.objects.filter(value_for=8, value=skill_category_text).first() : skill_category = skill_category_obj
@@ -571,9 +571,9 @@ def import_employee(request):
                                 off_day_ot          = True if str_from_xls(info['Off Day OT'][i]).title()   == "Yes" else False
                                 holiday_bonus       = True if str_from_xls(info['Holiday Bonus'][i]).title()== "Yes" else False
                                 if not employee :
-                                    if emp_details := EmployeeDetails.objects.create(personal=employee_info, employee_id=employee_id, company=company, division=division, sub_section=sub_section, department=department, designation=designation, section=section, cost_center=cost_center, unit=unit, location=location, building=building, floor=floor, line=line, employee_type=employee_type, employee_category=employee_category, reporting_to=reporting_to, pabx=pabx, skill_category=skill_category, initial_grade=initial_grade, grade=grade, punch_id=punch_id, office_mobile=office_mobile, office_email=office_email, tin=tin, joining_date=joining_date, provision_month=provision_month, shift=shift, salary=salary, holiday=holiday, income_tax=income_tax, tiffin_bill=tiffin_bill, transport_facility=transport_facility, has_pf=has_pf, overtime=overtime, off_day_ot=off_day_ot, holiday_bonus=holiday_bonus, created_by=user, status=Status.name('active')) : employee_ids.append(employee_id)
+                                    if emp_details := EmployeeDetails.objects.create(personal=employee_info, employee_id=employee_id, branch=company, department=department, designation=designation, section=section,location=location,employee_type=employee_type, employee_category=employee_category, reporting_to=reporting_to, pabx=pabx, skill_category=skill_category, initial_grade=initial_grade, grade=grade, punch_id=punch_id, office_mobile=office_mobile, office_email=office_email, tin=tin, joining_date=joining_date, provision_month=provision_month, shift=shift, salary=salary, holiday=holiday, income_tax=income_tax, tiffin_bill=tiffin_bill, transport_facility=transport_facility, has_pf=has_pf, overtime=overtime, off_day_ot=off_day_ot, holiday_bonus=holiday_bonus, created_by=user, status=Status.name('active')) : employee_ids.append(employee_id)
                                 elif employee :
-                                    if emp_details_update := EmployeeDetails.objects.filter(personal=employee_info, employee_id=employee_id).update(company=company, division=division, sub_section=sub_section, department=department, designation=designation, section=section, cost_center=cost_center, unit=unit, location=location, building=building, floor=floor, line=line, employee_category=employee_category, employee_type=employee_type, reporting_to=reporting_to, skill_category=skill_category, grade=grade, initial_grade=initial_grade, punch_id=punch_id, pabx=pabx, tin=tin, office_mobile=office_mobile, office_email=office_email, holiday=holiday, joining_date=joining_date, provision_month=provision_month, shift=shift, salary=salary, income_tax=income_tax, tiffin_bill=tiffin_bill, transport_facility=transport_facility, has_pf=has_pf, overtime=overtime, off_day_ot=off_day_ot, holiday_bonus=holiday_bonus, created_by=user, status=Status.name('active')) : employee_ids.append(employee_id)
+                                    if emp_details_update := EmployeeDetails.objects.filter(personal=employee_info, employee_id=employee_id).update(branch=company,department=department, designation=designation, section=section, location=location,employee_category=employee_category, employee_type=employee_type, reporting_to=reporting_to, skill_category=skill_category, grade=grade, initial_grade=initial_grade, punch_id=punch_id, pabx=pabx, tin=tin, office_mobile=office_mobile, office_email=office_email, holiday=holiday, joining_date=joining_date, provision_month=provision_month, shift=shift, salary=salary, income_tax=income_tax, tiffin_bill=tiffin_bill, transport_facility=transport_facility, has_pf=has_pf, overtime=overtime, off_day_ot=off_day_ot, holiday_bonus=holiday_bonus, created_by=user, status=Status.name('active')) : employee_ids.append(employee_id)
                                 emp_details = EmployeeDetails.objects.filter(personal=employee_info).first()
                                 if emp_details: create_user(emp_details)
                         elif employee_id and employee :
@@ -610,7 +610,7 @@ def create_user(emp_details=None):
         report_to, md5_obj = None, hashlib.md5(emp_details.personal.employee_id.encode())
         encripted_pass = md5_obj.hexdigest()
         if emp_details.reporting_to: report_to = Users.objects.filter(employee_id=emp_details.reporting_to.employee_id).last()
-        Users.objects.create(company_id=emp_details.company_id, department_id=emp_details.department_id, designation_id=emp_details.designation_id, 
+        Users.objects.create(branch_id=emp_details.branch_id, department_id=emp_details.department_id, designation_id=emp_details.designation_id, 
             password=encripted_pass, password_text=emp_details.personal.employee_id, employee_id=emp_details.personal.employee_id.strip(), 
             name=emp_details.name, role_id=user_role.id, email=emp_details.office_email, reporting_to=report_to) 
 
