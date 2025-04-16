@@ -87,6 +87,10 @@ class PFDiscontinueForm(forms.ModelForm):
     class Meta:
         model = PFDiscontinue
         fields = "__all__"
+class EmployeeCessationForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeCessation
+        fields = fields = ('emolpoyee','effective_from_date','cessation_reason','letter_type','letter')
 
 class EmployeeTransferForm(forms.ModelForm):
     class Meta:

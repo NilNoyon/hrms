@@ -17,8 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from notification.signals import notify
 from general.utils import render_to_pdf
 from general.templatetags import general_filters
-from hr.forms import EmpPfRegistationForm, EmployeeTransferForm, PFDiscontinueForm, Pf_EmployeeForm, PfContributionForm, PolicyMasterForm, ProvidentFundMasterForm, HolidayForm, HolidaySetupForm, NoticeBoardForm, HRLeaveMasterForm, HRLeaveTypeForm, HRLeaveAllocationForm, HRLeaveApplicationForm, AttendanceForm, HRSalarySlabForm, HRIncomeTaxSlabForm, HRSalaryBreakdownForm, EmployeeCalendar, OutsideRemoteDutyForm, HRSalaryProcessForm, FiscalYearForm
-from hr.models import EmployeeInfo, EmployeeDetails, EmployeePF, EmployeeTransfer,  PFDiscontinue, PFMonthlyContribution, PolicyMaster, ProvidentFundMaster, Holiday, HolidaySetup, NoticeBoard, HRLeaveType, HRLeaveMaster, HRLeaveAllocation, HRLeaveApplication, Attendance, AttenddanceLog, AttendanceDevice, HRFloor, HRSalarySlabMaster, HRIncomeTaxSlabMaster, HRSalaryBreakdown, HRMontlySalaryDetails, OutsideRemoteDuty, HRSalaryCycle, GEOLocation, HRSalaryProcess, HRShiftRoaster, HRAttendanceBonusRule, Shift, LoanRepayment, Division, SubSection, FiscalYear
+from hr.forms import EmpPfRegistationForm, EmployeeCessationForm, EmployeeTransferForm, PFDiscontinueForm, Pf_EmployeeForm, PfContributionForm, PolicyMasterForm, ProvidentFundMasterForm, HolidayForm, HolidaySetupForm, NoticeBoardForm, HRLeaveMasterForm, HRLeaveTypeForm, HRLeaveAllocationForm, HRLeaveApplicationForm, AttendanceForm, HRSalarySlabForm, HRIncomeTaxSlabForm, HRSalaryBreakdownForm, EmployeeCalendar, OutsideRemoteDutyForm, HRSalaryProcessForm, FiscalYearForm
+from hr.models import EmployeeCessation, EmployeeInfo, EmployeeDetails, EmployeePF, EmployeeTransfer,  PFDiscontinue, PFMonthlyContribution, PolicyMaster, ProvidentFundMaster, Holiday, HolidaySetup, NoticeBoard, HRLeaveType, HRLeaveMaster, HRLeaveAllocation, HRLeaveApplication, Attendance, AttenddanceLog, AttendanceDevice, HRFloor, HRSalarySlabMaster, HRIncomeTaxSlabMaster, HRSalaryBreakdown, HRMontlySalaryDetails, OutsideRemoteDuty, HRSalaryCycle, GEOLocation, HRSalaryProcess, HRShiftRoaster, HRAttendanceBonusRule, Shift, LoanRepayment, Division, SubSection, FiscalYear
 
 def exclude_company(company_id):
     return Company.objects.exclude(id=company_id)
@@ -1804,6 +1804,61 @@ def import_employee_in_pf(request):
         return redirect('/access-denied')
 
 
+@login
+def separation_management(request):
+    chk_permission   = permission(request, "/hr/separation-management/")
+    if chk_permission and chk_permission.view_action and chk_permission.update_action:
+        employee_list  = EmployeeInfo.objects.filter(status = True)
+        pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True)
+        approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False)
+        if request.method == 'POST':
+            request.POST              = request.POST.copy()
+            request.POST['emolpoyee'] = request.POST.get('employee_id')
+            request.POST['letter_type'] = request.POST.get('letter_type') if request.session.get('department') == "HR, Admin & Compliance" else 1
+            form = EmployeeCessationForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                message = 'Successfully Added!'
+                messages.success(request, message)
+                action = {'name': 'Add New', 'btnTxt': 'Submit'}
+                context = {
+                    'action': action, 'pending_list':pending_list,
+                    'employee_list' : employee_list, 'approved_list':approved_list
+                }
+                return render(request, 'hr/separation_management.html', context)
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.warning(request, "%s : %s" % (field.name, error))
+       
+        action = {'name': 'Add New', 'btnTxt': 'Submit'}
+        context = { 
+            'action': action, 'pending_list':pending_list,
+            'employee_list' : employee_list, 'approved_list':approved_list
+        }
+        return render(request, 'hr/separation_management.html', context)
+    else:
+        return redirect('/access-denied')
+    
+# @require_POST 
+def employee_cessation_action(request):
+    cessation_id = request.POST.get('cessation_id')
+    action_type = request.POST.get('action_type')
+    comments = request.POST.get('hr_admin_comments')
+
+    cessation = get_object_or_404(EmployeeCessation, id=cessation_id)
+
+    cessation.hr_admin = request.session.get('id', None)
+    cessation.hr_admin_comments = comments
+    cessation.hr_admin_approved_at = timezone.now()
+
+    if action_type == 'approve':
+        cessation.status = 'approved'
+    elif action_type == 'reject':
+        cessation.status = 'rejected'
+    cessation.save()
+    return redirect('/hr/separation-management/')
+ 
 # this is the function for loan
 try: from hr.view.loan import *
 except ImportError: pass

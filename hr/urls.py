@@ -311,4 +311,6 @@ urlpatterns = [
      path('fiscal_year/edit/<int:id>/', views.fiscal_year_update, name='fiscal_year_update'),
      path('fiscal_year/delete/<int:id>/', views.fiscal_year_delete, name='fiscal_year_delete'),
      path('ajax/fiscal-year-update-status/', views.fiscal_year_update_status, name='fiscal_year_update_status'),
+     path('separation-management/', views.separation_management, name='separation_management'),
+     path('cessation/action/', views.employee_cessation_action, name='employee_cessation_action'),
 ]
