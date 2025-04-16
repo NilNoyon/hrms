@@ -37,11 +37,11 @@
             </li>
             <li class="nav-item"> 
                 <a class="nav-link" data-toggle="tab" href="#pending_list" role="tab">
-                    Pending List<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-warning  ms-1_5 pt-50">{{pending_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i>
+                    Pending Letter<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{pending_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i>
                 </a>
             </li>
             <li class="nav-item"> 
-                <a class="nav-link" data-toggle="tab" href="#approved_list" role="tab">Approved <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-warning  ms-1_5 pt-50">{{approved_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i></a>
+                <a class="nav-link" data-toggle="tab" href="#approved_list" role="tab">Approved Letter<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{approved_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i></a>
             </li>
         </ul>
         <div class="tab-content tabcontent-border">
@@ -95,14 +95,6 @@
                                         <label for="cessation_reason">Resignation Reason</label>
                                     </div>
                                 </div>
-                 
-                                {% comment %} <div class="col-md-6">
-                                    <div class="form-group">               
-                                        <textarea type="text" id="hr_admin_comments" name="hr_admin_comments" class="form-control" value="" required rows="2" cols="5" >{{ form.reporting_to_comments.value|default:'' }}</textarea>                   
-                                        <span class="bar"></span>
-                                        <label for="hr_admin_comments">HR Comments</label>
-                                    </div>
-                                </div>  {% endcomment %}
                 
                                 <div class="col-md-2">
                                     <button class="btn btn-success btn-rounded btn-block" type="submit">
@@ -120,6 +112,7 @@
                 <table  class="table display table-border card-table table-vcenter" style="width:100%">
                     <thead>
                         <tr>
+                            {% if request.session.department == "HR, Admin & Compliance" %}<th class="d-sm-table-cell">Letter Type</th>{% endif %}
                             <th class="d-sm-table-cell">Employee ID</th>
                             <th class="d-sm-table-cell">Employee Name</th>
                             <th class="d-sm-table-cell">Phone</th>
@@ -127,12 +120,13 @@
                             <th class="d-sm-table-cell">Effective Date</th>
                             <th class="d-sm-table-cell">Reason</th>
                             <th class="d-sm-table-cell">Letter</th>
-                            <th class="d-sm-table-cell">Action</th>
+                            {% if request.session.department == "HR, Admin & Compliance" %}<th class="d-sm-table-cell">Action</th> {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for data in pending_list %}
                             <tr>
+                                {% if request.session.department == "HR, Admin & Compliance" %}<td class="">{{ data.get_letter_type_display }}</td>{% endif %}
                                 <td class="">{{ data.emolpoyee.personal.employee_id }}</td>
                                 <td class="">{{ data.emolpoyee.personal.first_name }} {{ data.emolpoyee.personal.last_name }}</td>
                                 <td class="">{{ data.emolpoyee.personal.phone_no }}</td>
@@ -146,6 +140,7 @@
                                         No File
                                     {% endif %}
                                 </td>
+                                {% if request.session.department == "HR, Admin & Compliance" %}
                                 <td> 
                                     <button type="button" class="btn btn-sm btn-success approve-btn"
                                         data-toggle="modal"
@@ -154,6 +149,7 @@
                                         Approve/Reject
                                     </button>
                                 </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -191,7 +187,7 @@
                                         No File
                                     {% endif %}
                                 </td>
-                                <td class="">{{ data.approved_at |date:"d F, Y" }}</td>
+                                <td class="">{{ data.hr_admin_approved_at|date:"d F, Y" }}</td>
                                 <td class="">{{ data.hr_admin_comments }}</td>
                             </tr>
                         {% endfor %}

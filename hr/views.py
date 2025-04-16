@@ -1808,16 +1808,30 @@ def import_employee_in_pf(request):
 def separation_management(request):
     chk_permission   = permission(request, "/hr/separation-management/")
     if chk_permission and chk_permission.view_action and chk_permission.update_action:
-        employee_list  = EmployeeInfo.objects.filter(status = True)
-        pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True)
-        approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False)
+        user = EmployeeDetails.objects.filter(employee_id=request.session.get('employee_id')).first()
+        if request.session["role_text"].lower() in ["admin", "super admin"] or request.session.get('department') == "HR, Admin & Compliance": 
+            employee_list  = EmployeeInfo.objects.filter(status = True)
+            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True)
+            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False)
+        else:
+            employee_list  = EmployeeInfo.objects.filter(status = True)
+            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True, emolpoyee_id = int(user.id))
+            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False, emolpoyee_id = int(user.id))
+
         if request.method == 'POST':
             request.POST              = request.POST.copy()
-            request.POST['emolpoyee'] = request.POST.get('employee_id')
+            request.POST['emolpoyee'] = int(user.id)
+            date_str = request.POST.get('effective_from_date')  # This is a string
+            if date_str:
+                request.POST['effective_from_date'] = datetime.strptime(date_str, "%d-%b-%Y").date()
+            else:
+                request.POST['effective_from_date'] = None
+            # request.POST['effective_from_date'] = request.POST.get('effective_from_date').strftime("%Y-%m-%d")
             request.POST['letter_type'] = request.POST.get('letter_type') if request.session.get('department') == "HR, Admin & Compliance" else 1
             form = EmployeeCessationForm(request.POST, request.FILES)
             if form.is_valid():
-                form.save()
+                cessation = form.save()
+                # cessation.effective_from_date = effective_date
                 message = 'Successfully Added!'
                 messages.success(request, message)
                 action = {'name': 'Add New', 'btnTxt': 'Submit'}
@@ -1840,22 +1854,21 @@ def separation_management(request):
     else:
         return redirect('/access-denied')
     
-# @require_POST 
 def employee_cessation_action(request):
     cessation_id = request.POST.get('cessation_id')
     action_type = request.POST.get('action_type')
     comments = request.POST.get('hr_admin_comments')
 
     cessation = get_object_or_404(EmployeeCessation, id=cessation_id)
-
-    cessation.hr_admin = request.session.get('id', None)
+    cessation.hr_admin_id = int(request.session.get('id'))
     cessation.hr_admin_comments = comments
+    from django.utils import timezone
     cessation.hr_admin_approved_at = timezone.now()
 
     if action_type == 'approve':
-        cessation.status = 'approved'
+        cessation.status_id = 3
     elif action_type == 'reject':
-        cessation.status = 'rejected'
+        cessation.status_id = 5
     cessation.save()
     return redirect('/hr/separation-management/')
  

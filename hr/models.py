@@ -1484,7 +1484,7 @@ class PerformanceIndicator(models.Model):
      def __str__(self):
           return f"{self.indicator_name}: {self.score}"
 
-
+from django.utils import timezone
 # cessation meaning the fact or process of ending or being brought to an end.
 class EmployeeCessation(CoreActionWithUpdate):
      emolpoyee               = models.ForeignKey(EmployeeDetails, on_delete=models.CASCADE, related_name='cessation')
@@ -1503,6 +1503,14 @@ class EmployeeCessation(CoreActionWithUpdate):
           db_table            = 'hr_cessation'
           verbose_name        = "HR Cessation"
           verbose_name_plural = "HR Cessations"
+     
+     def save(self, *args, **kwargs):
+        today = timezone.now().date()
+        if self.effective_from_date == today:
+            if hasattr(self.emolpoyee, 'personal'):
+                self.emolpoyee.personal.status = False
+                self.emolpoyee.personal.save()
+        super().save(*args, **kwargs)
 
      def __str__(self):
           return f"Cessation of {self.emolpoyee}"  
