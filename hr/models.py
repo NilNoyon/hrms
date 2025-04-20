@@ -253,7 +253,13 @@ class EmployeeInfo(CoreActionWithUpdate):
                if user := EmployeeInfo.objects.filter(employee_id=self.employee_details.last().reporting_to).first():
                     return str(f"{user.name} {(user.employee_id) or ''}")
           return "N/A"
-
+     
+     @property
+     def salary(self):
+          """Fetch the salary of the employee from EmployeeDetails."""
+          if self.emp_details_info:
+               return self.emp_details_info.salary
+          return 0
      @property
      def emp_details_info(self):
           return EmployeeDetails.objects.filter(employee_id=self.employee_id).first()
@@ -772,7 +778,7 @@ class Holiday(CoreActionWithUpdate):
           verbose_name_plural = "Holidays"
 
      def __str__(self):
-          return str(self.company.short_name + " - " + self.name)
+          return str(self.branch.short_name + " - " + self.name)
      
      
      def save(self, *args, **kwargs):
@@ -1435,7 +1441,6 @@ class LoanRepayment(CoreActionWithUpdate):
      def __str__(self):
           return str(self.loan.employee.name) + " - Loan #" + str(self.loan_id)
     
-
 # Appraisal
 class Appraisal(CoreActionWithUpdate):
      appraisee               = models.ForeignKey(EmployeeDetails, on_delete=models.CASCADE, related_name='appraisals')
@@ -1456,6 +1461,9 @@ class Appraisal(CoreActionWithUpdate):
      chairman_user           = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='chairman_appraisals')
      chairman_approved_at    = models.DateTimeField(null=True, blank=True)
      chairman_comments       = models.TextField(null=True, blank=True)
+     hr_admin                = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='hr_admin')
+     hr_admin_approved_at    = models.DateTimeField(null=True, blank=True)
+     hr_admin_comments       = models.TextField(null=True, blank=True)
 
      class Meta:
           db_table            = 'hr_appraisals'
@@ -1471,6 +1479,68 @@ class Appraisal(CoreActionWithUpdate):
           self.grand_total = sum(indicator.score for indicator in indicators)
           self.save()
 
+class EmployeePromotionDemotion(models.Model):
+     PROMOTION = 'promotion'
+     DEMOTION = 'demotion'
+
+     ACTION_TYPES = [(PROMOTION, 'Promotion'), (DEMOTION, 'Demotion')]
+     employee = models.ForeignKey(EmployeeDetails, on_delete=models.CASCADE, related_name='promotions_demotions')
+     action_type = models.CharField(max_length=10, choices=ACTION_TYPES)
+     previous_designation = models.CharField(max_length=100, null=True, blank=True)
+     new_designation  = models.ForeignKey(Designations, on_delete=models.CASCADE, null=True, blank=True)
+     old_salary       = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     increment_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     new_salary       = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     effective_date   = models.DateField()
+     reason           = models.TextField(blank=True, null=True)
+     approved_by      = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_promotions_demotions')
+     approved_by_comments = models.TextField(blank=True, null=True)
+     approved_at      = models.DateTimeField(null=True, blank=True)
+     remarks          = models.TextField(blank=True, null=True)
+     created_by       = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='created_promotions_demotions')
+     created_at       = models.DateTimeField(auto_now_add=True)
+     updated_at       = models.DateTimeField(auto_now=True)
+     status           = models.BooleanField(default=True)
+     class Meta:
+          db_table = 'employee_promotion_demotion'
+          verbose_name = 'Employee Promotion/Demotion'
+          verbose_name_plural = 'Employee Promotions/Demotions'
+
+     def save(self, *args, **kwargs):
+          if self.approved_by and not self.approved_at:
+               self.approved_at = timezone.now()
+          if self.increment_amount and self.old_salary:
+               self.new_salary = self.old_salary + self.increment_amount
+          if self.approved_by and self.employee:
+               self.employee.designation = self.new_designation
+               if self.new_salary:
+                    self.employee.salary = self.new_salary
+               self.employee.save()
+          super().save(*args, **kwargs)
+          
+     def __str__(self):
+          return f"{self.employee} - {self.get_action_type_display()} ({self.previous_designation})"
+    
+class PromotionDemotionHistory(models.Model):
+     record = models.ForeignKey('EmployeePromotionDemotion', on_delete=models.CASCADE, related_name='history')
+     changed_by       = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True)
+     changed_at       = models.DateTimeField(auto_now_add=True)
+     action_type      = models.CharField(max_length=10)  # Promotion / Demotion
+     from_designation = models.CharField(max_length=100)
+     to_designation   = models.CharField(max_length=100)
+     old_salary       = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+     increment_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+     new_salary       = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+     effective_date   = models.DateField()
+     remarks          = models.TextField(blank=True, null=True)
+
+     class Meta:
+          db_table = 'promotion_demotion_history'
+          ordering = ['-changed_at']
+
+     def __str__(self):
+          return f"{self.record.employee} - {self.action_type} on {self.changed_at.strftime('%Y-%m-%d')}"
+    
 class PerformanceIndicator(models.Model):
      appraisal               = models.ForeignKey(Appraisal, on_delete=models.CASCADE, related_name='performance_indicators')
      indicator_name          = models.CharField(max_length=255)
@@ -1505,12 +1575,11 @@ class EmployeeCessation(CoreActionWithUpdate):
           verbose_name_plural = "HR Cessations"
      
      def save(self, *args, **kwargs):
-        today = timezone.now().date()
-        if self.effective_from_date == today:
-            if hasattr(self.emolpoyee, 'personal'):
-                self.emolpoyee.personal.status = False
-                self.emolpoyee.personal.save()
-        super().save(*args, **kwargs)
+          today = timezone.now().date()
+          if self.effective_from_date == today and self.hr_admin_approved_at:
+               self.emolpoyee.personal.status = False
+               self.emolpoyee.personal.save()
+          super().save(*args, **kwargs)
 
      def __str__(self):
           return f"Cessation of {self.emolpoyee}"  

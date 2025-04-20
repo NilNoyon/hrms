@@ -1,9 +1,9 @@
 <div class="table-responsive pt-4 px-2">
-    <table class="table table-border table-striped table-vcenter" id="holiday" style="width:100%">
+    <table class="table table-border table-striped table-vcenter card-table" id="holiday" style="width:100%">
         <thead>
             <tr class="text-center">
                 <th>SL.</th>
-                <th>Company</th>
+                <th>Branch</th>
                 <th>Title</th>
                 <th>Start Date</th>
                 <th>End Date</th>
@@ -16,7 +16,7 @@
             {% for holiday in holiday_list %}
             <tr>
                 <td class="text-center">{{ forloop.counter }}</td>
-                <td>{{ holiday.company.short_name }}</td>
+                <td>{{ holiday.branch.short_name }}</td>
                 <td>{{ holiday.name }}</td>
                 <td>{{ holiday.start_date|date:'d/M/Y'|upper }}</td>
                 <td>{{ holiday.end_date|date:'d/M/Y'|upper }}</td>

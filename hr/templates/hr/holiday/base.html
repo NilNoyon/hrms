@@ -30,13 +30,13 @@
             <li class="nav-item"> 
                 <a class="nav-link {% if tab_name == 'holiday_update' %}active{% endif %}" data-toggle="tab" href="#holiday_update" role="tab">
                     <span class="hidden-sm-up"><i class="ti-user"></i></span> 
-                    <span class="hidden-xs-down"> Setup </span>
+                    <span class="hidden-xs-down">Holiday Setup </span>
                 </a>
             </li>
             <li class="nav-item"> 
                 <a class="nav-link {% if tab_name == 'holiday_setup' %}active{% endif %}" data-toggle="tab" href="#holiday_setup" role="tab">
                     <span class="hidden-sm-up"><i class="ti-user"></i></span> 
-                    <span class="hidden-xs-down"> Entry </span>
+                    <span class="hidden-xs-down"> Entry Type</span>
                 </a>
             </li>
         </ul>
@@ -45,16 +45,21 @@
             <div class="tab-pane custom-height {% if tab_name == 'holiday' %}active{% endif %}" role="tabpanel" id="holiday">
                 {% include 'hr/holiday/list.html' %}
             </div>
+            
             <div class="tab-pane custom-height {% if tab_name == 'holiday_update' %}active{% endif %}" role="tabpanel" id="holiday_update">
                 <form class="floating-labels p-4" method="post" id="form" action="{{ haction_url }}">
                     {% csrf_token %}
-                    <div class="form-group">
-                        <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Company">
-                            <option value="">Company</option>
-                            {% for c in company_list %}
-                            <option value="{{c.id}}">{{ c.name }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="row">
+                        <div class="col-md-3"> 
+                            <div class="form-group">
+                                <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Select Branch">
+                                    <option value="">Select Branch</option>
+                                    {% for c in company_list %}
+                                    <option value="{{c.id}}">{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="holiday_update"></div>
                 </form>

@@ -1,0 +1,94 @@
+<style>
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+      list-style: none;
+    }
+  
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: #0d6efd;
+    }
+  
+    .timeline-item {
+      position: relative;
+      margin-left: 60px;
+      margin-bottom: 30px;
+    }
+  
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -34px;
+      top: 0;
+      width: 14px;
+      height: 14px;
+      background: #0d6efd;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      z-index: 1;
+    }
+  
+    .timeline-item .time {
+      font-size: 0.875rem;
+      color: #6c757d;
+    }
+  
+    .timeline-item .badge {
+      font-size: 0.8rem;
+    }
+  </style>
+  
+  <ul class="timeline">
+    {% for h in history %}
+        <li class="timeline-item">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              {% if h.action_type == "promotion" %}
+                  <span class="badge bg-success">{{ h.action_type|title }}</span>
+              {% else %}
+                  <span class="badge bg-danger" style="color: white;">{{ h.action_type|title }}</span>
+              {% endif %}
+              <small class="text-muted">{{ h.effective_date }}</small>
+          </div>
+            
+            <p class="mb-1">
+                <strong>{{ h.from_designation }}</strong>
+                <i class="fa fa-arrow-right mx-1 text-success"></i>
+                <strong>{{ h.to_designation }}</strong>
+            </p>
+
+            <table class="table table-sm table-borderless mb-1">
+                <tr>
+                    <td><strong>Old Salary:</strong></td>
+                    <td>{{ h.old_salary }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{{ h.action_type|title }} Amount:</strong></td>
+                    <td>{{ h.increment_amount }}</td>
+                </tr>
+                <tr>
+                    <td><strong>New Salary:</strong></td>
+                    <td>{{ h.new_salary }}</td>
+                </tr>
+            </table>
+
+            {% if h.remarks %}
+                <p class="mb-0 text-muted">
+                    <i class="fa fa-comment-dots text-primary me-1"></i>
+                    <small>{{ h.remarks }}</small>
+                </p>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="timeline-item">
+            <p class="text-danger">No history found.</p>
+        </li>
+    {% endfor %}
+</ul>
+
+  

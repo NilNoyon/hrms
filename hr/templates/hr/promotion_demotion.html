@@ -1,0 +1,269 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Promotion/Demotion{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  * { box-sizing: border-box;}
+
+  .show-grid .row {
+    margin-bottom: 6px;
+  }
+
+  .show-grid [class^=col-] {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card mt-0 pt-0">
+    <div class="card-header">
+        <h4 class="text-themecolor mb-0 mt-0">Promotion/Demotion</h4>
+    </div>
+
+    <div class="card-body show-grid pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#resignation" role="tab"> {{action.name}} </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link" data-toggle="tab" href="#pending_list" role="tab">
+                    List <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{promotion_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane p-20 active" id="resignation" role="tabpanel">
+                <form class="floating-labels" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12 border rounded shadow-sm bg-white">
+                            <div class="row p-2"> 
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="action_type">Type</label>
+                                        <select class="form-control text-capitalize select2" id="action_type" name="action_type" data-title="Type" required>
+                                            <option value="" disabled selected>select</option> 
+                                            <option value="promotion">Promotion</option> 
+                                            <option value="demotion">Demotion</option> 
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="employee">Employee</label>
+                                        <select class="form-control text-capitalize select2" id="employee" name="employee" data-title="Employee" required>
+                                            <option value="" disabled selected></option>
+                                                {% for data in employee_list %}
+                                                    <option value="{{data.id}}" data-salary="{{data.salary}}">{{data.employee_id}} -- {{data.first_name}}({{data.emp_details_info.designation}})</option>
+                                                {% endfor %}
+                                        </select>
+                                    </div>
+                                </div> 
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="new_designation">New Designation</label>
+                                        <select class="form-control custom-select select2" id="new_designation" name="new_designation" data-title="New Designation" required>
+                                            <option value="" disabled selected></option>
+                                            {% for i in designation_list %}
+                                                <option value="{{i.id}}">{{i.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control singledate effective_date" name="effective_date" id="effective_date" required>
+                                        <span class="bar"></span>
+                                        <label for="effective_date">Effective From</label>
+                                    </div>
+                                </div>                                  
+                                <div class="col-md-3">
+                                    <div class="form-group">               
+                                        <textarea type="text" id="reason" name="reason" class="form-control" rows="1" cols="1" ></textarea>                   
+                                        <span class="bar"></span>
+                                        <label for="reason">Reason</label>
+                                    </div>
+                                </div> 
+                                <div class="col-md-3">
+                                    <div class="form-group focused">
+                                        <input type="number" class="form-control" name="old_salary" id="old_salary" step="0.01" readonly>
+                                        <span class="bar"></span>
+                                        <label for="old_salary">Current Salary</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3"> 
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" name="increment_amount" id="increment_amount" step="0.01" required>
+                                        <span class="bar"></span>
+                                        <label for="increment_amount">Increment Amount</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <input type="number" class="form-control" name="new_salary" id="new_salary" step="0.01" readonly>
+                                        <span class="bar"></span>
+                                        <label for="new_salary">New Salary</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">               
+                                        <textarea type="text" id="remarks" name="remarks" class="form-control" rows="1" cols="1" ></textarea>                   
+                                        <span class="bar"></span>
+                                        <label for="remarks">Remarks</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button class="btn btn-success btn-rounded btn-block" type="submit">
+                                        <i class="fa fa-check mr-1"></i> Submit
+                                    </button>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </form>
+                
+            </div> 
+
+            <div class="tab-pane p-20" id="pending_list" role="tabpanel">
+                <table  class="table display table-border card-table table-vcenter" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="d-sm-table-cell">Type</th>
+                            <th class="d-sm-table-cell">Employee ID</th>
+                            <th class="d-sm-table-cell">Employee Name</th>
+                            <th class="d-sm-table-cell">Phone</th>
+                            <th class="d-sm-table-cell">Pre. Designation</th>
+                            <th class="d-sm-table-cell">New Designation</th>
+                            <th class="d-sm-table-cell">Effective Date</th>
+                            <th class="d-sm-table-cell">Reason</th>
+                            <th class="d-sm-table-cell">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in promotion_list %}
+                            <tr>
+                                <td class="">{{ data.get_action_type_display }}</td>
+                                <td class="">{{ data.employee.personal.employee_id }}</td>
+                                <td class="">{{ data.employee.personal.first_name }} {{ data.employee.personal.last_name }}</td>
+                                <td class="">{{ data.employee.personal.phone_no }}</td>
+                                <td class="">{{ data.previous_designation }}</td>
+                                <td class="">{{ data.new_designation }}</td>
+                                <td class="">{{ data.effective_date|date:"d F, Y" }}</td>
+                                <td class="">{{ data.cessation_reason }}</td>
+                                <td> 
+                                    <button class="btn btn-info btn-sm view-history" data-employee-id="{{ data.employee.id }}">
+                                        <i class="fa fa-history"></i> History
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> 
+
+        <div class="modal fade" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel" aria-hidden="true" style="padding-top: 100px;">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                  <h5 class="modal-title" id="historyModalLabel">Promotion/Demotion History</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="historyContent">
+                  <div class="text-center">Loading history...</div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.effective_date').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        locale: {
+            format: 'DD-MMM-YYYY'
+        },
+        autoUpdateInput: false
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+  $(document).ready(function () {
+    $('table.display').DataTable({
+        responsive:true,
+        ordering: true,
+        paging: false,
+        bInfo: false
+    });
+});
+
+$(document).ready(function() {
+    $('#employee').on('change', function () {
+        const selectedOption = $(this).find('option:selected');
+        const salary = selectedOption.data('salary') || 0;
+        $('#old_salary').val(salary.toFixed(2));
+        $("#old_salary").focus();
+    });
+
+    function calculateNewSalary() {
+        let oldSalary = parseFloat($("#old_salary").val()) || 0;
+        let increment = parseFloat($("#increment_amount").val()) || 0;
+        let actionType = $("#action_type").val();
+
+        let newSalary = 0;
+        if (actionType === "promotion") {
+            newSalary = oldSalary + increment;
+        } else if (actionType === "demotion") {
+            newSalary = oldSalary - increment;
+        }
+
+        $("#new_salary").val(newSalary.toFixed(2));
+    }
+
+    // Recalculate on increment change
+    $("#increment_amount").on("input", function() {
+        calculateNewSalary();
+        $("#new_salary").focus();
+        $("#increment_amount").focus();
+    });
+
+    // Optional: recalculate if old salary changes
+    $("#old_salary").on("input", function() {
+        calculateNewSalary();
+    });
+
+    // Recalculate when action type changes
+    $("#action_type").on("change", function () {
+        calculateNewSalary();
+    });
+
+    $('.view-history').on('click', function() {
+        var employeeId = $(this).data('employee-id');
+    
+        $('#historyContent').html('<div class="text-center">Loading history...</div>');
+        $('#historyModal').modal('show');
+    
+        $.ajax({
+            url: '{% url "hr:promotion_history_view" %}',
+            data: { employee_id: employeeId },
+            success: function(response) {
+            $('#historyContent').html(response);
+            },
+            error: function() {
+            $('#historyContent').html('<div class="text-danger">Failed to load history.</div>');
+            }
+        });
+    });
+  });
+</script>
+{% endblock %}

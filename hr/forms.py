@@ -90,8 +90,13 @@ class PFDiscontinueForm(forms.ModelForm):
 class EmployeeCessationForm(forms.ModelForm):
     class Meta:
         model = EmployeeCessation
-        fields = fields = ('emolpoyee','effective_from_date','cessation_reason','letter_type','letter')
+        fields = fields = ('emolpoyee','effective_from_date','cessation_reason','letter_type','letter','created_by','updated_by')
 
+class EmployeePromotionDemotionForm(forms.ModelForm):
+    class Meta:
+        model = EmployeePromotionDemotion
+        fields = "__all__"
+        exclude = ('approved_by', 'approved_at')
 class EmployeeTransferForm(forms.ModelForm):
     class Meta:
         model = EmployeeTransfer
@@ -131,15 +136,11 @@ class AuditStatusForm(forms.ModelForm):
 
         fields = '__all__'
 
-
-
 # HolidaySetup
 class HolidaySetupForm(forms.ModelForm):
 	class Meta:
 		model = HolidaySetup
 		fields = '__all__'
-
-
 
 # Holiday
 class HolidayForm(forms.ModelForm):

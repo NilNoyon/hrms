@@ -1065,7 +1065,7 @@ def assessment_approved_report(request, id):
 @login
 def getUser(request):
     user = Users.objects.filter(id=request.POST.get("emp_id")).values(
-                'name','employee_id', 'company__name', 'department__name','designation__name', 
+                'name','employee_id', 'branch__name', 'department__name','designation__name', 
                 'email','reporting_to__name','reporting_to__employee_id')
     if user:
         emp = EmployeeDetails.objects.filter(personal__employee_id = user[0]['employee_id'], status = True).values(
