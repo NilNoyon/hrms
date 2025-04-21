@@ -304,11 +304,13 @@ urlpatterns = [
      path('sub_section/delete/<int:id>/', views.sub_section_delete, name='sub_section_delete'),
      path('ajax/sub_section/status-update/', views.sub_section_update_status, name='sub_section_update_status'),
 
-
-
      # FiscalYear
      path('fiscal_year/', views.fiscal_year_list, name='fiscal_year_list'),
      path('fiscal_year/edit/<int:id>/', views.fiscal_year_update, name='fiscal_year_update'),
      path('fiscal_year/delete/<int:id>/', views.fiscal_year_delete, name='fiscal_year_delete'),
      path('ajax/fiscal-year-update-status/', views.fiscal_year_update_status, name='fiscal_year_update_status'),
+     path('separation-management/', views.separation_management, name='separation_management'),
+     path('cessation/action/', views.employee_cessation_action, name='employee_cessation_action'),
+     path('promotion-demotion/', views.promotion_demotion, name='promotion_demotion'),
+     path('promotion-history-view/', views.promotion_history_view, name='promotion_history_view'),
 ]

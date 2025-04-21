@@ -81,7 +81,7 @@
                 <form class="floating-labels" method="post" id="form" action="{{ saction_url }}">
                     {% csrf_token %}
                     <div class="form-group">
-                        <input type="text" class="form-control bg-transparent" id="name" name="name" data-title="Name" value="{{ sinstance.name }}" required />
+                        <input type="text" class="form-control bg-transparent" id="name" name="name" data-title="Name" value="{{ sinstance.name }}" required   />
                         <span class="bar"></span>
                         <label for="name">Name</label>
                     </div>
@@ -142,14 +142,22 @@
 
 <script>
     $('body').on('click', '.holiday-setup-update-switch', function (e) {
-         var id     = $(this).data('id');
-         var stype  = $(this).data('type');
-         $.ajax({
-            url : "{% url 'hr:holiday_setup_update_fixed_status' %}",
-            type: "POST", dataType: 'json', data: { id:id, stype:stype },
+        var id    = $(this).data('id');
+        var stype = $(this).data('type');
+    
+        $.ajax({
+            url: "{% url 'hr:holiday_setup_update_fixed_status' %}",
+            type: "POST",
+            dataType: 'json',
+            data: { id: id, stype: stype },
             success: function (data) {
-                toasterMsg("success", "This Holiday successfully updated!", 5000);
+                if (data.success) {
+                    toasterMsg("success", data.message, 5000); // use returned message
+                }
             },
-         });
-   });
+            error: function () {
+                toasterMsg("error", "Something went wrong!", 5000);
+            }
+        });
+    });
 </script>

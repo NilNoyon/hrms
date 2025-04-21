@@ -17,8 +17,8 @@ from django.views.decorators.csrf import csrf_exempt
 from notification.signals import notify
 from general.utils import render_to_pdf
 from general.templatetags import general_filters
-from hr.forms import EmpPfRegistationForm, EmployeeTransferForm, PFDiscontinueForm, Pf_EmployeeForm, PfContributionForm, PolicyMasterForm, ProvidentFundMasterForm, HolidayForm, HolidaySetupForm, NoticeBoardForm, HRLeaveMasterForm, HRLeaveTypeForm, HRLeaveAllocationForm, HRLeaveApplicationForm, AttendanceForm, HRSalarySlabForm, HRIncomeTaxSlabForm, HRSalaryBreakdownForm, EmployeeCalendar, OutsideRemoteDutyForm, HRSalaryProcessForm, FiscalYearForm
-from hr.models import EmployeeInfo, EmployeeDetails, EmployeePF, EmployeeTransfer,  PFDiscontinue, PFMonthlyContribution, PolicyMaster, ProvidentFundMaster, Holiday, HolidaySetup, NoticeBoard, HRLeaveType, HRLeaveMaster, HRLeaveAllocation, HRLeaveApplication, Attendance, AttenddanceLog, AttendanceDevice, HRFloor, HRSalarySlabMaster, HRIncomeTaxSlabMaster, HRSalaryBreakdown, HRMontlySalaryDetails, OutsideRemoteDuty, HRSalaryCycle, GEOLocation, HRSalaryProcess, HRShiftRoaster, HRAttendanceBonusRule, Shift, LoanRepayment, Division, SubSection, FiscalYear
+from hr.forms import EmpPfRegistationForm, EmployeeCessationForm, EmployeePromotionDemotionForm, EmployeeTransferForm, PFDiscontinueForm, Pf_EmployeeForm, PfContributionForm, PolicyMasterForm, ProvidentFundMasterForm, HolidayForm, HolidaySetupForm, NoticeBoardForm, HRLeaveMasterForm, HRLeaveTypeForm, HRLeaveAllocationForm, HRLeaveApplicationForm, AttendanceForm, HRSalarySlabForm, HRIncomeTaxSlabForm, HRSalaryBreakdownForm, EmployeeCalendar, OutsideRemoteDutyForm, HRSalaryProcessForm, FiscalYearForm
+from hr.models import EmployeeCessation, EmployeeInfo, EmployeeDetails, EmployeePF, EmployeePromotionDemotion, EmployeeTransfer,  PFDiscontinue, PFMonthlyContribution, PolicyMaster, PromotionDemotionHistory, ProvidentFundMaster, Holiday, HolidaySetup, NoticeBoard, HRLeaveType, HRLeaveMaster, HRLeaveAllocation, HRLeaveApplication, Attendance, AttenddanceLog, AttendanceDevice, HRFloor, HRSalarySlabMaster, HRIncomeTaxSlabMaster, HRSalaryBreakdown, HRMontlySalaryDetails, OutsideRemoteDuty, HRSalaryCycle, GEOLocation, HRSalaryProcess, HRShiftRoaster, HRAttendanceBonusRule, Shift, LoanRepayment, Division, SubSection, FiscalYear
 
 def exclude_company(company_id):
     return Company.objects.exclude(id=company_id)
@@ -1804,6 +1804,164 @@ def import_employee_in_pf(request):
         return redirect('/access-denied')
 
 
+@login
+def separation_management(request):
+    chk_permission   = permission(request, "/hr/separation-management/")
+    if chk_permission and chk_permission.view_action and chk_permission.update_action:
+        employee = EmployeeDetails.objects.filter(employee_id=request.session.get('employee_id')).first()
+        if request.session["role_text"].lower() in ["admin", "super admin"] or request.session.get('department') == "HR, Admin & Compliance": 
+            employee_list  = EmployeeInfo.objects.filter(status = True)
+            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True)
+            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False)
+        else:
+            employee_list  = EmployeeInfo.objects.filter(status = True)
+            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True, emolpoyee_id = int(employee.id))
+            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False, emolpoyee_id = int(employee.id))
+
+        if request.method == 'POST': 
+            request.POST               = request.POST.copy()
+            request.POST['created_by'] = request.session.get("id")
+            request.POST['emolpoyee']  = int(employee.id)
+            date_str = request.POST.get('effective_from_date')  # This is a string
+            if date_str: request.POST['effective_from_date'] = datetime.strptime(date_str, "%d-%b-%Y").date()
+            else:request.POST['effective_from_date'] = None
+            request.POST['letter_type'] = request.POST.get('letter_type') if request.session.get('department') == "HR, Admin & Compliance" else 1
+            
+            form = EmployeeCessationForm(request.POST, request.FILES)
+            if form.is_valid():
+                cessation=form.save()
+                message = 'Successfully Added!'
+                messages.success(request, message) 
+
+                n_sender        = cessation.created_by
+                n_action_url    = reverse('hr:separation_management')
+                n_model         = 'Resignation'
+                n_verb          = 'Resignation Submitted'
+                n_description   = "A new resignation request has been submitted for review in HR."
+                notify.send(n_sender, recipient=cessation.created_by.reporting_to, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+                return redirect(reverse('hr:separation_management'))
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.warning(request, "%s : %s" % (field.name, error))
+       
+        action = {'name': 'Add New', 'btnTxt': 'Submit'}
+        context = { 
+            'action': action, 'pending_list':pending_list, 'employee_list' : employee_list, 'approved_list':approved_list
+        }
+        return render(request, 'hr/separation_management.html', context)
+    else: return redirect('/access-denied')
+ 
+def employee_cessation_action(request):
+    cessation_id = request.POST.get('cessation_id')
+    action_type = request.POST.get('action_type')
+    comments = request.POST.get('hr_admin_comments')
+
+    cessation = get_object_or_404(EmployeeCessation, id=cessation_id)
+    cessation.hr_admin_id = int(request.session.get('id'))
+    cessation.hr_admin_comments = comments
+    from django.utils import timezone
+    cessation.hr_admin_approved_at = timezone.now()
+    user = get_object_or_404(Users, pk=request.session.get("id", ""))
+    if action_type == 'approve':
+        cessation.status_id = 3
+        n_sender        = user
+        n_action_url    = reverse('hr:separation_management')
+        n_model         = 'Resignation'
+        n_verb          = 'Resignation Approved'
+        n_description   = "Your resignation request has been approved by HR."
+        notify.send(n_sender, recipient=cessation.created_by, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+        
+    elif action_type == 'reject':
+        cessation.status_id = 5
+        n_sender        = user
+        n_action_url    = reverse('hr:separation_management')
+        n_model         = 'Resignation'
+        n_verb          = 'Resignation Rejected'
+        n_description   = "Your resignation request has been rejected by HR."
+        notify.send(n_sender, recipient=cessation.created_by, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+        
+    cessation.save()
+    return redirect('/hr/separation-management/')
+
+@login
+def promotion_demotion(request):
+    chk_permission   = permission(request, "/hr/promotion-demotion/")
+    if chk_permission and chk_permission.view_action and chk_permission.update_action:
+        employee = EmployeeDetails.objects.filter(personal=request.POST.get('employee')).first()
+        employee_list    = EmployeeInfo.objects.filter(status = True)
+        promotion_list   = EmployeePromotionDemotion.objects.filter(status = True)
+        designation_list = Designations.objects.filter(status=True).order_by('name')
+        if request.method == 'POST': 
+            request.POST               = request.POST.copy()
+            request.POST['created_by'] = request.session.get("id")
+            request.POST['employee']   = int(employee.id)
+            request.POST['status']     = True
+            request.POST['new_designation_id'] = int(request.POST.get('new_designation'))
+            date_str   = request.POST.get('effective_date')
+            if date_str: request.POST['effective_date'] = datetime.strptime(date_str, "%d-%b-%Y").date()
+            else:request.POST['effective_date'] = None
+            request.POST['action_type'] = request.POST.get('action_type')
+            
+            form = EmployeePromotionDemotionForm(request.POST)
+            if form.is_valid(): 
+                instance = form.save()
+                instance.previous_designation = instance.employee.designation.name if instance.employee else ""
+                instance.save()
+
+                employee = instance.employee
+                from_designation = employee.designation.name if employee.designation else ""
+                old_salary = employee.salary if employee.salary else 0
+                user_data = Users.objects.filter(employee_id = instance.employee.employee_id).last()
+                # Save history
+                PromotionDemotionHistory.objects.create(
+                    record=instance,
+                    changed_by=instance.created_by if instance.created_by else None,
+                    action_type=instance.action_type,
+                    from_designation=from_designation,
+                    to_designation=instance.new_designation.name if instance.new_designation else "",
+                    old_salary=old_salary,
+                    increment_amount=instance.increment_amount,
+                    new_salary=instance.new_salary,
+                    effective_date=instance.effective_date,
+                    remarks=instance.remarks
+                )
+
+                action_type = instance.action_type.lower()  # 'promotion' or 'demotion'
+                if action_type == 'promotion':
+                    message = 'Promotion Successfully Added!'
+                    n_verb = 'Promotion Submitted'
+                    n_description = "A new promotion has been submitted for review in HR."
+                else:
+                    message = 'Demotion Successfully Added!'
+                    n_verb = 'Demotion Submitted'
+                    n_description = "A new demotion has been submitted for review in HR."
+
+                messages.success(request, message)
+                n_sender        = instance.created_by
+                n_action_url    = reverse('hr:promotion_demotion')
+                n_model         = 'Promotion/Demotion'
+                notify.send(n_sender, recipient=user_data, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+                return redirect(reverse('hr:promotion_demotion'))
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.warning(request, "%s : %s" % (field.name, error))
+        
+        
+        action = {'name': 'Add New', 'btnTxt': 'Submit'}
+        context = { 
+            'action': action, 'promotion_list':promotion_list, 'employee_list' : employee_list, 'designation_list':designation_list,
+        }
+        return render(request, 'hr/promotion_demotion.html', context)
+    else: return redirect('/access-denied')
+
+def promotion_history_view(request):
+    employee_id = request.GET.get('employee_id')
+    history = PromotionDemotionHistory.objects.filter(record__employee_id=employee_id).order_by('-effective_date')
+    print("history", history)
+    return render(request, 'hr/history_popup.html', {'history': history})
+
 # this is the function for loan
 try: from hr.view.loan import *
 except ImportError: pass
@@ -1822,7 +1980,7 @@ def holiday_context():
     setup_list, yearly_setups, year = HolidaySetup.objects.all(), [], datetime.now().year
     
     return { 
-        'company_list'  : Company.objects.filter(status = True).order_by('name'),
+        'company_list'  : Branch.objects.filter(status = True).order_by('name'),
         'months'        : [[m[0], m[1]] for m in HolidaySetup.month_list],
         'tab_name'      : 'holiday',
         'haction_name'  : "Add Holiday", 

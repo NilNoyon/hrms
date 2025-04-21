@@ -1,0 +1,78 @@
+.bootstrap-tagsinput {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: 0px solid #c1c1c1;
+    border-bottom: 1px solid #c1c1c1;
+}
+
+.twitter-typeahead {
+    width: auto;
+}
+
+.floating-labels .custom-control-label {
+    position: relative;
+    cursor: context-menu;
+}
+
+.floating-labels .custom-label, .floating-labels .focused label.custom-label {
+    position: relative;
+    top: 5px;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.select2-selection--multiple{
+    border-color: transparent !important;
+    border-bottom: 1px solid #c1c1c1 !important;
+    border-radius: 0px !important;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container {
+    pointer-events: none;
+    touch-action: none;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
+    background: transparent;
+    box-shadow: none;
+}
+
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow,
+select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
+    display: none;
+}
+
+
+.select2-container .select2-selection--single .select2-selection__rendered,
+.select2-container .select2-selection--multiple .select2-selection__rendered {
+    padding-left: 10px;
+}
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #e9ecef !important;
+    border-radius: 0.25rem !important;
+}
+.form-control:disabled,
+.form-control[readonly] {
+    opacity: 1 !important;
+    background-color: #fff !important;
+}
+
+table.ratio-table tbody th:first-child {
+    text-align: right !important;
+}
+
+table.ratio-table tbody th:last-child,
+table.ratio-table tfoot th:last-child {
+    text-align: center !important;
+}
+
+input[type='number'] {
+    text-align: center;
+}
+
+table.ratio-table tbody td,
+table.ratio-table tfoot td {
+    padding: 5px 20px !important;
+}

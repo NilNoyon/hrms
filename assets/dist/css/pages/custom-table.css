@@ -1,0 +1,42 @@
+.nav-tabs .nav-link .badge { padding: 1px 10px 0px !important; }
+
+.tab-content {
+  min-height: calc(100vh - (320px)) !important;
+}
+
+.tableFixHead {
+    overflow: auto;
+    height: 52vh;
+} 
+.tableFixHead table {
+    border-top: 0px solid transparent !important;
+    border-collapse: unset;
+    border-spacing: 0px !important;
+    margin-bottom: 0px !important;
+    width: 100%;
+    font-size: 12px;
+}
+.tableFixHead thead{
+    position: sticky;
+    top: 0px;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    z-index: 1;
+}
+.tableFixHead .table th, 
+.tableFixHead .table td {
+    text-align: center !important;
+    background: #fff; 
+    padding: 8px 16px;
+}
+.form-group, .input-group { margin-bottom : 10px; }
+.footer {
+    position: absolute;
+    padding: 0.5rem 1.25rem;
+    border-top: 0px transparent solid !important;
+}
+.input-group{ position: relative;} 
+.input-group .form-group { width: 100%; display: inline-block; }
+.input-group .input-group-append { display: inline-block; position: absolute; right: 0; }
+.floating-labels select.form-control { padding: 10px 10px 5px 0 !important; }

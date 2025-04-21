@@ -4,12 +4,11 @@ from hr.models import HolidayIndividuals
 
 @login
 def holiday_list(request):
-    # chk_permission = permission(request, reverse('hr:holiday_list'))
-    # if chk_permission and chk_permission.view_action:
     if request.method == "POST":
         user        = get_object_or_404(Users, pk=request.session.get("id"))
         company     = request.POST.get('company', None)
         setup_list  = request.POST.getlist('setup', [])
+        print("cm", company)
         for setup in setup_list:
             status = Status.name('Active' if request.POST.get('status[{}]'.format(setup), None) == 'on' else 'Inactive')
             duration = request.POST.get('duration[{}]'.format(setup), None)
@@ -22,9 +21,8 @@ def holiday_list(request):
             else : start_date, end_date = None, None
             data = {
                 'setup' : setup, 'start_date' : start_date, 'end_date' : end_date,
-                'company' : company, 'status' : status, 'created_by' : user,
+                'branch' : company, 'status' : status, 'created_by' : user,
                 'name'  : request.POST.get('name[{}]'.format(setup), None),
-               
             }
             holiday = request.POST.get('holiday[{}]'.format(setup), None)
             if holiday :
@@ -32,22 +30,25 @@ def holiday_list(request):
                 data['created_by'] = instance.created_by
                 data['updated_by'] = user
                 form    = HolidayForm(data, instance=instance)
+
             else : form = HolidayForm(data)
-            if form.is_valid()  : form.save()
+            if form.is_valid(): form.save()
             else : ebs_bl_common.form_errors(request, form)
-        if company := Company.objects.filter(id=company).first() :
+
+        if company := Branch.objects.filter(id=company).first() :
             if has_weekend := HolidaySetup.objects.filter(name="Weekend").first(): 
                 has_weekend.status  = Status.name("active")
                 has_weekend.fixed   = False
                 has_weekend.updated_by = user
                 has_weekend.save()
             else : has_weekend = HolidaySetup.objects.create(name="Weekend", status=Status.name("active"), fixed=False, created_by=user)
-            if holiday := Holiday.objects.filter(company=company, setup=has_weekend, name="Weekend").first():
+            if holiday := Holiday.objects.filter(branch=company, setup=has_weekend, name="Weekend").first():
                 holiday.status      = Status.name("active")
                 holiday.weekend     = True
                 holiday.updated_by  = user
                 holiday.save()
-            else : holiday = Holiday.objects.create(company=company, setup=has_weekend, created_by=user, name="Weekend", weekend=True, status=Status.name("active"))
+            else : holiday = Holiday.objects.create(branch=company, setup=has_weekend, created_by=user, name="Weekend", weekend=True, status=Status.name("active"))
+            
             ystart = date(datetime.now().year, 1, 1)  # Get the first day of the current year
             yend = date(datetime.now().year, 12, 31)  # Get the last day of the current year
             delta, weekends = timedelta(days=1), []
@@ -67,7 +68,6 @@ def holiday_list(request):
 
     template_name   = "hr/holiday/base.html"
     return render(request, template_name, holiday_context())
-    # else: return redirect(reverse("access_denied"))
 
 @login
 def holiday_calendar(request):

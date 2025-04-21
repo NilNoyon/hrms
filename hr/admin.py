@@ -168,6 +168,8 @@ class AppraisalAdmin(admin.ModelAdmin):
      raw_id_fields = ['appraisee', 'coo_user', 'chairman_user', 'created_by', 'updated_by', 'status']
      list_filter   = ['appraisee__branch',]
 admin.site.register(Appraisal, AppraisalAdmin)
+admin.site.register(EmployeePromotionDemotion)
+admin.site.register(PromotionDemotionHistory)
 
 import inspect
 from hr import models

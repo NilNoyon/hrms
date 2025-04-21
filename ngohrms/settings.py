@@ -154,9 +154,6 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
     messages.ERROR: 'error',
 }
-<<<<<<< HEAD
-=======
 
 try : from .local_settings import *
 except ImportError : pass
->>>>>>> 2f638d17556033bba5b8480693b1280500468fda

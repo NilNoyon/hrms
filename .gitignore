@@ -20,3 +20,6 @@ ngohrms/local_settings.py
 env/
 /env/
 env/*
+venv/
+/venv/
+venv/*

@@ -1,0 +1,272 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Resignation/Termination{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .show-grid .row {
+    margin-bottom: 15px;
+  }
+
+  .show-grid [class^=col-] {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    /* background-color: #eee;
+    background-color: rgba(86,61,124,.15);
+    border: 1px solid #ddd;
+    border: 1px solid rgba(86,61,124,.2); */
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card mt-0 pt-0">
+    <div class="card-header">
+        <h4 class="text-themecolor mb-0 mt-0">Resignation/Termination</h4>
+    </div>
+
+    <div class="card-body show-grid pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#resignation" role="tab"> {{action.name}} </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link" data-toggle="tab" href="#pending_list" role="tab">
+                    Pending Letter<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{pending_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link" data-toggle="tab" href="#approved_list" role="tab">Approved Letter<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{approved_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i></a>
+            </li>
+        </ul>
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane p-20 active" id="resignation" role="tabpanel">
+                <form class="floating-labels" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row p-4 border rounded shadow-sm bg-white">
+                                {% if request.session.department == "HR, Admin & Compliance" %}
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="letter_type">Letter Type</label>
+                                            <select class="form-control text-capitalize select2" id="letter_type" name="letter_type" data-title="Letter Type" required>
+                                                <option value="" disabled selected>select</option> 
+                                                <option value="1">Resignation</option> 
+                                                <option value="2">Termination</option> 
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="employee">Employee</label>
+                                            <select class="form-control text-capitalize select2" id="employee" name="employee" data-title="Employee">
+                                                <option value="" disabled selected></option>
+                                                    {% for data in employee_list %}
+                                                        <option value="{{data.id}}" {% if data.employee_id == request.session.employee_id %} selected {% endif %}>{{data.employee_id}} -- {{data.first_name}}
+                                                        </option>
+                                                    {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-3" {% endif %}>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control singledate date_of_formation" name="effective_from_date" id="effective_from_date" required>
+                                        <span class="bar"></span>
+                                        <label for="effective_from_date">Effective From</label>
+                                    </div>
+                                </div> 
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-3" {% endif %}>
+                                    <label for="letter">Letter</label>
+                                    <input type="file" class="form-control" name="letter" id="letter">
+                                </div>
+                                
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-6" {% endif %}>
+                                    <div class="form-group">               
+                                        <textarea type="text" id="cessation_reason" name="cessation_reason" class="form-control" value="" required rows="2" cols="2" ></textarea>                   
+                                        <span class="bar"></span>
+                                        <label for="cessation_reason">Resignation Reason</label>
+                                    </div>
+                                </div>
+                
+                                <div class="col-md-2">
+                                    <button class="btn btn-success btn-rounded btn-block" type="submit">
+                                        <i class="fa fa-check mr-1"></i> Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+            </div> 
+
+            <div class="tab-pane p-20" id="pending_list" role="tabpanel">
+                <table  class="table display table-border card-table table-vcenter" style="width:100%">
+                    <thead>
+                        <tr>
+                            {% if request.session.department == "HR, Admin & Compliance" %}<th class="d-sm-table-cell">Letter Type</th>{% endif %}
+                            <th class="d-sm-table-cell">Employee ID</th>
+                            <th class="d-sm-table-cell">Employee Name</th>
+                            <th class="d-sm-table-cell">Phone</th>
+                            <th class="d-sm-table-cell">Designation</th>
+                            <th class="d-sm-table-cell">Effective Date</th>
+                            <th class="d-sm-table-cell">Reason</th>
+                            <th class="d-sm-table-cell">Letter</th>
+                            {% if request.session.department == "HR, Admin & Compliance" %}<th class="d-sm-table-cell">Action</th> {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in pending_list %}
+                            <tr>
+                                {% if request.session.department == "HR, Admin & Compliance" %}<td class="">{{ data.get_letter_type_display }}</td>{% endif %}
+                                <td class="">{{ data.emolpoyee.personal.employee_id }}</td>
+                                <td class="">{{ data.emolpoyee.personal.first_name }} {{ data.emolpoyee.personal.last_name }}</td>
+                                <td class="">{{ data.emolpoyee.personal.phone_no }}</td>
+                                <td class="">{{ data.emolpoyee.designation }}</td>
+                                <td class="">{{ data.effective_from_date|date:"d F, Y" }}</td>
+                                <td class="">{{ data.cessation_reason }}</td>
+                                <td class="">
+                                    {% if data.letter %}
+                                        <a href="/assets{{ data.letter.url }}" target="_blank" class="btn btn-sm btn-primary">View File</a>
+                                    {% else %}
+                                        No File
+                                    {% endif %}
+                                </td>
+                                {% if request.session.department == "HR, Admin & Compliance" %}
+                                <td> 
+                                    <button type="button" class="btn btn-sm btn-success approve-btn"
+                                        data-toggle="modal"
+                                        data-target="#approveRejectModal"
+                                        data-id="{{ data.id }}">
+                                        Approve/Reject
+                                    </button>
+                                </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> 
+             
+            <div class="tab-pane p-20" id="approved_list" role="tabpanel">
+                <table class="table approved_list table-border card-table table-vcenter" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="d-sm-table-cell">Employee ID</th>
+                            <th class="d-sm-table-cell">Employee Name</th>
+                            <th class="d-sm-table-cell">Phone</th>
+                            <th class="d-sm-table-cell">Designation</th>
+                            <th class="d-sm-table-cell">Effective Date</th>
+                            <th class="d-sm-table-cell">Reason</th>
+                            <th class="d-sm-table-cell">Letter</th>
+                            <th class="d-sm-table-cell">Approved Date </th>
+                            <th class="d-sm-table-cell">HR Feedback </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in approved_list %}
+                            <tr>
+                                <td class="">{{ data.emolpoyee.personal.employee_id }}</td>
+                                <td class="">{{ data.emolpoyee.personal.first_name }} {{ data.emolpoyee.personal.last_name }}</td>
+                                <td class="">{{ data.emolpoyee.personal.phone_no }}</td>
+                                <td class="">{{ data.emolpoyee.designation }}</td>
+                                <td class="">{{ data.effective_from_date|date:"d F, Y" }}</td>
+                                <td class="">{{ data.cessation_reason }}</td>
+                                <td class="">
+                                    {% if data.letter %}
+                                        <a href="/assets{{ data.letter.url }}" target="_blank" class="btn btn-sm btn-primary">View File</a>
+                                    {% else %}
+                                        No File
+                                    {% endif %}
+                                </td>
+                                <td class="">{{ data.hr_admin_approved_at|date:"d F, Y" }}</td>
+                                <td class="">{{ data.hr_admin_comments }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> 
+        </div> 
+        <!-- Approve/Reject Modal -->
+        <div class="modal fade" id="approveRejectModal" tabindex="-1" role="dialog" aria-labelledby="approveRejectModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <form method="post" action="{% url 'hr:employee_cessation_action' %}">
+                {% csrf_token %}
+                <input type="hidden" name="cessation_id" id="modal_cessation_id">
+                <input type="hidden" name="action_type" id="modal_action_type">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveRejectModalLabel">Employee Cessation Action</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                    <label for="hr_admin_comments">Comments</label>
+                    <textarea class="form-control" name="hr_admin_comments" id="modal_hr_admin_comments" rows="3" required placeholder="Your feedback here."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" onclick="setActionType('approve')">Approve</button>
+                    <button type="submit" class="btn btn-danger" onclick="setActionType('reject')">Reject</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $('.date_of_formation').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        locale: {
+            format: 'DD-MMM-YYYY'
+        },
+        autoUpdateInput: false
+    }).on("apply.daterangepicker", function (e, picker) {
+        picker.element.val(picker.startDate.format(picker.locale.format));
+});
+
+  $(document).ready(function () {
+
+    $('table.display').DataTable({
+        responsive:true,
+        ordering: true,
+        paging: false,
+        bInfo: false
+    });
+    $('table.approved_list').DataTable({
+        responsive:true,
+        ordering: true,
+        paging: false,
+        bInfo: false
+    }); 
+});
+$(document).ready(function () {
+    $('.approve-btn').on('click', function () {
+      var cessationId = $(this).data('id');
+      $('#modal_cessation_id').val(cessationId);
+      $('#modal_hr_admin_comments').val('');
+    });
+  });
+
+  function setActionType(action) {
+    $('#modal_action_type').val(action);
+  }
+</script>
+{% endblock %}

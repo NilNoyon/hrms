@@ -42,9 +42,6 @@ def holiday_setup_list(request):
 
 @login
 def holiday_setup_update(request, id):
-    # chk_permission = permission(request, reverse('hr:holiday_setup_list'))
-    # if chk_permission and chk_permission.view_action:
-    # try:
     instance = get_object_or_404(HolidaySetup, id=id)
     if request.method == "POST":
         date    = request.POST.get('date', None)
@@ -82,9 +79,7 @@ def holiday_setup_update(request, id):
     context['saction_url']  = reverse_lazy('hr:holiday_setup_update', kwargs={'id':id})
     context['sform']        = HolidaySetupForm(instance=instance)
     context['sinstance']    = instance
-    return render(request, template_name, context)
-    # except : return redirect(reverse_lazy('hr:holiday_setup_list'))
-    # else: return redirect(reverse("access_denied"))
+    return render(request, template_name, context) 
 
 @login
 def holiday_setup_delete(request, id):
@@ -99,7 +94,7 @@ def holiday_setup_delete(request, id):
 def get_holiday_company_data(request):
     yearly_setups, year, company_id = [], datetime.now().year, request.POST.get('company_id', None)
     for setup in HolidaySetup.objects.filter(status=Status.name("active")).exclude(name="Weekend").order_by('month', 'date'):
-        current_data    = Holiday.objects.filter(start_date__year=year, setup=setup, company_id=company_id).first()
+        current_data    = Holiday.objects.filter(start_date__year=year, setup=setup, branch_id=company_id).first()
         if current_data:
             holiday_id  = current_data.id
             status      = current_data.status
@@ -130,7 +125,20 @@ def get_holiday_company_data(request):
 def holiday_setup_update_fixed_status(request):
     instance = get_object_or_404(HolidaySetup, id=request.POST.get('id'))
     stype = request.POST.get('stype')
-    if stype == 'fixed' : instance.fixed = 1 if instance.fixed == 0 else 0
-    else : instance.status = Status.name('Active') if instance.status == Status.name('Inactive') else Status.name('Inactive')
+
+    message = ""
+    if stype == 'fixed':
+        instance.fixed = 1 if instance.fixed == 0 else 0
+        message = "Fixed status updated"
+    else:
+        instance.status = Status.name('Active') if instance.status == Status.name('Inactive') else Status.name('Inactive')
+        message = "Holiday status updated"
+
     instance.save()
-    return HttpResponse("Updated")
+
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "fixed": instance.fixed,
+        "status": str(instance.status),  # Convert to string here
+    })

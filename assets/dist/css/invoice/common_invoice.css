@@ -1,0 +1,132 @@
+body {
+    font-size: 0.9em !important;
+}
+ 
+hr {
+    margin: 15px auto 5px !important;
+    padding: 0 !important;
+}
+
+h6 {
+    margin: 15px 0px 0px !important;
+}
+
+p {
+    margin: 0 !important;
+    padding: 0;
+}
+
+.logo {
+    left: 50%;
+    height: 45px;
+    z-index: 1;
+    border-radius: 50%;
+    background-color: #fcfcfc;
+}
+#footer {
+    display: none;
+}
+.footer {
+    display: none
+}
+table {
+    border-spacing: 0;
+    border-left:1px solid #ccc !important;
+    border-top: 1px solid #ccc !important;
+}
+
+th,
+td {
+    border-right: 1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    padding: 1px 1px;
+    text-align: left;
+}
+
+.dark{
+    font-weight: bold;
+}
+
+th, td{
+    font-size: 0.8em;
+}
+
+.blt-brd{
+    border-bottom:0px!important;
+    border-left:0px!important;
+    border-right:0px!important;
+}
+.t-brd{
+    border-top:0px!important;
+}
+.all-brd{
+    border-top:0px!important;
+    border-bottom:0px!important;
+    border-left:0px!important;
+    border-right:0px!important;
+}
+.b-brd{
+    border-bottom:0px!important;
+}
+.l-brd{
+    border-left:0px!important;
+}
+.r-brd{
+    border-right:0px!important;
+}
+.rl-brd{
+    border-left:0px!important;
+    border-right:0px!important;
+}
+.tb-brd{
+    border-top:0px!important;
+    border-bottom:0px!important;
+} 
+@media print {
+    tr {
+        page-break-inside: avoid !important;
+    }
+    .t-brd{
+        border-top:0px!important;
+    }
+    .all-brd{
+        border-top:0px!important;
+        border-bottom:0px!important;
+        border-left:0px!important;
+        border-right:0px!important;
+    }
+    .b-brd{
+        border-bottom:0px!important;
+    }
+    .l-brd{
+        border-left:0px!important;
+    }
+    .r-brd{
+        border-right:0px!important;
+    }
+    .rl-brd{
+        border-left:0px!important;
+        border-right:0px!important;
+    }
+    .tb-brd{
+        border-top:0px!important;
+        border-bottom:0px!important;
+    }
+    .blt-brd{
+        border-bottom:0px!important;
+        border-left:0px!important;
+        border-right:0px!important;
+    }
+    #contentarea {
+        width: 100%;
+    }
+    #footer {
+        display: block;
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        height: 50px;
+        margin-bottom: 0px;
+    }
+}
