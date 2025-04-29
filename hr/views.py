@@ -1959,7 +1959,6 @@ def promotion_demotion(request):
 def promotion_history_view(request):
     employee_id = request.GET.get('employee_id')
     history = PromotionDemotionHistory.objects.filter(record__employee_id=employee_id).order_by('-effective_date')
-    print("history", history)
     return render(request, 'hr/history_popup.html', {'history': history})
 
 # this is the function for loan
@@ -2094,7 +2093,7 @@ except ImportError: pass
 
 
 # ============ HRAttendanceBonusRule Start ============ #
-try: from hr.view.hr_attendance_bonus_rule import *
+try: from hr.view.festival_bonus import *
 except ImportError: pass
 # ============ HRAttendanceBonusRule End ============ #
 
