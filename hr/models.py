@@ -1339,15 +1339,13 @@ class HRTiffinBillRule(CoreActionWithUpdate):
 
 class HRAttendanceBonusRule(CoreActionWithUpdate):
      name                = models.CharField(max_length=100)
-     max_late            = models.IntegerField(default=0)
-     max_early_out       = models.IntegerField(default=0)
-     max_absent          = models.IntegerField(default=0)
      amount              = models.IntegerField(default=0)
+     amount_percent      = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
      class Meta:
-          db_table            = 'hr_attendance_bonus_rules'
-          verbose_name        = "HR Attendance Bonus Rule"
-          verbose_name_plural = "HR Attendance Bonus Rules"
+          db_table            = 'hr_festival_bonus_rules'
+          verbose_name        = "HR Festival Bonus"
+          verbose_name_plural = "HR Festival Bonus"
 
      def __str__(self):
           return str(self.name) + " - " + str(self.amount)

@@ -434,41 +434,41 @@ def salary_report(request):
         return render(request, 'hr/salary/report.html', context)
     else: return redirect('/access-denied')
 
-@login
-def festival_bonus(request):
-    companies = Company.objects.filter(status = True).order_by('name')
-    employee_categories = CommonMaster.objects.filter(value_for=38)
-    department_list = Departments.objects.filter(status=True)
-    context = {'companies' : companies, 'employee_categories' : employee_categories, 'departments' : department_list }
-    return render(request, 'hr/salary/festival.html', context)
+# @login
+# def festival_bonus(request):
+#     companies = Company.objects.filter(status = True).order_by('name')
+#     employee_categories = CommonMaster.objects.filter(value_for=38)
+#     department_list = Departments.objects.filter(status=True)
+#     context = {'companies' : companies, 'employee_categories' : employee_categories, 'departments' : department_list }
+#     return render(request, 'hr/salary/festival.html', context)
 
-@csrf_exempt
-def get_festival_report(request):
-    report_data, cut_of_date, query = "", request.POST.get("date", ""), Q(status=Status.name("Active"))
-    cut_of_date = datetime.strptime(cut_of_date, "%Y-%m-%d").date() if cut_of_date else ''
-    if company := request.POST.get('company', None) : 
-        query &= Q(company_id=company)
-        company = Company.objects.filter(id=company).first()
-    if department := request.POST.get('department', None)   : query &= Q(department_id=department)
-    if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
-    for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
-        bank_info = EmployeeBankInfo.objects.filter(employee=employee).first()
-        basic, bonus = get_salary_breakdown(employee=employee, heads='Basic'), 0
-        day_diff = cut_of_date - employee.joining_date.date()
-        if basic == 0 : continue
-        elif day_diff.days >= 365 : bonus = basic
-        else :
-            if employee.employee_category.value == 'Worker' : continue
-            elif 'Staff' in employee.employee_category.value :
-                bonus = round(float(day_diff.days / 365) * float(basic), 0)
-                if "Management" in employee.employee_category.value :
-                    bonus = bonus if bonus > 2000 else 2000
-                else : bonus = bonus if bonus > 1000 else 1000
-        data = [employee.company.short_name, employee.department.title, employee.cost_center.short_name if employee.cost_center else '',
-                employee.employee_category.value, employee.section.name if employee.section_id else '', employee.employee_id, employee.name, employee.designation.name,
-                employee.joining_date.strftime("%d-%b-%y"), cut_of_date.strftime("%d-%b-%y"), day_diff.days, employee.salary, basic, bonus, bank_info.account_no]
-        report_data += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
-    return JsonResponse({"report_data":report_data}, safe=False)
+# @csrf_exempt
+# def get_festival_report(request):
+#     report_data, cut_of_date, query = "", request.POST.get("date", ""), Q(status=Status.name("Active"))
+#     cut_of_date = datetime.strptime(cut_of_date, "%Y-%m-%d").date() if cut_of_date else ''
+#     if company := request.POST.get('company', None) : 
+#         query &= Q(company_id=company)
+#         company = Company.objects.filter(id=company).first()
+#     if department := request.POST.get('department', None)   : query &= Q(department_id=department)
+#     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
+#     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
+#         bank_info = EmployeeBankInfo.objects.filter(employee=employee).first()
+#         basic, bonus = get_salary_breakdown(employee=employee, heads='Basic'), 0
+#         day_diff = cut_of_date - employee.joining_date.date()
+#         if basic == 0 : continue
+#         elif day_diff.days >= 365 : bonus = basic
+#         else :
+#             if employee.employee_category.value == 'Worker' : continue
+#             elif 'Staff' in employee.employee_category.value :
+#                 bonus = round(float(day_diff.days / 365) * float(basic), 0)
+#                 if "Management" in employee.employee_category.value :
+#                     bonus = bonus if bonus > 2000 else 2000
+#                 else : bonus = bonus if bonus > 1000 else 1000
+#         data = [employee.company.short_name, employee.department.title, employee.cost_center.short_name if employee.cost_center else '',
+#                 employee.employee_category.value, employee.section.name if employee.section_id else '', employee.employee_id, employee.name, employee.designation.name,
+#                 employee.joining_date.strftime("%d-%b-%y"), cut_of_date.strftime("%d-%b-%y"), day_diff.days, employee.salary, basic, bonus, bank_info.account_no]
+#         report_data += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
+#     return JsonResponse({"report_data":report_data}, safe=False)
 
 def get_salary_breakdown(employee=None, heads=''):
     slab_head = HRSalaryBreakdown.objects.filter(employee=employee, slab_heads__head__value__iexact=heads).first()
