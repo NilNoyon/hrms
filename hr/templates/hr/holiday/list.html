@@ -16,7 +16,11 @@
             {% for holiday in holiday_list %}
             <tr>
                 <td class="text-center">{{ forloop.counter }}</td>
-                <td>{{ holiday.branch.short_name }}</td>
+                <td>
+                    {% for branch in holiday.branch.all %}
+                        {{ branch.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
                 <td>{{ holiday.name }}</td>
                 <td>{{ holiday.start_date|date:'d/M/Y'|upper }}</td>
                 <td>{{ holiday.end_date|date:'d/M/Y'|upper }}</td>

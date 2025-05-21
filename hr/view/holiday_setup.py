@@ -92,9 +92,9 @@ def holiday_setup_delete(request, id):
 
 @csrf_exempt
 def get_holiday_company_data(request):
-    yearly_setups, year, company_id = [], datetime.now().year, request.POST.get('company_id', None)
+    yearly_setups, year, company_id = [], datetime.now().year, request.POST.getlist('company_id', None)
     for setup in HolidaySetup.objects.filter(status=Status.name("active")).exclude(name="Weekend").order_by('month', 'date'):
-        current_data    = Holiday.objects.filter(start_date__year=year, setup=setup, branch_id=company_id).first()
+        current_data    = Holiday.objects.filter(start_date__year=year, setup=setup, branch__in=company_id).first()
         if current_data:
             holiday_id  = current_data.id
             status      = current_data.status
