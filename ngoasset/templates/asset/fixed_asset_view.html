@@ -1,0 +1,779 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+{% load math-filters %}
+{% load qr_code %}
+{% block page_title %}fixed_asset{% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .col {
+        display: inline-block;
+    }
+    .row {
+        display: block;
+    }
+    {% comment %} .logo {
+        max-width: 10%;
+    }
+    .logo-pic {
+        max-width: 90%;
+    }
+    .logo-pica {
+        max-width: 100%;
+    } {% endcomment %}
+    .column {
+        float: left;
+        width: 15%;
+        padding: 0px;
+    }
+    .columns {
+        float: left;
+        width: 17%;
+        padding: 0px;
+    }
+    .columns_oeko {
+        float: left;
+        width: 18%;
+        margin-right: 10px;
+    }
+    .grid-container {
+        display: grid;
+        grid-template-columns: auto auto;
+        text-align: left;
+        justify-content: center;
+        align-items: center;
+    }
+    .grid-container>div {
+        padding: 10px;
+    }
+    .hover-div {
+        padding: 6px 6px;
+    }
+    .hover-div {
+        border-top: 1px solid #f8f8f8;
+        {% comment %} background: #f8f8f8;
+        box-shadow: 0px .5px .5px rgba(0, 0, 0, 0.2);
+        -webkit-transition: all 0.3s;
+        transition: all 0.1s;
+        margin: 5px 0px; {% endcomment %}
+    }
+
+    .hover-div:hover {
+        {% comment %} -webkit-transform: translateY(-5px);
+        -ms-transform: translateY(-5px);
+        transform: translateY(-5px);
+        box-shadow: 0 3px 4px rgba(0, 0, 0, 0.32);
+        cursor: pointer;
+        border-radius: 5px; {% endcomment %}
+    }
+    .main {
+        margin: 0 auto;
+    }
+    .one {
+        float: left;
+    }
+
+    .two {
+        float: left;
+    }
+
+    .three {
+        overflow: hidden;
+    }
+
+    .float-left-child {
+        float: left
+    }
+    .parent {
+        text-align: center;
+
+    }
+
+    /* Accordion styles */
+    .tabs {
+        border-radius: 8px;
+        overflow: hidden;
+        /* box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.32); */
+    }
+    .tab {
+        width: 100%;
+        color: black;
+        overflow: hidden;
+    }
+    .tab-label {
+        display: flex;
+        justify-content: space-between;
+        padding: 1em;
+        background: #F8F8F8;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .tab-label:hover {
+        background: #dfdbdb;
+    }
+    .tab-label::after {
+        content: "❯";
+        width: 1em;
+        height: 1em;
+        text-align: center;
+        transition: all 0.35s;
+    }
+    .tab-content {
+        max-height: 0;
+        padding: 0 1em;
+        color: #2c3e50;
+        background: white;
+        transition: all 0.35s;
+    }
+    .tab-close {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1em;
+        font-size: 0.75em;
+        background: #f4f6f8;
+        cursor: pointer;
+    }
+    .tab-close:hover {
+        background: #f0f2f5;
+    }
+    input:checked+.tab-label {
+        background: #dfdbdb;
+    }
+    input:checked+.tab-label::after {
+        transform: rotate(90deg);
+    }
+    input:checked~.tab-content {
+        max-height: 100vh;
+        padding: 1em;
+    }
+    input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        z-index: -1;
+    }
+    .row {
+        display: flex;
+    }
+    .row .col {
+        flex: 1;
+    }
+    .row .col:last-child {
+        margin-left: 1em;
+    }
+    @media screen and (max-width: 500px) {
+        .column {
+            width: 100%;
+        }
+    }
+
+    .select2-container--default.select2-container--disabled .select2-selection--single,
+    .select2-container--default.select2-container--disabled .select2-selection--multiple {
+        background-color: transparent;
+        cursor: default;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-8">
+                <h4 class="text-themecolor mb-0">Fixed Asset View</h4>
+            </div>
+            <div class="col-md-4 align-self-center text-right">
+                <div class="d-flex justify-content-end align-items-center">
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        {% if has_scrapped %}
+                        <button class="btn btn-sm btn-outline-warning mr-1 scrapped" title="Scrapped">Scrapped</button>
+                        {% endif %}
+                        {% if not asset.status.title == "Scrapped" %}
+                        <button data-toggle="modal" class="btn btn-sm btn-outline-warning mr-1 repair" title="Repair Add" data-target="#myModal">Repair/Updgrade</button>
+                        <a href="{% url 'fa:fa_update' asset.id %}" target="_blank" class="btn btn-sm btn-success mr-1" title="Fixed asset update"><i class="ti-pencil-alt"></i></a>
+                        {% endif %}
+                        <a href="{% url 'fa:fa_list' %}" class="btn btn-sm btn-info" title="Fixed Asset LIST"><i class="ti-view-list-alt"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <div class="row custom-color rounded-lg">
+            <div class="col-md-3">
+                <div class="col-12">
+                    <div class="row p-2 pb-0 ">
+                        <div id="" class=" col-sm-12 hover-div text-center">
+                            {% qr_from_text asset_basic_info size="3" image_format="png" error_correction="L" %}
+                            <p class="font-weight-bold pt-4 text-center">{{asset.code}}</p>
+                            <p class="font-weight-bold text-center">{{asset.item.item_master.item_name}} ({{asset.item.item_code}})</p>
+                        </div>
+                        <div class=" col-sm-12 grid-container hover-div pt-2">
+                            <div>Asset User </div>
+                            <div>: {{asset.asset_user.name}}</div>
+                            <div>Asset Controller</div>
+                            <div>: {{asset.asset_controller.name}}</div>
+                            <div>Allocation Date</div>
+                            <div>: {{last_allocation_date|date:'d-M-Y h:i A'|upper}}</div>
+                            <div>Company</div>
+                            <div>: {%if asset.company %}{{asset.company.name}}{% else %}n/a{%endif%}</div>
+                            <div>Dept or Cost Center</div>
+                            <div>: {%if asset.department_or_cost_center %}{{asset.department_or_cost_center.name}}{% else %}n/a{%endif%}</div>
+                            <div>Others Accessories</div>
+                            <div>: {{asset.others_accessories}}</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12  col-md-9 p-2 pl-0">
+                <div class="row pr-3">
+                    <div class="col-md-12  hover-div">
+                        <div id="container" class="row main">
+                            <div class="one col-sm-12 col-md-6 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Classification</div>
+                                    <div class='child float-left-child'>: {% if asset.classification %}{{asset.classification.value}}{%else%}n/a{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="two col-md-6  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Item</div>
+                                    <div class='child float-left-child'>: {% if asset.item %}{{asset.item.item_master.item_name}}{%else%}n/a{%endif%} </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="border col-md-12 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Technical Specification</div>
+                                    <div class='child float-left-child'>: {% if asset.item %}{% specification asset.item.item_master asset.item.id %}{%else%}n/a{%endif%} {% if upgraded %} (Upgraded) {% endif %} </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="border col-md-12 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Serial Number</div>
+                                    <div class='child float-left-child'>: {% if asset.serial_no %}{{ asset.serial_no}}{%else%}n/a{%endif%} </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="one border col-sm-12 col-md-8 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Supplier</div>
+                                    <div class='child float-left-child'>: {% if asset.supplier %}{{asset.supplier.name}}{%else%}n/a{%endif%} </div>
+                                </div>
+                            </div>
+
+                            <div class="three border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Cost of Assets</div>
+                                    <div class='child float-left-child'>: {% if asset.cost_of_assets %}{{asset.cost_of_assets}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="one border col-sm-12 col-md-4 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Bank</div>
+                                    <div class='child float-left-child'>: {% if asset.bank %}{{asset.bank.name}}{%else%}n/a{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="two border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Current Value</div>
+                                    <div class='child float-left-child'>: {% if asset.current_value %}{{asset.current_value}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="three border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Asset Value</div>
+                                    <div class='child float-left-child'>: {% if asset.asset_value %}{{asset.asset_value}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="one border col-sm-12 col-md-4 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Conversion Rate</div>
+                                    <div class='child float-left-child'>: {% if asset.conversion_rate %}{{asset.conversion_rate}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="two border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>{{asset.currency}}</div>
+                                    <div class='child float-left-child'>: {% if asset.wo_price %}{{asset.wo_price}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="three border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>TAX</div>
+                                    <div class='child float-left-child'>: {% if asset.tax %}{{asset.tax}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="one border col-sm-12 col-md-4 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>VAT</div>
+                                    <div class='child float-left-child'>: {% if asset.vat %}{{asset.vat}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="two border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Regulatory Duty</div>
+                                    <div class='child float-left-child'>: {% if asset.regulatory_duty %}{{asset.regulatory_duty}}{%else%}n/a{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="three border col-md-4  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Total Landing Cost</div>
+                                    <div class='child float-left-child'>: {% if asset.total_landing_cost %}{{asset.total_landing_cost}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row main">
+                            <div class="one border col-sm-12 col-md-6 py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Rate Of Depreciation</div>
+                                    <div class='child float-left-child'>: {% if asset.rate_of_depreciation %}{{asset.rate_of_depreciation}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                            <div class="two border col-md-6  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Accumulated Depreciation</div>
+                                    <div class='child float-left-child'>: {% if asset.accumulated_depreciation %}{{asset.accumulated_depreciation}}{%else%}0.00{%endif%}</div>
+                                </div>
+                            </div>
+                            {% if asset.product_warenty_period_year %}
+                            <div class="two border col-md-12  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Product Warenty Period (Year)</div>
+                                    <div class='child float-left-child'>: {% if asset.product_warenty_period_year %}{{asset.product_warenty_period_year}}{%else%}n/a{%endif%}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if asset.last_warenty_date %}
+                            <div class="two border col-md-12  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Last Warenty Date</div>
+                                    <div class='child float-left-child'>: {% if asset.last_warenty_date %}{{asset.last_warenty_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if asset.remarks %}
+                            <div class="two border col-md-12  py-2">
+                                <div class='parent'>
+                                    <div class='child float-left-child'>Reamrks</div>
+                                    <div class='child float-left-child'>: {% if asset.remarks %}{{asset.remarks}}{%else%}n/a{%endif%}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if asset.sale_date or asset.sale_amount or asset.obsolenscence_date_disposal %}
+                        <div class="col-md-12  hover-div">
+                            <div class="row main">
+                                {% if asset.sale_date or asset.sale_amount %}
+                                    <div class="one border col-md-4  py-2">
+                                        <div class='parent'>
+                                            <div class='child float-left-child'>Sale Date</div>
+                                            <div class='child float-left-child'>: {% if asset.sale_date %}{{asset.sale_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%}</div>
+                                        </div>
+                                    </div>
+                                    <div class="two border col-sm-12 col-md-4 py-2">
+                                        <div class='parent'>
+                                            <div class='child float-left-child'>Sale Amount</div>
+                                            <div class='child float-left-child'>: {% if asset.sale_amount %}{{asset.sale_amount}}{%else%}0.00{%endif%}</div>
+                                        </div>
+                                    </div>
+                                {% elif asset.obsolenscence_date_disposal%}
+                                    <div class="three border col-md-4  py-2">
+                                        <div class='parent'>
+                                            <div class='child float-left-child'>Obsolescence Date Disposal</div>
+                                            <div class='child float-left-child'>: {% if asset.obsolenscence_date_disposal %}{{asset.obsolenscence_date_disposal}}{%else%}n/a{%endif%}</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="tabs">
+                                <div class="tab">
+                                    <input type="checkbox" id="chck1">
+                                    <label class="tab-label" for="chck1">Bill and Payment</label>
+                                    <div class="tab-content">
+                                        <div id="container" class="row main">
+                                            <div class="one border col-sm-12 col-md-12 py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>MRIR</div>
+                                                    <div class='child float-left-child'>: {% if asset.mrir %}{{asset.mrir.mrir_no}}{%else%}n/a{%endif%}</div>
+                                                </div>
+                                            </div>
+                                            <div class="two border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>MRIR Date</div>
+                                                    <div class='child float-left-child'>: {% if asset.mrir_date %}{{asset.mrir_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="three border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>PI Date</div>
+                                                    <div class='child float-left-child'>: {% if asset.pi_date %}{{asset.pi_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="three border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>LC Date</div>
+                                                    <div class='child float-left-child'>: {% if asset.pi_date %}{{asset.pi_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="one border col-sm-12 col-md-12 py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>LC</div>
+                                                    <div class='child float-left-child'>: {% if asset.lc %}{{asset.lc}}{%else%}n/a{%endif%}</div>
+                                                </div>
+                                            </div>
+                                            <div class="two border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Bill Of Entry No</div>
+                                                    <div class='child float-left-child'>: {% if asset.bill_of_entry_no %}{{asset.bill_of_entry_no}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="three border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Bill Of Entry Date</div>
+                                                    <div class='child float-left-child'>: {% if asset.bill_of_entry_date %}{{asset.bill_of_entry_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="tabs">
+
+                                <div class="tab">
+                                    <input type="checkbox" id="chck2">
+                                    <label class="tab-label" for="chck2">Insurance</label>
+                                    <div class="tab-content">
+                                        <div id="container" class="row main">
+                                            <div class="one border col-sm-12 col-md-12 py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Date Of Insurance</div>
+                                                    <div class='child float-left-child'>: {% if asset.date_of_insurance %}{{asset.date_of_insurance|date:'d-M-Y'|upper}}{%else%}n/a{%endif%}</div>
+                                                </div>
+                                            </div>
+                                            <div class="two border col-md-12 py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Insurance Policy</div>
+                                                    <div class='child float-left-child'>: {% if asset.insurance_policy %}{{asset.insurance_policy}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="three border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Insurer Name</div>
+                                                    <div class='child float-left-child'>: {% if asset.insurer_name %}{{asset.insurer_name}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="three border col-md-12  py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Insurance Expiry Date</div>
+                                                    <div class='child float-left-child'>: {% if asset.insurance_expiry_date %}{{asset.insurance_expiry_date|date:'d-M-Y'|upper}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                            <div class="one border col-sm-12 col-md-12 py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Insured Value</div>
+                                                    <div class='child float-left-child'>: {% if asset.insured_value %}{{asset.insured_value}}{%else%}0.00{%endif%}</div>
+                                                </div>
+                                            </div>
+                                            <div class="two border col-md-12 py-2">
+                                                <div class='parent'>
+                                                    <div class='child float-left-child'>Claim Status</div>
+                                                    <div class='child float-left-child'>: {% if asset.claim_status %}{{asset.claim_status}}{%else%}n/a{%endif%} </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                        <div class="col-md-12">
+                           <div class="row">
+                                <div class="tab">
+                                    <input type="checkbox" id="chck3">
+                                    <label class="tab-label" for="chck3">Allocation</label>
+                                    <div class="tab-content">
+                                        <div class="table-responsive">
+                                            <table id="allocation-table"
+                                                class="table table-border table-striped card-table table-vcenter"
+                                              >
+                                                <thead>
+                                                    <tr>
+                                                        <th>Asset User</th>
+                                                        <th>Cost Center</th>
+                                                        <th>Asset Location</th>
+                                                        <th>Revalution Value</th>
+                                                        <th>Migration Reason</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% if allocation_query|length %}
+                                                        {% for allocation in allocation_query %}
+                                                            <tr>
+                                                                <td class="">{{ allocation.asset_user.name }}</td>
+                                                                <td>{% if allocation.cost_center %}{{ allocation.cost_center.name }}{% else %}n/a{% endif %}</td>
+                                                                <td class="">{% if allocation.asset_location%}{{allocation.asset_location}}{%else%}n/a{%endif%}</td>
+                                                                <td class="">{%if allocation.revalution_value%}{{allocation.revalution_value}}{%else%}n/a{%endif%}</td>
+                                                                <td class="">{%if allocation.migration_reasons%}{{allocation.migration_reasons}}{%else%}n/a{%endif%}</td>
+                                                                <td class="">{{allocation.created_at|date:'d-M-Y h:i A'|upper}}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <p style="color:red">No results found</p>
+                                                    {% endif %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% comment %} Repair tab start {% endcomment %}
+                                <div class="tab">
+                                    <input type="checkbox" id="chck4">
+                                    <label class="tab-label" for="chck4">Repair</label>
+                                    <div class="tab-content">
+                                        <div class="table-responsive">
+                                            <table id="repair-table"
+                                                class="table table-border table-striped card-table table-vcenter"
+                                                style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Repair Type</th>
+                                                        <th>Repair Date</th>
+                                                        <th>Repair Amount</th>
+                                                        <th>Reason For Repair</th>
+                                                        <th>Repair Reference</th>
+                                                        <th>Upgradation Amount</th>
+                                                        <th>Attachment</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {%for repair in repair_query %}
+                                                    <tr>
+                                                        <td class="">{{repair.get_repair_type_display}}</td>
+                                                        <td class="">{{repair.repair_date|date:'d-M-Y'|upper}}</td>
+                                                        <td class="">{{repair.repair_amount}}</td>
+                                                        <td class="">{{repair.reason_for_repair}}</td>
+                                                        <td class="">{{repair.repair_reference}}</td>
+                                                        <td class="">{{repair.upgradation_cost}}</td>
+                                                        <td class="">{% if repair.attachment %}<a href="/assets/uploads/{{repair.attachment}}" target="_blank"><i class="fas fa-link"></i></a>{% else %} No File {% endif %}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% comment %} Repair option end {% endcomment %}
+
+                                {% comment %} Scrapped tab start {% endcomment %}
+                                {% if asset.scrapped_date %}
+                                <div class="tab">
+                                    <input type="checkbox" id="chck5">
+                                    <label class="tab-label" for="chck5">Scrapped</label>
+                                    <div class="tab-content">
+                                        <div class="table-responsive">
+                                            <table id="scrapped-table" class="table table-border table-striped card-table table-vcenter" style="width:100%">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Scrapped Date</th>
+                                                        <th>Scrapped Notes</th>
+                                                        <th>Scrapped By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="">{{asset.scrapped_date|date:'d-M-Y'|upper}}</td>
+                                                        <td class="">{{asset.scrapped_note}}</td>
+                                                        <td class="">{{asset.scrapped_by}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% comment %} Scrapped option end {% endcomment %}
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade bd-example-modal-xl pt-4 item-modal" id="myModal"  role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <form class="floating-labels" id="item_form" enctype="multipart/form-data" method="POST" action="{% url 'fa:fa_add_repair' asset.id %}">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="assessmentView">Fixed Asset Repair/Updgrade</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4 pb-0">
+                <div class="form-group">
+                    <label for="repair_type">Repair/Upgrade </label>
+                    <select class="form-control text-capitalize select2 repair_type_id" name="repair_type" id="repair_type_id" data-title="Repair Type" required>
+                        <option value="1">Repair</option>
+                        <option value="2">Upgrade</option>
+                    </select>
+                    <span class="bar"></span>
+                </div>
+                <div class="form-group">
+                    <label for="repair_date">Date </label>
+                    <input type="text" data-title="repair_date"
+                        class="form-control single_date" name="repair_date" id="repair_date" autocomplete="off"
+                        placeholder="" onfocusout="leadDays('_1')" {% if last_repair.repair_date %}value="{{last_repair.repair_date|date:'d-M-Y'}}"{%endif%} required>
+                    <span class="bar"></span>
+                </div>
+                <div class="form-group div_repair_amount">
+                    <label for="repair_amount">Repair Amount</label>
+                        <input type="number" class="form-control" id="repair_amount" autocomplete="off"
+                            data-title="repair_amount" name="repair_amount" {% if last_repair.repair_amount %}value="{{last_repair.repair_amount}}"{% endif %} required>
+                        <span class="bar"></span>
+                </div>
+                <div class="form-group div_upgradation_cost" style="display:none;">
+                    <label for="upgradation_cost">Upgradation Amount</label>
+                    <p class="required">*</p>
+                        <input type="number" class="form-control" id="upgradation_cost" autocomplete="off" data-title="Upgradation Amount" name="upgradation_cost">
+                        <span class="bar"></span>
+                </div>
+                <div class="form-group">
+                    <label id="lblreason" for="reason_for_repair">Reason For Repair</label>
+                    <textarea class="form-control" rows="2" id="reason_for_repair"
+                        data-title="reason_for_repair" name="reason_for_repair">{% if last_repair.reason_for_repair %}{{last_repair.reason_for_repair}}{%endif%}</textarea>
+                    <span class="bar"></span>
+                </div>
+                <div class="form-group">
+                    <label id="lblreference" for="repair_reference">Repair Reference Number</label>
+                    <input type="text" class="form-control" id="repair_reference" autocomplete="off"
+                        data-title="repair_reference" name="repair_reference" {% if last_repair.repair_reference %}value="{{last_repair.repair_reference}}"{% endif %}>
+                    <span class="bar"></span>
+                </div>
+                <div class="form-group">
+                    <label for="attachment"></label>
+                    <input type="file" class="form-control" id="attachment" autocomplete="off" name="attachment">
+                    <span class="bar"></span>
+                </div>
+                <div class="form-group mb-0">
+                    <button type="submit" id="submit_btn" class="btn btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<!-- js-->
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+<script>
+
+    $(".scrapped").on('click', function(){
+        Swal.fire({
+            text: "Do you want to scrapped this item?",
+            input: 'textarea',
+            inputPlaceholder: "Write the reason why you are scraping...",
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            confirmButtonColor: "#00c292",
+            cancelButtonText: 'Cancel',
+            cancelButtonColor: "#e46a76",
+            reverseButtons: false,
+            closeOnConfirm: false,
+            showLoaderOnConfirm: true,
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type    : "POST",
+                    url     : "{% url 'fa:item_scraping' asset.id %}",
+                    data    : { "notes" : result.value },
+                    success : function (data) {
+                        Swal.fire({
+                            type: 'success',
+                            title: 'Successfully Scrapped',
+                            showConfirmButton: false
+                        })
+                        setTimeout(function(){
+                            window.location = "{% url 'fa:fa_list' %}";
+                            }, 2000);
+                    }
+                });
+            }
+        });
+    });
+
+    $("#repair_type_id").on('change', function(){
+        let type = parseInt(this.value);
+        if(type == 2) {$(".div_upgradation_cost").css('display', ''); $("#upgradation_cost").attr('required', true);$("#lblreason").text('Reason For Upgrade');$("#lblreference").text('Upgrade Reference Number');}
+        else  {$("#upgradation_cost").removeAttr('required', 'required');$(".div_upgradation_cost").css('display', 'none');$("#lblreason").text('Reason For Repair');$("#lblreference").text('Repair Reference Number');}
+    });
+
+    $(document).ready(function () {
+        $('.single_date').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'DD-MMM-YYYY'
+            },
+            autoUpdateInput: false
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+        });
+
+        var nowDate = new Date();
+        var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+
+        $('#repair_date').daterangepicker({
+            singleDatePicker: true,
+            maxDate: today,
+            locale: {
+                format: 'DD-MMM-YYYY'
+            },
+            autoUpdateInput: false
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('.hover-div').hover(function () {
+            $('.hover-div').stop().fadeTo('fast', 0.3);
+            $(this).stop().fadeTo('fast', 1);
+        }, function () {
+            $('.hover-div').stop().fadeTo('fast', 1);
+        });
+    });
+</script>
+
+{% endblock %}

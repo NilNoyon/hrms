@@ -1,0 +1,373 @@
+<style>
+    .select2-container--default.select2-container--disabled .select2-selection--single,
+    .select2-container--default.select2-container--disabled .select2-selection--multiple {
+        background-color: transparent;
+        cursor: default;
+    }
+</style>
+
+<div class="modal fade bd-example-modal-xl pt-4 item-modal" id="myModal"  role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <form class="floating-labels" id="item_form" method="POST">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="assessmentView">Item Add Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="item_name">Name</label>
+                            <select class="form-control text-capitalize item-name" name="item_name" id="item_name" data-title="Name" required>
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="category">Sub Classification</label>
+                            <select class="form-control text-capitalize select2 item-category" name="category" id="category" style="width:100%" data-title="Sub Classification" required>
+                                <option value="" disabled selected></option>
+                                {% for cat in category_list %}
+                                    <option value="{{cat.id}}">{{cat.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="brand">Brand</label>
+                            <input id="brand" class="form-control brand" name="brand">
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="uom">Unit of Measurement</label>
+                            <select class="form-control text-capitalize select2 item-uom" name="uom" style="width:100%" id="uom" data-title="Unit of Measurement" required>
+                                <option value="" disabled selected></option>
+                                {% for uom in uom_list %}
+                                    <option value="{{uom.id}}">{{uom.short_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group">
+                    <textarea rows="2" class="form-control item-specification" id="item-specification" name="specification"required></textarea>
+                    <span class="bar"></span>
+                    <label for="specification">Specification</label>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group non-gmt">
+                            <label for="brand">Brand</label>
+                            <select class="form-control text-capitalize select2 item-brand" name="brand" id="brand" data-title="Brand">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group non-gmt">
+                            <label for="model">Model</label>
+                            <select class="form-control text-capitalize select2 item-model" name="model" id="model" data-title="Model">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group non-gmt">
+                            <label for="origin">Origin</label>
+                            <select class="form-control text-capitalize select2 item-origin" name="origin" id="origin" data-title="Origin">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group gmt">
+                            <input type="number" class="form-control item-number" id="count" name="count">
+                            <span class="bar"></span>
+                            <label for="count">Count</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group gmt">
+                            <input type="number" class="form-control item-gsm" id="gsm" name="gsm">
+                            <span class="bar"></span>
+                            <label for="gsm">GSM</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group gmt">
+                            <label for="dia">Dia</label>
+                            <select class="form-control text-capitalize select2 item-dia" name="dia" id="dia" data-title="Dia">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group gmt">
+                            <label for="width">Width</label>
+                            <select class="form-control text-capitalize select2 item-width" name="width" id="width" data-title="Width">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group gmt">
+                            <label for="construction">Construction</label>
+                            <select class="form-control text-capitalize select2 item-construction" name="construction" id="construction" data-title="Construction">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group gmt">
+                            <label for="composition">Composition</label>
+                            <select class="form-control text-capitalize select2 item-composition" name="composition" id="composition" data-title="Composition">
+                                <option value="" disabled selected></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-block">
+                <div class="row">
+                    <div class="col-md-4 ml-auto">
+                        <button type="button" id="submit_btn" class="btn btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // scripts for items
+    $(document).ready(function () {
+
+        $('.gmt').hide();
+        $('.non-gmt').hide();
+
+        $("#item_name").select2({
+            minimumInputLength  : 3,
+            placeholder         : "Item Name",
+            dropdownParent      : $('.item-modal'),
+            ajax: {
+                url: "{% url 'inventory:get_item' %}",
+                dataType: "json",
+                data: function(term, page) {
+                    return {
+                        q: term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.items
+                    };
+                }
+            },
+            tags: true,
+            closeOnSelect: true,
+        });
+
+        $('#submit_btn').on('click', function(e){
+            e.preventDefault();
+            $("#item_form :disabled").removeAttr('disabled');
+
+            let name_id         = $('.item-name').val();
+            let category_id     = $('.item-category').val();
+            let subcategory_id  = $('.item-subcategory').val();
+            let uom_id             = $('.item-uom').val();
+            let spec            = $('.item-specification').val();
+            if(name_id == "" || category_id == "" || uom_id == "" || spec == "") {
+                $.toast({
+                    heading: "Warning",
+                    text: 'Name, Category or Unit of Measurement or specification is required',
+                    position: 'top-right',
+                    loaderBg:'#fff',
+                    icon: 'warning',
+                    hideAfter : 5000,
+                });
+            }else{
+                e.preventDefault();
+                $.ajax({
+                    cache: false,
+                    url: "{% url 'inventory:ajax_save_item' %}",
+                    type: "POST",
+                    data: $("#item_form").serialize(),
+                    success: function (res) {
+                        if(res['status'] == "success"){
+                            Swal.fire({
+                                type: 'success',
+                                title: 'Item is being Requested!',
+                                text: 'Successfully added, Wait For Approval!'
+                            })
+                            $('.item-modal').modal('hide');
+                        }else{
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Opps!',
+                                text: 'Something went wrong, Try again!'
+                            })
+                        }
+                    }
+                });
+            }
+        });
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+
+
+        $('body').on('change', '#item_name', function (e) {
+            let item_name = $(this).val();
+            $.ajax({
+                cache: false,
+                url: "{% url 'inventory:get_item_info' %}",
+                type: "POST",
+                data: { item_name : item_name },
+                success: function (res) {
+                    $("#category, #subcategory, #uom").parent().addClass('focused');
+
+                    {% if 'Admin' not in request.session.role_text %}
+                        $("#category, #subcategory, #uom").prop("disabled", false);
+                    {% endif %}
+
+                    if (res.category.id > 0){
+                        // For Category Field
+                        $("#category").val(res.category.id).trigger("change");
+
+                        // For Sub Category Field
+                        setTimeout(function(){
+                            if (res.subcategory.id > 0){
+                                $("#subcategory").val(res.subcategory.id).trigger("change");
+                            }else{
+                                $("#subcategory").removeAttr('required').select2('destroy').empty()
+                                                .select2({ placeholder: "Sub-Category", width: '100%'})
+                            }
+                        }, 300);
+
+                        // For Unit Of Measurement Field
+                        if (res.uom.id > 0){
+                            $("#uom").val(res.uom.id).trigger("change");
+                        }else{
+                            $("#uom").parent().removeClass('focused');
+                        }
+
+
+                        if(res.category.text.search("Fabric") < 0 || res.category.text.search("Yarn") < 0){
+                            $(".non-gmt").show();
+                            $(".gmt").hide();
+
+                            appendSelect2($("#model"), 'Model', res.model, '{{spec.model}}', true, false, true);
+                            appendSelect2($("#brand"), 'Brand', res.brand, '{{spec.brand}}', true, false, true);
+                            appendSelect2($("#origin"), 'Origin', res.origin, '{{spec.origin}}', true, false, true);
+                        }else{
+                            $(".gmt").show();
+                            $(".non-gmt").hide();
+
+                            appendSelect2($("#dia"), 'Dia', res.dia, '{{spec.dia}}', true, false, true);
+                            appendSelect2($("#width"), 'Width', res.width, '{{spec.width}}', true, false, true);
+                            appendSelect2($("#construction"), 'Construction', res.construction, '{{spec.construction}}', true, false, true);
+                            appendSelect2($("#composition"), 'Composition', res.composition, '{{spec.composition}}', true, false, true);
+                        }
+
+                    }else{
+                        $(".non-gmt, .gmt").hide();
+                    }
+
+                }
+            });
+        });
+
+        $('body').on('change', '#category', function (e) {
+            let category_id = $(this).val();
+            let name_id = $('#name').val();
+            $.ajax({
+                cache: false,
+                url: "{% url 'inventory:get_sub_categories' %}",
+                type: "POST",
+                data: { category_id : category_id },
+                success: function (res) {
+                    $("#subcategory").select2('destroy').empty().removeAttr('required');
+                    $("#subcategory").select2({
+                        data: res.sub_categories,
+                        placeholder: "Sub-Category",
+                    });
+                    if(res.category.search("Fabric") == 0 || res.category.search("Yarn") == 0){
+                        $(".gmt").show();
+                        $(".non-gmt").hide();
+                    }else{
+                        $(".gmt").hide();
+                        $(".non-gmt").show();
+                    }
+                    if(isNaN(name_id)){
+                        $('.gmt .select2, .non-gmt .select2').each(function(index, item){
+                            let title = $(item).data("title");
+                            appendSelect2($(item), title, '', '', true);
+                        })
+                    }
+                }
+            });
+        }).on('select2:clear', '#category', function (e) {
+            $(this).select2("close");
+            $(".gmt, .non-gmt").hide();
+        });
+
+        function appendSelect2($obj, title='', data='', val='', tag_status=false, closeOnSelect_status=true, edit_text=false, disabled=false){
+
+            if ($obj.data('select2')){
+                $obj.select2('destroy').empty();
+            }
+
+            if(data != ''){
+                $obj.select2({
+                    data: data,
+                    placeholder: title,
+                    width: '100%',
+                    tags: tag_status,
+                    allowClear: true,
+                    closeOnSelect: closeOnSelect_status
+                });
+            }else{
+                $obj.select2({
+                    placeholder: title,
+                    width: '100%',
+                    tags: tag_status,
+                    allowClear: true,
+                    closeOnSelect: closeOnSelect_status
+                });
+            }
+
+            if(val != ''){
+                $obj.val(val).trigger("change");
+            }
+
+            if(edit_text){
+                var $search = $obj.data('select2').dropdown.$search || $el.data('select2').selection.$search;
+                $obj.on("select2:select", function(e) {
+                    $search.val(e.params.data.text);
+                });
+            }
+
+            if(disabled){
+                $obj.prop("disabled", true);
+            }
+        }
+
+    });
+
+</script>

@@ -1,0 +1,300 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Request Item Status History{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/bootstrap-treeview/bootstrap-treeview.min.css' %}" rel="stylesheet" type="text/css" />
+<style>
+    .tree ul.start{padding-left: 0px;}
+    .tree li {
+        list-style-type: none;
+        position: relative;
+    }
+    .tree li ul {display: none;}
+    .tree li.open>ul {display: block;}
+    .tree li>span:not(:last-child):before {
+        content: '+';
+        padding: 9px;
+    }
+    .tree li.open>span:not(:last-child):before {
+        content: '-';
+        padding: 9px;
+    }
+    .well {
+        min-height: 20px;
+        padding: 19px;
+        margin-bottom: 20px;
+        background-color: #ffffff;
+        border: 0px solid;
+    }
+    .tree {min-height: 20px;}
+    .tree li {
+        list-style-type: none;
+        margin: 0;
+        padding: 10px 5px 0 5px;
+        position: relative
+    }
+    .tree li::before,
+    .tree li::after {
+        content: '';
+        left: -20px;
+        position: absolute;
+        right: auto
+    }
+    .tree li::before {
+        border-left: 1px solid #999;
+        bottom: 50px;
+        height: 100%;
+        top: 0;
+        width: 1px
+    }
+    .tree li::after {
+        border-top: 1px solid #999;
+        height: 20px;
+        top: 25px;
+        width: 25px
+    }
+    .tree li span {
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border: 1px solid #999;
+        border-radius: 5px;
+        display: inline-block;
+        padding: 3px 8px;
+        text-decoration: none
+    }
+    .tree>ul>li::before,
+    .tree>ul>li::after {
+        border: 0
+    }
+   .tree li:last-child::before {height: 30px}
+    .user_info{cursor: pointer;}
+</style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="card" style="min-height: 82vh">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                    <h4 class="text-themecolor mb-0"> Request Item Status History </h4>
+                </div>
+                <div class="col-md-6 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <a href="{% url 'fa:maintenance_view' maintenance.id %}" class="btn btn-sm btn-outline-success" title="Request View"><i class="ti-eye"></i></a>
+                                <a href="{% url 'fa:request_list' %}" class="btn btn-sm btn-info ml-2" title="Request List"><i class="ti-view-list-alt"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            
+            <div class="tree custom-color rounded-lg p-3">
+                <ul class="start">
+                    <li class="open">
+                        <span>
+                            <i class="icon-folder-open"></i> 
+                            <b class="text-dark font-weight-bold"><a class="text-info" href="{{ maintenance.get_absolute_url }}" target="_blank">{{ maintenance.request_no }}</a></b> 
+                            <b class="text-success">Started</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ maintenance.created_by_id }}" data-target="#userModal">{{ maintenance.created_by }}</b>
+                            <small>at {{ maintenance.created_at|date:"d-M-Y h:i A"|upper }}</small>
+                        </span>
+                        <ul>
+                            {% for approval in data.statuses %}
+                            <li>
+                                <span>
+                                    <i class="icon-leaf"></i> <b class="{% if "reject" in approval.status.title|lower %} text-danger {% else %} text-success {% endif %}">{{ approval.status.title }}</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ approval.approved_rejected_by_id }}" data-target="#userModal">{{ approval.approved_rejected_by.name }}</b>
+                                    <small>at {{ approval.approved_rejected_date|date:"d-M-Y h:i A"|upper }}</small>
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% for p in data.pr_list %}
+                            <li class="open">
+                                <span>
+                                    <i class="icon-leaf"></i> 
+                                    <b class="text-dark font-weight-bold"><a class="text-info" href="{{ p.req.get_absolute_url }}" target="_blank">{{ p.req.req_code }}</a></b> 
+                                    <b class="text-success">Started</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ p.req.created_by_id }}" data-target="#userModal">{{ p.req.created_by }}</b>
+                                    <small>at {{ p.created_at|date:"d-M-Y h:i A"|upper }}</small>
+                                </span>
+                                <ul>
+                                    {% for pr_approval in p.approvals %}
+                                    <li>
+                                        <span>
+                                            <i class="icon-leaf"></i> <b class="{% if "reject" in pr_approval.status.title|lower %} text-danger {% else %} text-success {% endif %}">{{ pr_approval.status.title }}</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ pr_approval.approved_rejected_by_id }}" data-target="#userModal">{{ pr_approval.approved_rejected_by.name }}</b>
+                                            <small>at {{ pr_approval.approved_rejected_date|date:"d-M-Y h:i A"|upper }}</small>
+                                        </span>
+                                    </li>
+                                    {% endfor %}
+
+
+                                    {% for wo in p.wo_list %}
+                                        <li class="open">
+                                            <span>
+                                                <i class="icon-leaf"></i> 
+                                                <b class="text-dark font-weight-bold"><a class="text-info" href="{{ wo.wo.get_absolute_url }}" target="_blank">{{ wo.wo.wo_no }}</a></b> 
+                                                <b class="text-success">Started</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ wo.wo.created_by_id }}" data-target="#userModal">{{ wo.wo.created_by.name }}</b>
+                                                <small>at {{ wo.wo.created_at|date:"d-M-Y h:i A"|upper }}</small>
+                                            </span>
+                                            <ul>
+                                                {% for wo_approval in wo.approvals %}
+                                                    <li>
+                                                        <span>
+                                                            <i class="icon-leaf"></i> <b class="{% if "cancelled" in wo_approval.status.title|lower %} text-warning {% else %} text-success {% endif %}">{{ wo_approval.status.title }}</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ wo_approval.approved_rejected_by_id }}" data-target="#userModal">{{ wo_approval.approved_rejected_by.name }}</b>
+                                                            <small>at {{ wo_approval.approved_rejected_date|date:"d-M-Y h:i A"|upper }}</small>
+                                                        </span>
+                                                    </li>
+                                                {% endfor %}
+                                                {% for pi in wo.pi_list %}
+                                                    <li class="open">
+                                                        <span>
+                                                            <i class="icon-leaf"></i> 
+                                                            <b class="text-dark font-weight-bold"><a class="text-info" href="{{ pi.pi.get_absolute_url }}" target="_blank">PI : {{ pi.pi.pi_no }}</a></b> 
+                                                            <b class="text-success">Raised</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ pi.pi.created_by_id }}" data-target="#userModal">{{ pi.pi.created_by.name }}</b>
+                                                            <small>at {{ pi.pi.created_at|date:"d-M-Y h:i A"|upper }}</small>
+                                                        </span>
+                                                        <ul>
+                                                            {% for pi_approval in pi.approvals %}
+                                                            <li>
+                                                                <span>
+                                                                    <i class="icon-leaf"></i> <b class="{% if "reject" in pi_approval.status.title|lower %} text-danger {% else %} text-success {% endif %}">{{ pi_approval.status.title }}</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ pi_approval.approved_rejected_by_id }}" data-target="#userModal">{{ pi_approval.approved_rejected_by.name }}</b>
+                                                                    <small>at {{ pi_approval.approved_rejected_date|date:"d-M-Y h:i A"|upper }}</small>
+                                                                </span>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </li>
+                                                {% endfor %}
+                                                {% for grn in wo.grn_list %}
+                                                    <li class="open">
+                                                        <span>
+                                                            <i class="icon-leaf"></i> 
+                                                            <b class="text-dark font-weight-bold"><a class="text-info" href="{{ grn.grn.get_absolute_url }}" target="_blank">{{ grn.grn.receive_no }}</a></b> 
+                                                            <b class="text-success">Received </b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ grn.grn.received_by_id }}" data-target="#userModal">{{ grn.grn.received_by }}</b>
+                                                            <small>at {{ grn.grn.received_at|date:"d-M-Y h:i A"|upper }}</small>
+                                                        </span>
+                                                        <ul>
+                                                            {% if grn.items.count > 0 %}
+                                                            <li class="">
+                                                                <span class="font-weight-bold"><i class="icon-folder-open"></i> Total {{ grn.items.count }} Items</span>
+                                                                <ul>
+                                                                    {% for detail in grn.items %}
+                                                                    <li>
+                                                                        <span>
+                                                                            <b style="font-weight:600;">{{ detail.wo_item.item.item_name }} - {{ detail.quantity.normalize }} {{ detail.wo_item.uom.short_name }}</b> ( {% specification detail.wo_item.item detail.wo_item.spec_id %} )
+                                                                        </span>
+                                                                    </li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </li>
+                                                            {% endif %}
+                                                            {% for mrir in grn.mrir_list %}
+                                                            <li class="open">
+                                                                <span>
+                                                                    <i class="icon-leaf"></i> 
+                                                                    <b class="text-dark font-weight-bold"><a class="text-info" href="{{ mrir.mrir.get_absolute_url }}" target="_blank">{{ mrir.mrir.mrir_no }}</a></b> 
+                                                                    <b class="text-success">QC Passed</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ mrir.mrir.created_by_id }}" data-target="#userModal">{{ mrir.mrir.created_by.name }}</b>
+                                                                    <small>at {{ mrir.mrir.created_at|date:"d-M-Y h:i A"|upper }}</small>
+                                                                </span>
+                                                                <ul>
+                                                                    {% if mrir.items.count > 0 %}
+                                                                    <li class="">
+                                                                        <span class="font-weight-bold"><i class="icon-folder-open"></i> Total {{ mrir.items.count }} Items</span>
+                                                                        <ul>
+                                                                            {% for detail in mrir.items %}
+                                                                            <li>
+                                                                                <span>
+                                                                                    <b style="font-weight:600;">{{ detail.recv_breakdown.wo_item.item.item_name }} - {{ detail.ok_qty.normalize }} {{ detail.recv_breakdown.wo_item.uom.short_name }}</b> ( {% specification detail.recv_breakdown.wo_item.item detail.recv_breakdown.wo_item.spec_id %} )
+                                                                                </span>
+                                                                            </li>
+                                                                            {% endfor %}
+                                                                        </ul>
+                                                                    </li>
+                                                                    {% endif %}
+                                                                    {% if mrir.bill_data %}
+                                                                        <li class="open">
+                                                                            <span>
+                                                                                <i class="icon-leaf"></i> 
+                                                                                <b class="text-dark font-weight-bold"><a class="text-info" href="{{ mrir.bill_data.bill.get_absolute_url }}" target="_blank">{{ mrir.bill_data.bill.bill_no }}</a></b> 
+                                                                                <b class="text-success">Raised </b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ mrir.bill_data.bill.created_by_id }}" data-target="#userModal">{{ mrir.bill_data.bill.created_by.name }}</b>
+                                                                                <small>at {{ mrir.bill_data.bill.created_at|date:"d-M-Y h:i A"|upper }}</small>
+                                                                            </span>
+                                                                            <ul>
+                                                                                {% if mrir.items.count > 0 %}
+                                                                                <li class="">
+                                                                                    <span class="font-weight-bold"><i class="icon-folder-open"></i> Total {{ mrir.items.count }} Items</span>
+                                                                                    <ul>
+                                                                                        {% for detail in mrir.items %}
+                                                                                        <li>
+                                                                                            <span>
+                                                                                                <b style="font-weight:600;">{{ detail.recv_breakdown.wo_item.item.item_name }} - {{ detail.ok_qty.normalize }} {{ detail.recv_breakdown.wo_item.uom.short_name }}</b> ( {% specification detail.recv_breakdown.wo_item.item detail.recv_breakdown.wo_item.spec_id %} )
+                                                                                            </span>
+                                                                                        </li>
+                                                                                        {% endfor %}
+                                                                                    </ul>
+                                                                                </li>
+                                                                                {% endif %}
+                                                                                {% for bill_approval in mrir.bill_data.approvals %}
+                                                                                <li>
+                                                                                    <span>
+                                                                                        <i class="icon-leaf"></i> <b class="text-success">{{ bill_approval.status.title }}</b> by <b class="text-info user_info" data-toggle="modal" data-id="{{ bill_approval.approved_rejected_by_id }}" data-target="#userModal">{{ bill_approval.approved_rejected_by.name }}</b>
+                                                                                        <small>at {{ bill_approval.approved_rejected_date|date:"d-M-Y h:i A"|upper }}</small>
+                                                                                    </span>
+                                                                                </li>
+                                                                                {% endfor %}
+                                                                            </ul>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                </ul>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </li>
+
+                </ul>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block page_js %}
+
+    {% include 'inc/profile_modal.html' %}
+    <script src="{% static 'node_modules/bootstrap-treeview/bootstrap-treeview.min.js' %}" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var tree = document.querySelectorAll('.tree ul li span:not(:last-child)');
+            for (var i = 0; i < tree.length; i++) {
+                tree[i].addEventListener('click', function (e) {
+                    var parent = e.target.parentElement;
+                    var classList = parent.classList;
+                    if (classList.contains("open")) {
+                        classList.remove('open');
+                        var opensubs = parent.querySelectorAll(':scope .open');
+                        for (var i = 0; i < opensubs.length; i++) {
+                            opensubs[i].classList.remove('open');
+                        }
+                    } else { classList.add('open'); }
+                    {% comment %} e.preventDefault(); {% endcomment %}
+                });
+            }
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,130 @@
+<div class="row">
+    <div class="col-md-9">
+        <div class="table-responsive mt-4">
+            <table class="table table-border table-striped card-table table-vcenter" id="vehicle-requisition" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="d-sm-table-cell">SL.</th>
+                        <th>Vehicle</th>
+                        <th>Direction</th>
+                        <th>No. of Persons</th>
+                        <th>Visiting Place</th>
+                        <th class="d-sm-table-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in req_list %}
+                    <tr>
+                        <td class="">{{ forloop.counter }}</td>
+                        <td>{{ req.vehicle }}</td>
+                        <td>{{ req.get_route_type_display }}</td>
+                        <td>{{ req.num_of_persons }}</td>
+                        <td>{{ req.visiting_place }}</td>
+                        <td class="text-left">
+                            <a class="h4 m-r-10 text-success" href="{% url 'fa:vehicle_requisition_update' req.id %}">
+                                <span class="icon"><i class="ti-pencil-alt"></i></span>
+                            </a>
+                            <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'fa:vehicle_requisition_delete' req.id %}">
+                                <span class="icon"><i class="ti-trash"></i></span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger custom-color rounded-lg p-3 mb-0">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ raction_name }}</h4>
+                    </div>
+                    {% if rinstance %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'fa:vehicle_requisition_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                        <i class="ti-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="floating-labels" method="post" id="form" action="{{ raction_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="rvehicle">Vehicle</label>
+                        <select class="form-control text-capitalize select2" name="vehicle" id="rvehicle" data-title="Vehicle" required>
+                            <option value="" disabled selected></option>
+                            {% for vehicle in vehicle_list %}
+                            <option value="{{vehicle.id}}" {% if vehicle.id == rinstance.vehicle_id %} selected {% endif %}>{{vehicle}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent" id="visiting_place" name="visiting_place" value="{{ rinstance.visiting_place }}" />
+                                <span class="bar"></span>
+                                <label for="visiting_place">Visiting Place</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent" id="start_from" name="start_from" value="{{ rinstance.start_from }}" />
+                                <span class="bar"></span>
+                                <label for="start_from">Start From</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="form-group">
+                                <label for="route_type">Direction</label>
+                                <select class="form-control text-capitalize select2" name="route_type" id="route_type" data-title="Direction" required>
+                                    <option value="" disabled selected></option>
+                                    <option value="One way" {% if rinstance.route_type == "One way" %}selected{% endif %}>One Way</option>
+                                    <option value="Two way" {% if rinstance.route_type == "Two way" %}selected{% endif %}>Two Way</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent text-center" id="num_of_persons" name="num_of_persons" value="{{ rinstance.num_of_persons }}" />
+                                <span class="bar"></span>
+                                <label for="num_of_persons">Persons</label>
+                            </div>
+                        </div>    
+                        <div class="col-md">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="req_date" name="req_date" value="{{ rinstance.req_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="req_date">Arival Date</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control bg-transparent datepicker" id="req_duration" name="req_duration" value="{{ rinstance.start_time|date:'d/m/Y h:i A' }} - {{ rinstance.end_time|date:'d/m/Y h:i A' }}" autocomplete="off">
+                        <span class="bar"></span>
+                        <label for="req_duration">Required Duration</label>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="1" class="form-control bg-transparent" id="rremarks" name="remarks">{{ rinstance.remarks }}</textarea>
+                        <span class="bar"></span>
+                        <label for="rremarks">Remarks</label>
+                    </div>
+                    <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

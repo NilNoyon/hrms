@@ -1,0 +1,129 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Vehicle Management{% endblock %}
+{% block add_css %}
+<link href="{% static 'node_modules/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .custom-control-label::before, .custom-control-label::after {
+        top: 0.1rem !important;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 align-self-center">
+                <h4 class="text-themecolor mb-0">Vehicle Management</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'vehicle' %}active{% endif %}" data-toggle="tab" href="#entry" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-home"></i></span> 
+                    <span class="hidden-xs-down"> Entry </span>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'allocation' %}active{% endif %}" data-toggle="tab" href="#allocation" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
+                    <span class="hidden-xs-down"> Allocation </span>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'service' %}active{% endif %}" data-toggle="tab" href="#service" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
+                    <span class="hidden-xs-down"> Service </span>
+                </a>
+            </li>
+            <li class="nav-item"> 
+                <a class="nav-link {% if tab_name == 'requisition' %}active{% endif %}" data-toggle="tab" href="#requisition" role="tab">
+                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
+                    <span class="hidden-xs-down"> Requisition </span>
+                </a>
+            </li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content tabcontent-border">
+            <div class="tab-pane {% if tab_name == 'vehicle' %}active{% endif %}" role="tabpanel" id="entry">
+                {% include 'vehicle_mgt/vehicle.html' %}
+            </div>
+            <div class="tab-pane {% if tab_name == 'allocation' %}active{% endif %}" role="tabpanel" id="allocation">
+                {% include 'vehicle_mgt/vehicle_allocation.html' %}
+            </div>
+            <div class="tab-pane {% if tab_name == 'service' %}active{% endif %}" role="tabpanel" id="service">
+                {% include 'vehicle_mgt/vehicle_service.html' %}
+            </div>
+            <div class="tab-pane {% if tab_name == 'requisition' %}active{% endif %}" role="tabpanel" id="requisition">
+                {% include 'vehicle_mgt/vehicle_requisition.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/profile_modal.html' %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+
+        $(".card-table").DataTable({responsive: true});
+        
+        $('.singledate').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: false,
+            opens: "left",
+            locale: { format: 'DD-MM-YYYY' },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY'));
+            $(this).parent().addClass("focused");
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+        
+        $('.datepicker').daterangepicker({
+            autoUpdateInput: false,
+            showDropdowns: true,
+            timePicker: true,
+            opens: "left",
+            startDate: moment().startOf('hour'),
+            endDate: moment().startOf('hour').add(32, 'hour'),
+            locale: { format: 'DD/MM/YYYY hh:mm A' }
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY hh:mm A') + " - " + picker.endDate.format('DD/MM/YYYY hh:mm A'));
+            $(this).parent().addClass("focused");
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+
+        {% comment %} Delete {% endcomment %}
+        $('body').on('click','.delete_btn', function(e){
+            e.preventDefault();
+            Swal.fire({
+                text                : 'Do you want to delete this from list?',
+                type                : 'question',
+                confirmButtonText   : 'Yes',
+                confirmButtonColor  : "#00c292",
+                showCancelButton    : true,
+                cancelButtonText    : 'No',
+                cancelButtonColor   : "#e46a76",
+                reverseButtons      : false
+            }).then((result) => {
+                if(result.value){
+                    window.location.href = $(this).data('url')
+                }
+            });
+        });
+        {% comment %} Delete {% endcomment %}
+    });
+</script>
+{% endblock %}

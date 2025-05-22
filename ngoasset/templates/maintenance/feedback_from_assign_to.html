@@ -1,0 +1,79 @@
+<div class="modal fade bd-example-modal pt-4 item-modal" id="myModal"  role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal">
+        <div class="modal-content">
+            <form class="floating-labels" id="feedback_form" action="{% url 'fa:feedback_from_assign_to' %}" method="POST">{% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="assessmentView">Feedback</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    
+                        <div class="col-md-12 ml-auto">
+                        <textarea rows="2" class="form-control feedback_details" id="feedback_details" name="feedback_details" placeholder="Feedback Details" required></textarea>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-block">
+                <div class="row">
+                    <div class="col-md-5 ml-auto">
+                        <input type="hidden" name="request_details_id" id="request_details_id">
+                        <input type="hidden" name="feedback_type" id="feedback_type">
+                        <button type="button" id="not_solved_btn" class="btn btn-block waves-effect waves-light btn-rounded btn-warning">
+                            <span class="btn-label"><i class="fa fa-error"></i></span> Not Solved
+                        </button>
+                    </div>
+                    <div class="col-md-5 ml-auto">
+                        <button type="button" id="solved_btn" class="btn btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Solved
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    // scripts for items
+    $(document).ready(function () {
+        $("body").on('click', '.feedback_btn', function() {
+            $("#request_details_id").val($(this).data('id'))
+        });
+
+        $('body').on('click', '#feedback_form #solved_btn, #feedback_form #not_solved_btn', function(e){
+        e.preventDefault();
+            
+        let status ="";
+        if($(this).attr('id') == 'solved_btn'){
+            status ="solved"
+            $("#feedback_type").val("Solved")
+        }
+        else if($(this).attr('id') == 'not_solved_btn'){
+            status ="not solved"
+            $("#feedback_type").val("Not Solved")
+        }
+
+            Swal.fire({
+                text:" Do you want to " + status +" this?",
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor:"#00c292",
+                cancelButtonText: 'No',
+                cancelButtonColor:"#e46a76",
+                reverseButtons: false
+            }).then((result) => {
+                if (result.value) {
+                    $("#feedback_form").submit();
+                }
+            });
+        });
+    }); 
+    
+</script>

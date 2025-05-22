@@ -1,0 +1,110 @@
+<div class="row">
+    <div class="col-md-9">
+        <div class="table-responsive mt-4">
+            <table class="table table-border table-striped card-table table-vcenter" id="vehicle-allocation" style="width:100%">
+                <thead>
+                    <tr class="text-center">
+                        <th class="d-sm-table-cell">SL.</th>
+                        <th>Employee</th>
+                        <th>Vehicle</th>
+                        <th>Assigned Date</th>
+                        <th>Expiry Date</th>
+                        <th class="d-sm-table-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for allocation in allocation_list %}
+                    <tr>
+                        <td class="">{{ forloop.counter }}</td>
+                        <td>{{ allocation.assigned_to.name }} - {{allocation.assigned_to.employee_id}}</td>
+                        <td>{{ allocation.vehicle }}</td>
+                        <td>{{ allocation.assigned_date|date:"d-M-Y"|upper }}</td>
+                        <td>{{ allocation.exp_date|date:"d-M-Y"|upper }}</td>
+                        <td class="text-left">
+                            <a class="h4 m-r-10 text-success" href="{% url 'fa:vehicle_allocation_update' allocation.id %}">
+                                <span class="icon"><i class="ti-pencil-alt"></i></span>
+                            </a>
+                            <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'fa:vehicle_allocation_delete' allocation.id %}">
+                                <span class="icon"><i class="ti-trash"></i></span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card" style="background-color: rgb(255 255 255/var(--tw-bg-opacity));">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ aaction_name }}</h4>
+                    </div>
+                    {% if ainstance %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'fa:vehicle_allocation_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                        <i class="ti-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="floating-labels" method="post" id="aform" action="{{ aaction_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="assigned_to">Employee</label>
+                        <select class="form-control text-capitalize select2" name="assigned_to" id="assigned_to" data-title="Employee" required>
+                            <option value="" disabled selected></option>
+                            {% for employee in employee_list %}
+                            <option value="{{employee.id}}" {% if ainstance.assigned_to_id == employee.id %} selected {% endif %}>{{employee.personal.name}} - {{employee.personal.employee_id}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="avehicle">Vehicle</label>
+                        <select class="form-control text-capitalize select2" name="vehicle" id="avehicle" data-title="Vehicle" required>
+                            <option value="" disabled selected></option>
+                            {% for vehicle in vehicle_list %}
+                            <option value="{{vehicle.id}}" {% if vehicle.id == ainstance.vehicle_id %} selected {% endif %}>{{vehicle}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="assigned_date" name="assigned_date" value="{{ ainstance.assigned_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="assigned_date">Assigned Date</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="aexp_date" name="exp_date" value="{{ ainstance.exp_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="exp_date">Expiry Date</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="1" class="form-control bg-transparent" id="aremarks" name="remarks">{{ ainstance.remarks }}</textarea>
+                        <span class="bar"></span>
+                        <label for="aremarks">Remarks</label>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success submitBtn" id="submitBtn">
+                            <span class="btn-label"><i class="fa fa-check"></i> Submit</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

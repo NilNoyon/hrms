@@ -31,7 +31,57 @@ def holiday_list(request):
             else : form = HolidayForm(data)
             if form.is_valid(): form.save()
             else : ebs_bl_common.form_errors(request, form)
+        
+        # Loop through each selected company
+        for comp_id in company:
+            branch = Branch.objects.filter(id=comp_id).first()
+            if not branch: continue
+            has_weekend = HolidaySetup.objects.filter(name="Weekend").first()
+            if has_weekend:
+                has_weekend.status = Status.name("active")
+                has_weekend.fixed = False
+                has_weekend.updated_by = user
+                has_weekend.save()
+            else:
+                has_weekend = HolidaySetup.objects.create(name="Weekend", status=Status.name("active"), fixed=False, created_by=user)
 
+            holiday = Holiday.objects.filter(branch=branch, setup=has_weekend, name="Weekend").first()
+            if holiday:
+                holiday.status = Status.name("active")
+                holiday.weekend = True
+                holiday.updated_by = user
+                holiday.save()
+            else:
+                holiday = Holiday.objects.create(
+                    setup=has_weekend,
+                    created_by=user,
+                    name="Weekend",
+                    weekend=True,
+                    status=Status.name("active")
+                )
+                holiday.branch.set([branch])
+
+            ystart = date(datetime.now().year, 1, 1)
+            yend = date(datetime.now().year, 12, 31)
+            delta, weekends = timedelta(days=1), []
+
+            HolidayIndividuals.objects.filter( holiday_date__year=datetime.now().year, holiday=holiday).delete()
+            if branch.weekends:
+                weekends = [
+                    d for d in (ystart + timedelta(days=n) for n in range((yend - ystart).days + 1))
+                    if d.weekday() in [int(w) for w in branch.weekends]
+                ]
+
+                for w in weekends:
+                    hexist = HolidayIndividuals.objects.filter(holiday=holiday, holiday_date=w).first()
+                    if hexist:
+                        hexist.status = Status.name("active")
+                        hexist.updated_by = user
+                        hexist.save()
+                    else:
+                        HolidayIndividuals.objects.create(
+                            holiday=holiday, holiday_date=w, created_by=user, status=Status.name("active")
+                        )
         # if company := Branch.objects.filter(id__in=company).first() :
         #     if has_weekend := HolidaySetup.objects.filter(name="Weekend").first(): 
         #         has_weekend.status  = Status.name("active")
@@ -124,7 +174,7 @@ def company_weekends(request):
 def get_weekend_data(request):
     company_id, html = request.POST.get('company_id', None), ''
     weekend_list = HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year, holiday__weekend=True,
-                    holiday__branch__in=company_id, status=Status.name("active")).order_by('holiday_date')
+                    holiday__branch=company_id, status=Status.name("active")).order_by('holiday_date')
     for index, w in enumerate(weekend_list):
         html += """<div class="col-md-3">
                     <div class="input-group">
