@@ -59,8 +59,7 @@ def app_login(request):
                     request.session['role_text']            = str(user[0].role.name)
                     request.session['secondary_role']       = user[0].secondary_role if user[0].secondary_role else []
                     request.session['user_roles']           = request.session['secondary_role'] + [user[0].role.name]
-                    request.session['secondary_company']    = user[0].secondary_company if user[0].secondary_company else []
-                    request.session['branch_id_list']       = request.session['secondary_company'] + [user[0].branch_id]
+                    request.session['branch_id_list']       = user[0].secondary_company + [user[0].branch_id]
                     request.session['company']              = str(user[0].branch.company.name)
                     request.session['company_id']           = str(user[0].branch.company_id)
                     request.session['branch_id']            = str(user[0].branch_id)
@@ -74,7 +73,6 @@ def app_login(request):
                     request.session['emp_email']    = str(employee_info.email) if employee_info.email else False
                     request.session['emp_phone']    = str(employee_info.phone_no) if employee_info.phone_no else False
                 except EmployeeInfo.DoesNotExist : request.session['photo'] = ''
-                
                 messages.success(request, "Login Successful.")
                 next_url = request.POST.get("next_url")
                 return redirect("dashboard") if not next_url else redirect(next_url)

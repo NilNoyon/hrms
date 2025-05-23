@@ -100,8 +100,8 @@ urlpatterns = [
      path('salary-process/', views.salary_process, name='salary_process'),
      path('salary/report/', views.salary_report, name='salary_report'),
      path('ajax/salary-report-data/', views.get_salary_report, name='get_salary_report'),
-     path('festival-bonus/', views.festival_bonus, name='festival_bonus'),
-     path('ajax/festival-report-data/', views.get_festival_report, name='get_festival_report'),
+     # path('festival-bonus/', views.festival_bonus, name='festival_bonus'),
+     # path('ajax/festival-report-data/', views.get_festival_report, name='get_festival_report'),
      path('pay-slip/', views.pay_slip, name='pay_slip'),
      path('ajax/payslip-report-data/', views.get_payslip_report, name='get_payslip_report'),
      path('ajax/get-employee-data-for-salry-process/', views.get_employee_data_for_salary_process, name='get_employee_data_for_salary_process'),
@@ -265,9 +265,9 @@ urlpatterns = [
 
 
      # HRAttendanceBonusRule
-     path('hr_attendance_bonus_rule/', views.hr_attendance_bonus_rule_list, name='hr_attendance_bonus_rule_list'),
-     path('hr_attendance_bonus_rule/edit/<int:id>/', views.hr_attendance_bonus_rule_update, name='hr_attendance_bonus_rule_update'),
-     path('hr_attendance_bonus_rule/delete/<int:id>/', views.hr_attendance_bonus_rule_delete, name='hr_attendance_bonus_rule_delete'),
+     path('festival-bonus/', views.bonus_setup, name='bonus_setup'),
+     path('festival-bonus/edit/<int:id>/', views.bonus_setup_update, name='bonus_setup_update'),
+     path('festival-bonus/delete/<int:id>/', views.bonus_delete, name='bonus_delete'),
 
 
      # HRTiffinBillRule
@@ -313,4 +313,8 @@ urlpatterns = [
      path('cessation/action/', views.employee_cessation_action, name='employee_cessation_action'),
      path('promotion-demotion/', views.promotion_demotion, name='promotion_demotion'),
      path('promotion-history-view/', views.promotion_history_view, name='promotion_history_view'),
+
+     # employee branch wise transfer
+     path('employee-transfer-branchwise/', views.employee_transfer_branchwise, name='employee_transfer_branchwise'),
+     path('employee-transfer-branchwise/<int:id>/edit/', views.employee_transfer_branchwise_update, name='employee_transfer_branchwise_update'),
 ]

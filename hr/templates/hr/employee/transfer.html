@@ -1,0 +1,136 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Transfer File To Other Merchandiser{% endblock %}
+
+{% block content %}
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .custom-control-label{
+        padding-top: 2px;
+    }
+    #file_info{
+        vertical-align:top;
+    }
+</style>
+
+<div class="card border-danger">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 align-self-center">
+                <h4 class="text-themecolor mb-0">Transfer Employee To Other Branch</h4>
+            </div>
+        </div>
+    </div>
+    <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+        <form class="floating-labels" id="transferForm" method="post">
+            {% csrf_token %}
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="employee">Employee</label>
+                        <select class="form-control text-capitalize select2 employee" id="employee"
+                            name="employee" data-title="Employee" required>
+                            <option value="" disabled selected></option>
+                            {% for p in employee_list %}
+                            <option value="{{ p.employee_id }}">{{ p.name }}({{p.employee_id}})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="to_branch">To Branch</label>
+                        <select class="form-control text-capitalize select2 to_branch" id="to_branch"
+                            name="to_branch" data-title="To Branch" required>
+                            <option value="" disabled selected></option>
+                            {% for branch in branch_list %}
+                            <option value="{{ branch.id }}">{{branch.short_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        
+                        <input type="text" class="form-control effective_from_date" id="effective_from_date" name="effective_from_date">
+                        <span class="bar"></span>
+                        <label for="effective_from_date">Effective From Date</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3 ml-auto mt-4">
+                    <div class="button-group">
+                    <button id="submit_btn" type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span>
+                        Transfer
+                    </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+<!-- js-->
+<script src="{% static 'node_modules/moment/moment.js' %}"></script> 
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script> 
+<script>
+    $(document).ready(function () {
+        // Single Date Range Picker
+        $('.effective_from_date').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            locale: {
+              format: 'YYYY-MM-DD'
+            }
+        }).parent().addClass("focused");
+    });
+    
+    // if click on submit button then it will transfer all the file
+    $('body').on('click', '#submit_btn', function () {
+        let to_branch = $('#to_branch').val()
+        let employee  = $('#employee').val()
+        Swal.fire({
+            title: "Confirmation",
+            text: "Do you want transfer branch of this employee?",
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: "#00c292",
+            cancelButtonText: 'No',
+            cancelButtonColor: "#e46a76",
+            reverseButtons: false
+        }).then((result) => {
+            if (result.value && to_branch && employee) {
+                $("#transferForm").submit();
+                $.toast({
+                    heading: "Branch Transfer of selected Employee",
+                    text: 'Successfully transferred!',
+                    position: 'top-right',
+                    loaderBg: '#fff',
+                    icon: 'success',
+                    hideAfter: 5000,
+                    stack: false
+                });
+            }else{
+                if(result.value == true){
+                    $.toast({
+                        heading: "Branch Transfer of selected Employee",
+                        text: 'Please select a branch or employee at first!',
+                        position: 'top-right',
+                        loaderBg: '#fff',
+                        icon: 'warning',
+                        hideAfter: 5000,
+                        stack: false
+                    });
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
