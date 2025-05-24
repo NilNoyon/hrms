@@ -58,7 +58,7 @@ def common_context():
         'tab_name'      : 'vehicle',
         'vaction_name'  : "Add Vehicle", 
         'vform'         : VehicleForm(), 
-        'vaction_url'   : reverse_lazy('fa:vehicle_list'), 
+        'vaction_url'   : reverse_lazy('fa:fixed_list'), 
         'vehicle_list'  : Vehicle.objects.order_by('-id'),
         'aaction_name'  : "Add Allocation", 
         'aform'         : VehicleAllocationForm(), 
