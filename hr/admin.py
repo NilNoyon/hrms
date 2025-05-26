@@ -138,7 +138,7 @@ class EmployeeCalendarAdmin(admin.ModelAdmin):
 admin.site.register(EmployeeCalendar, EmployeeCalendarAdmin)
 
 class HolidayAdmin(admin.ModelAdmin):
-     list_display  = ['branch', 'setup', 'name', 'start_date', 'end_date', 'is_mail_send']
+     list_display  = ['setup', 'name', 'start_date', 'end_date', 'is_mail_send']
      list_filter   = ['branch','setup',]
      raw_id_fields = ['branch', 'setup', 'created_by', 'updated_by', 'status']
 admin.site.register(Holiday, HolidayAdmin)

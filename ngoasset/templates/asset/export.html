@@ -1,0 +1,61 @@
+{% load static %}
+{% load qr_code %}
+<!DocType html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Export</title>
+        <link href="{% static 'dist/css/custom.css' %}" rel="stylesheet">
+
+        <style>
+            @import url(https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700);
+            body {
+                margin: 0;
+                font-family: "Poppins", sans-serif;
+                color: #000 !important;
+                font-weight: 900 !important;
+            }
+            .esquire-font {
+                font-family: Esquivel, sans-serif;
+            }
+            .text-center {
+                text-align: center !important;
+            }
+
+            @page {
+                size: 66mm 60mm;
+                margin: 0mm 0mm 0mm 0mm;
+            }
+
+            @media print {
+                .qr-code {
+                    size: 86mm 70mm;
+                    margin-top: 15px !important;
+                    margin: 0mm 0mm 0mm 0mm;
+                }
+
+                body {
+                    font-size: 0.50em;
+                    font-weight: 900;
+                }
+            }
+        </style>
+    </head>
+    <body style="background-color: #fff;">
+        {% for asset in assets %}
+            <div class="qr-code p-4 mt-4 text-center">
+                {% qr_from_text asset.asset_basic_info size="6" %}
+                <p class="text-center">{{ asset.code }}</p>
+            </div>
+            <div style="page-break-after: always;"></div>
+        {% endfor %}
+
+        <script type="text/javascript">
+            setTimeout(function(){
+                window.print();
+                setTimeout(window.close, 50);
+            }, 300);
+        </script>
+    </body>
+</html>

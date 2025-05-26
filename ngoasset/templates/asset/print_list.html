@@ -1,0 +1,11 @@
+{% load qr_code %}
+
+<div class="row custom-color rounded-lg p-3 mx-0 mt-3" align="center">
+    {% for asset in assets %}
+        <div class="col-2">
+            {% qr_from_text asset.asset_basic_info size="3" image_format="png" error_correction="L" %}
+            <p class="font-weight-bold pt-4 text-center">{{asset.code}}</p>
+            <p class="font-weight-bold text-center">{{asset.item_name}} ({{asset.item_code}})</p>
+        </div>
+    {% endfor %}
+</div>

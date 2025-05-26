@@ -43,9 +43,9 @@
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mb-0">
-                            <label for="company">Company</label>
-                            <select class="form-control select2 company" id="company" name="company" data-title="Company">
-                                <option value="" selected disabled>Company</option>
+                            <label for="company">Branch</label>
+                            <select class="form-control select2 company" id="company" name="company" data-title="Branch">
+                                <option value="" selected disabled>Branch</option>
                                 {% for c in companies %}
                                 <option value="{{c.id}}">{{c.short_name}}</option>
                                 {% endfor %}

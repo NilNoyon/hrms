@@ -1,0 +1,447 @@
+
+{% load sc_filters %}
+
+<style>
+    .select2-container--default.select2-container--disabled .select2-selection--single,
+    .select2-container--default.select2-container--disabled .select2-selection--multiple {
+        background-color: #eee !important;
+        cursor: default;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .select2-container--default .select2-selection--multiple .select2-selection__rendered{
+        line-height: 28px !important;
+    }
+</style>
+
+<form class="floating-labels requisition_form" id="requisition_form" method="POST"  action="{{ action_url }}">
+    {% csrf_token %}
+        <div class="row">
+        {% if not maintenance %}
+            <div class="col-md">
+                <div class="form-group">
+                    <label for="company">Company </label>
+                    <select class="form-control text-capitalize select2" name="company" id="company" data-title="Company" required>
+                        <option value="" disabled selected></option>
+                        {% for c in company_list %}
+                        <option value="{{c.id}}" {% if maintenance and c.id == maintenance.company_id %} selected {% elif c.id == user.company.id %} selected {% endif%} >{{c.short_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md">
+                <div class="form-group">
+                    <input class="form-control" name="company" id="company" type="hidden" value="{{maintenance.company_id}}" />
+                    <input class="form-control" id="req_no" value="{{maintenance.request_no}}" readonly style="background: transparent !important;" />
+                    <span class="bar"></span>
+                    <label for="req_no">Request No.</label>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="etd">ETA</label>
+                <input type="text" data-title="etd"
+                    class="form-control singledate etd" name="etd"
+                    id="etd" {% if maintenance and maintenance.etd %}value="{{maintenance.etd|date:'d-M-Y'}}"{% endif %}>
+                <span class="bar"></span>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="form-group">
+                <input class="form-control" id="notes" name="notes" value="{{maintenance.note}}">
+                <span class="bar"></span>
+                <label for="notes">Notes</label>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row no-gutters">
+                <div class="col-md">
+                    <select class="form-control text-capitalize asset_code" name="asset_code" id="asset_code_id">
+                        <option value="" selected>All Asset</option>
+                    </select>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-md-2">FA Code</div>
+        <div class="col-md-2">Item Name</div>
+        <div class="col-md-4">Specification</div>
+        <div class="col-md-3">Problem Details</div>
+        <div class="col-md"></div>
+    </div><hr>
+    
+    <div class="requition-details">
+        {% if maintenance %}
+            {% for rd in maintenance.requestdetails_set.all %}
+                <div class="row mb-3" id="spec-{{rd.asset.item_id}}{{rd.asset.item.spec_id}}">
+                    <div class='col-md-2'>
+                        <input type="hidden" name="fa_code" id="fa_code" value="{{rd.asset_id}}">
+                        {{rd.asset.code}}
+                    </div>
+                    <div class='col-md-2'>
+                        <input type="hidden" name="item" value="{{rd.asset.item_id}}">
+                        {{rd.asset.item.item_master.item_name}}
+                    </div>
+                    <div class="col-md-4">
+                        <input type="hidden" name="spec_id" value="{{rd.spec_id}}">
+                        {% specification rd.asset.item.item_master rd.asset.item_id %}
+                    </div>
+                   
+                    <div class="col-md-3">
+                        <textarea class="form-control" rows="1" name="problem_details[{{rd.asset_id}}]" placeholder='Problem Details'>{{rd.problem_details}}</textarea>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="col-md remove">
+                        <a class="h4 m-t-10 text-center text-danger d-block delete_btn" href="javascript:void(0)" data-url="{% url 'fa:request_item_delete' rd.id %}">
+                            <span class='icon'>
+                                <i class='ti-trash'></i>
+                            </span>    
+                        </a>                    
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <div class="row">
+        {% if maintenance %}
+        <input type="hidden" name="submition_type" id="submition_type">
+        <div class="col-md-6 ml-auto mt-2">
+        </div>
+        <div class="col-md-3 ml-auto mt-2">
+            <div class="button-group">
+                <button   class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success item-edit-btn submit-btn" type="button" data-name="submit">
+                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                </button>
+            </div>
+        </div>
+
+        {% if not maintenance.status.title == 'Raised'%}
+            <div class="col-md-3 ml-auto mt-2">
+                <div class="button-group">
+                    <button class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-info item-edit-btn save-btn" type="button" data-name="save">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Save
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+        {% else %}
+            <input type="hidden" name="submition_type" id="submition_type">
+            <div class="col-md-6 ml-auto mt-2">
+            </div>
+            <div class="col-md-3 ml-auto mt-2">
+                <div class="button-group">
+                    <button  class="btn btn-sm btn-block btn-rounded btn-success item-add-btn submit-btn" type="button" data-name="submit">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-3 ml-auto mt-2">
+                <div class="button-group">
+                    <button class="btn btn-sm btn-block btn-rounded btn-info item-add-btn save-btn" type="button" data-name="save">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Save
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</form>
+
+
+<script>
+    
+    $(document).ready(function () {
+
+        $("#asset_code_id").select2({
+            minimumInputLength  : 2,
+            placeholder         : "Asset Code",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'fa:get_asset_code' %}",
+                dataType: "json",
+                data: function(term, page) { 
+                    var company = $("#company").val()
+                    return { q : term, company : company }; 
+                },
+                processResults: function (data) { return { results: data.items }; }
+            }
+        });
+
+        var nowDate = new Date();
+        var today = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+
+        $('.etd').daterangepicker({
+            singleDatePicker: true,
+            minDate: today,
+            locale: {
+                format: 'DD-MMM-YYYY'
+            },
+            autoUpdateInput: false
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+        });
+        
+
+        $('#asset_code_id').on("change", function(){
+            var item_code = this.value;
+            if(item_code != ''){
+                $.ajax({
+                    type    : "POST",
+                    url     : "{% url 'fa:get_fa_code_wise_item' %}",
+                    data    : { 'item_code' : item_code },
+                    success : function (data) {
+                        if(Object.keys(data).length > 0){
+                            let fa_id = parseInt(data['fa_id']);
+                            let fa_code = data['fa_code'];
+                            let get_item = parseInt(data['item_id']);
+                            let get_item_spec = parseInt(parseInt(data['spec_id']));
+                            let get_item_name = data['item_name'];
+                            let get_item_spec_name = data['spec'];
+                            let uom_name = data['uom_name'];
+
+                            // if the exists
+                            if (check_duplicacy(dict,fa_id) == 1){
+                                $.toast({
+                                    heading: "Warning",
+                                    text: 'This Item already exists!',
+                                    position: 'top-right',
+                                    loaderBg:'#fff',
+                                    icon: 'warning',
+                                    hideAfter : 5000,
+                                });
+                            }
+                            else if(isNaN(get_item_spec)){
+                                // pass
+                            }
+                            else{
+                                dict.push({
+                                    'key'       : fa_id
+                                });
+                                $('.requition-details')
+                                    .prepend("<div class='row mb-3' id='spec-"+get_item+get_item_spec+"'>"
+                                        +"<div class='col-md-2'>"
+                                            +"<input type='hidden' class='fa_code' name='fa_code' value='"+fa_id+"'>"
+                                            +fa_code
+                                        +"</div>"
+                                        +"<div class='col-md-2'>"
+                                            +"<input type='hidden' class='item' name='item' value='"+get_item+"'>"
+                                            +get_item_name
+                                        +"</div>"
+                                        +"<div class='col-md-4'>"
+                                            +"<input type='hidden' class='spec' name='spec_id' value='"+get_item_spec+"' >"
+                                            +get_item_spec_name
+                                        +"</div>"
+                                       
+                                        +"<div class='col-md-3'>"
+                                            +"<textarea type='text' class='form-control remarks' id='remarks-"+fa_id+"' name='problem_details["+fa_id+"]' data-title='Problem Details' placeholder='Problem Details' required></textarea>"
+                                            +"<span class='bar'></span>"
+                                        +"</div>"
+                                        +"<div class='col-md remove'>"
+                                            +"<a class='h4 m-t-10 text-center text-danger d-block' href='javascript:void(0)'>"
+                                            +"<span class='icon'><i class='ti-trash'></i></span>"
+                                            +"</a>"
+                                        +"</div>"
+                                    +"</div>");
+                                
+                            }
+                            $('.item-add-btn').show();
+                        }else{
+                            $.toast({
+                                heading: "Warning",
+                                text: 'Problem getting this item!',
+                                position: 'top-right',
+                                loaderBg:'#fff',
+                                icon: 'warning',
+                                hideAfter : 5000,
+                            });
+                        }
+                    },
+                    error: function(){
+                        $.toast({
+                            heading: "Warning",
+                            text: 'Problem getting this item!',
+                            position: 'top-right',
+                            loaderBg:'#fff',
+                            icon: 'warning',
+                            hideAfter : 5000,
+                        });
+                    }
+                });
+            }
+            else{
+                console.log('null');
+            }
+        });
+
+
+        $(".check_items").on("click", function(){
+            if($(".check_items").prop('checked')== true){
+                $(".check_item").prop("checked", true);
+            }
+            else{
+                $(".check_item").prop("checked", false);
+            }    
+        });
+        
+        // initially the submit & draft button will be hidden
+        // if one item is added by the user then the submit button will show
+
+        $('.item-add-btn').hide();
+        $('item-draft-btn').hide();
+
+        $(".item-add-btn, .item-edit-btn").on("click", function(e){
+            $("#submition_type").attr('value', $(this).data("name"));
+            $(this).attr('type', 'submit').trigger("click");
+        })
+
+        // using this variable for checking requition is duplicate or not
+        {% if maintenance %}
+            let dict = [];
+            {% for details in maintenance.requestdetails_set.all %}
+                dict.push({'key': {{details.asset_id}}});
+            {% endfor %}
+        {% else %}
+            let dict = [];
+        {% endif %}
+
+        // using this function for checking key and value exists or not 
+        // 1 for duplicate, 0 for not duplicate
+        function check_duplicacy(dict,key_data){
+            let duplicate = 0;
+            for ( i = 0;i<dict.length;i++){
+                if(dict[i].key == key_data){
+                    duplicate = 1;
+                    return duplicate;
+                }
+            }
+        }
+        
+        $('.item-submit-btn').show();
+
+        
+        // remove button when selects an item
+        $('body').on('click', '.remove .icon', function(){
+            Swal.fire({
+                text: "Do you want to delete this item from list?",
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor: "#00c292",
+                cancelButtonText: 'No',
+                cancelButtonColor: "#e46a76",
+                reverseButtons: false
+            }).then((result) => {
+                if( result.value){
+                    console.log(dict);
+                    get_item        = $(this).parent().parent().parent().find('.item').val();
+                    get_item_spec   = $(this).parent().parent().parent().find('.spec').val();
+                    console.log(get_item, get_item_spec);
+                    let index       = dict.findIndex(item => item.key == get_item && item.value == get_item_spec);
+                    dict.splice(index,1);
+                    $(this).parent().parent().parent().remove();
+                    if(dict.length == 0){
+                        $('.item-add-btn').hide();
+                        $('item-draft-btn').hide();
+                    }
+                }
+            });
+            
+        });
+
+        $('body').on('click','.delete_btn', function(e){
+            e.preventDefault();
+            let msg = "";
+            if(dict.length == 1){
+                msg = "This requisition has only one item, Do you want to delete this item along with requisition?"
+            }else{
+                msg = "Do you want to delete this item from list?"
+            }
+            Swal.fire({
+                text: msg,
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor: "#00c292",
+                cancelButtonText: 'No',
+                cancelButtonColor: "#e46a76",
+                reverseButtons: false
+            }).then((result) => {
+                if(result.value){
+                    window.location.href = $(this).data('url')
+                }
+            });
+        });
+
+
+        $(".requisition_approve").on("click", function(){
+            var item_list = [];
+            $("input:checkbox[name=type]:checked").each(function(){
+                item_list.push($(this).val());
+            });
+            console.log(item_list);
+            $.ajax({
+                url : "{% url 'inventory:requisition_approve'%}",
+                type: 'POST',
+                data: {'item_list[]': item_list},
+                success: function(){
+                    console.log('success');
+                    // set timer for 3/5 second
+                    $.toast({
+                        heading: "Success",
+                        text: 'Items Approved!',
+                        position: 'top-right',
+                        loaderBg:'#fff',
+                        icon: 'success',
+                        hideAfter : 5000,
+                    },3000);
+                    window.location = "{% url 'inventory:requisition_list' %}";
+                    
+                },
+                error: function(){
+                    console.log('error');
+                    window.location.reload();
+                }
+            });
+        });
+
+        $(".requisition_reject").on("click", function(){
+            var item_list = [];
+            $("input:checkbox[name=type]:checked").each(function(){
+                item_list.push($(this).val());
+            });
+            console.log(item_list);
+            $.ajax({
+                url : "{% url 'inventory:requisition_reject'%}",
+                type: 'POST',
+                data: {'item_list[]': item_list},
+                success: function(){
+                    console.log('success');
+                    window.location = '{% url 'inventory:requisition_list' %}';
+                    $.toast({
+                        heading: "Warning",
+                        text: 'Items rejected!',
+                        position: 'top-right',
+                        loaderBg:'#fff',
+                        icon: 'warning',
+                        hideAfter : 5000,
+                    });
+                },
+                error: function(){
+                    console.log('error');
+                    window.location.reload();
+                }
+            });
+        });
+
+    }); 
+    
+</script>

@@ -1,14 +1,11 @@
 from hr.views import *
 from hr.models import HolidayIndividuals
-
-
 @login
 def holiday_list(request):
     if request.method == "POST":
         user        = get_object_or_404(Users, pk=request.session.get("id"))
-        company     = request.POST.get('company', None)
+        company     = request.POST.getlist('company', None)
         setup_list  = request.POST.getlist('setup', [])
-        print("cm", company)
         for setup in setup_list:
             status = Status.name('Active' if request.POST.get('status[{}]'.format(setup), None) == 'on' else 'Inactive')
             duration = request.POST.get('duration[{}]'.format(setup), None)
@@ -34,34 +31,86 @@ def holiday_list(request):
             else : form = HolidayForm(data)
             if form.is_valid(): form.save()
             else : ebs_bl_common.form_errors(request, form)
-
-        if company := Branch.objects.filter(id=company).first() :
-            if has_weekend := HolidaySetup.objects.filter(name="Weekend").first(): 
-                has_weekend.status  = Status.name("active")
-                has_weekend.fixed   = False
+        
+        # Loop through each selected company
+        for comp_id in company:
+            branch = Branch.objects.filter(id=comp_id).first()
+            if not branch: continue
+            has_weekend = HolidaySetup.objects.filter(name="Weekend").first()
+            if has_weekend:
+                has_weekend.status = Status.name("active")
+                has_weekend.fixed = False
                 has_weekend.updated_by = user
                 has_weekend.save()
-            else : has_weekend = HolidaySetup.objects.create(name="Weekend", status=Status.name("active"), fixed=False, created_by=user)
-            if holiday := Holiday.objects.filter(branch=company, setup=has_weekend, name="Weekend").first():
-                holiday.status      = Status.name("active")
-                holiday.weekend     = True
-                holiday.updated_by  = user
+            else:
+                has_weekend = HolidaySetup.objects.create(name="Weekend", status=Status.name("active"), fixed=False, created_by=user)
+
+            holiday = Holiday.objects.filter(branch=branch, setup=has_weekend, name="Weekend").first()
+            if holiday:
+                holiday.status = Status.name("active")
+                holiday.weekend = True
+                holiday.updated_by = user
                 holiday.save()
-            else : holiday = Holiday.objects.create(branch=company, setup=has_weekend, created_by=user, name="Weekend", weekend=True, status=Status.name("active"))
-            
-            ystart = date(datetime.now().year, 1, 1)  # Get the first day of the current year
-            yend = date(datetime.now().year, 12, 31)  # Get the last day of the current year
+            else:
+                holiday = Holiday.objects.create(
+                    setup=has_weekend,
+                    created_by=user,
+                    name="Weekend",
+                    weekend=True,
+                    status=Status.name("active")
+                )
+                holiday.branch.set([branch])
+
+            ystart = date(datetime.now().year, 1, 1)
+            yend = date(datetime.now().year, 12, 31)
             delta, weekends = timedelta(days=1), []
-            HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year,holiday=holiday).delete()
-            if company.weekends :
-                for w in company.weekends:
-                    weekends += [d for d in (ystart + (n * delta) for n in range((yend - ystart).days + 1)) if d.weekday() == int(w)]
+
+            HolidayIndividuals.objects.filter( holiday_date__year=datetime.now().year, holiday=holiday).delete()
+            if branch.weekends:
+                weekends = [
+                    d for d in (ystart + timedelta(days=n) for n in range((yend - ystart).days + 1))
+                    if d.weekday() in [int(w) for w in branch.weekends]
+                ]
+
                 for w in weekends:
-                    if hexist := HolidayIndividuals.objects.filter(holiday=holiday, holiday_date=w).first() : 
-                        hexist.status       = Status.name("active")
-                        hexist.updated_by   = user
+                    hexist = HolidayIndividuals.objects.filter(holiday=holiday, holiday_date=w).first()
+                    if hexist:
+                        hexist.status = Status.name("active")
+                        hexist.updated_by = user
                         hexist.save()
-                    else : hexist = HolidayIndividuals.objects.create(holiday=holiday, holiday_date=w, created_by=user, status=Status.name("active"))
+                    else:
+                        HolidayIndividuals.objects.create(
+                            holiday=holiday, holiday_date=w, created_by=user, status=Status.name("active")
+                        )
+        # if company := Branch.objects.filter(id__in=company).first() :
+        #     if has_weekend := HolidaySetup.objects.filter(name="Weekend").first(): 
+        #         has_weekend.status  = Status.name("active")
+        #         has_weekend.fixed   = False
+        #         has_weekend.updated_by = user
+        #         has_weekend.save()
+        #     else : has_weekend = HolidaySetup.objects.create(name="Weekend", status=Status.name("active"), fixed=False, created_by=user)
+        #     if holiday := Holiday.objects.filter(branch=company, setup=has_weekend, name="Weekend").first():
+        #         holiday.status      = Status.name("active")
+        #         holiday.weekend     = True
+        #         holiday.updated_by  = user
+        #         holiday.save()
+        #     else : 
+        #         print("cm", company)
+        #         holiday = Holiday.objects.create(branch=company, setup=has_weekend, created_by=user, name="Weekend", weekend=True, status=Status.name("active"))
+            
+        #     ystart = date(datetime.now().year, 1, 1)  # Get the first day of the current year
+        #     yend = date(datetime.now().year, 12, 31)  # Get the last day of the current year
+        #     delta, weekends = timedelta(days=1), []
+        #     HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year,holiday=holiday).delete()
+        #     if company.weekends :
+        #         for w in company.weekends:
+        #             weekends += [d for d in (ystart + (n * delta) for n in range((yend - ystart).days + 1)) if d.weekday() == int(w)]
+        #         for w in weekends:
+        #             if hexist := HolidayIndividuals.objects.filter(holiday=holiday, holiday_date=w).first() : 
+        #                 hexist.status       = Status.name("active")
+        #                 hexist.updated_by   = user
+        #                 hexist.save()
+        #             else : hexist = HolidayIndividuals.objects.create(holiday=holiday, holiday_date=w, created_by=user, status=Status.name("active"))
             
         messages.success(request, "Successfully Stored!")
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
@@ -81,10 +130,11 @@ def holiday_calendar(request):
 @csrf_exempt
 def get_calendar_data(request):
     company_id, holidays, html = request.POST.get('company_id', None), [], ''
+    print("company_id", company_id)
     holiday_list = Holiday.objects.filter(start_date__year=datetime.now().year,
-                     branch_id=company_id, status=Status.name("active")).order_by('start_date')
+                     branch__in=company_id, status=Status.name("active")).order_by('start_date')
     holiday_indivs_list = HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year,
-                     holiday__branch_id=company_id, status=Status.name("active")).order_by('holiday_date')
+                     holiday__branch__in=company_id, status=Status.name("active")).order_by('holiday_date')
     holidays.append({ 'name' : "Today", 
         'startYear' : datetime.today().strftime("%Y"), 'startMonth' : datetime.today().strftime("%m"), 
         'startDay' : datetime.today().strftime("%d"), 'endYear' : datetime.today().strftime("%Y"), 
@@ -124,7 +174,7 @@ def company_weekends(request):
 def get_weekend_data(request):
     company_id, html = request.POST.get('company_id', None), ''
     weekend_list = HolidayIndividuals.objects.filter(holiday_date__year=datetime.now().year, holiday__weekend=True,
-                    holiday__branch_id=company_id, status=Status.name("active")).order_by('holiday_date')
+                    holiday__branch=company_id, status=Status.name("active")).order_by('holiday_date')
     for index, w in enumerate(weekend_list):
         html += """<div class="col-md-3">
                     <div class="input-group">

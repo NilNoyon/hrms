@@ -1,0 +1,178 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Maintenance Request View{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/icheck/skins/all.css' %}" rel="stylesheet">
+<style>
+
+    .icolors,
+    .icheck-list {
+    padding: 0;
+    margin: 0;
+    list-style: none; }
+
+    .icolors > li {
+    float: right;
+    padding: 0;
+    margin: 0 2px 0 0;
+    height: 10px;
+    width: 25px;
+    border-radius: 8px;
+    background: #343a40;
+    text-align: right; }
+
+    .icolors > li.active:after {
+    content: "\2713 ";
+    color: #fff;
+    line-height: 30px; }
+
+    .icolors > li:first-child {
+    margin-left: 0; }
+
+    .icolors > li.info {
+    background: #00aeff; }
+
+    .icolors > li.green {
+    background: #00c292; }
+
+    .icolors > li.transparent {
+    background: transparent; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="text-themecolor mb-0">Maintenance Request View</h4>
+                        </div>
+                        <div class="col-md-6 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    {% if maintenance.created_by_id == request.session.id and maintenance.status.title == 'Started' %}
+                                    <a href="{% url 'fa:request_update' maintenance.id  %}" target="_blank" class="btn btn-sm btn-success mr-1" title="Update Request"><i class="ti-pencil-alt"></i></a>
+                                    {% endif %}
+                                    <a href="{% url 'fa:request_list' %}" class="btn btn-xs btn-info mr-1" title="Return List"><i class="ti-view-list-alt"></i></a> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="custom-color rounded-lg p-3 mt-3">
+                        <div class="row my-3">
+                            <div class="col text-left">
+                                <b>Request No : </b>{{ maintenance.request_no }}
+                            </div>
+                            <div class="col text-left">
+                                <b>ETA : </b>{{ maintenance.etd|date:'d-M-Y'|upper }}
+                            </div>
+                            <div class="col text-left">
+                                <b>Note : </b>{{ maintenance.note|default_if_none:"" }}
+                            </div>
+
+                        </div>
+                        <div class="row my-3">
+                            <div class="col text-right">
+                            </div>
+                        </div>
+                    </div>    
+
+                        <div class="custom-color rounded-lg p-3 mt-3" style="position: relative;">
+                            <table class="breakdown-table table table-striped table-hover mb-4">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>SL</th>
+                                        <th>FA Code</th>
+                                        <th class="text-left">Item Name</th>
+                                        <th class="text-left">Specification</th>
+                                        <th class="text-left">Problem Details</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Assigned To</th>
+                                        <th class="text-left">Note</th>
+                                        <th class="text-left">Solved By</th>
+                                        <th class="text-left">Solved</th>
+                                        <th class="text-left">Solver Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {%  for r in maintenance.requestdetails_set.all %}
+                                        <tr class="text-justify text-center ">
+                                            <td class="text-center">{{ forloop.counter }}</td>
+                                            <td class="text-left">
+                                                <a href="{% url 'fa:fa_view'  r.asset_id %}" class="text-info" target="_blank">{{ r.asset.code }}</a>
+                                            </td>
+                                            <td class="text-left">{{ r.asset.item.item_master.item_name }}</td>
+                                            <td class="text-left">{% specification r.asset.item.item_master r.asset.item_id %}</td>
+                                            <td class="text-left">{{r.problem_details}}</td>
+                                            <td class="text-center">{{r.status.title}}</td>
+                                            <td class="text-center">
+                                                <a href="#aboutModal" data-toggle="modal" data-id="{{r.assign_to_id}}" class="user_info text-info" data-target="#userModal">{{r.assign_to|default_if_none:""}}</a>
+                                            </td>
+                                            <td class="text-center">{{r.remarks|default_if_none:""}}</td>
+                                            <td class="text-center">
+                                                <a href="#aboutModal" data-toggle="modal" data-id="{{r.solve_by_id}}" class="user_info text-info" data-target="#userModal">{{r.solve_by|default_if_none:""}}</a>
+                                            <td class="text-center">{{r.solve_at|date:'d-M-Y'|upper}}</td>
+                                            <td class="text-center">{{r.assign_to_feedback|default_if_none:""}}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="row custom-color rounded-lg p-3 mt-3" style="margin-top: 50px !important">
+    <div class="col-md" align="center"> 
+        <p>Requested By</p>
+            {{ maintenance.created_by.signature }}
+            <br>
+            <h6 class="small mt-2">{{ maintenance.created_at|date:'d-M-Y h:i A'|upper }}</h6>
+            <hr style="width: 50% !important; ">
+            <h6><b>{{maintenance.created_by.name}}</b></h6>
+            <p class="small">{{maintenance.created_by.designation}}</p>
+    </div>
+    <div class="col-md" align="center"></div>
+    {% if maintenance.status.title == "Approved" %}
+        <div class="col-md" align="center">
+            <p>Approved By</p>
+                {{ maintenance.approved_by.signature }}
+                <br>
+                <h6 class="small mt-2">{{ maintenance.received_at|date:'d-M-Y h:i A'|upper }}</h6>
+                <hr style="width: 50% !important; ">
+                <h6><b>{{maintenance.approved_by.name}}</b></h6>
+                <p class="small">{{maintenance.approved_by.designation}}</p>
+        </div>
+    {% else %}
+        <div class="col-md" align="center"></div>
+    {% endif %}
+</div>
+
+{% if has_approval %}
+    <form class="mt-4 custom-color rounded-lg p-3 mt-3"  action="{% url 'inventory:return_view' rtrn.id %}"  method="post" id="return_edit_form">{% csrf_token %}
+        <input type="hidden" name="approve" id="approval">
+        <div class="row">
+            <div class="col-md-6"></div>
+            <div class="col-md-3" align="right">
+                <button class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success approve-reject-check" type="button" id="approve_btn" data-approval="approve">Approve</button>
+            </div>
+            <div class="col-md-3">
+                <a class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-danger approve-reject-check" type="button" id="reject_btn"  href="{% url 'inventory:rts_reject' rtrn.id %}" data-approval="reject">Reject</a>
+            </div>
+        </div>
+    </form>
+{% endif %}
+
+
+{% endblock %}

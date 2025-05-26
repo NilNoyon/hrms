@@ -1,0 +1,544 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load inv_filters %}
+{% block page_title %}Fixed Asset{% endblock %}
+{% block add_css %}
+
+<link href="{% static 'node_modules/typeahead.js-master/dist/typehead-min.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  .bootstrap-tagsinput {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: 0px solid #c1c1c1;
+    border-bottom: 1px solid #c1c1c1;
+  }
+
+  .twitter-typeahead {
+    width: auto;
+  }
+
+  .floating-labels .custom-control-label {
+    position: relative;
+    cursor: context-menu;
+  }
+
+  .floating-labels .custom-label {
+    position: relative;
+  }
+
+  .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: transparent !important;
+  }
+
+  .select2-container .select2-selection--single .select2-selection__rendered,
+    .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder,
+    .select2-container--default .select2-selection--multiple .select2-selection__placeholder,
+    .select2-container .select2-selection--single .select2-selection__rendered,
+    .select2-container .select2-selection--multiple .select2-selection__rendered{
+        font-weight: 400 !important;
+    }
+    .dataTables_scroll{
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255/var(--tw-bg-opacity));
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: 0.5rem !important;
+        margin-top:18px;
+        padding:2rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-9 align-self-center">
+                    <h4 id="form_header">Fixed Asset List</h4>
+                </div>
+                <div class="col-3 align-self-center text-right">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0" id="completed_rec">
+            <table id="receive-table" class="table table-striped card-table table-vcenter " data-url="{% url 'fa:get_fa_for_datatable' %}">
+                <thead>
+                    <tr class="text-center">
+                        <th>Code</th>
+                        <th>Item</th>
+                        <th>Specification</th>
+                        <th>Asset User</th>
+                        <th>Asset Controller</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- Extra Filter Requisition List -->
+    <div class="reset">
+        <div class="form-group" style="display: none;">
+            <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+    </div>
+    <div class="companies">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize company_field" name="company">
+                <option value="" selected>All Company</option>
+                {% for c in company_list %}
+                <option value={% strip_single_quote_tag c.short_name %}>{% strip_single_quote_tag c.short_name %}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="department">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize department_field" name="department">
+                <option value="">All Department</option>
+                {% for d in departments %}
+                    <option value="{{d.id}}">{{d.name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="suppliers">
+        <div class="form-group" style="display: none;">
+            <select class="form-control supplier_field" name="supplier">
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    <div class="multi-date">
+        <div class="form-group" style="display: none;">
+            <input type="text" class="form-control date_field" name="to_date" placeholder="Select Date Range..." autocomplete="off">
+        </div>
+    </div>
+    <div class="item_types">
+        <div class="form-group" style="display: none;">
+            <select class="form-control item_type_field" name="item_type">
+                <option value="" selected>All Classification</option>
+                {% for c in classification_list %}
+                <option value="{{c.id}}">{{c.value}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="asset_users">
+        <div class="form-group" style="display: none;">
+            <select class="form-control asset_user_field" name="asset_user">
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="categories">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize category_field" name="category">
+                <option value="" selected>All Category</option>
+                {% for c in categories %}
+                    <option value="{{c.id}}">{{c.name}}</option>
+                {% endfor %}
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="subcategorys">
+        <div class="form-group" style="display: none;">
+            <select class="form-control text-capitalize subcategory_field" name="subcategory">
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="items">
+        <div class="form-group" style="display: none;">
+            <select class="form-control item_field" name="item">
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="statuses">
+        <div class="form-group" style="display: none;">
+            <select class="form-control status_field" name="status">
+                <option value="">All Status</option>
+                <option value="Created">Created</option>
+                <option value="Scrapped">Scrapped</option>
+            </select>
+            <span class="bar"></span>
+        </div>
+    </div>
+    
+    <div class="search_box">
+        <div class="input-group" style="display: none;">
+            <input type="text" class="form-control search_field" name="search_box" placeholder="Search by Fixed Asset Code/MRIR No/LC/Bill of Entry No/Insurer Name..." title="Search by Fixed Asset Code/MRIR No/LC/Bill of Entry No/Insurer Name...">
+            <div class="input-group-append">
+                <button class="search_btn btn btn-info" type="button"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="download">
+        <div class="form-group" style="display: none;">
+            <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
+        </div>
+    </div>
+    <!-- Extra Filter Requisition List -->
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/scrollerDT.html' %}
+{% include 'inc/profile_modal.html' %}
+{% include 'inc/supplier_modal.html' %}
+
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+<script>
+    $('body').on('click','.delete_btn', function(e){
+        e.preventDefault();
+        msg = "Do you want to delete this item from list?"
+        Swal.fire({
+            text: msg,
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: "#00c292",
+            cancelButtonText: 'No',
+            cancelButtonColor: "#e46a76",
+            reverseButtons: false
+        }).then((result) => {
+            if(result.value){
+                window.location.href = $(this).data('url')
+            }
+        });
+    });
+
+
+    var completeTable = null;
+    $(document).ready(function () { dataTableFunc(completeTable, '#completed_rec', '#receive-table', {}) });
+    function dataTableFunc(dataTable, root, table, data){
+        if (dataTable) { dataTable.destroy(); }
+        let url = $(table).data("url");
+        dataTable = $(table).DataTable({
+            dom             : "<'row custom-color rounded-lg p-3 mr-0 ml-0 top pending'<'col-md-2 reset_btn'><'col-md-2 company'><'col-md-2 department'><'col-md-2 supplier'><'col-md-2 asset_user'><'col-md-2 date'><'col-md-3 item_type'><'col-md-2 category'><'col-md-2 subcategory'><'col-md-3 item'><'col-md-2 status'><'col-md-4 search_area'><'col-md-1 py-2 font-weight-bold text-right total'><'col-md-1 download_btn'>>t<'button'p>",
+            ordering        : false,
+            paging          : true,
+            iDisplayLength  : 25,
+            pageLength      : 20,
+            autoWidth       : false,
+            scrollY         : '365',
+            pagingType      : 'full_numbers',
+            deferRender     : true,
+            serverSide      : true,
+            processing      : true,
+            responsive      : true,
+            ajax:{
+                type        : "POST",
+                url         : url,
+                data        : data,
+                dataSrc     : function(json){
+                    $(".total").html("Total : "+json.total_item);
+                    return json.data_list;
+                }
+            },
+            initComplete:function( settings, json){
+                if( Object.keys(data).length > 0 ){
+                    if(data.company != null){ $(root + " .company_field").select2("destroy").val(data.company).select2(); }
+                    if(data.department != null){ $(root + " .department_field").select2("destroy").val(data.department).select2(); }
+                    if(data.category != null){ $(root + " .category_field").select2("destroy").val(data.category).trigger("change").select2(); }
+                    if(data.status != null){ $(root + " .status_field").select2("destroy").val(data.status).trigger("change").select2(); }
+                    if(data.item_type != null){ $(root + " .item_type_field").select2("destroy").val(data.item_type).select2(); }
+
+                    if(data.supplier != null){
+                        $(root + " .supplier_field").select2("destroy")
+                            .append("<option value="+data.supplier+">"+data.supplier_text+"</option>");
+                        setSupplier(root + " .supplier_field")
+                    }
+
+                    if(data.asset_user != null){
+                        $(root + " .asset_user_field").select2("destroy")
+                            .append("<option value="+data.asset_user+">"+data.asset_user_text+"</option>");
+                        setAssetUser(root + " .asset_user_field")
+
+                    }
+
+                    if(data.subcategory != null){
+                        $(root + " .subcategory_field").select2("destroy")
+                            .append("<option value="+data.subcategory+" selected>"+data.subcategory_text+"</option>")
+                            .select2({placeholder: "Sub-Category"});
+                    }
+
+                    if(data.item != null){
+                        $(root + " .item_field").select2("destroy")
+                            .append("<option value="+data.item+">"+data.item_text+"</option>");
+                        setItem(root + " .item_field")
+
+                    }
+
+                    multi_date = ''
+                    if(data.start_date != undefined && data.start_date != ''){
+                        s_date = data.start_date.split("-").join("/");
+                        e_date = data.end_date.split("-").join("/");
+                        multi_date = s_date + " - " + e_date;
+                        $(root + ' .date_field').val(multi_date);
+                        $(root + ' .date_field').data('daterangepicker').setStartDate(s_date);
+                        $(root + ' .date_field').data('daterangepicker').setEndDate(e_date);
+                    }else{ $(root + ' .date_field').val(multi_date); }
+
+                    if(data.search_text.length > 0){ $(root + " .search_field").val(data.search_text).focus() };
+                }
+            }
+        });
+
+        // Export Fixed Asset
+        $(".download").children().clone().appendTo(root + " .download_btn");
+        $(root + " .download_btn").children().show();
+        $(".download_button").on("click", function(){
+            var company       =   $(".company_field").val() ? $(".company_field").val() : 0
+            var department    =   $(".department_field").val() ? $(".department_field").val() : 0
+            var category      =   $(".category_field").val() ? $(".category_field").val() : 0
+            var subcategory   =   $(".subcategory_field").val();
+            if (subcategory && subcategory != "selected") subcategory = subcategory
+            else subcategory = 0
+            var item_type     =   $(".item_type_field").val() ? $(".item_type_field").val() : 0 
+            var supplier      =   $(".supplier_field").val() ? $(".supplier_field").val() : 0
+            var item          =   $(".item_field").val() ? $(".item_field").val() : 0
+            var asset_user    =   $(".asset_user_field").val() ? $(".asset_user_field").val() : 0
+            
+            var start_date    =   0
+            var end_date      =   0
+            if ($(".date_field").val()){
+                start_date = $(".date_field").val().split('-')[0].replace('/', '-').replace('/', '-')
+                end_date = $(".date_field").val().split('-')[1].replace('/', '-').replace('/', '-')
+                start_date = start_date.trim()
+                end_date = end_date.trim()
+            }
+            var search_text   =   $(".search_field").val() ? $(".search_field").val() : 0
+            window.open("/fixed-asset/export_fixed_asset/"+company+"/"+department+"/"+item+"/"+category+"/"+subcategory+"/"+item_type+"/"+supplier+"/"+asset_user+"/"+start_date+"/"+end_date+"/"+search_text+"/", "_blank");
+        });
+
+        // Reset Filter
+        $(".reset").children().clone().appendTo(root + " .reset_btn");
+        $(root + " .reset_btn").children().show();
+        $(root).on("click", ".reset_button", function(){
+            dataTableFunc(dataTable, root, table, {});
+        });
+
+        // Company Filter
+        $(".companies").children().clone().appendTo(root + " .company");
+        $(root + " .company").children().show();
+        $(root + " .company .company_field").select2();
+        $(root + " .company .company_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+        // Company Filter
+        $(".department").children().clone().appendTo(root + " .department");
+        $(root + " .department").children().show();
+        $(root + " .department .department_field").select2();
+        $(root + " .department .department_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Supplier Filter
+        $(".suppliers").children().clone().appendTo(root + " .supplier");
+        $(root + " .supplier").children().show();
+        setSupplier(root + " .supplier_field")
+        $(root + " .supplier_field").on("change", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Asset User Filter
+        $(".asset_users").children().clone().appendTo(root + " .asset_user");
+        $(root + " .asset_user").children().show();
+        setAssetUser(root + " .asset_user_field")
+        $(root + " .asset_user_field").on("change", function(){
+            setData(dataTable, root, table);
+        });
+
+        // category filter
+        $(".categories").children().clone().appendTo(root + " .category");
+        $(root + " .category").children().show();
+        $(root + " .category .category_field").select2();
+        $(root + " .category .category_field").on("select2:select select2:unselecting", function(){
+            $(root + " .subcategory_field").val('');
+            setData(dataTable, root, table);
+        });
+
+        // sub-category filter as category
+        $(".subcategorys").children().clone().appendTo(root + " .subcategory");
+        $(root + " .subcategory").children().show();
+        $(root + " .subcategory .subcategory_field").select2({placeholder: "Sub-Category"});
+        $(root + " .subcategory .subcategory_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Item Filter
+        $(".items").children().clone().appendTo(root + " .item");
+        $(root + " .item").children().show();
+        setItem(root + " .item_field")
+        $(root + " .item_field").on("change", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Status Filter
+        $(".statuses").children().clone().appendTo(root + " .status");
+        $(root + " .status").children().show();
+        $(root + " .status .status_field").select2();
+        $(root + " .status .status_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+    
+
+        // Item Type Filter
+        $(".item_types").children().clone().appendTo(root + " .item_type");
+        $(root + " .item_type").children().show();
+        $(root + " .item_type .item_type_field").select2();
+        $(root + " .item_type .item_type_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+        // Date Range Picker
+        $(".multi-date").children().clone().appendTo(root + " .date");
+        $(root + " .date").children().show();
+        $(root + " .date_field").daterangepicker({
+            singleDatePicker: false,
+            showDropdowns   : true,
+            autoUpdateInput : false,
+            opens           : "left",
+            locale          : {
+                cancelLabel : 'Clear',
+                format      : 'YYYY/MM/DD'
+            },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            start_date      = picker.startDate.format('YYYY-MM-DD');
+            end_date        = picker.endDate.format('YYYY-MM-DD');
+            setData(dataTable, root, table, start_date, end_date)
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            start_date      = '';
+            end_date        = '';
+            setData(dataTable, root, table, start_date, end_date)
+        });
+
+        // Search Text Filter
+        $(".search_box").children().clone().appendTo(root + " .search_area");
+        $(root + " .search_area").children().show();
+        $(root + " .search_area").on("click", ".search_btn", function(){
+            setData(dataTable, root, table);
+        });
+        $(".download").children().clone().appendTo(root + " .download");
+        $(root + " .download").children().show();
+    }
+
+    function setData(dataTable, root, table, start_date='', end_date=''){
+        data = {
+            'company'       :   $(root + " .company_field").val(),
+            'department'    :   $(root + " .department_field").val(),
+            'category'      :   $(root + " .category_field").val(),
+            'subcategory'   :   $(root + " .subcategory_field").val(),
+            'subcategory_text' : $(root + " .subcategory_field option:selected").text(),
+            'item_type'     :   $(root + " .item_type_field").val(),
+            'supplier'      :   $(root + " .supplier_field").val(),
+            'item'          :   $(root + " .item_field").val(),
+            'item_text'     :   $(root + " .item_field option:selected").text(),
+            'status'        :   $(root + " .status_field").val(),
+            'status_text'   :   $(root + " .status_field option:selected").text(),
+            'asset_user'    :   $(root + " .asset_user_field").val(),
+            'asset_user_text':  $(root + " .asset_user_field option:selected").text(),
+            'supplier_text' :   $(root + " .supplier_field option:selected").text(),
+            'start_date'    :   start_date,
+            'end_date'      :   end_date,
+            'search_text'   :   $(root + " .search_field").val()
+        }
+        dataTableFunc(dataTable, root, table, data);
+    }
+
+    function setSupplier(field){
+        $(field).select2({
+            minimumInputLength: 3,
+            placeholder: "Supplier",
+            ajax: {
+                url: "{% url 'inventory:get_suppliers' %}",
+                dataType: "json",
+                data: function(term, page) {
+                    return { q: term };
+                },
+                processResults: function (data) {
+                    return { results: data };
+                }
+            },
+            closeOnSelect: true,
+        });
+    }
+
+    function setItem(field){
+        $(field).select2({
+            // Getting Items from select2 field from database
+            minimumInputLength  : 3,
+            placeholder         : "Item Name",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'inventory:get_items' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) { return { results: data.items }; }
+            }
+        });
+    }
+
+    function setAssetUser(field){
+        $(field).select2({
+            // Getting Users from select2 field from database
+            minimumInputLength  : 3,
+            placeholder         : "Asset User",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'get_user_list' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) {return { results: data.users }; }
+            }
+        });
+    }
+
+    $("body").on('change', '.category_field', function(){
+        let category_id = $(this).val();
+        $parent = $(this).parent().parent().parent();
+        
+        $.ajax({
+            url: '{% url "inventory:get_category_wise_subcategory" %}',
+            type: 'POST',
+            data: {'category_id':category_id},
+            success: function(data){
+                if($(".subcategory .subcategory_field").data('select2')){
+                    $(".subcategory .subcategory_field").select2("destroy");
+                }
+                $(".subcategory .subcategory_field").select2({
+                    data:data.items,
+                    placeholder: "Sub-Category",
+                    width: "100%",
+                });
+            }
+        });
+    });
+    </script>
+{% endblock %}

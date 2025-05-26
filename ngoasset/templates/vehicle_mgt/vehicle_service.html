@@ -1,0 +1,114 @@
+<div class="row">
+    <div class="col-md-9">
+        <div class="table-responsive mt-4">
+            <table class="table table-border table-striped card-table table-vcenter" id="vehicle-service" style="width:100%">
+                <thead>
+                    <tr class="text-center">
+                        <th class="d-sm-table-cell">SL.</th>
+                        <th>Vehicle</th>
+                        <th>Provider</th>
+                        <th>Cost</th>
+                        <th>Date</th>
+                        <th class="d-sm-table-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in service_list %}
+                    <tr>
+                        <td class="">{{ forloop.counter }}</td>
+                        <td>{{ service.vehicle }}</td>
+                        <td>{{ service.provider }}</td>
+                        <td>{{ service.repair_cost }}</td>
+                        <td>{{ service.repair_date|date:'d-M-Y'|upper }}</td>
+                        <td class="text-left">
+                            <a class="h4 m-r-10 text-success" href="{% url 'fa:vehicle_service_update' service.id %}">
+                                <span class="icon"><i class="ti-pencil-alt"></i></span>
+                            </a>
+                            <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'fa:vehicle_service_delete' service.id %}">
+                                <span class="icon"><i class="ti-trash"></i></span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger custom-color rounded-lg p-3 mb-0">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ saction_name }}</h4>
+                    </div>
+                    {% if sinstance %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'fa:vehicle_service_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                        <i class="ti-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="floating-labels" method="post" id="form" action="{{ saction_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="svehicle">Vehicle</label>
+                        <select class="form-control text-capitalize select2" name="vehicle" id="svehicle" data-title="Vehicle" required>
+                            <option value="" disabled selected></option>
+                            {% for vehicle in vehicle_list %}
+                            <option value="{{vehicle.id}}" {% if vehicle.id == sinstance.vehicle_id %} selected {% endif %}>{{vehicle}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control bg-transparent" id="provider" name="provider" data-title="Service Provider" value="{{ sinstance.provider }}" />
+                        <span class="bar"></span>
+                        <label for="provider">Service Provider</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control bg-transparent" id="location" name="location" data-title="Location" value="{{ sinstance.location }}" />
+                        <span class="bar"></span>
+                        <label for="location">Location</label>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="2" class="form-control bg-transparent" id="details" name="details">{{ sinstance.details }}</textarea>
+                        <span class="bar"></span>
+                        <label for="details">Details</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent" id="repair_cost" name="repair_cost" value="{{ sinstance.repair_cost }}" />
+                                <span class="bar"></span>
+                                <label for="repair_cost">Repair Cost</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="repair_date" name="repair_date" value="{{ sinstance.repair_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="repair_date">Repair Date</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="1" class="form-control bg-transparent" id="aremarks" name="remarks">{{ sinstance.remarks }}</textarea>
+                        <span class="bar"></span>
+                        <label for="aremarks">Remarks</label>
+                    </div>
+                    <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                        <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

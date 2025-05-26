@@ -1,0 +1,457 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}Maintenance Request Item List{% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/icheck/skins/all.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+    .dataTables_wrapper .select2-container .select2-selection--single .select2-selection__rendered,
+    .dataTables_wrapper .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .dataTables_wrapper .select2-container--default .select2-selection--single,
+    .dataTables_wrapper .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+    .dataTables_scroll{
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255/var(--tw-bg-opacity));
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(0 0 0 / 12%);
+        border-radius: 0.5rem !important;
+        margin-top:18px;
+        padding:2rem !important;
+    }
+</style>
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="text-themecolor mb-0">Maintenance Request Item List</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="" style="position: relative;">
+                        <div class="tab-pane" id="completed_req">
+                            <table id="item-table" style="width:100%" class="table table-border table-striped card-table table-vcenter complete_req_table" data-url="{% url 'fa:maintenance_pending' %}">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>Request No</th>
+                                        <th>FA Code</th>
+                                        <th class="text-left">Item Name</th>
+                                        <th class="text-left">Specification</th>
+                                        <th class="text-left">Problem Details</th>
+                                        <th class="text-left">Assign By</th>
+                                        <th class="text-left">Note</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Solved By</th>
+                                        <th class="text-center">Solved</th>
+                                        <th class="text-center">Remarks</th>
+                                        <th class="text-center"></th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+    
+                    </div>
+                </div>
+
+                <!-- Extra Filter Maintenance List -->
+                <div class="reset">
+                    <div class="form-group" style="display: none;">
+                        <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+                    </div>
+                </div>
+                <div class="companies">
+                    <div class="form-group" style="display: none;">
+                        <select class="form-control text-capitalize company_field" name="company">
+                            <option value="" selected>All Company</option>
+                            {% for c in company_list %}
+                            <option value="{{c.id}}">{{c.short_name}}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="departments">
+                    <div class="form-group" style="display: none;">
+                        <select class="form-control text-capitalize department_field" name="department">
+                            <option value="" selected>All Department</option>
+                            {% for d in dept_list %}
+                            <option value="{{d.id}}">{{d.name}}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="statuses">
+                    <div class="form-group" style="display: none;">
+                        <select class="form-control text-capitalize status_field" name="status">
+                            <option value="" selected>All Status</option>
+                            <option value="Started">Started</option>
+                            <option value="Raised">Raised</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="Solved">Solved</option>
+                            <option value="Not Solved">Not Solved</option>
+                            <option value="In External Service">In External Service</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="items">
+                    <div class="form-group" style="display: none;">
+                        <select class="form-control item_field" name="item">
+                            <option value="" selected>Item Name</option>
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            
+                <div class="multi-date">
+                    <div class="form-group" style="display: none;">
+                        <input type="text" class="form-control date_field" id="date_field_id" name="to_date" placeholder="Select Date Range..." autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="categories">
+                    <div class="form-group" style="display: none;">
+                        <select class="form-control text-capitalize category_field" name="category">
+                            <option value="" selected>All Category</option>
+                            {% for c in categories %}
+                                <option value="{{c.id}}">{{c.name}}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+
+                <div class="subcategorys">
+                    <div class="form-group" style="display: none;">
+                        <select class="form-control text-capitalize subcategory_field" name="subcategory">
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+
+                <div class="search_box">
+                    <div class="input-group" style="display: none;">
+                        <input type="text" class="form-control search_field" name="search_box" placeholder="Fixed Asset Code/Request No... ">
+                        <div class="input-group-append">
+                            <button class="search_btn btn btn-info" type="button"><i class="fa fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="print">
+                    <div class="form-group" style="display: none;">
+                        <button type="button" style="font-size: 17px;" id="btnPrint" class="btn btn-block btn-outline-warning" title="Print"><i class="ti-printer"></i></button>
+                    </div>
+                </div>
+                <!-- Extra Filter Maintenance List -->
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block page_js %}
+{% include 'maintenance/feedback_from_assign_to.html' %}
+{% include 'maintenance/delivered_or_unrecovered.html' %}
+<script src="{% static 'node_modules/icheck/icheck.min.js' %}"></script>
+<script src="{% static 'node_modules/icheck/icheck.init.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+{% include 'inc/profile_modal.html' %}
+{% include 'inc/scrollerDT.html' %}
+
+<script>
+    // start datatable
+    var completeTable = null;
+
+    $(document).ready(function () {
+        dataTableFunc(completeTable, '#completed_req', '#item-table', {})
+    });
+
+
+    function dataTableFunc(dataTable, root, table, data){
+        if (dataTable) { dataTable.destroy(); }
+        let url = $(table).data("url");
+        dataTable = $(table).DataTable({
+            dom             : "<'custom-color rounded-lg pt-5 px-5 pb-4'<'row top pending'<'col-md-1 reset_btn'><'col-md-2 company'><'col-md-3 department'><'col-md-3 status'><'col-md-3 item'><'col-md-3 category'><'col-md-3 subcategory'><'col-md-3 date'><'col-md-2 search_area'><'col-md-1 text-center printer'>>>t",
+            ordering        : false,
+            paging          : true,
+            iDisplayLength  : 25,
+            pageLength      : 5,
+            autoWidth       : false,
+            scrollY         : '365',
+            scroller        : true,
+            scrollX         : true,
+            deferRender     : true,
+            serverSide      : true,
+            processing      : true,
+            responsive      : true,
+            ajax:{
+                type        : "POST",
+                url         : url,
+                data        : data,
+                dataSrc     : ""
+            },
+            initComplete:function( settings, json){
+                if( Object.keys(data).length > 0 ){
+                    if(data.company != null){ $(root + " .company_field").select2("destroy").val(data.company).select2(); }
+                    if(data.department != null){ $(root + " .department_field").select2("destroy").val(data.department).select2(); }
+                    if(data.category != null){ $(root + " .category_field").select2("destroy").val(data.category).trigger("change").select2(); }
+                    if(data.status != null){ $(root + " .status_field").val(data.status) }
+                    if(data.item != null){
+                        $(root + " .item_field").select2("destroy")
+                            .append("<option value="+data.item+">"+data.item_text+"</option>");
+                        setItem(root + " .item_field")
+
+                    }
+                    if(data.subcategory != null){
+                        $(root + " .subcategory_field").select2("destroy")
+                            .append("<option value="+data.subcategory+" selected>"+data.subcategory_text+"</option>")
+                            .select2({placeholder: "Sub-Category"});
+                    }
+                    multi_date = ''
+
+                    if(data.start_date != undefined && data.start_date != ''){
+                        s_date = data.start_date.split("-").join("/");
+                        e_date = data.end_date.split("-").join("/");
+                        multi_date = s_date + " - " + e_date;
+                        $(root + ' .date_field').val(multi_date);
+                        $(root + ' .date_field').data('daterangepicker').setStartDate(s_date);
+                        $(root + ' .date_field').data('daterangepicker').setEndDate(e_date);
+                    }else{ $(root + ' .date_field').val(multi_date); }
+                    
+                    if(data.search_text.length > 0){ $(root + " .search_field").val(data.search_text).focus() };
+                }
+            }
+        });
+
+        // Reset Filter
+        $(".reset").children().clone().appendTo(root + " .reset_btn");
+        $(root + " .reset_btn").children().show();
+        $(root).on("click", ".reset_button", function(){
+            dataTableFunc(dataTable, root, table, {});
+        });
+
+        // Company Filter
+        $(".companies").children().clone().appendTo(root + " .company");
+        $(root + " .company").children().show();
+        $(root + " .company .company_field").select2();
+        $(root + " .company .company_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+
+        // Company Filter
+        $(".departments").children().clone().appendTo(root + " .department");
+        $(root + " .department").children().show();
+        $(root + " .department .department_field").select2();
+        $(root + " .department .department_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+
+        // category filter
+        $(".categories").children().clone().appendTo(root + " .category");
+        $(root + " .category").children().show();
+        $(root + " .category .category_field").select2();
+        $(root + " .category .category_field").on("select2:select select2:unselecting", function(){
+            $(root + " .subcategory_field").val('');
+            setData(dataTable, root, table);
+        });
+
+        // sub-category filter as category
+        $(".subcategorys").children().clone().appendTo(root + " .subcategory");
+        $(root + " .subcategory").children().show();
+        $(root + " .subcategory .subcategory_field").select2({placeholder: "Sub-Category"});
+        $(root + " .subcategory .subcategory_field").on("select2:select select2:unselecting", function(){
+            setData(dataTable, root, table);
+        });
+        
+        // Status Filter
+        $(".statuses").children().clone().appendTo(root + " .status");
+        $(root + " .status").children().show();
+        $(root + " .status_field").on("change", function(){
+            setData(dataTable, root, table);
+        });
+        
+        // Date Range Picker
+        $(".multi-date").children().clone().appendTo(root + " .date");
+        $(root + " .date").children().show();
+        $(root + " .date_field").daterangepicker({
+            singleDatePicker: false,
+            showDropdowns   : true,
+            autoUpdateInput : false,
+            locale          : {
+                cancelLabel : 'Clear',
+                format      : 'YYYY/MM/DD'
+            },
+        }).on('apply.daterangepicker', function(ev, picker) {
+            start_date      = picker.startDate.format('YYYY-MM-DD');
+            end_date        = picker.endDate.format('YYYY-MM-DD');
+            setData(dataTable, root, table, start_date, end_date)
+        }).on('cancel.daterangepicker', function(ev, picker) {
+            start_date      = '';
+            end_date        = '';
+            setData(dataTable, root, table, start_date, end_date)
+        });
+
+        // Search Text Filter
+        $(".search_box").children().clone().appendTo(root + " .search_area");
+        $(root + " .search_area").children().show();
+        $(root + " .search_area").on("click", ".search_btn", function(){
+            setData(dataTable, root, table);
+        });
+        // Search Text Filter
+        $(".print").children().clone().appendTo(root + " .printer");
+        $(root + " .printer").children().show();
+     
+
+        // Item Filter
+        $(".items").children().clone().appendTo(root + " .item");
+        $(root + " .item").children().show();
+        setItem(root + " .item_field")
+        $(root + " .item_field").on("change", function(){
+            setData(dataTable, root, table);
+        });
+        
+    }
+
+    function setData(dataTable, root, table, start_date='', end_date=''){
+        data = {
+            'company'       :   $(root + " .company_field").val(),
+            'department'    :   $(root + " .department_field").val(),
+            'status'        :   $(root + " .status_field").val(), 
+            'item'          :   $(root + " .item_field").val(),
+            'category'      :   $(root + " .category_field").val(),
+            'subcategory'   :   $(root + " .subcategory_field").val(),
+            'subcategory_text' : $(root + " .subcategory_field option:selected").text(),
+            'item_text'     :   $(root + " .item_field option:selected").text(),
+            'start_date'    :   start_date, 
+            'end_date'      :   end_date,
+            'search_text'   :   $(root + " .search_field").val()
+        }
+        dataTableFunc(dataTable, root, table, data);
+    }
+
+    function setItem(field){
+        $(field).select2({
+            minimumInputLength  : 3,
+            placeholder         : "Item Name",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'fa:get_fa_items' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) { return { results: data.items }; }
+            }
+        });
+    }
+// end datatable 
+
+    $('body').on('click', '#assign_to_form #approve_btn ', function(e){
+        event.preventDefault();
+        
+        let status ="";
+        if($(this).attr('id') == 'approve_btn'){
+            status ="Assign"
+        }
+
+        if($(this).attr('id') == 'approve_btn'){
+            Swal.fire({
+                text:" Do you want to " + status +" this?",
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor:"#00c292",
+                cancelButtonText: 'No',
+                cancelButtonColor:"#e46a76",
+                reverseButtons: false
+            }).then((result) => {
+                if (result.value) {
+                    if($(this).attr('id') == 'reject_btn'){
+                        window.location = $(this).attr('href');
+                    }else{
+                        $("#assign_to_form").submit();
+                    }
+                }
+            });
+        }
+        else{
+            $("#assign_to_form").submit();
+        }
+    });
+
+    $(document).ready(function () {
+        $(".assign_to").select2({
+            minimumInputLength  : 3,
+            placeholder         : "User ( Employee ID )",
+            allowClear          : true,
+            ajax: {
+                url             : "{% url 'get_user_list' %}",
+                dataType        : "json",
+                data            : function(term, page) { return { q : term }; },
+                processResults  : function (data) { return { results: data.users }; }
+            }
+        });
+    });
+
+    $("body").on('change', '.category_field', function(){
+        let category_id = $(this).val();
+        $parent = $(this).parent().parent().parent();
+        
+        $.ajax({
+            url: '{% url "inventory:get_category_wise_subcategory" %}',
+            type: 'POST',
+            data: {'category_id':category_id},
+            success: function(data){
+                if($(".subcategory .subcategory_field").data('select2')){
+                    $(".subcategory .subcategory_field").select2("destroy");
+                }
+                $(".subcategory .subcategory_field").select2({
+                    data:data.items,
+                    placeholder: "Sub-Category",
+                    width: "100%",
+                });
+            }
+        });
+    });
+
+    $('body').on('click', '#btnPrint', function(){
+        var company = $(".company_field").val() ? $(".company_field").val() : 0
+        var department = $(".department_field").val() ? $(".department_field").val() : 0
+        var item = $(".item_field").val() ? $(".item_field").val() : 0
+        var status = $(".status_field").val() ? $(".status_field").val() : 0
+        var search_text = $(".search_field").val() ? $(".search_field").val() : 0
+        var category      =   $(".category_field").val() ? $(".category_field").val() : 0
+        var subcategory   =   $(".subcategory_field").val();
+        if(search_text){search_text = search_text.replace('/','-').replace('/','-').replace('/','-').replace('/','-')}
+        else{search_text = 0}
+        if (subcategory && subcategory != "selected") subcategory = subcategory
+        else subcategory = 0
+        var start_date    =   0
+        var end_date      =   0
+        if ($("#date_field_id").val()){
+            start_date = $("#date_field_id").val().split('-')[0].replace('/', '-').replace('/', '-')
+            end_date = $("#date_field_id").val().split('-')[1].replace('/', '-').replace('/', '-')
+            start_date = start_date.trim()
+            end_date = end_date.trim()
+        }
+        window.open("/fixed-asset/machine-diagnostics-status/"+company+"/"+department+"/"+item+"/"+category+"/"+subcategory+"/"+status+"/"+start_date+"/"+end_date+"/"+search_text+"/", "_blank");
+    });
+
+</script>
+{% endblock %}

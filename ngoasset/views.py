@@ -44,31 +44,11 @@ class QR_Text:
         else: return ""
 
 
-
-# ============ Fixed Asset Items Start ============ #
-try:
-    from ngoasset.view.view_item import *
-except ImportError:
-    pass
-# ============ Fixed Asset Items End ============ #
-
-# ============ Fixed Asset Items Start ============ #
-try:
-    from ngoasset.view.view_asset import *
-except ImportError:
-    pass
-# ============ Fixed Asset Maintenance Start ============ #
 try:
     from ngoasset.view.view_maintenance import *
 except ImportError:
     pass
-
-# ============ Fixed Asset Reports ============ #
-try:
-    from ngoasset.view.view_reports import *
-except ImportError:
-    pass
-
+ 
 
 # Vehicle Management
 template_name       = "vehicle_mgt_base.html"

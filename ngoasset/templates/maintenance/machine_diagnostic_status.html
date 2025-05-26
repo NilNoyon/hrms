@@ -1,0 +1,58 @@
+{% extends "print_base.html" %}
+{% load sc_filters %}
+
+{% block page_title %}Machine Diagnostics Status{% endblock %}
+{% block header_title %} Machine Diagnostics Status {% endblock %}
+
+{% block page_content %}
+<style type="text/css">
+    @page {
+        size: A4 Landscape;
+        margin: 0.5in;
+        position: relative;
+    }
+</style>
+    <table border="0.5" class="item-table" style="padding: 5px 3px 0px; margin-bottom: 20px;">
+        <tr>
+            <th width="30px">SL</th>
+            <th width="150px">FA Code</th>
+            <th width="100px">Item</th>
+            <th width="150px">Specification</th>
+            <th width="100px">Requsted By</th>
+            <th width="100px">Assign To</th>
+            <th width="100px">Status</th>
+            <th>ETA</th>
+            <th>Lead Days</th>
+            <th>AD Date</th>
+            <th>AD Days</th>
+            <th>Deviation Days</th>
+        </tr>
+        {% for r in maintenance_pending_list %}
+            <tr>
+                <td align="center">{{  forloop.counter }}</td>
+                <td>{{ r.asset.code }}</td>
+                <td width="100px">{{ r.asset.item.item_master.item_name }}</td>
+                <td>{% specification r.asset.item.item_master r.asset.item_id %}</td>
+                <td width="100px">{{ r.created_by }}</td>
+                <td width="100px">{{ r.assign_to|default_if_none:" " }}</td>
+                <td width="100px">{{ r.status.title }}</td>
+                <td width="100px">{% if r.maintenance.etd %}{{ r.maintenance.etd|date:'d-M-Y'|upper }}{% endif %}</td>
+                <td width="100px">{% if r.maintenance.etd %}{{ r.maintenance.etd|timeuntil:r.created_at }}{% endif %}</td>
+                <td width="100px">{% if r.delivery_at %}{{ r.delivery_at|date:'d-M-Y'|upper }}{% endif %}</td>
+                <td width="100px">{% if r.delivery_at %}{{ r.delivery_at|timeuntil:r.created_at }}{% endif %}</td>
+                <td width="100px" style="text-align:center;">
+                    {% if r.delivery_at and r.maintenance.etd and r.maintenance.etd|date:"Y-m-d" > r.delivery_at|date:"Y-m-d" %}
+                        <span style="color:green;">{{ r.maintenance.etd|timeuntil:r.delivery_at }}</span>
+                    {% elif r.delivery_at and r.maintenance.etd and r.maintenance.etd|date:"Y-m-d" < r.delivery_at|date:"Y-m-d" %}
+                        <span style="color:red;">{{ r.delivery_at|timeuntil:r.maintenance.etd }}</span>
+                    {% else %} - {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table>
+        <tr><td colspan="12"><b>Note: </b>AD = Actual Delivery</td></tr>
+    </table>
+
+
+{% endblock %}

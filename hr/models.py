@@ -161,7 +161,7 @@ class Shift(CoreActionWithUpdate):
           verbose_name_plural = "Shifts" 
 
      def __str__(self):
-          return f'{self.shift_id}'
+          return f'{self.shift_id}-{self.name}'
 
      @property
      def title(self):
@@ -764,13 +764,13 @@ class HolidaySetup(CoreActionWithUpdate):
           return str(self.name)
 
 class Holiday(CoreActionWithUpdate):
-     branch              = models.ForeignKey(Branch, on_delete=models.SET_NULL, related_name='branch_holiday', null=True, blank=True)
-     setup               = models.ForeignKey(HolidaySetup, on_delete=models.SET_NULL, related_name='holiday', null=True,blank=True)
-     name                = models.CharField(max_length=100, default='')
-     start_date          = models.DateField(auto_now=False, null=True, blank=True)
-     end_date            = models.DateField(auto_now=False, null=True, blank=True)
-     weekend             = models.BooleanField(default = False)
-     is_mail_send        = models.BooleanField(default = True)
+     branch       = models.ManyToManyField(Branch, related_name='branch_holiday', blank=True)
+     setup        = models.ForeignKey(HolidaySetup, on_delete=models.SET_NULL, related_name='holiday', null=True,blank=True)
+     name         = models.CharField(max_length=100, default='')
+     start_date   = models.DateField(auto_now=False, null=True, blank=True)
+     end_date     = models.DateField(auto_now=False, null=True, blank=True)
+     weekend      = models.BooleanField(default = False)
+     is_mail_send = models.BooleanField(default = True)
      
      class Meta:
           db_table            = 'hr_holidays'
@@ -778,7 +778,7 @@ class Holiday(CoreActionWithUpdate):
           verbose_name_plural = "Holidays"
 
      def __str__(self):
-          return str(self.branch.short_name + " - " + self.name)
+          return str(self.name)
      
      
      def save(self, *args, **kwargs):
@@ -795,7 +795,6 @@ class Holiday(CoreActionWithUpdate):
                          holiday_date=current_date, status=Status.name("active"))
                     holidays_list.append(hexist.id)
                HolidayIndividuals.objects.filter(holiday=self).exclude(id__in=holidays_list).delete()
-
 
      @property
      def num_of_days(self):

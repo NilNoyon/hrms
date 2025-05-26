@@ -5,7 +5,7 @@ from hr.views import *
 def attendance_list(request):
     template_name   = "hr/attendance/list.html"
     context         = {
-        'company_list'      : Branch.objects.filter(company_id=request.session.get('company_id')).order_by('short_name'),
+        'company_list'      : Branch.objects.filter(company_id=request.session.get('company_id'),status=True).order_by('short_name'),
         'designation_list'  : Designations.objects.filter(status = True).order_by('name'),
         'department_list'   : Departments.objects.filter(status = True).order_by('name'),
         'user_list'         : Users.objects.filter(status = True),
@@ -65,7 +65,7 @@ def attendance_report(request):
             attendances.append(data)
 
     context = {
-        'company_list'      : Company.objects.filter(status = True).order_by('name'),
+        'company_list'      : Branch.objects.filter(status = True,company_id=request.session.get('company_id')).order_by('name'),
         'designation_list'  : Designations.objects.filter(status = True).order_by('name'),
         'department_list'   : Departments.objects.filter(status = True).order_by('name'),
         'num_of_days'       : monthrange(datetime.now().year, datetime.now().month)[1],
@@ -78,7 +78,7 @@ def get_monthly_report_data(request):
     template_name, query = "hr/attendance/monthly_report_data.html", Q(status=Status.name('active'))
     if employee := request.POST.get('employee', None) : query &= Q(id=employee)
     else :
-        if company := request.POST.get('company', None)         : query &= Q(company_id=company)
+        if company := request.POST.get('company', None)         : query &= Q(branch_id=company)
         if department := request.POST.get('department', None)   : query &= Q(department_id=department)
         if designation := request.POST.get('designation', None) : query &= Q(designation_id=designation)
     attendance_date = request.POST.get('attendance_date', None)
@@ -111,7 +111,7 @@ def get_monthly_report_data(request):
 def job_card(request):
     template_name = "hr/attendance/job_card.html"
     context = {
-        'company_list'      : Company.objects.filter(status = True).order_by('name'),
+        'company_list'      : Branch.objects.filter(status = True,company_id=request.session.get('company_id')).order_by('name'),
         'designation_list'  : Designations.objects.filter(status = True).order_by('name'),
         'department_list'   : Departments.objects.filter(status = True).order_by('name'),
     }
@@ -122,7 +122,7 @@ def get_job_card_data(request):
     report_data, query, date_query = '', Q(status=Status.name("Active")), Q()
     if employee := request.POST.get('employee', None) : query &= Q(id=employee)
     else :
-        if company := request.POST.get('company', None)         : query &= Q(company_id=company)
+        if company := request.POST.get('company', None)         : query &= Q(branch_id=company)
         if department := request.POST.get('department', None)   : query &= Q(department_id=department)
         if designation := request.POST.get('designation', None) : query &= Q(designation_id=designation)
     attendance_date = request.POST.get('attendance_date', None)
@@ -189,7 +189,7 @@ def my_job_card(request, employee_id="", start_date="", end_date=""):
 def daily_attendance_report(request):
     template_name = "hr/attendance/daily-report.html"
     context = {
-        'company_list'      : Company.objects.filter(status = True).order_by('name'),
+        'company_list'      : Branch.objects.filter(status = True,company_id=request.session.get('company_id')).order_by('name'),
         'designation_list'  : Designations.objects.filter(status = True).order_by('name'),
         'department_list'   : Departments.objects.filter(status = True).order_by('name'),
     }
@@ -200,7 +200,7 @@ def get_daily_attendance_report_data(request):
     report_data, query, date_query = '', Q(status=Status.name("Active")), Q()
     if employee := request.POST.get('employee', None) : query &= Q(id=employee)
     else :
-        if company      := request.POST.get('company', None)    : query &= Q(company_id=company)
+        if company      := request.POST.get('company', None)    : query &= Q(branch_id=company)
         if department   := request.POST.get('department', None) : query &= Q(department_id=department)
         if designation  := request.POST.get('designation', None): query &= Q(designation_id=designation)
     attendance_date = request.POST.get('attendance_date', None)
@@ -259,7 +259,7 @@ def import_attendances(request):
         attendance_list, user = 0, get_object_or_404(Users, pk=request.session.get('id', None))
         import_file = request.FILES['import_file']
         info = pd.read_excel(import_file, 'Sheet1', engine='openpyxl', dtype={'Employee': str})
-        from inventory.view.views_item import retrun_str_from_xls as str_from_xls
+        from hr.views import str_from_xls
         for i in range(0, len(info)):
             employee_id = str_from_xls(info['Employee'][i])
             employee_dtl= EmployeeDetails.objects.filter(personal__employee_id=employee_id).last()
@@ -268,7 +268,7 @@ def import_attendances(request):
             if not outside :
                 in_time = str_from_xls(info['In Time'][i], time_field=True)
                 out_time= str_from_xls(info['Out Time'][i], time_field=True)
-            if employee_dtl and date :
+            if employee_dtl and date:
                 attn_exist = Attendance.objects.filter(employee=employee_dtl,present_day=date).last()
                 has_roaster_shift = HRShiftRoaster.objects.filter(employee=employee_dtl, roaster_date=date).first()
                 shift = has_roaster_shift.shift if has_roaster_shift else employee_dtl.shift
@@ -367,7 +367,7 @@ def attendance_devices(request):
 @login
 def import_attendance_devices(request):
     if request.method == "POST":
-        from inventory.view.views_item import retrun_str_from_xls as str_from_xls
+        from hr.views import retrun_str_from_xls as str_from_xls
         device_list, user = [], get_object_or_404(Users, pk=request.session.get('id', None))
         import_file = request.FILES['import_file']
         info = pd.read_excel(import_file, 'Sheet1', engine='openpyxl')
@@ -408,7 +408,7 @@ def get_attendance_devices(request):
 @login
 def sync_attendance(request):   
     devices         = AttendanceDevice.objects.order_by('device_id')
-    companies       = Company.objects.filter(status=True).order_by('name')
+    companies       = Branch.objects.filter(status=True,company_id=request.session.get('company_id')).order_by('name')
     departments     = Departments.objects.filter(status = True).order_by('name')
     locations       = Location.objects.filter(status=Status.name("Active"))
     template_name   = "hr/attendance/sync_attendance.html"

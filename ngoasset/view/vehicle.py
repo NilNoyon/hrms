@@ -1,4 +1,4 @@
-from fixedasset.views import *
+from ngoasset.views import *
 
 
 @login

@@ -1,0 +1,52 @@
+{% load sc_filters %}
+{% load inv_filters %}
+{% block add_css %}
+    <style>
+        table#stock_table tbody {
+            display: block;
+            max-height: 400px;
+            overflow-y: scroll;
+        }
+
+        table#stock_table thead, table#stock_table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        #stock_table .table-scroll thead > tr > th {
+            border: none;
+        }
+    </style>
+{% endblock %}
+
+<div class="table-responsive table-scroll" align="center">
+    <table class="table table-striped mt-1" id="stock_table">
+        <thead class="text-center">
+            <tr>
+                <th width="250">Store</th>
+                <th width="150" class="text-left">Item</th>
+                <th class="">Specification</th>
+                <th class="">Lot</th>
+                <th class="">Buyer</th>
+                <th class="">File</th>
+                <th width="150" class="">Available</th>
+                <th width="150" class="">Last Price</th>
+                <th width="100"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in items %}
+                <tr>
+
+                </tr>
+            {% empty %}
+                <tr class="text-center text-danger">
+                    <td>No Data Found!</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+

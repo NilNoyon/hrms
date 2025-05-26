@@ -1,0 +1,639 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load math-filters %}
+{% block page_title %}Fixed Asset{% endblock %}
+{% block add_css %}
+<!-- page css -->
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+
+    input[type='number'] {
+        text-align: center;
+    }
+
+    label {
+        text-align: right;
+        clear: both;
+        float: left;
+        margin-right: 5px;
+    }
+
+    .floating-labels .custom-control-label {
+        position: relative;
+        cursor: context-menu;
+    }
+
+    .floating-labels .custom-label {
+        position: relative;
+    }
+
+    .select2-container--default.select2-container--disabled .select2-selection--single {
+        background-color: transparent !important;
+    }
+
+
+    /* Designing for scroll-bar */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .required-field::before {
+        content: "*";
+        color: red;
+    }
+
+    .form-group {
+        margin-bottom: 0px;
+        margin-top: 0px;
+    }
+    .btn {
+        padding: .5em;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="row" style="padding-right: 0px;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body" style="padding:0rem 0px 1.25rem 0px;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-8">
+                                <h4 class="text-themecolor mb-0">Fixed Asset Update</h4>
+                            </div>
+                            <div class="col-md-4 align-self-center text-right">
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                        <a href="{% url 'fa:fa_view' asset.id %}" target="_blank" class="btn btn-sm btn-outline-success mr-1" title="Fixed asset view"><i class="ti-eye"></i></a>
+                                        <a href="{% url 'fa:fa_list' %}" class="btn btn-sm btn-info" title="Fixed Asset LIST"><i class="ti-view-list-alt"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <form class="floating-labels form-horizontal error ml-auto custom-color rounded-lg p-3" method="POST" action="{% url 'fa:fa_update' asset.id %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="name">Item</label>
+                                                        <input type="text" data-title="Select name" value="{{asset.item.item_master.item_name}}"
+                                                        class="form-control text-capitalize" name="item"
+                                                        id="name" placeholder="name" readonly>
+                                                        <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="classification">Classification</label>
+                                                <select class="form-control text-capitalize select2 "
+                                                    id="classification" name="classification"
+                                                    data-title="Select classification"
+                                                    style="width:20em" placeholder="classification" disabled>
+                                                    <option value="" disabled selected></option>
+                                                    {% for c in classifications%}
+                                                        <option value="{{c.id}}" {% if c.id == asset.classification.id %}selected{% endif %}>{{c.value}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="name">Serial Number</label>
+                                                        <input type="text" data-title="Serial No" value="{{asset.serial_no}}" class="form-control" name="serial_no" id="serial_no">
+                                                        <span class="bar"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="supplier">Supplier </label>
+                                                <select class="form-control text-capitalize select2 supplier" id="supplier"
+                                                    data-title="supplier" name="supplier"
+                                                    data-title="Select Supplier" style="width:20em" placeholder="" >
+                                                    <option value="" disabled selected></option>
+                                                    {% if asset.supplier %}
+                                                        <option value="{{asset.supplier_id}}" selected>{{asset.supplier.name}}</option>
+                                                    {% endif %}
+                                                </select>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="technical_specification">Technical Specification </label>
+                                                <input type="text" data-title="technical_specification"
+                                                    class="form-control" name="technical_specification"
+                                                    id="technical_specification" placeholder="" value="{{asset.technical_specification}}" readonly>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+                                                <label for="mrr_date">MRIR Date</label>
+                                                <input type="text" data-title="mrr_date"
+                                                    class="form-control mrr_date single_date" name="mrir_date"
+                                                    id="mrr_date" {% if asset and asset.mrir_date%}value="{{asset.mrir_date|date:'d-M-Y'}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+                                                <label for="pi_date">PI Date</label>
+                                                <input type="text" data-title="pi_date"
+                                                    class="form-control  single_date" name="pi_date"
+                                                    id="pi_date" {% if asset.pi_date is not None%}value="{{asset.pi_date|date:'d-M-Y'}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+                                                <label for="lc_date">LC Date</label>
+                                                <input type="text" data-title="lc_date"
+                                                    class="form-control single_date" name="lc_date"
+                                                    id="lc_date" {% if asset.lc_date is not None%}value="{{asset.lc_date|date:'d-M-Y'}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="lc_date">LC</label>
+                                                <input type="text" data-title="lc" class="form-control"
+                                                    name="lc" id="lc" placeholder="" {% if asset.lc is not None%}value="{{asset.lc}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="bank">Bank</label>
+                                                <select class="form-control text-capitalize select2 po_color" id="bank"
+                                                    name="bank" data-title="Select Bank" id="bank" style="width:20em"
+                                                    placeholder="">
+                                                    <option value="" disabled selected></option>
+                                                    {% for b in banks %}
+                                                        <option value="{{b.id}}" {% if b.id == asset.bank_id%}selected{%endif%}>{{b.name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="currency">currency</label>
+                                                <select class="form-control text-capitalize select2 po_color"
+                                                    id="currency" name="currency" data-title="Select Currency"
+                                                        style="width:20em" placeholder="">
+                                                    <option value="" disabled selected></option>
+                                                    {% for c in currencies %}
+                                                        <option value="{{c.id}}"{% if c.id == asset.currency_id %}selected{%endif%}>{{c.value}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="asset_value">Asset Value</label>
+                                                <input type="number" data-title="asset_value" class="form-control"
+                                                    name="asset_value" id="asset_value" placeholder="" min="0.001"
+                                                    step="any" onkeyup="enforceMin(this)" {% if asset.asset_value %}value="{{asset.asset_value}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="conversion_rate">Conversion Rate</label>
+                                                <input type="number" data-title="conversion_rate" class="form-control"
+                                                    name="conversion_rate" id="conversion_rate" placeholder="" min="0"
+                                                    step="any" onkeyup="enforceMin(this)" {% if asset.conversion_rate %}value="{{asset.conversion_rate}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+
+                                                <label for="wo_price">WO Price</label>
+                                                <input type="number" data-title="wo_price" class="form-control" name="wo_price"
+                                                    id="wo_price" placeholder="" min="0" step="any"
+                                                    onkeyup="enforceMin(this)" {% if asset.wo_price  %}value="{{asset.wo_price}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+
+                                                <label for="tax">TAX</label>
+                                                <input type="number" data-title="tax" class="form-control" name="tax"
+                                                    id="tax" placeholder="" min="0" step="any"
+                                                    onkeyup="enforceMin(this)" {% if asset.tax %}value="{{asset.tax}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+
+                                                <label for="vat">VAT</label>
+                                                <input type="number" data-title="vat" class="form-control" name="vat"
+                                                    id="vat" placeholder="" min="0" step="any"
+                                                    onkeyup="enforceMin(this)" {% if asset.vat %}value="{{asset.vat}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="regulatory_duty">Regulatory Duty </label>
+                                                <input type="text" data-title="regulatory_duty" class="form-control"
+                                                    name="regulatory_duty" id="regulatory_duty" placeholder=""
+                                                    {% if asset.regulatory_duty %}value="{{asset.regulatory_duty}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="bill_of_entry_no">Bill of Entry No</label>
+                                                <input type="text" class="form-control" id="bill_of_entry_no"
+                                                    data-title="bill_of_entry_no" name="bill_of_entry_no" {% if asset.bill_of_entry_no %}value="{{asset.bill_of_entry_no}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+                                                <label for="bill_of_entry_date">Bill of Entry Date</label>
+                                                <input type="text" data-title="bill_of_entry_date"
+                                                    class="form-control single_date" name="bill_of_entry_date"
+                                                    id="bill_of_entry_date" {% if asset.bill_of_entry_date is not None%}value="{{asset.bill_of_entry_date|date:'d-M-Y'}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="total_landing_cost">Total Landing Cost</label>
+                                                <input type="number" class="form-control" id="total_landing_cost"
+                                                    data-title="total_landing_cost" name="total_landing_cost" {% if asset.total_landing_cost %}value="{{asset.total_landing_cost}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="cost_of_assets">Cost of Assets</label>
+                                                <input type="number" class="form-control" id="cost_of_assets"
+                                                    data-title="cost_of_assets" name="cost_of_assets" {% if asset.cost_of_assets %}value="{{asset.cost_of_assets}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="rate_of_depreciation">Rate of Depreciation</label>
+                                                <input type="number" class="form-control" id="rate_of_depreciation"
+                                                    data-title="rate_of_depreciation" name="rate_of_depreciation" {% if asset.rate_of_depreciation %}value="{{asset.rate_of_depreciation}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="accumulated_depreciation">Accumulated Depreciation</label>
+                                                <input type="number" class="form-control" id="accumulated_depreciation"
+                                                    data-title="accumulated_depreciation"
+                                                    name="accumulated_depreciation" {% if asset.accumulated_depreciation %}value="{{asset.accumulated_depreciation}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="current_value">Current Value</label>
+                                                <input type="number" class="form-control" id="current_value"
+                                                    data-title="current_value" name="current_value" {% if asset.current_value %}value="{{asset.current_value}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="revalution_value">Revalution Value</label>
+                                                <input type="number" class="form-control" id="revalution_value" min="0" step="any"
+                                                    data-title="revalution_value" name="revalution_value" {% if last_allocation.revalution_value %}value="{{last_allocation.revalution_value}}"{% endif %}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="department_or_cost_center">Department/Cost Center</label>
+                                                <select class="form-control text-capitalize select2 po_color"
+                                                    id="department_or_cost_center" name="department_or_cost_center"
+                                                    data-title="Select Department/Cost Center"
+                                                    style="width:20em" placeholder="" required>
+                                                    <option value="" disabled selected></option>
+                                                    {% for d in departments %}
+                                                        <option value="{{d.id}}" {% if d.id == asset.department_or_cost_center.id %}selected{% endif %}>{{d.name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="company">Company</label>
+                                                <select class="form-control text-capitalize select2 company" id="company"
+                                                    data-title="Company" name="company"
+                                                    data-title="Select Company" style="width:20em" placeholder="" >
+                                                    <option value="" disabled selected></option>
+                                                    {% for i in company_list %}
+                                                        <option value="{{i.id}}" {% if asset.company_id == i.id %} selected {% endif %}>{{i.short_name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="asset_user">Asset User</label>
+                                                <select class="form-control text-capitalize select2 asset_user" id="asset_user"
+                                                    data-title="asset_user" name="asset_user"
+                                                    data-title="Select Asset User" style="width:20em" placeholder="" >
+                                                    <option value="" disabled selected></option>
+                                                    {% if asset.asset_user %}
+                                                        <option value="{{asset.asset_user_id}}" selected>{{asset.asset_user.name}}</option>
+                                                    {% endif %}
+                                                </select>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="asset_user">Asset Controller</label>
+                                                <select class="form-control text-capitalize select2 asset_controller" id="asset_controller"
+                                                    data-title="Asset Controller" name="asset_controller"
+                                                    data-title="Select Asset Controller" style="width:20em" placeholder="" >
+                                                    <option value="" disabled selected></option>
+                                                    {% if asset.asset_controller %}
+                                                        <option value="{{asset.asset_controller_id}}" selected>{{asset.asset_controller.name}}</option>
+                                                    {% endif %}
+                                                </select>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="remarks">Asset Location</label>
+                                                <input type="text" class="form-control" id="asset_location"
+                                                    data-title="asset_location" name="asset_location" {% if last_allocation.asset_location %}value="{{last_allocation.asset_location}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="remarks">Remarks</label>
+                                                <input type="text" class="form-control" id="remarks"
+                                                    data-title="remarks" name="remarks" {% if asset.remarks %}value="{{asset.remarks}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="payment_mode_or_acuired_mode">Payment Mode or Acuired Mode</label>
+                                                <input type="text" class="form-control" id="payment_mode_or_acuired_mode"
+                                                    data-title="payment_mode_or_acuired_mode" name="payment_mode_or_acuired_mode" {% if asset.payment_mode_or_acuired_mode %}value="{{asset.payment_mode_or_acuired_mode}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+
+                                                <label for="insurance">Insurance Date</label>
+                                                <input type="text" data-title="insurance"
+                                                    class="form-control single_date" name="date_of_insurance" id="insurance"
+                                                    placeholder="" onfocusout="leadDays('_1')" {% if asset.date_of_insurance %}value="{{asset.date_of_insurance|date:'d-M-Y'}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="insurance_policy">Insurance Policy</label>
+                                                <input type="text" class="form-control" id="insurance_policy"
+                                                    data-title="insurance_policy" name="insurance_policy" {% if asset.insurance_policy %}value="{{asset.insurance_policy}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="insurer_name">Insurance Name</label>
+                                                <input type="text" class="form-control" id="insurer_name"
+                                                    data-title="insurer_name" name="insurer_name" {% if asset.insurer_name %}value="{{asset.insurer_name}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+
+                                                <label for="insurance_expiry_date">Insurance Expiry Date</label>
+                                                <input type="text" data-title="insurance_expiry_date"
+                                                    class="form-control single_date" name="insurance_expiry_date"
+                                                    id="insurance_expiry_date" placeholder=""
+                                                    onfocusout="leadDays('_1')" {% if asset.insurance_expiry_date %}value="{{asset.insurance_expiry_date|date:'d-M-Y'}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="insured_value">Insurance Value</label>
+                                                <input type="number" class="form-control" id="insured_value"
+                                                    data-title="insured_value" name="insured_value" {% if asset.insured_value %}value="{{asset.insured_value}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="claim_status">Claim Status</label>
+                                                <input type="text" class="form-control" id="claim_status"
+                                                    data-title="claim_status" name="claim_status" {% if asset.claim_status %}value="{{asset.claim_status}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+
+                                                <label for="sale_date">Sale Date</label>
+                                                <input type="text" data-title="sale_date"
+                                                    class="form-control single_date" name="sale_date" id="sale_date"
+                                                    placeholder="" onfocusout="leadDays('_1')" {% if asset.sale_date%}value="{{asset.sale_date|date:'d-M-Y'}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="sale_amount">Sale Amount</label>
+                                                <input type="number" class="form-control" id="sale_amount"
+                                                    data-title="sale_amount" name="sale_amount" {% if asset.sale_amount%}value="{{asset.sale_amount}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group focused">
+
+                                                <label for="obsolescence_date_disposal">Obsolescence Disposal
+                                                    Date</label>
+                                                <input type="text" data-title="obsolescence_date_disposal"
+                                                    class="form-control single_date" name="obsolescence_date_disposal"
+                                                    id="obsolescence_date_disposal" placeholder=""
+                                                    onfocusout="leadDays('_1')" {% if asset.obsolescence_date_disposal%}value="{{asset.obsolescence_date_disposal|date:'d-M-Y'}}"{%endif%}>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="migration_reasons">Migration Reason</label>
+                                                <textarea class="form-control" rows="1" id="migration_reasons"
+                                                    data-title="Migration Reason" name="migration_reasons"></textarea>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <label for="others_accessories">Others Accessories</label>
+                                                <textarea class="form-control" rows="1" id="others_accessories"
+                                                    data-title="Others Accessories" name="others_accessories">{{asset.others_accessories}}</textarea>
+                                                <span class="bar"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 col-sm-4 col-xs-6 ml-auto mr-3 mt-4">
+                                    <div class="button-group">
+                                        <button type="submit" id="btnStyleSave"
+                                            class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                            <span class="btn-label"><i class="fa fa-check"></i></span>
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $('.single_date').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'DD-MMM-YYYY'
+            },
+            autoUpdateInput: false
+        }).on("apply.daterangepicker", function (e, picker) {
+            picker.element.val(picker.startDate.format(picker.locale.format));
+        });
+
+
+        // Single Date Range Picker
+        $('.singledate').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+
+        function enforceMin(el) {
+            if (el.value != "") {
+            if (parseInt(el.value) < parseInt(el.min)) {
+                el.value = '';
+            }
+            else if (parseInt(el.value) == 0) {
+                el.value = 0;
+            }
+            else{
+            
+            }
+            }
+        }
+
+        $("#asset_user").select2({
+            // Getting Users from select2 field from database
+            minimumInputLength  : 3,
+            placeholder         : "Asset User",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'get_user_list' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) {
+                    return { results: data.users };
+                }
+            }
+        });
+        $("#asset_controller").select2({
+            // Getting Users from select2 field from database
+            minimumInputLength  : 3,
+            placeholder         : "Asset Controller",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'get_user_list' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) {
+                    return { results: data.users };
+                }
+            }
+        });
+
+        $("#supplier").select2({
+            minimumInputLength: 3,
+            placeholder: "Supplier",
+            ajax: {
+                url: "{% url 'inventory:get_suppliers' %}",
+                dataType: "json",
+                data: function(term, page) {
+                    return { q: term };
+                },
+                processResults: function (data) {
+                    return { results: data };
+                }
+            },
+            closeOnSelect: true,
+        });
+
+    });
+
+
+
+</script>
+
+{% endblock %}
