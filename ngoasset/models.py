@@ -189,55 +189,6 @@ class FAAssetAllocation(CoreActionWithUpdate):
      class Meta:
           db_table = 'asset_allocation'
 
-class MaintenanceRequest(CoreAction):
-     request_no     = models.CharField(max_length=100, unique=True)
-     branch         = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True, blank=True)
-     etd            = models.DateField(auto_now=False, null=True, blank=True)
-     item_types     =((0,'Fixed Asset'),(1,'Others'))
-     item_type      = models.IntegerField(null=True, blank=True, choices=item_types, default=0)
-     requset_branch = models.ForeignKey('self',on_delete=models.CASCADE,related_name='maintenance_requset_branch', null=True, blank=True)
-     note           = models.TextField()
-     updated_at     = models.DateTimeField(auto_now=True, null=True, blank=True)
-     delivery_at    = models.DateTimeField(null=True, blank=True)
-
-     def __str__(self):
-          return str(self.request_no)
-
-     class Meta:
-          db_table            = 'asset_maintenance_request'
-          verbose_name        = "Asset Maintenance Request"
-          verbose_name_plural = "Asset Maintenance Requests"
-
-     def get_absolute_url(self):
-          return reverse("fa:maintenance_view", kwargs={"id": self.pk})
-    
-
-class RequestDetails(CoreAction):
-     maintenance       = models.ForeignKey(MaintenanceRequest, on_delete=models.CASCADE, null=True, blank=True)
-     asset             = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, blank=True)
-     item              = models.ForeignKey(AssetItem, on_delete=models.CASCADE, null=True, blank=True, default=None)
-     remarks           = models.TextField(null=True, blank=True)
-     problem_details   = models.TextField(null=True, blank=True)
-     assign_to_feedback = models.TextField(null=True, blank=True)
-     delivery_note     = models.TextField(null=True, blank=True)
-     assign_to         = models.ForeignKey(Users, related_name="%(class)s_assign_to", related_query_name="%(class)s_assign_to", 
-                                   on_delete=models.CASCADE, null=True, blank=True, default=None)
-     assign_by         = models.ForeignKey('general.Users', related_name="%(class)s_assign_by", related_query_name="%(class)s_assign_by", 
-                                   on_delete=models.CASCADE, null=True, blank=True, default=None)
-     solve_by          = models.ForeignKey('general.Users', related_name="%(class)s_solve_by", related_query_name="%(class)s_solve_by", 
-                                   on_delete=models.CASCADE, null=True, blank=True, default=None)
-     solve_at          = models.DateField(null=True, blank=True, default=None)
-     delivery_at       = models.DateTimeField(null=True, blank=True)
-
-     def __str__(self):
-          return str(self.maintenance.request_no)+" - "+ str(self.asset.item.item_master.item_name) if self.asset else "N/A"
-
-     class Meta:
-          db_table            = 'asset_request_details'
-          verbose_name        = "Asset Request Details"
-          verbose_name_plural = "Asset Requests Details"
-
-
 # Vehicle
 class Vehicle(CoreActionWithUpdate):
      vehicle_types   = (
@@ -291,40 +242,3 @@ class VehicleAllocation(CoreActionWithUpdate):
 
      def __str__(self):
           return (self.assigned_to.name if self.assigned_to else '') + str(" - ") + (self.vehicle.name if self.vehicle else '')
-
-class VehicleService(CoreActionWithUpdate):
-     vehicle         = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, blank=True) 
-     provider        = models.CharField(max_length=100, default='', null=True, blank=True)
-     details         = models.CharField(max_length=200, default='', null=True, blank=True)
-     location        = models.CharField(max_length=150, default='', null=True, blank=True)
-     repair_cost     = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=0)
-     repair_date     = models.DateTimeField(auto_now=False, null=True, blank=True)
-     remarks         = models.TextField(default='', null=True, blank=True)
-
-     class Meta:
-          db_table            = 'vmgt_vehicle_services'
-          verbose_name        = 'Vehicle Service'
-          verbose_name_plural = 'Vehicle Services'
-
-     def __str__(self):
-          return self.provider
-
-class VehicleRequisition(CoreActionWithUpdate):
-     route_types   = (
-          ('One way', 'One way'),
-          ('Two way', 'Two way'),
-     )
-     vehicle         = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, blank=True) 
-     visiting_place  = models.CharField(max_length=150, default='', null=True, blank=True)
-     start_from      = models.CharField(max_length=150, default='', null=True, blank=True)
-     route_type      = models.CharField(max_length=10, choices=route_types)
-     num_of_persons  = models.IntegerField(default=1) 
-     req_date        = models.DateTimeField(auto_now=False, blank=True, null=True)
-     start_time      = models.DateTimeField(auto_now=False, blank=True, null=True)
-     end_time        = models.DateTimeField(auto_now=False, blank=True, null=True)
-     remarks         = models.TextField(default='', null=True, blank=True)
-
-     class Meta:
-          db_table            = 'vmgt_vehicle_requisitions'
-          verbose_name        = 'Vehicle Requisition'
-          verbose_name_plural = 'Vehicle Requisitions'

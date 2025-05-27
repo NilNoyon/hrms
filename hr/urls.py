@@ -266,7 +266,7 @@ urlpatterns = [
 
      # HRAttendanceBonusRule
      path('festival-bonus/', views.bonus_setup, name='bonus_setup'),
-     path('festival-bonus//edit/<int:id>/', views.bonus_setup_update, name='bonus_setup_update'),
+     path('festival-bonus/edit/<int:id>/', views.bonus_setup_update, name='bonus_setup_update'),
      path('festival-bonus/delete/<int:id>/', views.bonus_delete, name='bonus_delete'),
 
 
@@ -313,4 +313,8 @@ urlpatterns = [
      path('cessation/action/', views.employee_cessation_action, name='employee_cessation_action'),
      path('promotion-demotion/', views.promotion_demotion, name='promotion_demotion'),
      path('promotion-history-view/', views.promotion_history_view, name='promotion_history_view'),
+
+     # employee branch wise transfer
+     path('employee-transfer-branchwise/', views.employee_transfer_branchwise, name='employee_transfer_branchwise'),
+     path('employee-transfer-branchwise/<int:id>/edit/', views.employee_transfer_branchwise_update, name='employee_transfer_branchwise_update'),
 ]

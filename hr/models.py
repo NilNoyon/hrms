@@ -564,10 +564,10 @@ class EmployeeTransfer(CoreActionWithUpdate):
      employee_pf            = models.ForeignKey (EmployeePF, on_delete=models.CASCADE,null=True, blank=True)
      to_employee_id         = models.CharField (max_length=50,default='')
      effictive_from_date    = models.DateField (auto_now_add=False, null=True, blank=True)
-     department_from         =  models.ForeignKey (Departments,on_delete=models.CASCADE, related_name='pf_trans_dept_from')
-     department_to           =  models.ForeignKey (Departments,on_delete=models.CASCADE, related_name='pf_trans_dept_to')
-     designation_from       =  models.ForeignKey (Designations,on_delete=models.CASCADE, related_name='pf_trans_desig_from')
-     designation_to         =  models.ForeignKey (Designations,on_delete=models.CASCADE, related_name='pf_trans_desig_to')
+     department_from        = models.ForeignKey (Departments,on_delete=models.CASCADE, related_name='pf_trans_dept_from')
+     department_to          = models.ForeignKey (Departments,on_delete=models.CASCADE, related_name='pf_trans_dept_to')
+     designation_from       = models.ForeignKey (Designations,on_delete=models.CASCADE, related_name='pf_trans_desig_from')
+     designation_to         = models.ForeignKey (Designations,on_delete=models.CASCADE, related_name='pf_trans_desig_to')
      remarks                = models.CharField(max_length=100, null=True, blank=True)
      email                  = models.CharField(max_length=100)
      joining_date           = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -1580,4 +1580,27 @@ class EmployeeCessation(CoreActionWithUpdate):
 
      def __str__(self):
           return f"Cessation of {self.emolpoyee}"  
+     
+class EmployeeBranchTransfer(CoreActionWithUpdate):
+     employee                = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='transfered_employee')
+     from_branch             = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='from_branch')
+     to_branch               = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='to_branch')
+     effective_from_date     = models.DateField(null=True, blank=True)
+     remarks                 = models.TextField(null=True, blank=True)     
+
+     class Meta:
+          db_table            = 'hr_emp_branch_transfer'
+          verbose_name        = "HR Employee Branch Transfer"
+          verbose_name_plural = "HR Employee Branch Transfer"
+     
+     def save(self, *args, **kwargs):
+          today = timezone.now().date()
+          if self.effective_from_date == today:
+               self.employee.branch_id = self.to_branch_id
+               self.employee.save()
+               EmployeeDetails.objects.filter(employee_id=self.employee.employee_id).update(branch_id=self.to_branch_id,cost_center_id=self.to_branch_id)
+          super().save(*args, **kwargs)
+
+     def __str__(self):
+          return f"Transfer of {self.employee}"
      

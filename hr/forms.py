@@ -334,3 +334,9 @@ class FiscalYearForm(forms.ModelForm):
 	class Meta:
 		model = FiscalYear
 		fields = '__all__'
+		
+# Employee Branch Transfer
+class EmployeeBranchTransferForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeBranchTransfer
+        fields = '__all__'

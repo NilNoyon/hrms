@@ -13,14 +13,4 @@ urlpatterns = [
 	path('vehicle-allocation/edit/<int:id>/', views.vehicle_allocation_update, name='vehicle_allocation_update'),
 	path('vehicle-allocation/delete/<int:id>/', views.vehicle_allocation_delete, name='vehicle_allocation_delete'),
 
-	# VehicleService
-	path('vehicle-service/', views.vehicle_service_list, name='vehicle_service_list'),
-	path('vehicle-service/edit/<int:id>/', views.vehicle_service_update, name='vehicle_service_update'),
-	path('vehicle-service/delete/<int:id>/', views.vehicle_service_delete, name='vehicle_service_delete'),
-
-	# VehicleRequisition
-	path('vehicle-requisition/', views.vehicle_requisition_list, name='vehicle_requisition_list'),
-	path('vehicle-requisition/edit/<int:id>/', views.vehicle_requisition_update, name='vehicle_requisition_update'),
-	path('vehicle-requisition/delete/<int:id>/', views.vehicle_requisition_delete, name='vehicle_requisition_delete'),
-
 ]

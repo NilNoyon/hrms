@@ -75,16 +75,17 @@
                                         </div>
                                     </div>
                                 {% endif %}
-
+                                
                                 <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-3" {% endif %}>
                                     <div class="form-group">
-                                        <input type="text" class="form-control singledate date_of_formation" name="effective_from_date" id="effective_from_date" required>
+                                        <input type="text" class="form-control singledate date_of_formation" name="effective_from_date" id="effective_from_date" required autocomplete="off">
                                         <span class="bar"></span>
                                         <label for="effective_from_date">Effective From</label>
                                     </div>
                                 </div> 
+                               
                                 <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-3" {% endif %}>
-                                    <label for="letter">Letter</label>
+                                    {% comment %} <label for="letter">Letter</label> {% endcomment %}
                                     <input type="file" class="form-control" name="letter" id="letter">
                                 </div>
                                 
@@ -196,7 +197,7 @@
             </div> 
         </div> 
         <!-- Approve/Reject Modal -->
-        <div class="modal fade" id="approveRejectModal" tabindex="-1" role="dialog" aria-labelledby="approveRejectModalLabel" aria-hidden="true">
+        <div class="modal fade" id="approveRejectModal" tabindex="-1" role="dialog" aria-labelledby="approveRejectModalLabel" aria-hidden="true" style="padding-top: 50px;">
             <div class="modal-dialog" role="document">
             <form method="post" action="{% url 'hr:employee_cessation_action' %}">
                 {% csrf_token %}

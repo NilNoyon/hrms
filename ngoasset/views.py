@@ -42,39 +42,9 @@ class QR_Text:
                                                             asset_url[1:])
             return asset_basic_info
         else: return ""
-
-
-try:
-    from ngoasset.view.view_maintenance import *
-except ImportError:
-    pass
  
-
 # Vehicle Management
 template_name       = "vehicle_mgt_base.html"
-
-def common_context():
-    return { 
-        'tab_name'      : 'vehicle',
-        'vaction_name'  : "Add Vehicle", 
-        'vform'         : VehicleForm(), 
-        'vaction_url'   : reverse_lazy('fa:fixed_list'), 
-        'vehicle_list'  : Vehicle.objects.order_by('-id'),
-        'aaction_name'  : "Add Allocation", 
-        'aform'         : VehicleAllocationForm(), 
-        'aaction_url'   : reverse_lazy('fa:vehicle_allocation_list'), 
-        'allocation_list' : VehicleAllocation.objects.order_by('-id'),
-        'employee_list' : EmployeeDetails.objects.order_by('id'),
-        'saction_name'  : "Add Service", 
-        'sform'         : VehicleServiceForm(), 
-        'saction_url'   : reverse_lazy('fa:vehicle_service_list'), 
-        'service_list'  : VehicleService.objects.order_by('-id'),
-        'raction_name'  : "Add Requisition", 
-        'rform'         : VehicleRequisitionForm(), 
-        'raction_url'   : reverse_lazy('fa:vehicle_requisition_list'), 
-        'req_list'      : VehicleRequisition.objects.order_by('-id'),
-    }
-
 
 # ============ Vehicle Start ============ #
 try: from ngoasset.view.vehicle import *
@@ -86,15 +56,3 @@ except ImportError: pass
 try: from ngoasset.view.vehicle_allocation import *
 except ImportError: pass
 # ============ VehicleAllocation End ============ #
-
-
-# ============ VehicleService Start ============ #
-try: from ngoasset.view.vehicle_service import *
-except ImportError: pass
-# ============ VehicleService End ============ #
-
-
-# ============ VehicleRequisition Start ============ #
-try: from ngoasset.view.vehicle_requisition import *
-except ImportError: pass
-# ============ VehicleRequisition End ============ #
