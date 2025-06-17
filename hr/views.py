@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from notification.signals import notify
 from general.utils import render_to_pdf
 from general.templatetags import general_filters
-from hr.forms import EmpPfRegistationForm, EmployeeCessationForm, EmployeePromotionDemotionForm, EmployeeTransferForm, PFDiscontinueForm, Pf_EmployeeForm, PfContributionForm, PolicyMasterForm, ProvidentFundMasterForm, HolidayForm, HolidaySetupForm, NoticeBoardForm, HRLeaveMasterForm, HRLeaveTypeForm, HRLeaveAllocationForm, HRLeaveApplicationForm, AttendanceForm, HRSalarySlabForm, HRIncomeTaxSlabForm, HRSalaryBreakdownForm, EmployeeCalendar, OutsideRemoteDutyForm, HRSalaryProcessForm, FiscalYearForm
+from hr.forms import *
 from hr.models import EmployeeCessation, EmployeeInfo, EmployeeDetails, EmployeePF, EmployeePromotionDemotion, EmployeeTransfer,  PFDiscontinue, PFMonthlyContribution, PolicyMaster, PromotionDemotionHistory, ProvidentFundMaster, Holiday, HolidaySetup, NoticeBoard, HRLeaveType, HRLeaveMaster, HRLeaveAllocation, HRLeaveApplication, Attendance, AttenddanceLog, AttendanceDevice, HRFloor, HRSalarySlabMaster, HRIncomeTaxSlabMaster, HRSalaryBreakdown, HRMontlySalaryDetails, OutsideRemoteDuty, HRSalaryCycle, GEOLocation, HRSalaryProcess, HRShiftRoaster, HRAttendanceBonusRule, Shift, LoanRepayment, Division, SubSection, FiscalYear
 
 def exclude_company(company_id):
@@ -30,20 +30,20 @@ def str_from_xls(value, change_quote=True, date_field = False, time_field=False)
         value   = general_filters.strip_double_quotes(value) if value else ''
         value   = general_filters.strip_single_quote(value)  if value else '' 
     value = str(value) if str(value) not in ['nan', 'NaT'] else ''
-    if date_field and value :
-        try : value = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").date()
-        except : 
-            try : value = datetime.datetime.strptime(value, "%d-%m-%Y").date()
+    if date_field and value:
+        try : value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").date()
+        except: 
+            try : value = datetime.strptime(value, "%d-%m-%Y").date()
             except : 
-                try : value = datetime.datetime.strptime(value, "%d/%m/%Y").date()
+                try : value = datetime.strptime(value, "%d/%m/%Y").date()
                 except : value = None
-    if time_field and value :
-        try : value = datetime.datetime.strptime(value, "%H:%M:%S").time()
+    if time_field and value:
+        try : value = datetime.strptime(value, "%H:%M:%S").time()
         except : 
-            try : value = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").time()
+            try : value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").time()
             except : value = None
-    elif date_field and not value : value = None
-    elif time_field and not value : value = None
+    elif date_field and not value: value = None
+    elif time_field and not value: value = None
     return value
 
 def retrun_str_from_xls(value):
@@ -1535,7 +1535,7 @@ def get_employee_transfer(request):
                 pf = EmployeePF.objects.filter(employee_id=int(request.POST.get('employee'))).first()
                 data = {
                     'emp_id' : employee.id,
-                    'company' : str(employee.company.name),
+                    'company' : str(employee.branch.name),
                     'employee' : employee.employee_id,
                     'father_name' : employee.father_name,
                     'permanent_address' : employee.permanent_address,
@@ -1960,6 +1960,70 @@ def promotion_history_view(request):
     employee_id = request.GET.get('employee_id')
     history = PromotionDemotionHistory.objects.filter(record__employee_id=employee_id).order_by('-effective_date')
     return render(request, 'hr/history_popup.html', {'history': history})
+
+@login
+def employee_transfer_branchwise(request):
+    chk_permission   = permission(request, "/hr/employee-transfer-branchwise/")
+    if chk_permission and chk_permission.view_action and chk_permission.insert_action:
+        if request.method == "POST":
+            request.POST = request.POST.copy()
+            request.POST['created_by'] = request.session.get('id')
+            employee    = request.POST.get('employee')
+            selected_employee = Users.objects.filter(id=employee).last()
+            request.POST['from_branch'] = selected_employee.branch if selected_employee else None
+            request.POST['status']      = True
+            form = EmployeeBranchTransferForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Successfully add!")
+                return redirect(reverse_lazy('hr:employee_transfer_branchwise'))
+            else : ebs_bl_common.form_errors(request, form)
+
+        template_name   = "hr/employee/transfer_list.html"
+        object_list     = EmployeeBranchTransfer.objects.order_by('-id')
+        action_url      = reverse_lazy('hr:employee_transfer_branchwise')
+        action_name     = "Employee Branch Transfer"
+        employee_list   = Users.objects.filter(status=True,branch__company_id=request.session.get('company_id'))
+        branch_list     = Branch.objects.filter(status=True,company_id=request.session.get('company_id'))
+        form            = EmployeeBranchTransferForm()
+        context         = { 'action_name':action_name, 'form':form, 
+                           'action_url':action_url, 'object_list':object_list,
+                           'employee_list':employee_list,'branch_list':branch_list
+                           }
+        return render(request, template_name, context)
+    else: return redirect('/access-denied')
+
+@login
+def employee_transfer_branchwise_update(request, id):
+    chk_permission   = permission(request, "/hr/employee-transfer-branchwise/")
+    if chk_permission and chk_permission.view_action and chk_permission.update_action:
+        try:
+            instance = get_object_or_404(EmployeeBranchTransfer, id=id)
+            if request.method == "POST":
+                request.POST = request.POST.copy()
+                employee    = request.POST.get('employee')
+                selected_employee = Users.objects.filter(id=employee).last()
+                request.POST['from_branch'] = selected_employee.branch if selected_employee else None
+                form = EmployeeBranchTransferForm(request.POST, instance=instance)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "Successfully Updated!")
+                    return redirect(reverse_lazy('hr:employee_transfer_branchwise'))
+                else : ebs_bl_common.form_errors(request, form)
+
+            template_name   = "hr/employee/transfer_list.html"
+            action_name     = "Update Employee Branch Transfer"
+            action_url      = reverse_lazy('hr:employee_transfer_branchwise_update', kwargs={'id':id})
+            object_list     = EmployeeBranchTransfer.objects.order_by('id')
+            employee_list   = Users.objects.filter(status=True,branch__company_id=request.session.get('company_id'))
+            branch_list     = Branch.objects.filter(status=True,company_id=request.session.get('company_id'))
+            form            = EmployeeBranchTransferForm(instance=instance)
+
+            context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance, 'employee_list':employee_list,'branch_list':branch_list}
+            return render(request, template_name, context)
+        except : return redirect(reverse_lazy('hr:employee_transfer_branchwise'))
+    else: return redirect('/access-denied')
+    
 
 # this is the function for loan
 try: from hr.view.loan import *

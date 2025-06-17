@@ -1,0 +1,156 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block page_title %}Fixed Asset Item{% endblock %}
+
+{% block add_css %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9 custom-color rounded-lg">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 align-self-center">
+                        <h4 class="mb-1">Fixed Asset Item List</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+              <div class="">
+                <table id="process-table" class="table table-striped card-table table-vcenter pending_req_table scrollerDT" style="width:100%" data-url="{% url 'fa:get_fa_item_for_datatable'%}">
+                  <thead>
+                      <tr>
+                          <th class="d-sm-table-cell">Name</th>
+                          <th class="d-sm-table-cell" width="30%">Specification</th>
+                          <th class="d-sm-table-cell">Brand</th>
+                          <th class="d-sm-table-cell">Unit of Measurement</th>
+                          <th class="d-sm-table-cell">Origin</th>
+                          <th class="d-sm-table-cell">Sub Classification</th>
+                          <th class="d-sm-table-cell"></th>
+                      </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 custom-color rounded-lg">
+        <div class="card border-danger">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                    </div>
+                    {% if item %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'fa:item_list' %}" class="btn btn-xs btn-success" title="Add New"><i class="ti-plus"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+              <div class="col-12">
+                <form class="floating-labels mt-3" method="post" id="item_form" action="{{ action_url }}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control text-capitalize" id="name" name="name" maxlength="100" value="{{ item.name }}" required>
+                        <span class="bar"></span>
+                        <label for="name">Name</label>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea class="form-control text-capitalize" id="specification" name="specification" maxlength="100" required>{{ item.specification }}</textarea>
+                        <span class="bar"></span>
+                        <label for="specification">Specification</label>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" class="form-control text-capitalize" id="brand" name="brand" maxlength="100" value="{{ item.brand }}">
+                        <span class="bar"></span>
+                        <label for="brand">Brand</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="uom">Unit of Measurement</label>
+                        <select class="form-control text-capitalize select2" name="uom" id="uom" data-title="Unit of Measurement" required>
+                            <option value="" disabled selected></option>
+                            {% for uom in uom_list %}
+                            <option value="{{uom.id}}" {% if item.uom_id == uom.id %} selected {% endif %}>{{uom.short_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="origin">Country</label>
+                        <select class="form-control select2" name="origin" id="origin" data-title="Country">
+                            <option value="" disabled selected></option>
+                            {% for country in countries %}
+                                <option value="{{ country.code }}" {% if country.code == item.origin.code %}selected {% endif %} >{{ country.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subclassification">Sub Category</label>
+                        <select class="form-control select2" name="subclassification" id="subclassification" data-title="Sub Classification" required>
+                            <option value="" disabled selected></option>
+                            {% if item and item.subclassification %}
+                            <option value="{{item.subclassification_id}}" selected>{{item.subclassification.name}}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="mt-2 col-md-12">
+                          <div class="button-group">
+                            <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                              <span class="btn-label"><i class="fa fa-check"></i></span>
+                              Submit
+                            </button>
+                          </div>
+                        </div>
+                    </div>
+                </form>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/scrollerDT.html' %}
+<script>
+
+    $(document).ready(function () {
+        $("#subclassification").select2({
+            minimumInputLength: 3,
+            placeholder: "Sub Classification",
+            ajax: {
+                url: "{% url 'fa:get_fa_subclassification' %}",
+                dataType: "json",
+                data: function(term, page) {
+                    return {
+                        q: term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.items
+                    };
+                }
+            },
+            tags: true,
+            closeOnSelect: true,
+        });
+    });
+</script>
+{% endblock %}

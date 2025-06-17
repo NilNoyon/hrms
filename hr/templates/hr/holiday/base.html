@@ -50,9 +50,9 @@
                 <form class="floating-labels p-4" method="post" id="form" action="{{ haction_url }}">
                     {% csrf_token %}
                     <div class="row">
-                        <div class="col-md-3"> 
+                        <div class="col-md-6"> 
                             <div class="form-group">
-                                <select class="form-control text-capitalize select2 company" id="company" name="company" data-title="Select Branch">
+                                <select class="form-control text-capitalize select2 company" id="company" name="company" multiple data-title="Select Branch">
                                     <option value="">Select Branch</option>
                                     {% for c in company_list %}
                                     <option value="{{c.id}}">{{ c.name }}</option>
@@ -119,23 +119,31 @@
         });
         {% comment %} Delete {% endcomment %}
 
+        // Handle multiple selection for company field
         $("body").on("select2:select", "#company", function(){
-            $.ajax({
-                url : "{% url 'hr:get_holiday_company_data' %}",
-                type: "POST", dataType: 'html', 
-                data: { company_id:$(this).val() },
-                success: function (data) {
-                    $(".holiday_update").html(data);
+            var selectedCompanies = $(this).val();
+            console.log('company::: ', selectedCompanies)
+            if (selectedCompanies && selectedCompanies.length > 0) {
+                $.ajax({
+                    url : "{% url 'hr:get_holiday_company_data' %}",
+                    type: "POST", dataType: 'html', 
+                    data: { company_id: selectedCompanies },
+                    traditional: true,
+                    success: function (data) {
+                        $(".holiday_update").html(data);
 
-                    // Switchery
-                    $('.switchery').remove(); 
-                    var elems = Array.prototype.slice.call(document.querySelectorAll('#holiday .js-switch'));
-                    elems.forEach(function(html) {
-                        var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
-                    });
-                    date_range_picker('#holiday .datepicker')
-                }
-            });
+                        // Switchery
+                        $('.switchery').remove(); 
+                        var elems = Array.prototype.slice.call(document.querySelectorAll('#holiday .js-switch'));
+                        elems.forEach(function(html) {
+                            var switchery = new Switchery(html, { size:'mini', color:'#009efb'});
+                        });
+                        date_range_picker('#holiday .datepicker')
+                    }
+                });
+            } else {
+                $(".holiday_update").html('');
+            }
         });
     });
 

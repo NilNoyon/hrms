@@ -1,0 +1,216 @@
+<div class="row">
+    <div class="col-md-9">
+        <div class="table-responsive mt-4">
+            <table class="table table-border table-striped card-table table-vcenter" id="vehicle" style="width:100%">
+                <thead>
+                    <tr class="text-center">
+                        <th class="d-sm-table-cell">SL.</th>
+                        <th>Name</th>
+                        <th>Model</th>
+                        <th>Reg. No.</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Driver/R. Person</th>
+                        <th class="d-sm-table-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehicle in vehicle_list %}
+                    <tr>
+                        <td class="">{{ forloop.counter }}</td>
+                        <td>{{ vehicle.name|default_if_none:"" }}</td>
+                        <td>{{ vehicle.model|default_if_none:"" }}</td>
+                        <td>{{ vehicle.reg_no|default_if_none:"" }}</td>
+                        <td>{{ vehicle.vehicle_type|default_if_none:"" }}</td>
+                        <td>{{ vehicle.category|default_if_none:"" }}</td>
+                        <td>{{ vehicle.driver_name|default_if_none:"" }} {% if vehicle.driver_employee_id %} ({{vehicle.driver_employee_id}}) {% endif %}</td>
+                        <td class="text-left">
+                            <a class="h4 m-r-10 text-success" href="{% url 'fa:vehicle_update' vehicle.id %}">
+                                <span class="icon"><i class="ti-pencil-alt"></i></span>
+                            </a>
+                            <a class="h4 text-danger delete_btn" href="javascript:void(0)" data-url="{% url 'fa:vehicle_delete' vehicle.id %}">
+                                <span class="icon"><i class="ti-trash"></i></span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger custom-color rounded-lg p-3 mb-0">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9 align-self-center">
+                        <h4 class="mb-1" id="form_header">{{ vaction_name }}</h4>
+                    </div>
+                    {% if vinstance %}
+                    <div class="col-3 align-self-center text-right">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group" role="group" aria-label="First group">
+                                    <a href="{% url 'fa:vehicle_list' %}" class="btn btn-xs btn-success" title="Add New">
+                                        <i class="ti-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="floating-labels" method="post" id="vform" action="{{ vaction_url }}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-5">
+                            <p class="pr-4 font-weight-bold mt-1">Type</p>
+                            <p class="pr-4 font-weight-bold mt-1">Category</p>
+                        </div>    
+                        <div class="col-md-7">
+                            <div class="form-group mb-2" aria-readonly="true"> 
+                                <div class="pl-3 custom-control custom-radio" style="display: inline-flex; margin-right: 3rem;">
+                                    <input type="radio" id="own" name="vehicle_type" value="Own" class="custom-control-input vehicle_type" {% if not vinstance or vinstance.vehicle_type == 'Own' %}checked{% endif %} />
+                                    <label class="custom-control-label" for="own">Own</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="rent" name="vehicle_type" value="Rent" class="custom-control-input vehicle_type" {% if vinstance.vehicle_type == 'Rent' %}checked{% endif %} />
+                                    <label class="custom-control-label" for="rent">Rent</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group" aria-readonly="true"> 
+                                <div class="pl-3 custom-control custom-radio" style="display: inline-flex; margin-right: 3rem;">
+                                    <input type="radio" id="official" name="category" value="Official" class="custom-control-input" {% if not vinstance or vinstance.category == 'Official' %}checked{% endif %} />
+                                    <label class="custom-control-label" for="official">Official</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="private" name="category" value="Private" class="custom-control-input" {% if vinstance.category == 'Private' %}checked{% endif %} />
+                                    <label class="custom-control-label" for="private">Private</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                                               
+                    <div class="form-group">
+                        <input type="text" class="form-control bg-transparent" id="name" name="name" data-title="Name" value="{{ vinstance.name }}" />
+                        <span class="bar"></span>
+                        <label for="name">Name</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent" id="model" name="model" data-title="Model" value="{{ vinstance.model }}" />
+                                <span class="bar"></span>
+                                <label for="model">Model</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent text-center" id="year" name="year" data-title="Year" value="{{ vinstance.year }}" />
+                                <span class="bar"></span>
+                                <label for="year">Year</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent text-center" id="num_of_seats" name="num_of_seats" data-title="Seats" value="{{ vinstance.num_of_seats }}" />
+                                <span class="bar"></span>
+                                <label for="num_of_seats">Seats</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent" id="reg_no" name="reg_no" data-title="Reg No" value="{{ vinstance.reg_no }}" />
+                                <span class="bar"></span>
+                                <label for="reg_no">Reg No</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="reg_exp_date" name="reg_exp_date" value="{{ vinstance.reg_exp_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="reg_exp_date">Reg. Expiry Date</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="fitness_exp_date" name="fitness_exp_date" value="{{ vinstance.fitness_exp_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="fitness_exp_date">Fitness Expiry Date</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="rent_date" name="rent_date" value="{{ vinstance.rent_date|date:'d/m/Y' }}" data-val="{{ vinstance.rent_date|date:'d/m/Y' }}" {% if not vinstance or vinstance.vehicle_type != 'Rent' %} disabled {% endif %} autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="rent_date">Rent Date</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="number" step="1" min="0" class="form-control text-center bg-transparent" id="actual_cost" name="actual_cost" data-title="Actual Cost" value="{{ vinstance.actual_cost }}" />
+                                <span class="bar"></span>
+                                <label for="actual_cost">Actual Cost</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="number" step="1" min="0" class="form-control text-center bg-transparent" id="net_worth" name="net_worth" data-title="Net Worth" value="{{ vinstance.net_worth }}" />
+                                <span class="bar"></span>
+                                <label for="net_worth">Net Worth</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control bg-transparent" id="driver_name" name="driver_name" data-title="Driver/Responsible Person" value="{{ vinstance.driver_name }}" />
+                        <span class="bar"></span>
+                        <label for="driver_name">Driver/Responsible Person</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent" id="driver_employee_id" name="driver_employee_id" data-title="Person Employee ID" value="{{ vinstance.driver_employee_id|default_if_none:"" }}" />
+                                <span class="bar"></span>
+                                <label for="driver_employee_id">Employee ID</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control bg-transparent singledate" id="driver_assigned_date" name="driver_assigned_date" value="{{ vinstance.driver_assigned_date|date:'d/m/Y' }}" autocomplete="off">
+                                <span class="bar"></span>
+                                <label for="driver_assigned_date">Assigned Date</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="1" class="form-control bg-transparent" id="vremarks" name="remarks">{{ vinstance.remarks }}</textarea>
+                        <span class="bar"></span>
+                        <label for="vremarks">Remarks</label>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success submitBtn" id="submitBtn">
+                            <span class="btn-label"><i class="fa fa-check"></i> Submit</span>
+                        </button>
+                    </div>
+                </form> 
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("body").on("change", ".vehicle_type", function(e){
+        if($(this).val() == "Rent"){
+            $("#rent_date").removeAttr("disabled").val($("#rent_date").data('val')).trigger("change");
+        }else{ 
+            $("#rent_date").attr("disabled", true).val('').trigger("change");
+        }
+    })
+</script>

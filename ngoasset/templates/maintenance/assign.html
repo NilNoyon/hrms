@@ -1,0 +1,318 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load sc_filters %}
+
+{% block page_title %}MR Assign {% endblock %}
+
+{% block add_css %}
+{% endblock %}
+
+{% block content %}
+<form class="mt-4"  action="{% url 'fa:assign_to_user' maintenance.id %}"  method="post" id="assign_to_form">{% csrf_token %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <h4 class="text-themecolor mb-0">MR Assign</h4>
+                        </div>
+                        <div class="col-md-6 align-self-center text-right">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                    <a href="{% url 'fa:request_list' %}" class="btn btn-xs btn-info mr-1" title="Return List"><i class="ti-view-list-alt"></i></a> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body pt-0 custom-color rounded-lg p-3">
+                    <div class="row mr_searching">
+                        <div class="col-md-2">
+                            <div class="form-group companies">
+                                <select class="form-control text-capitalize" name="company" id="companies" data-title="Company">
+                                    {% for c in company_list %}
+                                    <option {% if maintenance.company_id == c.id%}selected{% endif %} value="{{c.id}}">{{c.short_name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group pending_mrs">
+                                <select class="form-control text-capitalize" name="pending_mrs" id="pending_mrs" multiple data-title="Requisitions">
+                                    {% if maintenance %}
+                                    <option value="{{maintenance.id}}" selected>{{maintenance.request_no}}</option>
+                                    {% endif %}
+                                </select>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="table-responsive" id="mr_item_table"></div>
+                    {% comment %} footer start {% endcomment %}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <select class="form-control text-capitalize assign_to" name="assign_to" id="assign_to_id" required>
+                                <option value="" selected>Assign To</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                        </div>
+                    </div>
+                    <br>
+                
+                    <input type="hidden" name="submission_type" id="submission_type">
+                    <div class="row">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-3" align="right">
+                            <button class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success approve-reject-check" type="button" id="assign_btn" data-approval="approve">Assign</button>
+                        </div>
+                        <div class="col-md-3" align="right">
+                            <button class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-primary approve-reject-check" type="button" id="pr_btn" data-approval="pr">MR To PR</button>
+                        </div>
+                    </div>
+                    {% comment %} footer end {% endcomment %}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block page_js %}
+
+{% include 'inc/profile_modal.html' %}
+{% include 'inc/supplier_modal.html' %}
+<script src="{% static 'node_modules/icheck/icheck.min.js' %}"></script>
+<script src="{% static 'node_modules/icheck/icheck.init.js' %}"></script>
+<script>
+    {% if not maintenance.id %}
+        $(".process").hide();
+    {% else %}
+        $.ajax({
+            type    : "POST",
+            url     : '{% url "fa:get_mr_item_info" %}',
+            data    : { "mr_ids[]" : ["{{ maintenance.id }}"] },
+            success : function (data) {
+                $("#mr_item_table").html(data);
+            }
+        });
+    {% endif %}
+
+    $('body').on('click', '#select_all', function(e){
+        if($(this).is(':checked')){
+            $('.check_item').attr('checked', true);
+        }
+        else{
+            $('.check_item').attr('checked', false);
+        }
+
+        var total_checkbox          = $(".check_item:checkbox").length;
+        var total_checked_checkbox  = $(".check_item:checkbox").filter(":checked").length;
+
+        if ( total_checkbox != total_checked_checkbox){
+            $(".select_all").attr('checked', false);
+        }
+    });
+
+    $('body').on('change', '.check_item', function(){
+        $tr =  $(this).parent().parent().parent();
+        if (!$(this).is(':checked')) {
+            let id = this.value;
+            $("#check_checkbox_"+id).val(0);
+            $tr.find(".return_qty").attr("required", false);
+            $tr.find(".stock_out_qty").attr("required", false);
+        }else{
+            let id = this.value;
+            $("#check_checkbox_"+id).val(1);
+            $tr.find(".return_qty").attr("required", true);
+            $tr.find(".stock_out_qty").attr("required",true);
+        }
+        var all_checked = true;
+        $('.check_item').each(function (index, item) {
+            if (!$(item).is(':checked')) {
+                all_checked = false;
+            }
+        });
+        if(all_checked){
+            $('#select_all').prop("checked", true);
+        }else{
+            $('#select_all').prop("checked", false);
+        }
+    });
+
+    function toggle(elm) {
+        if ($(elm).is(':checked')) {
+            $('.check_item').each(function (index, item) {
+                if (!$(this).is(':checked')) {
+                    $(item).trigger('click');
+                }
+            });
+        } else {
+            $('.check_item').each(function (index, item) {
+                if ($(this).is(':checked')) {
+                    $(item).trigger('click');
+                }
+            });
+        }
+    }
+
+
+    $('body').on('click', '#assign_to_form #assign_btn, #assign_to_form #pr_btn ', function(e){
+        event.preventDefault();
+        
+        let status ="";
+        if($(this).attr('id') == 'assign_btn'){
+            status ="Assign"
+            $("#submission_type").val('assign');
+        }
+        if($(this).attr('id') == 'pr_btn'){
+            status ="MR To PR"
+            $("#submission_type").val('pr');
+            $("#assign_to_id").prop('required', false);
+        }
+        let assign_to_id = $("#assign_to_id").val();
+
+        let counter = 0;
+        $('.check_item').each(function (index, item) {
+            if ($(this).is(':checked')) {
+                ++counter;
+            }
+        });
+        if(counter == 0){
+            e.preventDefault();
+            Swal.fire({
+                title: "Invalid Selection!",
+                text: "No item is being selected to proceed!",
+                type: "error",
+            })
+        }
+        else{
+            if($(this).attr('id') != 'pr_btn' && $(this).attr('id') == 'assign_btn' && assign_to_id != ""){
+                Swal.fire({
+                    text:" Do you want to " + status +" this?",
+                    type: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    confirmButtonColor:"#00c292",
+                    cancelButtonText: 'No',
+                    cancelButtonColor:"#e46a76",
+                    reverseButtons: false
+                }).then((result) => {
+                    if (result.value) {
+                        $("#assign_to_form").submit();
+                    }
+                });
+            }
+            else if($(this).attr('id') != 'pr_btn'){
+                toasterMsg("warning", "Please select the assign to!", 5000);
+            }
+            if($(this).attr('id') == 'pr_btn'){
+                Swal.fire({
+                    text:" Do you want to " + status +" this?",
+                    type: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    confirmButtonColor:"#00c292",
+                    cancelButtonText: 'No',
+                    cancelButtonColor:"#e46a76",
+                    reverseButtons: false
+                }).then((result) => {
+                    if (result.value) {
+                        $("#assign_to_form").submit();
+                    }
+                });
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        $(".assign_to").select2({
+            minimumInputLength  : 3,
+            placeholder         : "User ( Employee ID )",
+            allowClear: true,
+            ajax: {
+                url             : "{% url 'get_user_list' %}",
+                dataType        : "json",
+                data            : function(term, page) { return { q : term }; },
+                processResults  : function (data) { return { results: data.users }; }
+            }
+        });
+    });
+
+
+    {% comment %} Modification of Companies Select2 Field {% endcomment %}
+    let title = $("#companies").data("title");
+    $("#companies").select2({ placeholder: title });
+    $(".mr_searching").on("select2:selecting", "#companies", function(e){
+        var current     = e.val, previous    = $(this).val();
+        let pr_values = $("#pending_mrs").val();
+        if(pr_values.length > 0){
+            Swal.fire({
+                text                : "All selected Request and items will be removed, Do you agree?",
+                type                : 'question',
+                showCancelButton    : true,
+                confirmButtonText   : 'Yes',
+                confirmButtonColor  : "#00c292",
+                cancelButtonText    : 'No',
+                cancelButtonColor   : "#e46a76",
+                reverseButtons      : false
+            }).then((result) => {
+                if(result.value){ commonFuncForMR(); }
+                else{ 
+                    $("#companies").val(previous).trigger("change");
+                    $(".process").hide();
+                }
+            });
+        }else{ commonFuncForMR(); }
+    });
+    function commonFuncForMR(){
+        $("#pending_mrs").val(null).trigger("change");
+        $("#pending_mrs").select2("destroy");
+        $("#pending_mrs").html("");
+        $("#mr_item_table").html('');
+        $(".process").hide();
+        MRLoad();
+    }
+    {% comment %} Modification of Companies Select2 Field {% endcomment %}
+
+    MRLoad();
+    function MRLoad(){
+        $("#pending_mrs").select2({
+            minimumInputLength  : 3,
+            width               : '100%',
+            placeholder         : "MR...",
+            closeOnSelect       : true,
+            ajax: {
+                url             : "{% url 'fa:get_mr_info' %}",
+                dataType        : "json",
+                data            : function(term, page) { return { q: term, company_id: $("#companies").val() }; },
+                processResults  : function (data) { return { results: data.items }; }
+            },
+        });
+    }
+
+    $(".mr_searching").on("select2:select select2:unselect", "#pending_mrs", function(e){
+        let pr_ids = $(this).val();
+        if (pr_ids.length){
+            $.ajax({
+                type    : "POST",
+                url     : '{% url "fa:get_mr_item_info" %}',
+                data    : { "mr_ids" : pr_ids },
+                success : function (data) {
+                    $("#mr_item_table").html(data);
+                    $(".process").show(); 
+                }
+            });
+        }else{
+            $("#mr_item_table").html('');
+            $(".process").hide(); 
+        }
+    });
+
+</script>
+{% endblock %}

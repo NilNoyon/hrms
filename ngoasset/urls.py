@@ -4,20 +4,6 @@ from . import views
 app_name = 'fa'
 
 urlpatterns = [
-    path('', views.fa_list, name='fa_list'),
-    path('import/', views.fa_import_page, name='fa_upload_page'),
-    path('add/', views.fixed_asset_add, name='fa_add'),
-    path('view/<int:id>/', views.fa_view, name='fa_view'),
-    path('update/<int:id>/', views.fa_update, name='fa_update'),
-    path('scraping/<int:id>/', views.item_scraping, name='item_scraping'),
-    path('delete/<int:id>/', views.fa_delete, name='fa_delete'),
-    path('get_fa_for_datatable', views.get_fa_for_datatable, name='get_fa_for_datatable'),
-    # path('export_fixed_asset/<str:company>/<int:departments>/<int:item>/<int:category>/<int:subcategory>/<int:item_type>/<int:supplier>/<int:asset_user>/<str:start_date>/<str:end_date>/<int:search_text>/', views.export_fixed_asset, name='export_fixed_asset'),
-    path('add/repair/<int:id>/', views.fa_add_repair, name='fa_add_repair'),
-    # print operations
-    path('print/', views.asset_print, name='asset_print'),
-    path('print/list/', views.asset_print_list, name='asset_print_list'),
-    path('export/<str:company>/<int:departments>/<int:item>/<int:category>/<int:subcategory>/<int:user_field>/<str:search_box>/', views.asset_export, name='asset_export'),
     # Maintenance
     # path('request-list/', views.request_list, name='request_list'),
     # path('get-items-from-fa/', views.get_items_from_fa, name='get_items_from_fa'),
@@ -41,23 +27,23 @@ urlpatterns = [
 
 
 	# # Vehicle
-	# path('vehicle/', views.vehicle_list, name='vehicle_list'),
-	# path('vehicle/edit/<int:id>/', views.vehicle_update, name='vehicle_update'),
-	# path('vehicle/delete/<int:id>/', views.vehicle_delete, name='vehicle_delete'),
+	path('vehicle/', views.vehicle_list, name='vehicle_list'),
+	path('vehicle/edit/<int:id>/', views.vehicle_update, name='vehicle_update'),
+	path('vehicle/delete/<int:id>/', views.vehicle_delete, name='vehicle_delete'),
 
-	# # VehicleAllocation
-	# path('vehicle-allocation/', views.vehicle_allocation_list, name='vehicle_allocation_list'),
-	# path('vehicle-allocation/edit/<int:id>/', views.vehicle_allocation_update, name='vehicle_allocation_update'),
-	# path('vehicle-allocation/delete/<int:id>/', views.vehicle_allocation_delete, name='vehicle_allocation_delete'),
+	# VehicleAllocation
+	path('vehicle-allocation/', views.vehicle_allocation_list, name='vehicle_allocation_list'),
+	path('vehicle-allocation/edit/<int:id>/', views.vehicle_allocation_update, name='vehicle_allocation_update'),
+	path('vehicle-allocation/delete/<int:id>/', views.vehicle_allocation_delete, name='vehicle_allocation_delete'),
 
-	# # VehicleService
-	# path('vehicle-service/', views.vehicle_service_list, name='vehicle_service_list'),
-	# path('vehicle-service/edit/<int:id>/', views.vehicle_service_update, name='vehicle_service_update'),
-	# path('vehicle-service/delete/<int:id>/', views.vehicle_service_delete, name='vehicle_service_delete'),
+	# VehicleService
+	path('vehicle-service/', views.vehicle_service_list, name='vehicle_service_list'),
+	path('vehicle-service/edit/<int:id>/', views.vehicle_service_update, name='vehicle_service_update'),
+	path('vehicle-service/delete/<int:id>/', views.vehicle_service_delete, name='vehicle_service_delete'),
 
-	# # VehicleRequisition
-	# path('vehicle-requisition/', views.vehicle_requisition_list, name='vehicle_requisition_list'),
-	# path('vehicle-requisition/edit/<int:id>/', views.vehicle_requisition_update, name='vehicle_requisition_update'),
-	# path('vehicle-requisition/delete/<int:id>/', views.vehicle_requisition_delete, name='vehicle_requisition_delete'),
+	# VehicleRequisition
+	path('vehicle-requisition/', views.vehicle_requisition_list, name='vehicle_requisition_list'),
+	path('vehicle-requisition/edit/<int:id>/', views.vehicle_requisition_update, name='vehicle_requisition_update'),
+	path('vehicle-requisition/delete/<int:id>/', views.vehicle_requisition_delete, name='vehicle_requisition_delete'),
 
 ]

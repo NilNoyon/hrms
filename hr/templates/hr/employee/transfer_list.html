@@ -1,0 +1,148 @@
+{% extends "admin.html" %}
+{% load static %}
+{% block page_title %}Employee Branch Transfer{% endblock %}
+{% block content %}
+     <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+     <div class="row">
+          <div class="col-md-9">
+               <div class="card border-danger">
+                    <div class="card-header">
+                         <div class="row">
+                              <div class="col-md-6 align-self-center">
+                                   <h4 class="mb-1">Employee Branch Transfer</h4>
+                              </div>
+                         </div>
+                    </div>
+                    <div class="card-body custom-color rounded-lg p-3 custom-rl mr-0 custom-height">
+                         <div class="table-responsive">
+                         <table class="table table-border table-striped card-table table-vcenter">
+                              <thead>
+                                   <tr>
+                                        <th class="d-sm-table-cell">SL</th>
+                                        <th>Employee</th>
+                                        <th>From Branch</th>
+                                        <th>To Branch</th> 
+                                        <th>Effective From</th> 
+                                        <th>Created by</th> 
+                                        <th>Status</th> 
+                                        <th class="d-sm-table-cell"></th>
+                                   </tr>
+                              </thead>
+                              <tbody>
+                                   {% for data in object_list %}
+                                        <tr>
+                                             <td class="">{{ forloop.counter }}</td>
+                                             <td>{{ data.employee.name }}[{{data.employee.employee_id}}]</td>
+                                             <td>{{ data.from_branch }}</td>
+                                             <td>{{ data.to_branch }}</td>
+                                             <td>{{ data.effective_from_date }}</td>
+                                             <td>{{ data.created_by }}</td>
+                                             <td>
+                                                  <label class="mx-auto mb-0">
+                                                  <input type="checkbox" data-id="{{data.id}}" data-type="status" {% if data.status.title|lower == "active" %}checked{% endif %} name="status" 
+                                                       class="js-switch shift-update-switch" data-color="#009efb" data-size="mini" />
+                                                  </label>
+                                             </td>
+                                             <td class="text-left">
+                                                  <a class="h4 m-r-10 text-success" href="{% url 'hr:employee_transfer_branchwise_update' data.id %}">
+                                                       <span class="icon"><i class="ti-pencil-alt"></i></span>
+                                                  </a>
+                                             </td>
+                                        </tr>
+                                   {% endfor %}
+                              </tbody>
+                         </table>
+                         </div>
+                    </div>
+               </div>
+          </div>
+          <div class="col-md-3">
+               <div class="card border-danger">
+                    <div class="card-header pl-0">
+                         <div class="row">
+                              <div class="col-9 align-self-center">
+                                   <h4 class="mb-1" id="form_header">{{ action_name }}</h4>
+                              </div>
+                              {% if instance %}
+                              <div class="col-3 align-self-center text-right">
+                                   <div class="d-flex justify-content-end align-items-center">
+                                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                             <div class="btn-group" role="group" aria-label="First group">
+                                                  <a href="{% url 'hr:bonus_setup' %}" class="btn btn-xs btn-success" title="Add New">
+                                                       <i class="ti-plus"></i>
+                                                  </a>
+                                             </div>
+                                        </div>
+                                   </div>
+                              </div>
+                              {% endif %}
+                         </div>
+                    </div>
+                    <div class="card-body custom-color rounded-lg p-3 custom-rl ml-0">
+                         <form class="floating-labels mt-3" method="post" id="form" action="{{ action_url }}">
+                              {% csrf_token %}
+                              <div class="form-group">
+                                   <label for="employee">Employee</label>
+                                   <select class="form-control text-capitalize select2 employee" id="employee"
+                                        name="employee" data-title="Employee" required>
+                                        <option value="" disabled selected></option>
+                                        {% for p in employee_list %}
+                                        <option value="{{ p.id }}" {% if instance.employee_id == p.id %} selected {% endif %}>{{ p.name }}({{p.employee_id}})</option>
+                                        {% endfor %}
+                                   </select>
+                              </div>
+                              <div class="form-group">
+                                   <label for="to_branch">To Branch</label>
+                                   <select class="form-control text-capitalize select2 to_branch" id="to_branch"
+                                        name="to_branch" data-title="To Branch" required>
+                                        <option value="" disabled selected></option>
+                                        {% for branch in branch_list %}
+                                        <option value="{{ branch.id }}" {% if instance.to_branch_id == branch.id %} selected {% endif %}>{{branch.short_name}}</option>
+                                        {% endfor %}
+                                   </select>
+                              </div>
+                              <div class="form-group">
+                                   <input type="text" class="form-control effective_from_date" id="effective_from_date" name="effective_from_date" {% if instance.effective_from_date %} value="{{instance.effective_from_date|date:'Y-m-d'}}" {% endif %}>
+                                   <span class="bar"></span>
+                                   <label for="effective_from_date">Effective From Date</label>
+                              </div>
+                              
+                              <div class="row">
+                                   {% comment %}
+                                   <div class="col">
+                                        <label for="status" class="mb-2">
+                                             <input type="checkbox" id="status" name="status" class="js-switch" {% if instance.status.title == "Active" or not instance %}checked{% endif %} data-color="#009efb" data-size="mini"/> Status
+                                        </label>
+                                   </div>
+                                   {% endcomment %}
+                                   <div class="col-md-6">
+                                        <button type="submit" id="submit_btn" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success">
+                                             <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                        </button>
+                                   </div>
+                              </div>
+                         </form>
+                    </div>
+               </div>
+          </div>
+     </div>
+{% endblock %}
+
+
+{% block page_js %}
+<script src="{% static 'node_modules/moment/moment.js' %}"></script> 
+<script src="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.js' %}"></script> 
+<script>
+     $(".card-table").DataTable({});
+     $(document).ready(function () {
+          // Single Date Range Picker
+          $('.effective_from_date').daterangepicker({
+               singleDatePicker: true,
+               showDropdowns: true,
+               locale: {
+                    format: 'YYYY-MM-DD'
+               }
+          }).parent().addClass("focused");
+     });
+</script>
+{% endblock %}

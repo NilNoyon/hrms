@@ -1,0 +1,88 @@
+<div class="modal fade bd-example-modal pt-4 delivery-modal" id="myModal"  role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal">
+        <div class="modal-content">
+            <form class="floating-labels" id="delivered_form" action="{% url 'fa:delivery_to_user' %}" method="POST">{% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="assessmentView">Delivery To User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    
+                        <div class="col-md-12 ml-auto">
+                        <textarea rows="2" class="form-control delivery_notes" id="delivery_notes" name="delivery_notes" placeholder="Delivery Notes" required></textarea>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-block">
+                <div class="row">
+                    <div class="col-md-5 ml-auto">
+                        <button type="button" id="delivered_btn" class="btn btn-block waves-effect waves-light btn-rounded btn-success">
+                            <span class="btn-label"><i class="fa fa-check"></i></span> Delivered
+                        </button>
+                    </div>
+                    <div class="col-md-5 ml-auto">
+                        <input type="hidden" name="req_details_id" id="req_details_id">
+                        <input type="hidden" name="submission_type" id="submission_type">
+                        <button type="button" id="unrecovered_btn" class="btn btn-block waves-effect waves-light btn-rounded btn-warning">
+                            <span class="btn-label"><i class="fa fa-error"></i></span> Unrecovered
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    // scripts for items
+    $(document).ready(function () {
+        $("body").on('click', '.delivery_btn', function() {
+            $("#req_details_id").val($(this).data('id'))
+            $.ajax({
+                type    : "POST",
+                url     : '{% url "fa:check_solved_or_not" %}',
+                data    : { "req_details_id" : $(this).data('id') },
+                success : function (data) {
+                    if(data == "Solved"){ $("#unrecovered_btn").hide();}
+                    else{ $("#unrecovered_btn").show();}
+                }
+            });
+        });
+
+        $('body').on('click', '#delivered_form #delivered_btn, #delivered_form #unrecovered_btn', function(e){
+        e.preventDefault();
+            
+        let status ="";
+        if($(this).attr('id') == 'delivered_btn'){
+            status ="delivered"
+            $("#submission_type").val("Delivered")
+        }
+        else if($(this).attr('id') == 'unrecovered_btn'){
+            status ="unrecovered"
+            $("#submission_type").val("Unrecovered")
+        }
+
+            Swal.fire({
+                text:" Do you want to " + status +" this?",
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor:"#00c292",
+                cancelButtonText: 'No',
+                cancelButtonColor:"#e46a76",
+                reverseButtons: false
+            }).then((result) => {
+                if (result.value) {
+                    $("#delivered_form").submit();
+                }
+            });
+        });
+    }); 
+    
+</script>

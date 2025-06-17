@@ -30,9 +30,9 @@
             <div class="row floating-labels mt-3">
                 <div class="col-md-1">
                     <div class="form-group">
-                        <label for="company">Company</label>
+                        <label for="company">Branch</label>
                         <select class="form-control text-capitalize select2" name="company" id="company"
-                            data-title="Company">
+                            data-title="Branch">
                             <option value="" disabled selected></option>
                             {% for data in company_list %}
                             <option value="{{data.id}}">{{data.short_name}}</option>
@@ -172,7 +172,7 @@
                     $("#attendance-data").html(data);
                 }
             });
-        } else { toasterMsg('warning', 'At least Search by Company!', 5000); }
+        } else { toasterMsg('warning', 'At least Search by Branch!', 5000); }
     });
 </script>
 {% endblock %}

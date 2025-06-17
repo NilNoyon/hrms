@@ -3,37 +3,6 @@ from django.dispatch import receiver
 from .models import *
 from datetime import datetime, timedelta, date
 from .forms import HRSalaryBreakdownForm
-
-# @receiver(post_save, sender=HRLeaveMaster)
-# def save_or_create_leave_master(sender, instance, created, **kwargs):
-#     if created and instance.status == Status.name("Inactive"): return
-    
-#     today = datetime.now()
-#     employees = EmployeeDetails.objects.filter(company=instance.company, 
-#         employee_type=instance.employee_type, employee_category=instance.employee_category)
-#     for employee in employees:
-#         if today.month >= 5 :
-#             start_date  = datetime.strptime(str(today.year) + '-07-01', '%Y-%m-%d')
-#             end_date    = datetime.strptime(str(today.year + 1) + '-06-30', '%Y-%m-%d')
-#         else :
-#             start_date  = datetime.strptime(str(today.year - 1) + '-07-01', '%Y-%m-%d')
-#             end_date    = datetime.strptime(str(today.year) + '-06-30', '%Y-%m-%d')
-#         data, created   = HRLeaveAllocation.objects.filter(created_at__range=(start_date, end_date)).get_or_create(
-#             employee    = employee,
-#             leave       = instance,
-
-#         )
-#         if not created and (instance.allocated_days > data.availed_days + data.applied_days ) :
-#             data.allocated_days = instance.allocated_days
-#             data.updated_by = instance.updated_by
-#             data.updated_at = today
-#         elif created : 
-#             data.allocated_days = instance.allocated_days
-#             data.created_by = instance.created_by if not instance.updated_by else instance.updated_by
-#             data.created_at = today
-#         data.status = instance.status
-#         data.save()
-        
         
 @receiver(post_save, sender=Attendance)
 def save_or_create_attendance(sender, instance, created, **kwargs):
@@ -48,7 +17,7 @@ def save_or_create_attendance(sender, instance, created, **kwargs):
     
     if instance.outside_office : calendar_log.outside_duty = True
     if holiday := HolidayIndividuals.objects.filter(holiday_date=instance.present_day, 
-        holiday__company=instance.employee.company).first() :
+        holiday__branch=instance.employee.branch).first() :
         if holiday.holiday.weekend : calendar_log.is_weekend = True
         else : calendar_log.is_holiday = True
 

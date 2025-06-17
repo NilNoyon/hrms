@@ -1,0 +1,60 @@
+{% load sc_filters %}
+<div class="" style="position: relative;">
+    <table class="breakdown-table table table-bordered table-hover mb-4">
+        <thead>
+            <tr class="text-center">
+                <th class="text-left">Request No</th>
+                <th>
+                    <div class="custom-control custom-checkbox mb-1">
+                        <input type="checkbox" class="custom-control-input select_all" id="select_all" onClick="toggle(this)">
+                        <label class="custom-control-label" for="select_all"></label>
+                    </div>
+                </th>
+                <th>FA Code</th>
+                <th class="text-left">Item Name</th>
+                <th class="text-left">Specification</th>
+                <th class="text-left">Problem Details</th>
+                <th class="text-center">Status</th>
+                <th class="text-left">Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% variable_assign_tag '' as mr_no %}
+            {%  for req in mr_list %}
+                {%  for r in req.requestdetails_set.all %}
+                        <tr class="text-justify text-center ">
+                        {% if mr_no != req.request_no %}
+                        {% variable_assign_tag req.request_no as mr_no %}
+                            <td class="text-left" rowspan="{{req.requestdetails_set.all|length}}">
+                                <a href="{% url 'fa:maintenance_view'  req.id %}" class="text-info" target="_blank">{{ req.request_no }}</a>
+                                <input class="form-control" type="hidden" id="request_id" name="request_id" value="{{req.id}}">
+                            </td>
+                        {% endif %}
+                        <td class="text-center">
+                            {% if r.status.title in "Raised,Not Solved" %}
+                                <div class="custom-control custom-checkbox mb-1">
+                                    <input type="checkbox" class="custom-control-input check_item" name="check_checkbox" value="{{r.id}}" id="check-[{{r.id}}]">
+                                    <label class="custom-control-label" for="check-[{{r.id}}]"></label>
+                                    <input type="hidden" step="any" name="check_checkboxhdn[{{r.id}}]" id="check_checkbox_{{r.id}}" class="form-control" value="0">
+                                </div>
+                            {% else %}
+                            <span style="font-size:10px;">{{r.status.title}}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-left">
+                            <a href="{% url 'fa:fa_view'  r.asset_id %}" class="text-info" target="_blank">{{ r.asset.code }}</a>
+                        </td>
+                        <td class="text-left">{{ r.asset.item.item_master.item_name }}</td>
+                        <td class="text-left">{% specification r.asset.item.item_master r.asset.item_id %}</td>
+                        <td class="text-left">{{r.problem_details}}</td>
+                        <td class="text-center">{{r.status.title}}</td>
+                        <td class="text-left">
+                            <input class="form-control" type="text" id="notes" name="notes[{{r.id}}]" value="{{r.remarks}}">
+                            <input class="form-control" type="hidden" id="request_details" name="request_details[{{req.id}}]" value="{{r.id}}">
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

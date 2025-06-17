@@ -1,0 +1,337 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load inv_filters %}
+
+{% block page_title %} Fixed Asset Print {% endblock %}
+
+{% block add_css %}
+<link href="{% static 'node_modules/typeahead.js-master/dist/typehead-min.css' %}" rel="stylesheet">
+<link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+<style>
+  .bootstrap-tagsinput {
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border: 0px solid #c1c1c1;
+    border-bottom: 1px solid #c1c1c1;
+  }
+
+  .twitter-typeahead {
+    width: auto;
+  }
+
+  .floating-labels .custom-control-label {
+    position: relative;
+    cursor: context-menu;
+  }
+
+  .floating-labels .custom-label {
+    position: relative;
+  }
+
+  .floating-labels .form-control {
+    border: 1px solid #e9ecef!important;
+    border-radius: 5px!important;
+}
+
+
+  .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: transparent !important;
+  }
+
+  .select2-container .select2-selection--single .select2-selection__rendered,
+    .select2-container .select2-selection--multiple .select2-selection__rendered {
+        padding-left: 10px;
+    }
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e9ecef !important;
+        border-radius: 0.25rem !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder,
+    .select2-container--default .select2-selection--multiple .select2-selection__placeholder,
+    .select2-container .select2-selection--single .select2-selection__rendered,
+    .select2-container .select2-selection--multiple .select2-selection__rendered{
+        font-weight: 400 !important;
+    }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="card border-danger">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-8 align-self-center">
+                    <h4 class="text-themecolor mb-0">Asset Print</h4>
+                </div>
+                <div class="col-md-4 align-self-center text-right">
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row floating-labels custom-color rounded-lg p-3 mx-0">
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="admin-company">Select Company</label>
+                        <select class="form-control text-capitalize select2 company" name="company" id="admin-company" data-title="Select Company" required>
+                            <option value="" disabled selected></option>
+                            {% for c in companies %}
+                                <option value="{% strip_single_quote_tag c.short_name %}">{{c.short_name}}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="department">Select Department</label>
+                        <select class="form-control text-capitalize select2 department_field" name="department" id="department" data-title="Select Department">
+                            <option value="" disabled selected></option>
+                            {% for d in departments %}
+                                <option value="{{d.id}}">{{d.name}}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="item">Select Category</label>
+                        <select class="form-control text-capitalize select2 category_field" name="category" data-title="Cateegory">
+                            <option value="" selected>All Category</option>
+                            {% for c in categories %}
+                                <option value="{{c.id}}">{{c.name}}</option>
+                            {% endfor %}
+
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="subcategory col-md-2">
+                    <div class="form-group">
+                        <label for="item">Select Subcategory</label>
+                        <select class="form-control text-capitalize select2 subcategory_field" name="subcategory" data-title="Sub-Cateegory">
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="item">Select Item</label>
+                        <select class="form-control text-capitalize select2 item" name="item" id="item" data-title="Select Item" >
+                            <option value="" disabled selected></option>
+
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="user">Asset User</label>
+                        <select class="form-control text-capitalize select2 user_field" name="user" id="user" data-title="Select User" >
+                            <option value="" disabled selected></option>
+                        </select>
+                        <span class="bar"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 search_box">
+                    <div class="form-group">
+                        <label for="search_box">Search By</label>
+                        <input type="text" class="form-control search_field" id="search_box" name="search_box" placeholder="                    Fixed Asset Code/MRIR No/LC/Bill of Entry No/Insurer Name..."  title="Search by Fixed Asset Code/MRIR No/LC/Bill of Entry No/Insurer Name...">
+                    </div>
+                </div>
+
+                <div class="col-md-1" align="center">
+                    <button class="btn btn-block btn-info search_btn" type="button"><i class="fa fa-search"></i></button>
+                </div>
+                <div class="col-md-1" align="center">
+                    <button class="btn btn-block btn-outline-success fa_export" title="Fixed Asset QR Code Export"><i class="fas fa-download"></i></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12" align="center">
+                    <div class="spinner-border text-info" role="status" id="loader" align="center">
+                    <span class="sr-only" >Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="stockItemsTable"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_js %}
+{% include 'inc/scrollerDT.html' %}
+<script src="{% static 'admin/js/table_to_excel.js' %}"></script>
+<script src="{% static 'node_modules/moment/moment.js' %}"></script>
+<script src="{% static 'node_modules/typeahead.js-master/dist/typeahead.bundle.min.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        $(".stock_report").click(function() {
+            let table       = document.getElementsByTagName("table");
+            var tds_length  = $("#stockItemsTable tbody tr td").length;
+            if(tds_length > 1){
+                TableToExcel.convert(table[0], { // html code may contain multiple tables so here we are refering to 1st table tag
+                name: `Stock_report.xlsx`, // fileName you could use any name
+                sheet: { name: 'Stock' } // sheetName
+                });
+            }else{
+                $.toast({
+                    heading : "Warning",
+                    text    : 'Please Search First!',
+                    position: 'top-right',
+                    loaderBg: '#fff',
+                    icon    : 'warning',
+                    hideAfter : 5000,
+                });
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $("#loader").hide();
+        // Getting Items from select2 field from database
+        $(".item").select2({
+            minimumInputLength  : 3,
+            placeholder         : "Item Name",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'inventory:get_items' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) { return { results: data.items }; }
+            }
+        });
+
+        $(".user_field").select2({
+            // Getting Users from select2 field from database
+            minimumInputLength  : 3,
+            placeholder         : "Asset User",
+            allowClear          : true,
+            ajax: {
+                url: "{% url 'get_user_list' %}",
+                dataType: "json",
+                data: function(term, page) { return { q : term }; },
+                processResults: function (data) {return { results: data.users }; }
+            }
+        });
+
+        $(".reset_button").click(function(){
+            $("#admin-company, .store, .item").val('').trigger("change");
+            $("#admin-company, .store, .item").parent().removeClass("focused");
+            $("#stockItemsTable").empty();
+        });
+
+    
+        $(".search_btn").click(function(){
+            let company         = $("#admin-company").val();
+            let department_valu = $(".department_field").val();
+            let item            = $(".item").val();
+            let category        = $(".category_field").val();
+            let subcategory     = $(".subcategory_field").val();
+            let user_field     = $(".user_field").val();
+            let search_box     = $(".search_field").val();
+            if(company || item){
+                 $.ajax({
+                    url     : "{% url 'fa:asset_print_list' %}",
+                    type    : 'POST',
+                    data    : {'company': company, 'department_valu': department_valu, 'item': item, 'category': category, 'subcategory': subcategory,'user_field': user_field, 'search_box': search_box },
+                    beforeSend: function(){ 
+                        $("#loader").show(); 
+                    },
+                    complete: function(){ $('#loader').hide(); },
+                    success : function(data){
+                        $("#stockItemsTable").empty();
+                        $("#stockItemsTable").append(data);
+                    }
+                });
+            }
+            else{
+                $.toast({
+                    heading: "Warning",
+                    text: 'Please Select At Least One Field!',
+                    position: 'top-right',
+                    loaderBg:'#fff',
+                    icon: 'warning',
+                    hideAfter : 5000,
+                });
+            }
+        });
+
+        $(".fa_export").click(function(){
+            let company          = $("#admin-company").val();
+            let item             = $(".item").val() ? $(".item").val() : 0
+            let department_field = $(".department_field").val() ? $(".department_field").val() : 0
+            let category         = $(".category_field").val() ? $(".category_field").val() : 0
+            let subcategory      = $(".subcategory_field").val() ? $(".subcategory_field").val() : 0
+            let user_field       = $(".user_field").val() ? $(".user_field").val() : 0
+            let search_box       = $(".search_field").val() ? $(".search_field").val() : 0
+            if(search_box != 0){
+                search_box = search_box.replace('/', '_').replace('/', '_').replace('/', '_').replace('/', '_').replace('/', '_')
+            }
+         
+            if(company || item){
+                window.open("/fixed-asset/export/"+company+"/"+department_field+"/"+item+"/"+category+"/"+subcategory+"/"+user_field+"/"+search_box+"/", "_blank");
+            }
+            else{
+                $.toast({
+                    heading: "Warning",
+                    text: 'Please Select At Least One Field!',
+                    position: 'top-right',
+                    loaderBg:'#fff',
+                    icon: 'warning',
+                    hideAfter : 5000,
+                });
+            }
+        });
+
+         // category filter
+         $(".categories").children().clone().appendTo(root + " .category");
+         $(root + " .category").children().show();
+         $(root + " .category .category_field").select2();
+         $(root + " .category .category_field").on("select2:select select2:unselecting", function(){
+             $(root + " .subcategory_field").val('');
+             setData(dataTable, root, table);
+         });
+
+
+         $(".subcategorys").children().clone().appendTo(root + " .subcategory");
+         $(root + " .subcategory").children().show();
+         $(root + " .subcategory .subcategory_field").select2({placeholder: "Sub-Category"});
+         $(root + " .subcategory .subcategory_field").on("select2:select select2:unselecting", function(){
+             setData(dataTable, root, table);
+         });
+
+
+    });
+
+    $("body").on('change', '.category_field', function(){
+        let category_id = $(this).val();
+        $parent = $(this).parent().parent().parent();
+        
+        $.ajax({
+            url: '{% url "inventory:get_category_wise_subcategory" %}',
+            type: 'POST',
+            data: {'category_id':category_id},
+            success: function(data){
+                if($(".subcategory .subcategory_field").data('select2')){
+                    $(".subcategory .subcategory_field").select2("destroy");
+                }
+                $(".subcategory .subcategory_field").select2({
+                    data:data.items,
+                    placeholder: "Sub-Category",
+                    width: "100%",
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock %}
