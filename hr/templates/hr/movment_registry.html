@@ -1,7 +1,6 @@
 {% extends "admin.html" %}
 {% load static %}
-
-{% block page_title %}Resignation/Termination{% endblock %}
+{% block page_title %}Movement Registry{% endblock %}
 
 {% block add_css %}
 <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
@@ -17,17 +16,13 @@
   .show-grid [class^=col-] {
     padding-top: 10px;
     padding-bottom: 10px;
-    /* background-color: #eee;
-    background-color: rgba(86,61,124,.15);
-    border: 1px solid #ddd;
-    border: 1px solid rgba(86,61,124,.2); */
   }
 </style>
 {% endblock %}
 {% block content %}
 <div class="card mt-0 pt-0">
     <div class="card-header">
-        <h4 class="text-themecolor mb-0 mt-0">Resignation/Termination</h4>
+        <h4 class="text-themecolor mb-0 mt-0">Movement Registry</h4>
     </div>
 
     <div class="card-body show-grid pt-0">
@@ -37,11 +32,11 @@
             </li>
             <li class="nav-item"> 
                 <a class="nav-link" data-toggle="tab" href="#pending_list" role="tab">
-                    Pending Letter<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{pending_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i>
+                    Pending<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{pending_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i>
                 </a>
             </li>
             <li class="nav-item"> 
-                <a class="nav-link" data-toggle="tab" href="#approved_list" role="tab">Approved Letter<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{approved_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i></a>
+                <a class="nav-link" data-toggle="tab" href="#approved_list" role="tab">Approved<span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-success ms-1_5 pt-50">{{approved_list|length}}</span></span><i class="bx bx-user bx-sm d-sm-none"></i></a>
             </li>
         </ul>
         <div class="tab-content tabcontent-border">
