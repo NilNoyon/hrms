@@ -92,8 +92,11 @@ def get_monthly_report_data(request):
         if month != 12 : end_date = datetime(year, int(month) + 1, 1) - timedelta(days=1)
         else : end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
     range_days, data = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)], []
+    print('query:::: ', query)
+    print('range:::: ', range_days)
     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
         log_data = []
+        print('in')
         for rdate in range_days :
             log = EmployeeCalendar.objects.filter(calendar_day=rdate, employee=employee).first()
             remarks = ""
