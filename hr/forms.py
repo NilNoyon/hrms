@@ -90,7 +90,7 @@ class PFDiscontinueForm(forms.ModelForm):
 class EmployeeCessationForm(forms.ModelForm):
     class Meta:
         model = EmployeeCessation
-        fields = fields = ('emolpoyee','effective_from_date','cessation_reason','letter_type','letter','created_by','updated_by')
+        fields = ('emolpoyee','effective_from_date','cessation_reason','letter_type','letter','created_by','updated_by')
 
 class EmployeePromotionDemotionForm(forms.ModelForm):
     class Meta:
@@ -168,6 +168,16 @@ class OutsideRemoteDutyForm(forms.ModelForm):
 class HRSalarySlabForm(forms.ModelForm):
 	class Meta:
 		model = HRSalarySlabMaster
+		fields = '__all__'
+		
+class HRSalaryGradeForm(forms.ModelForm):
+	class Meta:
+		model = HRSalaryGradeMaster
+		fields = '__all__'
+		
+class HRSalaryGradeStepForm(forms.ModelForm):
+	class Meta:
+		model = HRSalaryGradeStep
 		fields = '__all__'
                 
 # Income Tax Slab Setup

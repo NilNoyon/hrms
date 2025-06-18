@@ -272,6 +272,7 @@ class CommonMaster(models.Model): #this common model/table will use for all smal
         ('10', 'Units'),
         ('11', 'Audit By'),
         ('12', 'License Name'),
+        ('13', 'Structure'),
         
     )
     value_for      = models.CharField(max_length=50, choices=value_types)

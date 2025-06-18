@@ -66,7 +66,7 @@ def salary_process2(request):
         context = { 
             'years' : year_list, 'months' : month_list, 
             'companies'     : Company.objects.filter(status = True).order_by('name'),
-            'categories'    : CommonMaster.objects.filter(value_for=38, status = True),
+            'categories'    : CommonMaster.objects.filter(value_for=5, status = True),
             'departments'   : Departments.objects.filter(status = True).order_by('name'), 
             'shifts'        : Shift.objects.filter(status=Status.name('active')) 
         }
@@ -139,7 +139,7 @@ def get_salary_process_for_datatable(request):
     user_level = user.sc_user_level()
     if status_text := request.POST.get('status', None) :
         if status_text == 'pending' :
-            if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+            if request.session.get('employee_id', '') in ['NGO00001001'] :
                 query &= Q(status__in=[Status.name('started'), Status.name('rejected')])
             elif is_role_assigned(str(request.session.get('user_roles', '')).lower(), 'cfo'):
                 query &= Q(status=Status.name('checked'))
@@ -151,7 +151,7 @@ def get_salary_process_for_datatable(request):
                 query &= Q(status=Status.name('submitted'))
         elif status_text == 'list' :
             # if is_role_assigned(str(request.session.get('user_roles', '')).lower(), 'payroll officer'):
-            if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+            if request.session.get('employee_id', '') in ['NGO00001001'] :
                 query &= ~Q(status__in=[Status.name('started'), Status.name('rejected')])
             elif is_role_assigned(str(request.session.get('user_roles', '')).lower(), 'cfo'):
                 query &= Q(status__in=[Status.name('approved'), Status.name('acknowledged')])
@@ -400,7 +400,7 @@ def salary_process(request):
         elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
         else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
         companies = Company.objects.filter(status = True).order_by('name')
-        employee_categories = CommonMaster.objects.filter(value_for=38)
+        employee_categories = CommonMaster.objects.filter(value_for=5)
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
                    'employee_categories' : employee_categories, 'departments' : department_list }
@@ -409,7 +409,7 @@ def salary_process(request):
 
 def salary_details_entry(year=None, month=None, amount=0, employee=None, slab_head=None, head_name="", head_type="AV", user=None):
     if not slab_head : 
-        salary_head, created = CommonMaster.objects.get_or_create(value=head_name, value_for=47, status=True)
+        salary_head, created = CommonMaster.objects.get_or_create(value=head_name, value_for=9, status=True)
         slab_head, created = HRSalarySlabMaster.objects.get_or_create(head=salary_head, type=head_type, 
             slab=employee.employee_category, created_by=user, status=Status.name('Active'))
     if salary_details := HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee, heads=slab_head).first() :
@@ -421,13 +421,13 @@ def salary_details_entry(year=None, month=None, amount=0, employee=None, slab_he
 def salary_report(request):
     # chk_permission   = permission(request, reverse('hr:salary_process'))
     # if chk_permission and chk_permission.view_action:
-    if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+    if request.session.get('employee_id', '') in ['NGO00001001'] :
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
         elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
         else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
         companies = Company.objects.filter(status = True).order_by('name')
-        employee_categories = CommonMaster.objects.filter(value_for=38)
+        employee_categories = CommonMaster.objects.filter(value_for=5)
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
                    'employee_categories' : employee_categories, 'departments' : department_list }
@@ -437,7 +437,7 @@ def salary_report(request):
 # @login
 # def festival_bonus(request):
 #     companies = Company.objects.filter(status = True).order_by('name')
-#     employee_categories = CommonMaster.objects.filter(value_for=38)
+#     employee_categories = CommonMaster.objects.filter(value_for=5)
 #     department_list = Departments.objects.filter(status=True)
 #     context = {'companies' : companies, 'employee_categories' : employee_categories, 'departments' : department_list }
 #     return render(request, 'hr/salary/festival.html', context)

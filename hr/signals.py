@@ -64,7 +64,7 @@ def save_or_create_employee_details(sender, instance, created, **kwargs):
             else : HRSalaryBreakdown.objects.create(slab_heads=i, employee=instance, amount=amount)
         
         if instance.income_tax :
-            itds_data, created = CommonMaster.objects.get_or_create(value_for=47, value='ITDS')
+            itds_data, created = CommonMaster.objects.get_or_create(value_for=9, value='ITDS')
             itds, created = HRSalarySlabMaster.objects.get_or_create(slab=instance.employee_category, head=itds_data, type='DV')
             iexist = HRSalaryBreakdown.objects.filter(slab_heads=itds, employee=instance).first()
             if tax_value := HRIncomeTaxSlabMaster.objects.filter(from_amount__lte=instance.salary, to_amount__gte=instance.salary).first() :
