@@ -170,6 +170,7 @@ class AppraisalAdmin(admin.ModelAdmin):
 admin.site.register(Appraisal, AppraisalAdmin)
 admin.site.register(EmployeePromotionDemotion)
 admin.site.register(PromotionDemotionHistory)
+admin.site.register(MovementRegistry)
 
 import inspect
 from hr import models
