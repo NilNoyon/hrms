@@ -156,11 +156,11 @@ def import_leave_balance(request):
                             if leave_type_obj      := HRLeaveType.objects.filter(short_title=leave_type_str).first() : leave_type = leave_type_obj
                             else : leave_type       = HRLeaveType.objects.create(short_title=leave_type_str, description=leave_type_str, status=Status.name('Active'), created_by=user)
                         if employee_type_text      := str_from_xls(info['Employment Type'][i]) :
-                            if employee_type_obj   := CommonMaster.objects.filter(value_for=37, value=employee_type_text).first() : employee_type = employee_type_obj
-                            else : employee_type    = CommonMaster.objects.create(value_for=37, value=employee_type_text)
+                            if employee_type_obj   := CommonMaster.objects.filter(value_for=4, value=employee_type_text).first() : employee_type = employee_type_obj
+                            else : employee_type    = CommonMaster.objects.create(value_for=4, value=employee_type_text)
                         if employee_category_text  := str_from_xls(info['Employee Category'][i]) :
-                            if employee_category_obj:= CommonMaster.objects.filter(value_for=38, value=employee_category_text).first() : employee_category = employee_category_obj
-                            else : employee_category = CommonMaster.objects.create(value_for=38, value=employee_category_text)
+                            if employee_category_obj:= CommonMaster.objects.filter(value_for=5, value=employee_category_text).first() : employee_category = employee_category_obj
+                            else : employee_category = CommonMaster.objects.create(value_for=5, value=employee_category_text)
                         allocated_days  = str_from_xls(int(float(info['Allocated Days'][i] if str(info['Allocated Days'][i]) != 'nan' else 0)))
                         if leave_policy := HRLeaveMaster.objects.filter(company=company, leave_type=leave_type, 
                             employee_type=employee_type, employee_category=employee_category).first() :

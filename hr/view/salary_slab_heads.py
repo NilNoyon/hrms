@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from general.decorators import login, permission
-from general.models import CommonMaster
-from hr.models import HRSalarySlabMaster
-from hr.forms import CommonMasterForm, HRSalarySlabForm
+from general.models import CommonMaster,Status
+from hr.models import HRSalarySlabMaster, HRSalaryGradeMaster,HRSalaryGradeStep
+from hr.forms import CommonMasterForm, HRSalarySlabForm, HRSalaryGradeForm, HRSalaryGradeStepForm
 from django.urls import reverse_lazy
 from django.contrib import messages
 
@@ -16,7 +16,7 @@ ebs_bl_common       = common_logic.Common()
 def salary_slab_list(request):
     if request.method == "POST":
         request.POST = request.POST.copy()
-        request.POST['value_for'] = 38
+        request.POST['value_for'] = 5
         form = CommonMasterForm(request.POST)
         if form.is_valid():
             form.save()
@@ -24,7 +24,7 @@ def salary_slab_list(request):
         else : ebs_bl_common.form_errors(request, form)
 
     template_name   = "hr/salary/salary_slab.html"
-    object_list     = CommonMaster.objects.filter(value_for=38).order_by('id')
+    object_list     = CommonMaster.objects.filter(value_for=5).order_by('id')
     action_url      = reverse_lazy('hr:salary_slab_list')
     action_name, form = "Add Slab/Category", CommonMasterForm()
     context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list }
@@ -37,7 +37,7 @@ def salary_slab_update(request, id):
         instance = CommonMaster.objects.get(id=id)
         if request.method == "POST":
             request.POST = request.POST.copy()
-            request.POST['value_for'] = 38
+            request.POST['value_for'] = 5
             form = CommonMasterForm(request.POST, instance=instance)
             if form.is_valid():
                 form.save()
@@ -47,7 +47,7 @@ def salary_slab_update(request, id):
         template_name   = "hr/salary/salary_slab.html"
         action_name     = "Update Slab/Category"
         action_url      = reverse_lazy('hr:salary_slab_update', kwargs={'id':id})
-        object_list     = CommonMaster.objects.filter(value_for=38).order_by('id')
+        object_list     = CommonMaster.objects.filter(value_for=5).order_by('id')
         form            = CommonMasterForm(instance=instance)
 
         context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance }
@@ -69,7 +69,7 @@ def salary_slab_delete(request, id):
 def salary_head_list(request):
     if request.method == "POST":
         request.POST = request.POST.copy()
-        request.POST['value_for'] = 47
+        request.POST['value_for'] = 9
         form = CommonMasterForm(request.POST)
         if form.is_valid():
             form.save()
@@ -77,7 +77,7 @@ def salary_head_list(request):
         else : ebs_bl_common.form_errors(request, form)
 
     template_name   = "hr/salary/salary_head.html"
-    object_list     = CommonMaster.objects.filter(value_for=47).order_by('id')
+    object_list     = CommonMaster.objects.filter(value_for=9).order_by('id')
     action_url      = reverse_lazy('hr:salary_head_list')
     action_name, form = "Add Salary Head", CommonMasterForm()
     context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list }
@@ -90,7 +90,7 @@ def salary_head_update(request, id):
         instance = CommonMaster.objects.get(id=id)
         if request.method == "POST":
             request.POST = request.POST.copy()
-            request.POST['value_for'] = 47
+            request.POST['value_for'] = 9
             form = CommonMasterForm(request.POST, instance=instance)
             if form.is_valid():
                 form.save()
@@ -100,7 +100,7 @@ def salary_head_update(request, id):
         template_name   = "hr/salary/salary_head.html"
         action_name     = "Update Salary Head"
         action_url      = reverse_lazy('hr:salary_head_update', kwargs={'id':id})
-        object_list     = CommonMaster.objects.filter(value_for=47).order_by('id')
+        object_list     = CommonMaster.objects.filter(value_for=9).order_by('id')
         form            = CommonMasterForm(instance=instance)
 
         context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance }
@@ -131,7 +131,7 @@ def salary_structure_list(request):
         else : messages.warning(request, "This salary slab & head already exists!")
     action_name, form = "Add Salary Structure", HRSalarySlabForm()
     object_list, action_url = HRSalarySlabMaster.objects.order_by('id'), reverse_lazy('hr:salary_structure_list')
-    slab_list, head_list = CommonMaster.objects.filter(value_for=38, status=1), CommonMaster.objects.filter(value_for=47, status=1)               
+    slab_list, head_list = CommonMaster.objects.filter(value_for=5, status=1), CommonMaster.objects.filter(value_for=9, status=1)               
     context = { "action_name": action_name, 'form':form, 'action_url':action_url, "object_list":object_list, "slab_list":slab_list, "head_list":head_list }
     return render(request, 'hr/salary/salary_structure.html', context)
 
@@ -149,7 +149,7 @@ def salary_structure_update(request, id):
             else : ebs_bl_common.form_errors(request, form)
         action_name, form = "Update Salary Structure", HRSalarySlabForm(instance=instance)
         object_list, action_url = HRSalarySlabMaster.objects.order_by('id'), reverse_lazy('hr:salary_structure_update', kwargs={'id':id})
-        slab_list, head_list = CommonMaster.objects.filter(value_for=38, status=1), CommonMaster.objects.filter(value_for=47, status=1)               
+        slab_list, head_list = CommonMaster.objects.filter(value_for=5, status=1), CommonMaster.objects.filter(value_for=9, status=1)               
         context = { "action_name": action_name, 'form':form, 'action_url':action_url, "object_list":object_list, 
                    "slab_list":slab_list, "head_list":head_list, 'instance':instance }
         return render(request, 'hr/salary/salary_structure.html', context)
@@ -162,3 +162,55 @@ def salary_structure_delete(request, id):
         messages.success(request, "Successfully Deleted!")
         return redirect(request.META.get('HTTP_REFERER', '/'))
     except : return redirect(reverse_lazy('hr:salary_structure_list'))
+
+
+@login
+def salary_grade_list(request):
+    if request.method == "POST":
+        request.POST = request.POST.copy()
+        request.POST['status'] = Status.name('active')
+        form = HRSalaryGradeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Successfully Stored!")
+        else : ebs_bl_common.form_errors(request, form)
+
+    template_name   = "hr/salary_grade/list.html"
+    object_list     = HRSalaryGradeMaster.objects.order_by('id')
+    action_url      = reverse_lazy('hr:salary_grade_list')
+    action_name, form = "Add Salary Grade", HRSalaryGradeForm()
+    context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list }
+    return render(request, template_name, context)
+
+
+@login
+def salary_grade_update(request, id):
+    try:
+        instance = HRSalaryGradeMaster.objects.get(id=id)
+        if request.method == "POST":
+            request.POST = request.POST.copy()
+            request.POST['status'] = Status.name('active')
+            form = HRSalaryGradeForm(request.POST, instance=instance)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Successfully Updated!")
+            else : ebs_bl_common.form_errors(request, form)
+
+        template_name   = "hr/salary_grade/list.html"
+        action_name     = "Update Salary Grade"
+        action_url      = reverse_lazy('hr:salary_grade_update', kwargs={'id':id})
+        object_list     = HRSalaryGradeMaster.objects.order_by('id')
+        form            = HRSalaryGradeForm(instance=instance)
+
+        context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance }
+        return render(request, template_name, context)
+    except : return redirect(reverse_lazy('hr:salary_grade_list'))
+
+
+@login
+def salary_grade_delete(request, id):
+    try:
+        HRSalaryGradeMaster.objects.get(id=id).delete()
+        messages.success(request, "Successfully Deleted!")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    except : return redirect(reverse_lazy('hr:salary_grade_list'))

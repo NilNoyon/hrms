@@ -10,7 +10,7 @@ def leave_allocation_list(request):
         'department_list'   : Departments.objects.filter(status=True).order_by('short_name', 'name'),
         'designation_list'  : Designations.objects.filter(status=True).order_by('name'),
         'leave_type_list'   : HRLeaveType.objects.filter(status=True).order_by('short_title'),
-        'employee_category_list':CommonMaster.objects.filter(value_for=38, status=True),
+        'employee_category_list':CommonMaster.objects.filter(value_for=5, status=True),
     }
     return render(request, 'hr/leave/allocation/list.html', context)
 
@@ -76,7 +76,7 @@ def leave_allocation_company_wise(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     template_name   = "hr/leave/allocation/company.html"
     companies       = Company.objects.filter(status=True).order_by('short_name')
-    employee_categories = CommonMaster.objects.filter(value_for=38)
+    employee_categories = CommonMaster.objects.filter(value_for=5)
     leave_types     = HRLeaveType.objects.filter(status=Status.name('Active'))
     context         = {'leave_types':leave_types, 'companies':companies, 'employee_categories':employee_categories}
     return render(request, template_name, context)

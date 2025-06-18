@@ -817,7 +817,7 @@ def salary_breakdown(request):
 def import_other_salary_amounts(request):
     # chk_permission   = permission(request,request.path)
     # if chk_permission and chk_permission.insert_action:
-    if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+    if request.session.get('employee_id', '') in ['NGO00001001'] :
         if request.method == "POST":
             import_file = request.FILES['import_file']
             xl = pd.read_excel(import_file, "Sheet1") 
@@ -854,7 +854,7 @@ def import_gross_salary_amounts(request):
     # chk_permission   = permission(request,request.path)
     # if chk_permission and chk_permission.insert_action:
         
-    if request.session.get('employee_id', '') in ['EC00007156', 'HC01000038', 'LE01000084'] :
+    if request.session.get('employee_id', '') in ['NGO00001001'] :
         if request.method == "POST":
             import_file = request.FILES['import_file']
             xl, new_count = pd.read_excel(import_file, "Sheet1"), 0

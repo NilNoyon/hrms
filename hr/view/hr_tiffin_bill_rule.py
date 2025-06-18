@@ -37,7 +37,7 @@ def hr_tiffin_bill_rule_list(request):
     action_name     = "Add HRTiffinBillRule"
     form            = HRTiffinBillRuleForm()
     context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list,
-                       'employee_categories' : CommonMaster.objects.filter(value_for=38) }
+                       'employee_categories' : CommonMaster.objects.filter(value_for=5) }
     return render(request, template_name, context)
     # else: return redirect(reverse("access_denied"))
 
@@ -74,7 +74,7 @@ def hr_tiffin_bill_rule_update(request, id):
         form            = HRTiffinBillRuleForm(instance=instance)
 
         context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 
-                   'employee_categories' : CommonMaster.objects.filter(value_for=38), 'instance':instance }
+                   'employee_categories' : CommonMaster.objects.filter(value_for=5), 'instance':instance }
         return render(request, template_name, context)
     except : return redirect(reverse_lazy('hr:hr_tiffin_bill_rule_list'))
     # else: return redirect(reverse("access_denied"))

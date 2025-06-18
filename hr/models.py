@@ -1604,7 +1604,6 @@ class EmployeeBranchTransfer(CoreActionWithUpdate):
      def __str__(self):
           return f"Transfer of {self.employee}"
 
-
 class MovementRegistry(CoreActionWithUpdate):
      employee             = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='movement_registry')
      movement_date        = models.DateField(null=True, blank=True)
@@ -1619,4 +1618,31 @@ class MovementRegistry(CoreActionWithUpdate):
           db_table            = 'hr_movement_registry'
           verbose_name        = "Movement Registry"
           verbose_name_plural = "Movement Registry"
+     
+
+class HRSalaryGradeMaster(CoreActionWithUpdate):
+     name                = models.CharField(max_length=20,null=True,blank=True)
+     range_start         = models.FloatField(null=True,blank=True)
+     range_end           = models.FloatField(null=True,blank=True)
+
+     class Meta:
+          db_table            = 'hr_salary_grade_master'
+          verbose_name        = "Salary Grades"
+          verbose_name_plural = "Salary Grades"
+
+     def __str__(self):
+          return f"Range of {self.name} = {self.range_start}-{self.range_end}"
+     
+class HRSalaryGradeStep(CoreActionWithUpdate):
+     name                = models.CharField(max_length=20,null=True,blank=True)
+     value               = models.FloatField(null=True,blank=True)
+     grade               = models.ForeignKey(HRSalaryGradeMaster, on_delete=models.CASCADE, related_name='grade', null=True, blank=True)
+
+     class Meta:
+          db_table            = 'hr_salary_grade_step'
+          verbose_name        = "Salary Grades Step"
+          verbose_name_plural = "Salary Grades Steps"
+
+     def __str__(self):
+          return str(self.name)
      
