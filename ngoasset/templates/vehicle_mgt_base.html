@@ -1,6 +1,6 @@
 {% extends "admin.html" %}
 {% load static %}
-{% block page_title %}Vehicle Management{% endblock %}
+{% block page_title %}Fixed Asset{% endblock %}
 {% block add_css %}
 <link href="{% static 'node_modules/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet">
 <link href="{% static 'node_modules/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
@@ -15,7 +15,7 @@
     <div class="card-header">
         <div class="row">
             <div class="col-md-6 align-self-center">
-                <h4 class="text-themecolor mb-0">Vehicle Management</h4>
+                <h4 class="text-themecolor mb-0">Fixed Asset</h4>
             </div>
         </div>
     </div>
@@ -33,18 +33,6 @@
                     <span class="hidden-xs-down"> Allocation </span>
                 </a>
             </li>
-            <li class="nav-item"> 
-                <a class="nav-link {% if tab_name == 'service' %}active{% endif %}" data-toggle="tab" href="#service" role="tab">
-                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
-                    <span class="hidden-xs-down"> Service </span>
-                </a>
-            </li>
-            <li class="nav-item"> 
-                <a class="nav-link {% if tab_name == 'requisition' %}active{% endif %}" data-toggle="tab" href="#requisition" role="tab">
-                    <span class="hidden-sm-up"><i class="ti-user"></i></span> 
-                    <span class="hidden-xs-down"> Requisition </span>
-                </a>
-            </li>
         </ul>
         <!-- Tab panes -->
         <div class="tab-content tabcontent-border">
@@ -53,13 +41,7 @@
             </div>
             <div class="tab-pane {% if tab_name == 'allocation' %}active{% endif %}" role="tabpanel" id="allocation">
                 {% include 'vehicle_mgt/vehicle_allocation.html' %}
-            </div>
-            <div class="tab-pane {% if tab_name == 'service' %}active{% endif %}" role="tabpanel" id="service">
-                {% include 'vehicle_mgt/vehicle_service.html' %}
-            </div>
-            <div class="tab-pane {% if tab_name == 'requisition' %}active{% endif %}" role="tabpanel" id="requisition">
-                {% include 'vehicle_mgt/vehicle_requisition.html' %}
-            </div>
+            </div> 
         </div>
     </div>
 </div>

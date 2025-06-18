@@ -1962,6 +1962,55 @@ def promotion_history_view(request):
     return render(request, 'hr/history_popup.html', {'history': history})
 
 @login
+def movement_registry(request):
+    chk_permission   = permission(request, "/hr/separation-management/")
+    if chk_permission and chk_permission.view_action and chk_permission.update_action:
+        employee = EmployeeDetails.objects.filter(employee_id=request.session.get('employee_id')).first()
+        if request.session["role_text"].lower() in ["admin", "super admin"] or request.session.get('department') == "HR, Admin & Compliance": 
+            employee_list  = EmployeeInfo.objects.filter(status = True)
+            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True)
+            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False)
+        else:
+            employee_list  = EmployeeInfo.objects.filter(status = True)
+            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True, emolpoyee_id = int(employee.id))
+            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False, emolpoyee_id = int(employee.id))
+
+        if request.method == 'POST': 
+            request.POST               = request.POST.copy()
+            request.POST['created_by'] = request.session.get("id")
+            request.POST['emolpoyee']  = int(employee.id)
+            date_str = request.POST.get('effective_from_date')  # This is a string
+            if date_str: request.POST['effective_from_date'] = datetime.strptime(date_str, "%d-%b-%Y").date()
+            else:request.POST['effective_from_date'] = None
+            request.POST['letter_type'] = request.POST.get('letter_type') if request.session.get('department') == "HR, Admin & Compliance" else 1
+            
+            form = EmployeeCessationForm(request.POST, request.FILES)
+            if form.is_valid():
+                cessation=form.save()
+                message = 'Successfully Added!'
+                messages.success(request, message) 
+
+                n_sender        = cessation.created_by
+                n_action_url    = reverse('hr:separation_management')
+                n_model         = 'Resignation'
+                n_verb          = 'Resignation Submitted'
+                n_description   = "A new resignation request has been submitted for review in HR."
+                notify.send(n_sender, recipient=cessation.created_by.reporting_to, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+                return redirect(reverse('hr:separation_management'))
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.warning(request, "%s : %s" % (field.name, error))
+       
+        action = {'name': 'Add New', 'btnTxt': 'Submit'}
+        context = { 
+            'action': action, 'pending_list':pending_list, 'employee_list' : employee_list, 'approved_list':approved_list
+        }
+        return render(request, 'hr/movment_registry.html', context)
+    else: return redirect('/access-denied')
+ 
+
+@login
 def employee_transfer_branchwise(request):
     chk_permission   = permission(request, "/hr/employee-transfer-branchwise/")
     if chk_permission and chk_permission.view_action and chk_permission.insert_action:

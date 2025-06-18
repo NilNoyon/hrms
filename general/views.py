@@ -58,12 +58,13 @@ def app_login(request):
                     request.session['role']                 = str(user[0].role)
                     request.session['role_text']            = str(user[0].role.name)
                     request.session['secondary_role']       = user[0].secondary_role if user[0].secondary_role else []
+                    request.session['department']           = str(user[0].department.name)
+                    request.session['department_id']        = str(user[0].department.id)
                     request.session['user_roles']           = request.session['secondary_role'] + [user[0].role.name]
                     request.session['branch_id_list']       = user[0].secondary_company + [user[0].branch_id]
                     request.session['company']              = str(user[0].branch.company.name)
                     request.session['company_id']           = str(user[0].branch.company_id)
                     request.session['branch_id']            = str(user[0].branch_id)
-                    request.session['department']           = str(user[0].department.name)
                 except Exception as e:
                     messages.warning(request, str(e))
                     return render(request, "login1.html",{"employee_id":request.POST['employee_id']})
