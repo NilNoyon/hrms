@@ -161,7 +161,7 @@ class Shift(CoreActionWithUpdate):
           verbose_name_plural = "Shifts" 
 
      def __str__(self):
-          return f'{self.shift_id}'
+          return f'{self.shift_id}-{self.name}'
 
      @property
      def title(self):
@@ -1603,4 +1603,20 @@ class EmployeeBranchTransfer(CoreActionWithUpdate):
 
      def __str__(self):
           return f"Transfer of {self.employee}"
+
+
+class MovementRegistry(CoreActionWithUpdate):
+     employee             = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='movement_registry')
+     movement_date        = models.DateField(null=True, blank=True)
+     hours                = models.CharField(max_length=255)
+     location             = models.TextField(null=True, blank=True)     
+     hr_admin             = models.ForeignKey('general.Users', on_delete=models.SET_NULL, null=True, blank=True, related_name='hr_admin_movement')
+     hr_admin_approved_at = models.DateTimeField(null=True, blank=True)
+     hr_admin_comments    = models.TextField(null=True, blank=True)
+     remarks              = models.TextField(null=True, blank=True)     
+
+     class Meta:
+          db_table            = 'hr_movement_registry'
+          verbose_name        = "Movement Registry"
+          verbose_name_plural = "Movement Registry"
      

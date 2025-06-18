@@ -30,20 +30,20 @@ def str_from_xls(value, change_quote=True, date_field = False, time_field=False)
         value   = general_filters.strip_double_quotes(value) if value else ''
         value   = general_filters.strip_single_quote(value)  if value else '' 
     value = str(value) if str(value) not in ['nan', 'NaT'] else ''
-    if date_field and value :
-        try : value = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").date()
-        except : 
-            try : value = datetime.datetime.strptime(value, "%d-%m-%Y").date()
+    if date_field and value:
+        try : value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").date()
+        except: 
+            try : value = datetime.strptime(value, "%d-%m-%Y").date()
             except : 
-                try : value = datetime.datetime.strptime(value, "%d/%m/%Y").date()
+                try : value = datetime.strptime(value, "%d/%m/%Y").date()
                 except : value = None
-    if time_field and value :
-        try : value = datetime.datetime.strptime(value, "%H:%M:%S").time()
+    if time_field and value:
+        try : value = datetime.strptime(value, "%H:%M:%S").time()
         except : 
-            try : value = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").time()
+            try : value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S").time()
             except : value = None
-    elif date_field and not value : value = None
-    elif time_field and not value : value = None
+    elif date_field and not value: value = None
+    elif time_field and not value: value = None
     return value
 
 def retrun_str_from_xls(value):

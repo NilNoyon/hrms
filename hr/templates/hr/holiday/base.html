@@ -120,8 +120,9 @@
         {% comment %} Delete {% endcomment %}
 
         // Handle multiple selection for company field
-        $("body").on("change", "#company", function(){
+        $("body").on("select2:select", "#company", function(){
             var selectedCompanies = $(this).val();
+            console.log('company::: ', selectedCompanies)
             if (selectedCompanies && selectedCompanies.length > 0) {
                 $.ajax({
                     url : "{% url 'hr:get_holiday_company_data' %}",
