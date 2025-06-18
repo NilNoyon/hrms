@@ -47,16 +47,6 @@
                         <div class="col-md-12">
                             <div class="row p-4 border rounded shadow-sm bg-white">
                                 {% if request.session.department == "HR, Admin & Compliance" %}
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="letter_type">Letter Type</label>
-                                            <select class="form-control text-capitalize select2" id="letter_type" name="letter_type" data-title="Letter Type" required>
-                                                <option value="" disabled selected>select</option> 
-                                                <option value="1">Resignation</option> 
-                                                <option value="2">Termination</option> 
-                                            </select>
-                                        </div>
-                                    </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="employee">Employee</label>
@@ -73,23 +63,33 @@
                                 
                                 <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-3" {% endif %}>
                                     <div class="form-group">
-                                        <input type="text" class="form-control singledate date_of_formation" name="effective_from_date" id="effective_from_date" required autocomplete="off">
+                                        <input type="text" class="form-control singledate date_of_formation" name="movement_date" id="movement_date" required autocomplete="off">
                                         <span class="bar"></span>
-                                        <label for="effective_from_date">Effective From</label>
+                                        <label for="movement_date">Movement Date</label>
                                     </div>
                                 </div> 
-                                
-                                
-                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-6" {% endif %}>
-                                    <div class="form-group">               
-                                        <textarea type="text" id="cessation_reason" name="cessation_reason" class="form-control" value="" required rows="1" cols="1" ></textarea>                   
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <input type="number" min="0" class="form-control" name="movement_hours" id="movement_hours" required>
                                         <span class="bar"></span>
-                                        <label for="cessation_reason">Resignation Reason</label>
+                                        <label for="movement_hours">Hours</label>
                                     </div>
                                 </div>
-                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-3" {% endif %}>
-                                    {% comment %} <label for="letter">Letter</label> {% endcomment %}
-                                    <input type="file" class="form-control" name="letter" id="letter">
+                                 
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-6" {% endif %}>
+                                    <div class="form-group">               
+                                        <textarea type="text" id="locations" name="locations" class="form-control" value="" required rows="1" cols="1" ></textarea>                   
+                                        <span class="bar"></span>
+                                        <label for="locations">Locations</label>
+                                    </div>
+                                </div>
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-6" {% endif %}>
+                                    <div class="form-group">               
+                                        <textarea type="text" id="remarks" name="remarks" class="form-control" value="" required rows="1" cols="1" ></textarea>                   
+                                        <span class="bar"></span>
+                                        <label for="remarks">Remarks</label>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
                                     <button class="btn btn-success btn-rounded btn-block" type="submit">
