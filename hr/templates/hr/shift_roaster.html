@@ -41,7 +41,7 @@
                                 <select class="form-control select2" name="company" id="company" data-title="Company">
                                     <option value="" disabled selected></option>
                                     {% for company in companies %}
-                                    <option value="{{company.id}}">{{company.short_name}}</option>
+                                        <option value="{{company.id}}">{{company.short_name}}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -207,11 +207,6 @@
                                     </div>
                                 </div>
                             </div>
-                            {% comment %} <div class="col-md-1">
-                                <div class="form-group">
-                                    <button class="btn btn-block btn-outline-success download_button" type="button" title="Fixed Asset Export"><i class="fas fa-download"></i></button>
-                                </div>
-                            </div> {% endcomment %}
                         </div>
                     </div>
                     <table id="regular-table" class="table table-border card-table table-vcenter">

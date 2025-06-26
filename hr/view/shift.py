@@ -149,13 +149,13 @@ def get_employee_data_for_shift_roaster(request):
     if category_list := request.POST.getlist('category[]', None): query &= Q(employee_category_id__in=category_list)
     if employee_list := request.POST.getlist('employee[]', [])  : query &= Q(id__in=employee_list)
     for employee in EmployeeDetails.objects.filter(query) :
-        company     = employee.company.short_name if employee.company_id else ''
+        branch      = employee.branch.short_name if employee.branch_id else ''
         department  = employee.department.title if employee.department_id else ''
         designation = employee.designation.title if employee.designation_id else ''
         employee_id = employee.personal.employee_id if employee.personal_id else ''
         name        = employee.personal.name if employee.personal_id else ''
         shift       = employee.shift if employee.shift_id else ''
-        data = [company, department, designation, employee_id, name, shift]
+        data = [branch, department, designation, employee_id, name, shift]
         report_data += "<tr><td><div class='custom-control custom-checkbox mb-1'>"
         report_data += "<input type='checkbox' class='custom-control-input check_emp'"
         report_data += "name='emp_id' value='" + str(employee.id) + "' id='check-[" + str(employee.id) + "]'>"

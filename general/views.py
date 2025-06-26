@@ -371,7 +371,7 @@ def get_users_for_dataTable(request,status):
 def addUser(request):
     chk_permission   = permission(request,reverse("addUser"))
     if chk_permission and chk_permission.insert_action:
-        if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin": 
+        if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin" or request.session.get('department') == "HR, Admin & Compliance": 
             syncUsers(request) #user update from employee info
             # generated encryption pass :
             # text = admin

@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from general.decorators import login, permission
 from django.views.decorators.csrf import csrf_exempt
-from general.models import Status
+from general.models import Branch, Status
 from hr.models import Location
 from hr.forms import LocationForm
 from django.urls import reverse, reverse_lazy
@@ -37,10 +37,11 @@ def location_list(request):
 
         template_name   = "hr/location.html"
         object_list     = Location.objects.order_by('id')
+        branch_list     = Branch.objects.order_by('id')
         action_url      = reverse_lazy('hr:location_list')
         action_name     = "Add Location"
         form            = LocationForm()
-        context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list }
+        context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'branch_list':branch_list }
         return render(request, template_name, context)
     else: return redirect(reverse("access_denied"))
 
@@ -74,9 +75,9 @@ def location_update(request, id):
             action_url      = reverse_lazy('hr:location_update', kwargs={'id':id})
             object_list     = Location.objects.order_by('id')
             form            = LocationForm(instance=instance)
+            branch_list     = Branch.objects.order_by('id')
 
-
-            context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance }
+            context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance, 'branch_list':branch_list }
             return render(request, template_name, context)
         except : return redirect(reverse_lazy('hr:location_list'))
     else: return redirect(reverse("access_denied"))

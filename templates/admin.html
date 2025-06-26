@@ -132,7 +132,7 @@
     <!-- End Wrapper -->
     <!-- ============================================================== -->
     
-    {% if request.path != "/user/myProfile/" and not request.session.photo and request.session.employee_id != 'EKCLADV001' %} {% comment %} Last and condition added for advisor user, who get prompt to update profile, but advisor is temporary user thats why user don't have any emp id {% endcomment %}
+    {% comment %} {% if request.path != "/user/myProfile/" and not request.session.photo and request.session.employee_id != 'EKCLADV001' %}
         <div class="modal fade" id="promotModal" tabindex="-1" role="dialog" aria-labelledby="promot" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -149,7 +149,7 @@
                 </div>
             </div>
         </div>
-    {% endif %}
+    {% endif %} {% endcomment %}
 {% endblock %}
 
 
