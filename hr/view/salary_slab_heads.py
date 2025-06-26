@@ -214,3 +214,57 @@ def salary_grade_delete(request, id):
         messages.success(request, "Successfully Deleted!")
         return redirect(request.META.get('HTTP_REFERER', '/'))
     except : return redirect(reverse_lazy('hr:salary_grade_list'))
+
+
+@login
+def salary_step_list(request):
+    if request.method == "POST":
+        request.POST = request.POST.copy()
+        request.POST['status'] = Status.name('active')
+        form = HRSalaryGradeStepForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Successfully Stored!")
+        else : ebs_bl_common.form_errors(request, form)
+
+    template_name   = "hr/salary_grade/salary_step_list.html"
+    object_list     = HRSalaryGradeStep.objects.order_by('id')
+    grade_list      = HRSalaryGradeMaster.objects.order_by('id')
+    action_url      = reverse_lazy('hr:salary_step_list')
+    action_name, form = "Add Salary Step", HRSalaryGradeStepForm()
+    context         = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'grade_list':grade_list }
+    return render(request, template_name, context)
+
+
+@login
+def salary_step_update(request, id):
+    try:
+        instance = HRSalaryGradeStep.objects.get(id=id)
+        if request.method == "POST":
+            request.POST = request.POST.copy()
+            request.POST['status'] = Status.name('active')
+            form = HRSalaryGradeStepForm(request.POST, instance=instance)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Successfully Updated!")
+            else : ebs_bl_common.form_errors(request, form)
+
+        template_name   = "hr/salary_grade/salary_step_list.html"
+        action_name     = "Update Salary Step"
+        action_url      = reverse_lazy('hr:salary_step_update', kwargs={'id':id})
+        object_list     = HRSalaryGradeStep.objects.order_by('id')
+        grade_list      = HRSalaryGradeMaster.objects.order_by('id')
+        form            = HRSalaryGradeStepForm(instance=instance)
+
+        context = { 'action_name':action_name, 'form':form, 'action_url':action_url, 'object_list':object_list, 'instance':instance, 'grade_list':grade_list }
+        return render(request, template_name, context)
+    except : return redirect(reverse_lazy('hr:salary_step_list'))
+
+
+@login
+def salary_step_delete(request, id):
+    try:
+        HRSalaryGradeStep.objects.get(id=id).delete()
+        messages.success(request, "Successfully Deleted!")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    except : return redirect(reverse_lazy('hr:salary_step_list'))

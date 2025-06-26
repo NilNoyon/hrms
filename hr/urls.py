@@ -130,6 +130,11 @@ urlpatterns = [
      path('salary-grades/edit/<int:id>/', views.salary_grade_update, name='salary_grade_update'),
      path('salary-grades/delete/<int:id>/', views.salary_grade_delete, name='salary_grade_delete'),
 
+     # Salary Grade-Step
+     path('salary-steps/', views.salary_step_list, name='salary_step_list'),
+     path('salary-steps/edit/<int:id>/', views.salary_step_update, name='salary_step_update'),
+     path('salary-steps/delete/<int:id>/', views.salary_step_delete, name='salary_step_delete'),
+
      # Leave Type
      path('leave-type/', views.leave_type_list, name='leave_type_list'),
      path('leave-type/edit/<int:id>/', views.leave_type_update, name='leave_type_update'),
