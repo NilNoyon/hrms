@@ -20,6 +20,7 @@
                             <thead>
                                 <tr>
                                     <th class="d-sm-table-cell">SL.</th>
+                                    <th>Branch</th>
                                     <th>Location</th>
                                     <th>Status</th>
                                     <th>Created By</th>
@@ -32,6 +33,9 @@
                                 {% for data in object_list %}
                                 <tr>
                                     <td class="">{{ forloop.counter }}</td>
+                                    <td> 
+                                        {{ data.branch.name }}
+                                    </td>
                                     <td>{{ data }}</td>
                                     <td>
                                         <label class="mx-auto">
@@ -95,6 +99,17 @@
                             <span class="bar"></span>
                             <label for="name">Location</label>
                         </div>
+
+                        <div class="form-group">
+                            <label for="branch">Branch</label>
+                            <select class="form-control text-capitalize select2" name="branch" id="branch" data-title="Branch" required>
+                                <option value="" disabled selected></option>
+                                {% for l in branch_list %}
+                                <option value="{{l.id}}" {% if instance.branch_id == l.id %} selected {% endif %}>{{l.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
                         <div class="row">
                             <div class="col">
                                 <label for="status" class="mb-2">
