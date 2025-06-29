@@ -52,8 +52,8 @@
         </div> 
         <div class="col-md">
           <div class="form-group mb-0">
-              <label for="company">Company</label>
-              <select class="form-control select2" name="company" id="company" data-title="Company" required />
+              <label for="company">Branch</label>
+              <select class="form-control select2" name="company" id="company" data-title="Branch" required />
                   <option value="" disabled selected></option>
                   {% for company in companies %}
                   <option value="{{company.id}}">{{company.short_name}}</option>
@@ -118,7 +118,7 @@
               </tr>
               <tr class="text-center">
                   <th class="">Employee ID</th>
-                  <th class="">Company</th>
+                  <th class="">Branch Code & Name</th>
                   <th class="">Department</th>
                   <th class="">Designation</th>
                   <th class="">Cost Center</th>

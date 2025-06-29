@@ -77,7 +77,7 @@ def process_salary_func(sp_id=None):
     salary_process = get_object_or_404(HRSalaryProcess, pk=sp_id)
     num_of_days, per_day_amount, basic, user = 30, 0, 0, salary_process.created_by
     for employee in salary_process.employees.all():
-        if salary_cycle := HRSalaryCycle.objects.filter(company=employee.company, employee_category=employee.employee_category).first() :
+        if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
             if salary_cycle.start_date != 1 : 
                 syear = year = int(salary_process.year)
                 month = int(salary_process.month)
@@ -261,8 +261,8 @@ def salary_process_view(request, id=None):
         other       = get_salary_breakdown(employee=employee, heads='Other Allowance')
 
         present, absent_days, with_pay, without_pay, working_day, total_days, holiday_n_weekends = 0, 0, 0, 0, 0, 0, 0
-        if salary_cycle := HRSalaryCycle.objects.filter(company=employee.company, employee_category=employee.employee_category).first() :
-            weekend_query = Q(holiday__company=employee.company)
+        if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
+            weekend_query = Q(holiday__branch=employee.branch)
             if salary_cycle.start_date != 1 : 
                 if month == 1:
                     month = 13
@@ -308,7 +308,7 @@ def salary_process_view(request, id=None):
         # for salary in HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee) :
         per_hr_amount   = round(basic / 206, 2) if basic else 0
 
-        data = { "employee_id":employee.employee_id, "name":employee.name, "company":employee.company.short_name, "department":employee.department.title, "designation":employee.designation.name, "cost_center":employee.cost_center.short_name if employee.cost_center else '', "grade":employee.grade, "employee_category":employee.employee_category.value if employee.employee_category_id else "N/A", "joining_date":employee.joining_date.strftime("%d/%m/%Y") if employee.joining_date else '', "salary":employee.salary, "basic":basic, "hrent":hrent, "medical":medical, "conveyance":conveyance, "food":food, "other":other, "working_day":working_day, "holiday_n_weekends":holiday_n_weekends, "total_days":total_days, "present":present, "absent_days":absent_days, "with_pay":with_pay, "without_pay":without_pay, "ot_hrs":round(ot / (per_hr_amount * 2), 0) if ot else 0, "salary_payable":round(salary_payable, 0), "ot":ot, "holiday":holiday, "night":night, "attendance":attendance, "incentive":incentive, "arrear":arrear, "tiffin":tiffin, "total_payable":round(total_payable, 0), "loan":loan, "absent":absent, "others":others, "itds":itds, "pf":pf, "net_payable":round(net_payable, 0)}
+        data = { "employee_id":employee.employee_id, "name":employee.name, "company":employee.branch.short_name, "department":employee.department.title, "designation":employee.designation.name, "cost_center":employee.cost_center.short_name if employee.cost_center else '', "grade":employee.grade, "employee_category":employee.employee_category.value if employee.employee_category_id else "N/A", "joining_date":employee.joining_date.strftime("%d/%m/%Y") if employee.joining_date else '', "salary":employee.salary, "basic":basic, "hrent":hrent, "medical":medical, "conveyance":conveyance, "food":food, "other":other, "working_day":working_day, "holiday_n_weekends":holiday_n_weekends, "total_days":total_days, "present":present, "absent_days":absent_days, "with_pay":with_pay, "without_pay":without_pay, "ot_hrs":round(ot / (per_hr_amount * 2), 0) if ot else 0, "salary_payable":round(salary_payable, 0), "ot":ot, "holiday":holiday, "night":night, "attendance":attendance, "incentive":incentive, "arrear":arrear, "tiffin":tiffin, "total_payable":round(total_payable, 0), "loan":loan, "absent":absent, "others":others, "itds":itds, "pf":pf, "net_payable":round(net_payable, 0)}
         print(data)
         emp_data.append(data)
     context = {'salary_process':salary_process, 'month':month_list[salary_process.month], 'emp_data':emp_data, 'user_level':user_level}
@@ -323,7 +323,7 @@ def get_employee_data_for_salary_process(request):
     if category_list := request.POST.getlist('category[]', None): query &= Q(employee_category_id__in=category_list)
     if employee_list := request.POST.getlist('employee[]', [])  : query &= Q(id__in=employee_list)
     for employee in EmployeeDetails.objects.filter(query).order_by('employee_id') :
-        company     = employee.company.short_name if employee.company_id else ''
+        company     = employee.branch.short_name if employee.branch else ''
         department  = employee.department.title if employee.department_id else ''
         designation = employee.designation.title if employee.designation_id else ''
         employee_id = employee.personal.employee_id if employee.personal_id else ''
@@ -342,7 +342,7 @@ def salary_process(request):
     chk_permission   = permission(request, reverse('hr:salary_process'))
     if chk_permission and chk_permission.view_action:
         if request.method == "POST":
-            company             = Company.objects.filter(id=request.POST.get("company", None)).first()
+            company             = Branch.objects.filter(id=request.POST.get("company", None)).first()
             department          = Departments.objects.filter(id=request.POST.get("department", None)).first()
             employee_category   = CommonMaster.objects.filter(id=request.POST.get("employee_category", None)).first()
             user                = get_object_or_404(Users, pk=request.session.get("id"))
@@ -350,8 +350,8 @@ def salary_process(request):
             num_of_days, per_day_amount, basic = 30, 0, 0
             # num_of_days, per_day_amount, basic = monthrange(year, month)[1], 0, 0
 
-            for employee in EmployeeDetails.objects.filter(personal__employee_id='LE01000074', company=company, department=department, employee_category=employee_category):
-                if salary_cycle := HRSalaryCycle.objects.filter(company=employee.company, employee_category=employee.employee_category).first() :
+            for employee in EmployeeDetails.objects.filter(personal__employee_id='LE01000074', branch=company, department=department, employee_category=employee_category):
+                if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
                     if salary_cycle.start_date != 1 : 
                         syear = year
                         if month == 1:
@@ -426,7 +426,7 @@ def salary_report(request):
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
         elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
         else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
-        companies = Company.objects.filter(status = True).order_by('name')
+        companies = Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name')
         employee_categories = CommonMaster.objects.filter(value_for=5)
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
@@ -483,11 +483,11 @@ def get_salary_report(request):
     from decimal import Decimal
     report_type, report_data, query  = request.POST.get('report_type', None), '', Q(status=Status.name("Active"))
     if company := request.POST.get('company', None)         : 
-        query &= Q(company_id=company)
-        company = Company.objects.filter(id=company).first()
-    if department := request.POST.get('department', None)   : query &= Q(department_id=department)
+        query  &= Q(branch_id=company)
+        company = Branch.objects.filter(id=company).first()
+    if department := request.POST.get('department', None) : query &= Q(department_id=department)
     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
-    month, year         = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
         basic       = get_salary_breakdown(employee=employee, heads='Basic')
         hrent       = get_salary_breakdown(employee=employee, heads='House Rent')
@@ -497,8 +497,8 @@ def get_salary_report(request):
         other       = get_salary_breakdown(employee=employee, heads='Other Allowance')
 
         late, absent_days, with_pay, without_pay, working_day, total_days, holiday_n_weekends = 0, 0, 0, 0, 0, 0, 0
-        if salary_cycle := HRSalaryCycle.objects.filter(company=employee.company, employee_category=employee.employee_category).first() :
-            weekend_query = Q(holiday__company=company)
+        if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
+            weekend_query = Q(holiday__branch=company)
             if salary_cycle.start_date != 1 : 
                 syear = year
                 if month == 1:
@@ -545,7 +545,7 @@ def get_salary_report(request):
         # for salary in HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee) :
         per_hr_amount   = round(basic / 206, 2) if basic else 0
 
-        data = [employee.employee_id, employee.company.short_name, employee.department.title, employee.designation.name,
+        data = [employee.employee_id, employee.branch.code+' '+employee.branch.name, employee.department.title, employee.designation.name,
                 employee.cost_center.short_name if employee.cost_center else '', employee.grade, employee.employee_category.value, 
                 employee.joining_date.strftime("%d/%m/%Y"), employee.salary, basic, hrent, medical, conveyance,
                 food, other, working_day, holiday_n_weekends, total_days, late, absent_days, with_pay, without_pay, 
@@ -619,7 +619,7 @@ def get_payslip_report(request):
             other       = get_salary_breakdown(employee=employee, heads='Other Allowance')
 
             late, absent_days, with_pay, without_pay, working_day, total_days, weekends, holidays = 0, 0, 0, 0, 0, 0, 0, 0
-            if salary_cycle := HRSalaryCycle.objects.filter(company=employee.company, employee_category=employee.employee_category).first() :
+            if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
                 weekend_query = Q(holiday__company=company)
                 if salary_cycle.start_date != 1 : 
                     syear = year
@@ -656,7 +656,7 @@ def get_payslip_report(request):
                 data['joining_month'] = bn_month_list[str(int(employee.joining_date.strftime("%m")))]
                 all_data.append(data)
         else : 
-            data = [employee.employee_id, employee.company.short_name, employee.department.title, employee.designation.name,
+            data = [employee.employee_id, employee.branch.short_name, employee.department.title, employee.designation.name,
             employee.employee_category.value, round(employee.salary, 0), round(total_payable, 0), round(total_deduction, 0), 
             round(net_payable, 0)]
             report_data += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
