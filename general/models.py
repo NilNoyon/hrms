@@ -48,6 +48,7 @@ class Branch(models.Model):
     name                = models.CharField(max_length = 100, unique=True)
     short_name          = models.CharField(max_length = 10, blank=True) #need to unique = true later
     address             = models.CharField(max_length = 100, blank=True)
+    code                = models.CharField(max_length = 20, blank=True)
     phone_no            = models.CharField(max_length = 15, blank=True)
     email               = models.EmailField(max_length = 80, blank=True)
     fax                 = models.CharField(max_length = 20, blank=True)
