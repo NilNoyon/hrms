@@ -1963,40 +1963,39 @@ def promotion_history_view(request):
 
 @login
 def movement_registry(request):
-    chk_permission   = permission(request, "/hr/separation-management/")
+    chk_permission   = permission(request, "/hr/movement-registry/")
     if chk_permission and chk_permission.view_action and chk_permission.update_action:
         employee = EmployeeDetails.objects.filter(employee_id=request.session.get('employee_id')).first()
         if request.session["role_text"].lower() in ["admin", "super admin"] or request.session.get('department') == "HR, Admin & Compliance": 
             employee_list  = EmployeeInfo.objects.filter(status = True)
-            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True)
-            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False)
+            pending_list   = MovementRegistry.objects.filter(hr_admin__isnull = True)
+            approved_list  = MovementRegistry.objects.filter(hr_admin__isnull = False)
         else:
             employee_list  = EmployeeInfo.objects.filter(status = True)
-            pending_list   = EmployeeCessation.objects.filter(hr_admin__isnull = True, emolpoyee_id = int(employee.id))
-            approved_list  = EmployeeCessation.objects.filter(hr_admin__isnull = False, emolpoyee_id = int(employee.id))
+            pending_list   = MovementRegistry.objects.filter(hr_admin__isnull = True, employee_id = int(employee.id))
+            approved_list  = MovementRegistry.objects.filter(hr_admin__isnull = False, employee_id = int(employee.id))
 
         if request.method == 'POST': 
             request.POST               = request.POST.copy()
             request.POST['created_by'] = request.session.get("id")
-            request.POST['emolpoyee']  = int(employee.id)
-            date_str = request.POST.get('effective_from_date')  # This is a string
-            if date_str: request.POST['effective_from_date'] = datetime.strptime(date_str, "%d-%b-%Y").date()
-            else:request.POST['effective_from_date'] = None
-            request.POST['letter_type'] = request.POST.get('letter_type') if request.session.get('department') == "HR, Admin & Compliance" else 1
+            request.POST['employee']  = int(employee.id)
+            date_str = request.POST.get('movement_date')  # This is a string
+            if date_str: request.POST['movement_date'] = datetime.strptime(date_str, "%d-%b-%Y").date()
+            else:request.POST['movement_date'] = None
             
-            form = EmployeeCessationForm(request.POST, request.FILES)
+            form = MovementRegistryForm(request.POST, request.FILES)
             if form.is_valid():
-                cessation=form.save()
+                movement=form.save()
                 message = 'Successfully Added!'
                 messages.success(request, message) 
 
-                n_sender        = cessation.created_by
-                n_action_url    = reverse('hr:separation_management')
-                n_model         = 'Resignation'
-                n_verb          = 'Resignation Submitted'
-                n_description   = "A new resignation request has been submitted for review in HR."
-                notify.send(n_sender, recipient=cessation.created_by.reporting_to, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
-                return redirect(reverse('hr:separation_management'))
+                n_sender        = movement.created_by
+                n_action_url    = reverse('hr:movement_registry')
+                n_model         = 'Movement'
+                n_verb          = 'Movement Submitted'
+                n_description   = "A new movement request has been submitted for review in HR."
+                notify.send(n_sender, recipient=movement.created_by.reporting_to, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+                return redirect(reverse('hr:movement_registry'))
             else:
                 for field in form:
                     for error in field.errors:
@@ -2006,9 +2005,42 @@ def movement_registry(request):
         context = { 
             'action': action, 'pending_list':pending_list, 'employee_list' : employee_list, 'approved_list':approved_list
         }
-        return render(request, 'hr/movment_registry.html', context)
+        return render(request, 'hr/movement_registry.html', context)
     else: return redirect('/access-denied')
  
+
+def movement_registry_action(request):
+    movement_id = request.POST.get('movement_id')
+    action_type = request.POST.get('action_type')
+    comments = request.POST.get('hr_admin_comments')
+
+    movement = get_object_or_404(MovementRegistry, id=movement_id)
+    movement.hr_admin_id = int(request.session.get('id'))
+    movement.hr_admin_comments = comments
+    from django.utils import timezone
+    movement.hr_admin_approved_at = timezone.now()
+    user = get_object_or_404(Users, pk=request.session.get("id", ""))
+    if action_type == 'approve':
+        movement.status_id = 3
+        n_sender        = user
+        n_action_url    = reverse('hr:movement_registry')
+        n_model         = 'Movement'
+        n_verb          = 'Movement Approved'
+        n_description   = "Your movement request has been approved by HR."
+        notify.send(n_sender, recipient=movement.created_by, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+
+    elif action_type == 'reject':
+        movement.status_id = 5
+        n_sender        = user
+        n_action_url    = reverse('hr:movement_registry')
+        n_model         = 'Movement'
+        n_verb          = 'Movement Rejected'
+        n_description   = "Your movement request has been rejected by HR."
+        notify.send(n_sender, recipient=movement.created_by, action_url=n_action_url, model=n_model, verb=n_verb, description=n_description, is_repeated=True)
+
+    movement.save()
+    return redirect('/hr/movement-registry/')
+
 
 @login
 def employee_transfer_branchwise(request):

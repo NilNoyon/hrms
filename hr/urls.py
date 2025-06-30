@@ -321,6 +321,7 @@ urlpatterns = [
      path('ajax/fiscal-year-update-status/', views.fiscal_year_update_status, name='fiscal_year_update_status'),
      path('separation-management/', views.separation_management, name='separation_management'),
      path('movement-registry/', views.movement_registry, name='movement_registry'),
+     path('movement/action/', views.movement_registry_action, name='movement_registry_action'),
      path('cessation/action/', views.employee_cessation_action, name='employee_cessation_action'),
      path('promotion-demotion/', views.promotion_demotion, name='promotion_demotion'),
      path('promotion-history-view/', views.promotion_history_view, name='promotion_history_view'),

@@ -92,6 +92,11 @@ class EmployeeCessationForm(forms.ModelForm):
         model = EmployeeCessation
         fields = ('emolpoyee','effective_from_date','cessation_reason','letter_type','letter','created_by','updated_by')
 
+class MovementRegistryForm(forms.ModelForm):
+    class Meta:
+        model = MovementRegistry
+        fields = ('employee','movement_date','hours','location','created_by','updated_by', 'remarks')
+
 class EmployeePromotionDemotionForm(forms.ModelForm):
     class Meta:
         model = EmployeePromotionDemotion

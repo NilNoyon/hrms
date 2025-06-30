@@ -229,6 +229,9 @@ class EmployeeInfo(CoreActionWithUpdate):
      signature           = models.ImageField(upload_to=upload_to("employees_sign"), blank=True, null=True)
      reporting_to        = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True)
      status              = models.BooleanField(default = True)
+
+     face_encoding       = models.BinaryField(null=True, blank=True)  # numpy array 
+     image               = models.ImageField(upload_to='employee_photos/', null=True, blank=True)
      employee_status     = models.ForeignKey('general.Status', on_delete=models.CASCADE, null=True, blank=True)
 
      class meta:
@@ -373,6 +376,25 @@ class EmployeeDetails(CoreActionWithUpdate):
                     self.confirmation_date = self.joining_date + timedelta(num_of_days)
           super(EmployeeDetails, self).save(*args, **kwargs)
 
+class FaceAttendance(models.Model):
+    employee = models.ForeignKey(EmployeeInfo, on_delete=models.CASCADE, related_name='face_attendance', null=True, blank=True)
+    date     = models.DateField(auto_now_add=True)
+    in_time  = models.TimeField(null=True, blank=True)
+    out_time = models.TimeField(null=True, blank=True)
+    status   = models.CharField(max_length=20, choices=[('Present', 'Present'), ('Late', 'Late'), ('Absent', 'Absent')])
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.date}"
+
+
+class FaceAttendanceLog(models.Model):
+    attendance = models.ForeignKey(FaceAttendance, on_delete=models.CASCADE, related_name='logs', null=True, blank=True)
+    timestamp  = models.DateTimeField(auto_now_add=True)
+    remarks    = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Log: {self.attendance.employee.name} at {self.timestamp}"
+    
 class EmployeeNominee(CoreActionWithUpdate):
      employee            = models.ForeignKey (EmployeeDetails, related_name='nominees', on_delete=models.CASCADE, blank=True, null=True, default=None)
      nominee_name        = models.CharField (max_length=50, blank=True, null=True)
@@ -1605,7 +1627,7 @@ class EmployeeBranchTransfer(CoreActionWithUpdate):
           return f"Transfer of {self.employee}"
 
 class MovementRegistry(CoreActionWithUpdate):
-     employee             = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='movement_registry')
+     employee             = models.ForeignKey(EmployeeDetails, on_delete=models.CASCADE, related_name='movement_registry')
      movement_date        = models.DateField(null=True, blank=True)
      hours                = models.CharField(max_length=255)
      location             = models.TextField(null=True, blank=True)     

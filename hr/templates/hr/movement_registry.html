@@ -71,22 +71,22 @@
 
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <input type="number" min="0" class="form-control" name="movement_hours" id="movement_hours" required>
+                                        <input type="number" min="0" class="form-control" name="hours" id="hours" required>
                                         <span class="bar"></span>
-                                        <label for="movement_hours">Hours</label>
+                                        <label for="hours">Hours</label>
                                     </div>
                                 </div>
                                  
-                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-6" {% endif %}>
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-3" {% endif %}>
                                     <div class="form-group">               
-                                        <textarea type="text" id="locations" name="locations" class="form-control" value="" required rows="1" cols="1" ></textarea>                   
+                                        <textarea type="text" id="location" name="location" class="form-control" value="" required rows="1" cols="1" ></textarea>                   
                                         <span class="bar"></span>
-                                        <label for="locations">Locations</label>
+                                        <label for="location">Locations</label>
                                     </div>
                                 </div>
-                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-3" {% else %} class="col-md-6" {% endif %}>
+                                <div {% if request.session.department == "HR, Admin & Compliance" %} class="col-md-2" {% else %} class="col-md-4" {% endif %}>
                                     <div class="form-group">               
-                                        <textarea type="text" id="remarks" name="remarks" class="form-control" value="" required rows="1" cols="1" ></textarea>                   
+                                        <textarea type="text" id="remarks" name="remarks" class="form-control" value="" rows="1" cols="1" ></textarea>                   
                                         <span class="bar"></span>
                                         <label for="remarks">Remarks</label>
                                     </div>
@@ -107,36 +107,34 @@
                 <table  class="table display table-border card-table table-vcenter" style="width:100%">
                     <thead>
                         <tr>
-                            {% if request.session.department == "HR, Admin & Compliance" %}<th class="d-sm-table-cell">Letter Type</th>{% endif %}
-                            <th class="d-sm-table-cell">Employee ID</th>
-                            <th class="d-sm-table-cell">Employee Name</th>
-                            <th class="d-sm-table-cell">Phone</th>
-                            <th class="d-sm-table-cell">Designation</th>
-                            <th class="d-sm-table-cell">Effective Date</th>
-                            <th class="d-sm-table-cell">Reason</th>
-                            <th class="d-sm-table-cell">Letter</th>
+                            {% if request.session.department == "HR, Admin & Compliance" %}
+                                <th class="d-sm-table-cell">Employee ID</th>
+                                <th class="d-sm-table-cell">Employee Name</th>
+                                <th class="d-sm-table-cell">Phone</th>
+                                <th class="d-sm-table-cell">Designation</th>
+                            {% endif %}
+                            <th class="d-sm-table-cell">Movement Date</th>
+                            <th class="d-sm-table-cell">Hours</th>
+                            <th class="d-sm-table-cell">Location</th>
                             <th class="d-sm-table-cell">Entry Date</th>
+                            <th class="d-sm-table-cell">Remarks</th>
                             {% if request.session.department == "HR, Admin & Compliance" %}<th class="d-sm-table-cell">Action</th> {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for data in pending_list %}
                             <tr>
-                                {% if request.session.department == "HR, Admin & Compliance" %}<td class="">{{ data.get_letter_type_display }}</td>{% endif %}
-                                <td class="">{{ data.emolpoyee.personal.employee_id }}</td>
-                                <td class="">{{ data.emolpoyee.personal.first_name }} {{ data.emolpoyee.personal.last_name }}</td>
-                                <td class="">{{ data.emolpoyee.personal.phone_no }}</td>
-                                <td class="">{{ data.emolpoyee.designation }}</td>
-                                <td class="">{{ data.effective_from_date|date:"d F, Y" }}</td>
-                                <td class="">{{ data.cessation_reason }}</td>
-                                <td class="">
-                                    {% if data.letter %}
-                                        <a href="/assets{{ data.letter.url }}" target="_blank" class="btn btn-sm btn-primary">View File</a>
-                                    {% else %}
-                                        No File
-                                    {% endif %}
-                                </td>
+                                {% if request.session.department == "HR, Admin & Compliance" %}
+                                    <td class="">{{ data.employee.personal.employee_id }}</td>
+                                    <td class="">{{ data.employee.personal.first_name }} {{ data.employee.personal.last_name }}</td>
+                                    <td class="">{{ data.employee.personal.phone_no }}</td>
+                                    <td class="">{{ data.employee.designation }}</td>
+                                {% endif %}
+                                <td class="">{{ data.movement_date|date:"d F, Y" }}</td>
+                                <td class="">{{ data.hours }}</td>
+                                <td class="">{{ data.location }}</td>
                                 <td class="">{{ data.created_at|date:"d F, Y" }}</td>
+                                <td class="">{{ data.remarks }}</td>
                                 {% if request.session.department == "HR, Admin & Compliance" %}
                                 <td> 
                                     <button type="button" class="btn btn-sm btn-success approve-btn"
@@ -157,13 +155,17 @@
                 <table class="table approved_list table-border card-table table-vcenter" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="d-sm-table-cell">Employee ID</th>
-                            <th class="d-sm-table-cell">Employee Name</th>
-                            <th class="d-sm-table-cell">Phone</th>
-                            <th class="d-sm-table-cell">Designation</th>
-                            <th class="d-sm-table-cell">Effective Date</th>
-                            <th class="d-sm-table-cell">Reason</th>
-                            <th class="d-sm-table-cell">Letter</th>
+                            {% if request.session.department == "HR, Admin & Compliance" %}
+                                <th class="d-sm-table-cell">Employee ID</th>
+                                <th class="d-sm-table-cell">Employee Name</th>
+                                <th class="d-sm-table-cell">Phone</th>
+                                <th class="d-sm-table-cell">Designation</th>
+                            {% endif %}
+                            <th class="d-sm-table-cell">Movement Date</th>
+                            <th class="d-sm-table-cell">Hours</th>
+                            <th class="d-sm-table-cell">Location</th>
+                            <th class="d-sm-table-cell">Entry Date</th>
+                            <th class="d-sm-table-cell">Remarks</th>
                             <th class="d-sm-table-cell">Approved Date </th>
                             <th class="d-sm-table-cell">HR Feedback </th>
                         </tr>
@@ -171,19 +173,17 @@
                     <tbody>
                         {% for data in approved_list %}
                             <tr>
-                                <td class="">{{ data.emolpoyee.personal.employee_id }}</td>
-                                <td class="">{{ data.emolpoyee.personal.first_name }} {{ data.emolpoyee.personal.last_name }}</td>
-                                <td class="">{{ data.emolpoyee.personal.phone_no }}</td>
-                                <td class="">{{ data.emolpoyee.designation }}</td>
-                                <td class="">{{ data.effective_from_date|date:"d F, Y" }}</td>
-                                <td class="">{{ data.cessation_reason }}</td>
-                                <td class="">
-                                    {% if data.letter %}
-                                        <a href="/assets{{ data.letter.url }}" target="_blank" class="btn btn-sm btn-primary">View File</a>
-                                    {% else %}
-                                        No File
-                                    {% endif %}
-                                </td>
+                                {% if request.session.department == "HR, Admin & Compliance" %}
+                                    <td class="">{{ data.employee.personal.employee_id }}</td>
+                                    <td class="">{{ data.employee.personal.first_name }} {{ data.employee.personal.last_name }}</td>
+                                    <td class="">{{ data.employee.personal.phone_no }}</td>
+                                    <td class="">{{ data.employee.designation }}</td>
+                                {% endif %}
+                                <td class="">{{ data.movement_date|date:"d F, Y" }}</td>
+                                <td class="">{{ data.hours }}</td>
+                                <td class="">{{ data.location }}</td>
+                                <td class="">{{ data.created_at|date:"d F, Y" }}</td>
+                                <td class="">{{ data.remarks }}</td>
                                 <td class="">{{ data.hr_admin_approved_at|date:"d F, Y" }}</td>
                                 <td class="">{{ data.hr_admin_comments }}</td>
                             </tr>
@@ -195,13 +195,13 @@
         <!-- Approve/Reject Modal -->
         <div class="modal fade" id="approveRejectModal" tabindex="-1" role="dialog" aria-labelledby="approveRejectModalLabel" aria-hidden="true" style="padding-top: 50px;">
             <div class="modal-dialog" role="document">
-            <form method="post" action="{% url 'hr:employee_cessation_action' %}">
+            <form method="post" action="{% url 'hr:movement_registry_action' %}">
                 {% csrf_token %}
-                <input type="hidden" name="cessation_id" id="modal_cessation_id">
+                <input type="hidden" name="movement_id" id="modal_movement_id">
                 <input type="hidden" name="action_type" id="modal_action_type">
                 <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="approveRejectModalLabel">Employee Cessation Action</h5>
+                    <h5 class="modal-title" id="approveRejectModalLabel">Movement Registry Action</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
@@ -293,8 +293,8 @@
 });
 $(document).ready(function () {
     $('.approve-btn').on('click', function () {
-      var cessationId = $(this).data('id');
-      $('#modal_cessation_id').val(cessationId);
+      var movementId = $(this).data('id');
+      $('#modal_movement_id').val(movementId);
       $('#modal_hr_admin_comments').val('');
     });
   });
