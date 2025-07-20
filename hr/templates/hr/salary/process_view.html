@@ -268,7 +268,7 @@
 
             {% comment %} Approvals {% endcomment %}
             {% variable_assign_tag 0 as approval %}
-            {% if request.session.employee_id|ifinlistSTR:'EC00007156,HC01000038,LE01000084' and salary_process.status.title|lower == 'started' %}
+            {% if salary_process.status.title|lower == 'started' %}
             {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'submitted' as sp_status %}
             {% elif request.session.is_head and salary_process.status.title|lower == 'submitted' %}
             {% variable_assign_tag 1 as approval %} {% variable_assign_tag 'recommended' as sp_status %}

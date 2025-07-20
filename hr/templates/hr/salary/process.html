@@ -42,8 +42,8 @@
                     <div class="row floating-labels mt-2">
                         <div class="col-md-2">
                             <div class="form-group mb-3">
-                                <label for="company">Company</label>
-                                <select class="form-control select2" name="company" id="company" data-title="Company">
+                                <label for="company">Branch</label>
+                                <select class="form-control select2" name="company" id="company" data-title="Branch">
                                     <option value="" disabled selected></option>
                                     {% for company in companies %}
                                     <option value="{{company.id}}">{{company.short_name}}</option>

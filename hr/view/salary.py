@@ -36,7 +36,8 @@ bn_month_list = {
 
 @login
 def salary_process2(request):
-    if request.session.get('employee_id', '') in ['NGO00001001']:
+    chk_permission = permission(request, reverse('hr:salary_process2'))
+    if request.session.get('employee_id', '') in ['NGO00001001'] or chk_permission and chk_permission.insert_action:
         if request.method == "POST":
             ids, month, year = [], request.POST.get('month', None), request.POST.get('year', None)
             for emp_id in request.POST.getlist('emp_id', []):
@@ -65,7 +66,7 @@ def salary_process2(request):
         
         context = { 
             'years' : year_list, 'months' : month_list, 
-            'companies'     : Company.objects.filter(status = True).order_by('name'),
+            'companies'     : Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name'),
             'categories'    : CommonMaster.objects.filter(value_for=5, status = True),
             'departments'   : Departments.objects.filter(status = True).order_by('name'), 
             'shifts'        : Shift.objects.filter(status=Status.name('active')) 
@@ -139,7 +140,8 @@ def get_salary_process_for_datatable(request):
     user_level = user.sc_user_level()
     if status_text := request.POST.get('status', None) :
         if status_text == 'pending' :
-            if request.session.get('employee_id', '') in ['NGO00001001'] :
+            chk_permission = permission(request, reverse('hr:salary_process2'))
+            if request.session.get('employee_id', '') in ['NGO00001001'] or chk_permission and chk_permission.insert_action:
                 query &= Q(status__in=[Status.name('started'), Status.name('rejected')])
             elif is_role_assigned(str(request.session.get('user_roles', '')).lower(), 'cfo'):
                 query &= Q(status=Status.name('checked'))
@@ -151,7 +153,8 @@ def get_salary_process_for_datatable(request):
                 query &= Q(status=Status.name('submitted'))
         elif status_text == 'list' :
             # if is_role_assigned(str(request.session.get('user_roles', '')).lower(), 'payroll officer'):
-            if request.session.get('employee_id', '') in ['NGO00001001'] :
+            chk_permission = permission(request, reverse('hr:salary_process2'))
+            if request.session.get('employee_id', '') in ['NGO00001001'] or chk_permission and chk_permission.insert_action:
                 query &= ~Q(status__in=[Status.name('started'), Status.name('rejected')])
             elif is_role_assigned(str(request.session.get('user_roles', '')).lower(), 'cfo'):
                 query &= Q(status__in=[Status.name('approved'), Status.name('acknowledged')])
@@ -317,7 +320,7 @@ def salary_process_view(request, id=None):
 @csrf_exempt
 def get_employee_data_for_salary_process(request):
     report_data, query = '', Q(status=Status.name('Active'))
-    if company     := request.POST.get('company', None)     : query &= Q(company_id=company)
+    if company     := request.POST.get('company', None)     : query &= Q(branch_id=company)
     if department  := request.POST.get('department', None)  : query &= Q(department_id=department)
     if designation := request.POST.get('designation', None) : query &= Q(designation_id=designation)
     if category_list := request.POST.getlist('category[]', None): query &= Q(employee_category_id__in=category_list)
@@ -421,7 +424,8 @@ def salary_details_entry(year=None, month=None, amount=0, employee=None, slab_he
 def salary_report(request):
     # chk_permission   = permission(request, reverse('hr:salary_process'))
     # if chk_permission and chk_permission.view_action:
-    if request.session.get('employee_id', '') in ['NGO00001001'] :
+    chk_permission = permission(request, reverse('hr:salary_process2'))
+    if request.session.get('employee_id', '') in ['NGO00001001'] or chk_permission and chk_permission.insert_action:
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
         elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
