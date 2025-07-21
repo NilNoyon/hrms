@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_countries',
-    'notification',
+    # 'notification',
     'general',
     'desk',
     'ngohrms',
