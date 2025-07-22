@@ -5,9 +5,7 @@ migrations
 migrations/
 /migrations/
 
-/settings.py
-.settings.py
-settings.py
+
 ngohrms/settings.py
 /ngohrms/settings.py
 
