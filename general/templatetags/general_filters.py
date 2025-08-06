@@ -69,3 +69,22 @@ div_float.is_safe = False
 def times(number):
     return range(number)
 
+import re
+@register.filter(name='bdt_currency')
+def bdt_currency(value):
+    s, *d = str(value).partition(".")
+    r = ",".join([s[x-2:x] for x in range(-3, -len(s), -2)][::-1] + [s[-3:]])
+    s = "".join([r] + d)
+    return s.rstrip('0').rstrip('.') if '.' in s else s
+
+@register.filter(name='convert_to_bangla')
+def convert_to_bangla(number):
+    """
+    Converts a number to its Bangla representation.
+    """
+    bangla_digits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"]
+    result = []
+    for digit in str(number):
+        try : result.append(bangla_digits[int(digit)])
+        except : result.append(str(digit))
+    return "".join(result)

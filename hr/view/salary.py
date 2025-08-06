@@ -491,6 +491,7 @@ def get_salary_report(request):
         company = Branch.objects.filter(id=company).first()
     if department := request.POST.get('department', None) : query &= Q(department_id=department)
     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
+    print('month and year:: ', request.POST.get('month'))
     month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
         basic       = get_salary_breakdown(employee=employee, heads='Basic')
@@ -591,7 +592,7 @@ def get_payslip_report(request):
     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
     if employees := request.POST.getlist('user', []) : query &= Q(id__in=employees)
     if employees := request.POST.getlist('user[]', []) : query &= Q(id__in=employees)
-    month, year = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    month, year = int(request.POST.get('month', None)), int(request.POST.get('year', None))
     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
         # Addition
         holiday     = get_salary_details(year=year, month=month, employee=employee, heads='Holiday')

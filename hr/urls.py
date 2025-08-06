@@ -73,7 +73,7 @@ urlpatterns = [
      path('holiday-setup-update-fixed-status/', views.holiday_setup_update_fixed_status, name='holiday_setup_update_fixed_status'),
 
      # Holiday
-     path('company-wise-weekends/', views.company_weekends, name='company_weekends'),
+     path('branch-wise-weekends/', views.company_weekends, name='company_weekends'),
      path('ajax/get-company-weekends-data/', views.get_weekend_data, name='get_weekend_data'),
 
      path('holiday/', views.holiday_list, name='holiday_list'),
