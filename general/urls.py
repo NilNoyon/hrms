@@ -16,9 +16,9 @@ urlpatterns = [
 
     # user management
     path('user/', views.user_index, name='user_index'),
-    path('user/company/', views.company, name='company'),
-    path('user/company/<int:id>/edit/', views.update_company, name='update_company'),
-    path('user/company/<int:id>/delete/', views.delete_company, name='delete_company'),
+    path('user/branch/', views.branch, name='branch'),
+    path('user/branch/<int:id>/edit/', views.update_branch, name='update_branch'),
+    path('user/branch/<int:id>/delete/', views.delete_branch, name='delete_branch'),
     path('user/add-user/', views.addUser, name='addUser'),
     path('user/edit/<int:id>', views.user_update, name='user_edit'),
     path('user/update-status/', views.updateStatus, name='user_status'),

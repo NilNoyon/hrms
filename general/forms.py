@@ -39,10 +39,15 @@ class ApprovalLogForm(forms.ModelForm):
         fields      = '__all__'
 
         
-# class CompanyForm(forms.ModelForm):
-#     class Meta:
-#         model = Company
-#         fields = '__all__'
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = '__all__'
+
+class BranchForm(forms.ModelForm):
+    class Meta:
+        model = Branch
+        fields = '__all__'
 
 # Departments
 class DepartmentsForm(forms.ModelForm):

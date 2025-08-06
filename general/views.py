@@ -431,7 +431,7 @@ def company(request):
             form = CompanyForm(request.POST) 
             if form.is_valid():
                 form.save()
-                message = request.POST.get('short_name')+' - Company Successfully Added!'
+                message = request.POST.get('short_name')+' - Branch Successfully Added!'
                 messages.success(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
             else:
@@ -439,7 +439,7 @@ def company(request):
                     for error in field.errors:
                         messages.warning(request, "%s : %s" % (field.name, error)) 
         user_list      = Users.objects.filter(status=True) 
-        company_list   = Company.objects.order_by('-id')
+        company_list   = Branch.objects.order_by('-id')
         banks          = Bank.objects.order_by('name')
         context = { 
             'user_list'    : user_list, 
@@ -496,6 +496,82 @@ def delete_company(request, id):
     if chk_permission.delete_action:
         Company.objects.filter(id=id).delete()
         return JsonResponse('Company Delete Successful.', safe=False)
+    else:
+        return JsonResponse('You have no access on this action!', safe=False)
+@login
+def branch(request):
+    chk_permission   = permission(request,reverse("branch"))
+    if chk_permission and chk_permission.insert_action: 
+        if request.method == 'POST':
+            request.POST = request.POST.copy()
+            form = BranchForm(request.POST) 
+            if form.is_valid():
+                form.save()
+                message = request.POST.get('short_name')+' - Branch Successfully Added!'
+                messages.success(request, message)
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.warning(request, "%s : %s" % (field.name, error)) 
+        user_list      = Users.objects.filter(status=True) 
+        company_list   = Branch.objects.filter(company_id=request.session.get('company_id')).order_by('-id')
+        banks          = Bank.objects.order_by('name')
+        context = { 
+            'user_list'    : user_list, 
+            'company_list' : company_list, 
+            'banks'        : banks, 
+            'action_name'  : "Submit", 
+            'tab_name'     : "Add Branch", 
+        }
+        return render(request, 'company.html', context)
+             
+    else:
+        return redirect('/access-denied')
+
+@login
+def update_branch(request, id):
+    chk_permission   = permission(request,reverse("branch"))
+    if chk_permission.update_action: 
+        instance = get_object_or_404(Branch, id=id)
+        if request.method == 'POST':
+            request.POST = request.POST.copy()
+            if request.POST.get('status') == 'on': request.POST['status'] = 1
+            else: request.POST['status'] = 0
+
+            form = BranchForm(request.POST, instance=instance) 
+            if form.is_valid():
+                company = form.save()
+                company.weekends = request.POST.getlist('weekends', [])
+                company.save()
+                message = company.short_name + ' - Branch Successfully Updated!'
+                messages.success(request, message)
+                return redirect('/user/branch/')
+            else:
+                for field in form:
+                    for error in field.errors:
+                        messages.warning(request, "%s : %s" % (field.name, error)) 
+        user_list      = Users.objects.filter(status=True) 
+        company_list   = Branch.objects.filter(company_id=request.session.get('company_id')).order_by('-id') 
+        banks          = Bank.objects.order_by('name')
+        context = { 
+            'user_list'       : user_list, 
+            'company_list'    : company_list, 
+            'banks'           : banks, 
+            'instance'        : instance, 
+            'action_name'     : "Update", 
+            'tab_name'        : "Update Branch", 
+        }
+        return render(request, 'company.html', context)
+             
+    else:
+        return redirect('/access-denied')
+@login
+def delete_branch(request, id):
+    chk_permission   = permission(request,reverse("branch"))
+    if chk_permission.delete_action:
+        Branch.objects.filter(id=id).delete()
+        return JsonResponse('Branch Delete Successful.', safe=False)
     else:
         return JsonResponse('You have no access on this action!', safe=False)
  
