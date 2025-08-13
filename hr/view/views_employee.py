@@ -396,8 +396,7 @@ def get_company_and_floor_wise_line(request):
 @csrf_exempt
 def get_company_wise_line(request):
     company_id = request.POST.get('company_id')
-    line_list = list(SewingLine.objects.filter(company_id=company_id).annotate(
-                    text=Concat('floor__name',Value(' - '),'name')).values('id','text'))
+    line_list = []
     line_list.insert(0, {'id':'','text':''})
     return JsonResponse({'line':line_list}, safe=False)
 

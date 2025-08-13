@@ -403,11 +403,11 @@
                         <div class="row">
                             <div class="col-md">
                                 <div class="form-group">
-                                    <label for="company">Company</label>
-                                    <select class="form-control  custom-select select2" id="company" name="company" data-title="Company" placeholder="gender" required>
+                                    <label for="company">Branch</label>
+                                    <select class="form-control  custom-select select2" id="company" name="company" data-title="Branch" placeholder="branch" required>
                                         <option value="" disabled selected></option>
                                         {% for i in company_list %}
-                                        <option value="{{i.id}}" {% if office.company_id == i.id %} selected {% endif %}>{{i.short_name}}</option>
+                                        <option value="{{i.id}}" {% if office.company_id == i.id %} selected {% endif %}>{{i.name}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -448,7 +448,7 @@
                                     <select class="form-control custom-select select2" name="cost_center" data-title="Cost Center" id="cost_center">
                                         <option value="" disabled selected></option>
                                         {% for i in company_list %}
-                                        <option value="{{i.id}}" {% if office.cost_center_id == i.id %} selected {% endif %}>{{i.short_name}}</option>
+                                        <option value="{{i.id}}" {% if office.cost_center_id == i.id %} selected {% endif %}>{{i.name}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>

@@ -261,7 +261,7 @@ def analytics_reports(request):
 def user_index(request):
     chk_permission   = permission(request, reverse("user_index"))
     if chk_permission and chk_permission.view_action:
-        if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin":
+        if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin" or chk_permission.view_action:
             user_list = Users.objects.all().exclude(employee_id = 'admin')
             submitted_count   = Users.objects.all().exclude(employee_id = 'admin').count()
             # active_count   = Users.objects.filter(status = True).exclude(employee_id = 'admin').count()
