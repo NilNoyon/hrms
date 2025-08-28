@@ -883,7 +883,7 @@ def user_access_control_setup(request):
                 'department_list': Departments.objects.all().order_by('name'),
                 'user_roles': UserRoles.objects.filter(status = True).order_by('name'),
                 'user_list': Users.objects.filter(status = True),
-                'company_list': Company.objects.all().order_by('name'),
+                'company_list': Branch.objects.filter(company_id=request.session.get('company_id')).order_by('name'),
             }
             return render(request, 'user/user_access_control_setup.html',context)
     else:

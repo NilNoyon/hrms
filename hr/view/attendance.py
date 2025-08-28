@@ -1,5 +1,5 @@
 from hr.views import *
-
+from openpyxl import load_workbook
 
 @login
 def attendance_list(request):
@@ -261,32 +261,40 @@ def import_attendances(request):
     if request.method == "POST":
         attendance_list, user = 0, get_object_or_404(Users, pk=request.session.get('id', None))
         import_file = request.FILES['import_file']
-        info = pd.read_excel(import_file, 'Sheet1', engine='openpyxl', dtype={'Employee': str})
-        from hr.views import str_from_xls
-        for i in range(0, len(info)):
-            employee_id = str_from_xls(info['Employee'][i])
-            employee_dtl= EmployeeDetails.objects.filter(personal__employee_id=employee_id).last()
-            date        = str_from_xls(info['Date'][i], date_field = True)
-            outside     = True if str_from_xls(info['Outside Office'][i]).title() == "Yes" else False
-            if not outside :
-                in_time = str_from_xls(info['In Time'][i], time_field=True)
-                out_time= str_from_xls(info['Out Time'][i], time_field=True)
-            if employee_dtl and date:
-                attn_exist = Attendance.objects.filter(employee=employee_dtl,present_day=date).last()
-                has_roaster_shift = HRShiftRoaster.objects.filter(employee=employee_dtl, roaster_date=date).first()
-                shift = has_roaster_shift.shift if has_roaster_shift else employee_dtl.shift
-                if outside : in_time, out_time = shift.start_time, shift.end_time
-                if not attn_exist:
-                    Attendance.objects.create(employee=employee_dtl, shift=shift, location=employee_dtl.location, present_day=date,
-                        in_time=in_time, out_time=out_time, outside_office=outside, created_by=user, status=Status.name('Active'))
-                else :
-                    attn_exist.shift    = shift
-                    attn_exist.in_time  = in_time
-                    attn_exist.out_time = out_time
-                    attn_exist.save()
-                attendance_list += 1
-        messages.success(request, "You have successfully imported {} attendance/s information.".format(attendance_list))
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+        try:
+            # Load workbook
+            wb = load_workbook(import_file)
+            # Get sheet names
+            sheet_names = wb.sheetnames
+            info = pd.read_excel(import_file, sheet_names[0], engine='openpyxl', dtype={'Employee': str})
+            from hr.views import str_from_xls
+            for i in range(0, len(info)):
+                employee_id = str_from_xls(info['Employee'][i])
+                employee_dtl= EmployeeDetails.objects.filter(personal__employee_id=employee_id).last()
+                date        = str_from_xls(info['Date'][i], date_field = True)
+                outside     = True if str_from_xls(info['Outside Office'][i]).title() == "Yes" else False
+                if not outside :
+                    in_time = str_from_xls(info['In Time'][i], time_field=True)
+                    out_time= str_from_xls(info['Out Time'][i], time_field=True)
+                if employee_dtl and date:
+                    attn_exist = Attendance.objects.filter(employee=employee_dtl,present_day=date).last()
+                    has_roaster_shift = HRShiftRoaster.objects.filter(employee=employee_dtl, roaster_date=date).first()
+                    shift = has_roaster_shift.shift if has_roaster_shift else employee_dtl.shift
+                    if outside : in_time, out_time = shift.start_time, shift.end_time
+                    if not attn_exist:
+                        Attendance.objects.create(employee=employee_dtl, shift=shift, location=employee_dtl.location, present_day=date,
+                            in_time=in_time, out_time=out_time, outside_office=outside, created_by=user, status=Status.name('Active'))
+                    else :
+                        attn_exist.shift    = shift
+                        attn_exist.in_time  = in_time
+                        attn_exist.out_time = out_time
+                        attn_exist.save()
+                    attendance_list += 1
+            messages.success(request, "You have successfully imported {} attendance/s information.".format(attendance_list))
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+        except Exception as e:
+            messages.success(request, "Error in reading the excel file : ".format(str(e)))
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     context = {'title':"Attendance from Device", 'file':'dummy/attendance-template.xlsx'}
     return render(request, 'hr/attendance/import.html', context)
 

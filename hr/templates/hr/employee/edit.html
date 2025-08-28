@@ -407,7 +407,7 @@
                                     <select class="form-control  custom-select select2" id="company" name="company" data-title="Branch" placeholder="branch" required>
                                         <option value="" disabled selected></option>
                                         {% for i in company_list %}
-                                        <option value="{{i.id}}" {% if office.company_id == i.id %} selected {% endif %}>{{i.name}}</option>
+                                        <option value="{{i.id}}" {% if office.branch_id == i.id %} selected {% endif %}>{{i.name}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -437,7 +437,7 @@
                             <div class="col-md">
                                 <div class="form-group">
                                     <label for="section">Section</label>
-                                    <select class="form-control custom-select select2" id="section" name="section" data-title="Section" required>
+                                    <select class="form-control custom-select select2" id="section" name="section" data-title="Section">
                                         <option value="" disabled selected></option>
                                     </select>
                                 </div>
@@ -454,6 +454,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% comment %}
                         <div class="row">
                             <div class="col-md">
                                 <div class="form-group">
@@ -503,6 +504,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endcomment %}
                         <div class="row">
                             <div class="col-md">
                                 <div class="form-group">
@@ -656,13 +658,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <!-- <div class="col-md">
+                            <div class="col-md">
                                 <div class="form-group">
                                     <input type="text" class="form-control" placeholder="" id="gross"
                                         name="gross" value="{{office.salary}}" required>
                                     <label for="gross">Gross</label>
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md">
@@ -753,7 +755,7 @@
                                 <div class="row">
                                     <div class="col-sm-4 nopadding">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" id="nameNom" name="nameNom[]" value="{{nominee.nominee_name}}">
+                                            <input type="text" class="form-control" id="nameNom" name="nameNom[]" value="{{nominee.nominee_name}}" required>
                                             <label for="nameNom">Name</label>
                                             <span class="bar"></span>
                                         </div>
@@ -761,7 +763,7 @@
                                     <div class="col-sm-4 nopadding">
                                         <div class="form-group">
                                             <input type="text" class="form-control" id="nidNom"
-                                                name="nidNom[]" value="{{nominee.nominee_nid}}">
+                                                name="nidNom[]" value="{{nominee.nominee_nid}}" required>
                                                 <label for="nid">NID</label>
                                                 <span class="bar"></span>
                                         </div>
@@ -794,8 +796,8 @@
                                         <div class="form-group">
                                             <input type="text" class="form-control" id="share_of_right"
                                                 name="share_of_right" value="{{nominee.share_of_right}}">
-                                                <label for="share_of_right">Share Of Right</label>
-                                                <span class="bar"></span>
+                                            <label for="share_of_right">Share Of Right</label>
+                                            <span class="bar"></span>
                                         </div>
                                     </div>
                             
@@ -1237,6 +1239,7 @@
             dataN.append('share_of_right',  $('#share_of_right').val());
             dataN.append('nominee_id',      $("#nominee_id").val());
             dataN.append('personal_id',     personal_id);
+            dataN.append('official_id',     official_id);
             $.ajax({
                 processData : false, contentType : false,
                 async   : false, type : "POST",  data : dataN,
@@ -1251,6 +1254,7 @@
                 url     : "{% url 'hr:employee_bank_info' %}",
                 async   : false, type: "POST", dataType: 'json',
                 data    : { 'personal_id'   : personal_id, 
+                    'official_id'   : official_id,
                     'bank_name'     : $("#bank_name").val(),
                     'branch_name'   : $("#branch_name").val(),
                     'account_no'    : $("#account_no").val(),

@@ -258,10 +258,10 @@ def employee_update(request, employee_id):
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
             else:
                 dept_head_list = EmployeeInfo.objects.filter(status=True)
-                company_list = Company.objects.filter(status=True)
-                department_list = Departments.objects.filter(status=True)
+                company_list   = Company.objects.filter(status=True)
+                department_list  = Departments.objects.filter(status=True)
                 designation_list = Designations.objects.filter(status=True)
-                employee_type_list = CommonMaster.objects.filter(value_for=4)
+                employee_type_list     = CommonMaster.objects.filter(value_for=4)
                 employee_category_list = CommonMaster.objects.filter(value_for=5)
                 if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin":
                     employee_list = EmployeeInfo.objects.all()

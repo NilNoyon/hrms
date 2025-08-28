@@ -1,4 +1,5 @@
 from datetime import time,datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import hashlib, json, base64
 from django.conf import settings
 from django.http import JsonResponse
@@ -150,7 +151,7 @@ def employee_official_info(request):
     employee_type   = request.POST.get('employee_type', None)
     skill_category  = request.POST.get('skill_category', None)
     attendance_bonus= request.POST.get('attendance_bonus', None)
-    salary          = 0 # request.POST.get('salary', 0)
+    salary          = request.POST.get('salary', 0)
     pabx            = request.POST.get('pabx', '')
     grade           = request.POST.get('grade', '')
     joining_date    = request.POST.get('joining_date', '')
@@ -172,6 +173,7 @@ def employee_official_info(request):
     tiffin_bill         = True if request.POST.get('tiffin_bill') == 'true' else False
     status              = Status.name('Active') if request.POST.get('status') == 'true' else Status.name('Inactive')
     joining_date        = datetime.strptime(joining_date, "%d/%m/%Y").date() if joining_date else None
+    confirmation_date   = joining_date + relativedelta(months=+int(provision_month)) if provision_month and provision_month == 'N/A' else None
     confirmation_date   = datetime.strptime(confirmation_date, "%d/%m/%Y").date() if confirmation_date else None
     holiday             = None
     if company: 
@@ -184,11 +186,23 @@ def employee_official_info(request):
     except          : 
         if skill_category: skill_category, created = CommonMaster.objects.get_or_create(value_for=46, value=skill_category)
         else : skill_category = None
-    data={'punch_id':punch_id, 'tin':tin, 'personal': personal_id, 'branch':company.id, 'department': department, 'designation': designation, 'division': division, 'sub_section': sub_section, 'section': section, 'building': building, 'location':location, 'shift': shift, 'floor': floor,'cost_center': cost_center, 'unit': unit, 'line': line, 'office_mobile': office_mobile, 'pabx':pabx,'office_email': office_email, 'salary': salary, 'joining_date': joining_date, 'confirmation_date': confirmation_date,'has_pf': has_pf, 'initial_grade': grade, 'grade': grade, 'reporting_to': reporting_to,'employee_type': employee_type, 'employee_category': employee_category, 'skill_category': skill_category,'provision_month': provision_month, 'holiday': holiday, 'overtime': overtime, 'off_day_ot': off_day_ot,'income_tax' : income_tax, 'holiday_bonus': holiday_bonus, 'transport_facility': transport_facility,'created_by': request.session.get('id', None), 'status': status, 'attendance_bonus':attendance_bonus, 'tiffin_bill':tiffin_bill}
+    print('attendance ::: ', attendance_bonus)
+    data={'punch_id':punch_id, 'tin':tin, 'personal': personal_id, 'branch':company.id, 
+          'department': department, 'designation': designation, 'division': division, 
+          'sub_section': sub_section, 'section': section, 'building': building, 
+          'location':location,'cost_center': cost_center, 
+          'office_mobile': office_mobile, 'pabx':pabx,'office_email': office_email, 
+          'salary': salary, 'joining_date': joining_date, 'confirmation_date': confirmation_date,
+          'has_pf': has_pf, 'initial_grade': grade, 'grade': grade, 'reporting_to': reporting_to,
+          'employee_type': employee_type, 'employee_category': employee_category, 'skill_category': skill_category,
+          'provision_month': provision_month, 'holiday': holiday, 'overtime': overtime, 'off_day_ot': off_day_ot,'income_tax' : income_tax, 
+          'holiday_bonus': holiday_bonus, 'transport_facility': transport_facility,'created_by': request.session.get('id', None),
+          'status': status, 'attendance_bonus':attendance_bonus, 'tiffin_bill':tiffin_bill}
     if emp_official: 
         if EmployeeDetails.objects.filter(employee_id=employee_id).exclude(id=emp_official.id).exists():
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
         data['salary'] = emp_official.salary
+        data['attendance_bonus'] = None
         emp_official_form = EmployeeDetailsForm(data, instance=emp_official)
     else: 
         if EmployeeDetails.objects.filter(employee_id=employee_id).exists():
@@ -234,8 +248,9 @@ def employee_official_info(request):
 def employee_nominee_info(request):
     comparison_data, old_data, msg = {}, {}, ''
     employee = get_object_or_404(EmployeeInfo, id=request.POST.get('personal_id', 0))
+    employee_details = get_object_or_404(EmployeeDetails, id=request.POST.get('official_id', 0))
     if request.POST.get('create', None) == 'true' : 
-        nominee_data = create_nominee_info(request, employee)
+        nominee_data = create_nominee_info(request, employee_details)
         return JsonResponse(nominee_data, safe=False)
     data={
         'nominee_name'  : request.POST.get('nominee_name', '') or None,
@@ -290,9 +305,8 @@ def create_nominee_info(request, employee):
         'created_by': request.session.get('id', None),
         'status': Status.name('Active'),
     }
-
     emp_nominee_form = EmployeeNomineeForm(data)
-    if data['nominee_name'] and data['nominee_nid'] and data['share_of_right'] and emp_nominee_form.is_valid():
+    if data['nominee_name'] and data['nominee_nid'] and emp_nominee_form.is_valid():
         nominee = emp_nominee_form.save()
         if nominee_photo := request.FILES.get('nominee_photo') :
             if nominee.nominee_photo: nominee.nominee_photo.delete()
@@ -300,6 +314,7 @@ def create_nominee_info(request, employee):
         nominee.save()
         nominee_id, msg = nominee.id, 'success'
     else:
+        print('hi')
         nominee_id, msg = None, 'failed'
         ebs_bl_common.form_error_print(request, emp_nominee_form)
     return {'msg':msg,'nominee_id':nominee_id}
@@ -308,8 +323,11 @@ def create_nominee_info(request, employee):
 def employee_bank_info(request):
     comparison_data, old_data, msg = {}, {}, ''
     employee = get_object_or_404(EmployeeInfo, id=request.POST.get('personal_id', 0))
+    print('request.P:::: ', request.POST)
+    employee_details = get_object_or_404(EmployeeDetails, id=request.POST.get('official_id', 0))
     if request.POST.get('create', None) == 'true' : 
-        bank_data = create_bank_info(request, employee)
+        print('he')
+        bank_data = create_bank_info(request, employee_details)
         return JsonResponse(bank_data, safe=False)
     data={
         'bank_name'     : request.POST.get('bank_name', None) or None, 
