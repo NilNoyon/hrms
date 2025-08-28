@@ -37,7 +37,7 @@ bn_month_list = {
 @login
 def salary_process2(request):
     chk_permission = permission(request, reverse('hr:salary_process2'))
-    if request.session.get('employee_id', '') in ['NGO00001001'] or chk_permission and chk_permission.insert_action:
+    if chk_permission and chk_permission.insert_action:
         if request.method == "POST":
             ids, month, year = [], request.POST.get('month', None), request.POST.get('year', None)
             for emp_id in request.POST.getlist('emp_id', []):
@@ -256,12 +256,15 @@ def salary_process_view(request, id=None):
     emp_data, month = [], int(salary_process.month)
     syear = year = int(salary_process.year)
     for employee in salary_process.employees.order_by('employee_id'):
-        basic       = get_salary_breakdown(employee=employee, heads='Basic')
-        hrent       = get_salary_breakdown(employee=employee, heads='House Rent')
-        medical     = get_salary_breakdown(employee=employee, heads='Medical Allowance')
-        conveyance  = get_salary_breakdown(employee=employee, heads='Conveyance')
-        food        = get_salary_breakdown(employee=employee, heads='Food Allowance')
-        other       = get_salary_breakdown(employee=employee, heads='Other Allowance')
+        basic       = get_salary_breakdown2(heads='Basic')
+        hrent       = get_salary_breakdown2(heads='House Rent')
+        medical     = get_salary_breakdown2(heads='Medical Allowance')
+        conveyance  = get_salary_breakdown2(heads='Conveyance')
+        food        = get_salary_breakdown2(heads='Food Allowance')
+        other       = get_salary_breakdown2(heads='Other Allowance')
+        if basic: basic = round(employee.salary * (basic/100),0)
+        if hrent: hrent = round(employee.salary * (hrent/100),0)
+        if medical: medical = round(employee.salary * (medical/100),0)
 
         present, absent_days, with_pay, without_pay, working_day, total_days, holiday_n_weekends = 0, 0, 0, 0, 0, 0, 0
         if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
@@ -311,7 +314,7 @@ def salary_process_view(request, id=None):
         # for salary in HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee) :
         per_hr_amount   = round(basic / 206, 2) if basic else 0
 
-        data = { "employee_id":employee.employee_id, "name":employee.name, "company":employee.branch.short_name, "department":employee.department.title, "designation":employee.designation.name, "cost_center":employee.cost_center.short_name if employee.cost_center else '', "grade":employee.grade, "employee_category":employee.employee_category.value if employee.employee_category_id else "N/A", "joining_date":employee.joining_date.strftime("%d/%m/%Y") if employee.joining_date else '', "salary":employee.salary, "basic":basic, "hrent":hrent, "medical":medical, "conveyance":conveyance, "food":food, "other":other, "working_day":working_day, "holiday_n_weekends":holiday_n_weekends, "total_days":total_days, "present":present, "absent_days":absent_days, "with_pay":with_pay, "without_pay":without_pay, "ot_hrs":round(ot / (per_hr_amount * 2), 0) if ot else 0, "salary_payable":round(salary_payable, 0), "ot":ot, "holiday":holiday, "night":night, "attendance":attendance, "incentive":incentive, "arrear":arrear, "tiffin":tiffin, "total_payable":round(total_payable, 0), "loan":loan, "absent":absent, "others":others, "itds":itds, "pf":pf, "net_payable":round(net_payable, 0)}
+        data = { "employee_id":employee.employee_id, "name":employee.name, "company":employee.branch.name, "department":employee.department.title, "designation":employee.designation.name, "cost_center":employee.cost_center.short_name if employee.cost_center else '', "grade":employee.grade, "employee_category":employee.employee_category.value if employee.employee_category_id else "N/A", "joining_date":employee.joining_date.strftime("%d/%m/%Y") if employee.joining_date else '', "salary":employee.salary, "basic":basic, "hrent":hrent, "medical":medical, "conveyance":conveyance, "food":food, "other":other, "working_day":working_day, "holiday_n_weekends":holiday_n_weekends, "total_days":total_days, "present":present, "absent_days":absent_days, "with_pay":with_pay, "without_pay":without_pay, "ot_hrs":round(ot / (per_hr_amount * 2), 0) if ot else 0, "salary_payable":round(salary_payable, 0), "ot":ot, "holiday":holiday, "night":night, "attendance":attendance, "incentive":incentive, "arrear":arrear, "tiffin":tiffin, "total_payable":round(total_payable, 0), "loan":loan, "absent":absent, "others":others, "itds":itds, "pf":pf, "net_payable":round(net_payable, 0)}
         print(data)
         emp_data.append(data)
     context = {'salary_process':salary_process, 'month':month_list[salary_process.month], 'emp_data':emp_data, 'user_level':user_level}
@@ -425,7 +428,7 @@ def salary_report(request):
     # chk_permission   = permission(request, reverse('hr:salary_process'))
     # if chk_permission and chk_permission.view_action:
     chk_permission = permission(request, reverse('hr:salary_process2'))
-    if request.session.get('employee_id', '') in ['NGO00001001'] or chk_permission and chk_permission.insert_action:
+    if chk_permission and chk_permission.insert_action:
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
         elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
@@ -435,7 +438,8 @@ def salary_report(request):
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
                    'employee_categories' : employee_categories, 'departments' : department_list }
-        return render(request, 'hr/salary/report.html', context)
+        # return render(request, 'hr/salary/report.html', context)
+        return render(request, 'hr/salary/salary_report.html', context)
     else: return redirect('/access-denied')
 
 # @login
@@ -478,9 +482,23 @@ def get_salary_breakdown(employee=None, heads=''):
     slab_head = HRSalaryBreakdown.objects.filter(employee=employee, slab_heads__head__value__iexact=heads).first()
     return round(slab_head.amount, 0) if slab_head else 0
 
+def get_salary_breakdown2(employee=None, heads=''):
+    slab_head = HRSalaryBreakdown.objects.filter(slab_heads__head__value__iexact=heads).first()
+    return round(slab_head.amount, 0) if slab_head else 0
+
 def get_salary_details(year=None, month=None, employee=None, heads=''):
     detail = HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee, heads__head__value__iexact=heads).last()
     return round(detail.amount, 0) if detail else 0
+
+def get_salary_details2(year=None, month=None, employee=None, heads=''):
+    detail = HRMontlySalaryDetails.objects.filter(year=year, month=month, heads__head__value__iexact=heads).last()
+    return round(detail.amount, 0) if detail else 0
+
+def get_salary_grade(salary=None):
+    salary_value = float(100000)
+    grade  = HRSalaryGradeStep.objects.filter(grade__range_start__gte=salary,grade__range_end__lte=salary)
+    if grade: return grade.last().grade.name, grade.last().name
+    else: return 0,0
 
 @csrf_exempt
 def get_salary_report(request):
@@ -491,16 +509,19 @@ def get_salary_report(request):
         company = Branch.objects.filter(id=company).first()
     if department := request.POST.get('department', None) : query &= Q(department_id=department)
     if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
-    print('month and year:: ', request.POST.get('month'))
     month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    index = 0
     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
-        basic       = get_salary_breakdown(employee=employee, heads='Basic')
-        hrent       = get_salary_breakdown(employee=employee, heads='House Rent')
-        medical     = get_salary_breakdown(employee=employee, heads='Medical Allowance')
-        conveyance  = get_salary_breakdown(employee=employee, heads='Conveyance')
-        food        = get_salary_breakdown(employee=employee, heads='Food Allowance')
-        other       = get_salary_breakdown(employee=employee, heads='Other Allowance')
-
+        basic       = get_salary_breakdown2(employee=employee, heads='Basic')
+        if basic: basic = round(employee.salary * (basic/100),0)
+        hrent       = get_salary_breakdown2(employee=employee, heads='House Rent')
+        if hrent: hrent = round(employee.salary * (hrent/100),0)
+        medical     = get_salary_breakdown2(employee=employee, heads='Medical Allowance')
+        if medical: medical = round(employee.salary * (medical/100),0)
+        # conveyance  = get_salary_breakdown2(employee=employee, heads='Conveyance')
+        # food        = get_salary_breakdown2(employee=employee, heads='Food Allowance')
+        # other       = get_salary_breakdown2(employee=employee, heads='Other Allowance')
+        grade       = get_salary_grade(float(employee.salary) if employee.salary else 0)
         late, absent_days, with_pay, without_pay, working_day, total_days, holiday_n_weekends = 0, 0, 0, 0, 0, 0, 0
         if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
             weekend_query = Q(holiday__branch=company)
@@ -526,36 +547,48 @@ def get_salary_report(request):
             without_pay         = calendar_days.filter(in_leave=True, leave_application__leave__payable=False).count()
         
         # Addition
-        holiday     = get_salary_details(year=year, month=month, employee=employee, heads='Holiday')
-        ot          = get_salary_details(year=year, month=month, employee=employee, heads='Over Time')
-        night       = get_salary_details(year=year, month=month, employee=employee, heads='Night')
-        attendance  = get_salary_details(year=year, month=month, employee=employee, heads='Attendance')
-        incentive   = get_salary_details(year=year, month=month, employee=employee, heads='Incentive')
+        # holiday     = get_salary_details2(year=year, month=month, employee=employee, heads='Holiday')
+        # ot          = get_salary_details2(year=year, month=month, employee=employee, heads='Over Time')
+        # night       = get_salary_details2(year=year, month=month, employee=employee, heads='Night')
+        # attendance  = get_salary_details2(year=year, month=month, employee=employee, heads='Attendance')
+        # incentive   = get_salary_details2(year=year, month=month, employee=employee, heads='Incentive')
         # festival    = get_salary_details(year=year, month=month, employee=employee, heads='Festival')
-        arrear      = get_salary_details(year=year, month=month, employee=employee, heads='Arrear')
-        tiffin      = get_salary_details(year=year, month=month, employee=employee, heads='Tifin Bill')
+        arrear      = get_salary_details2(year=year, month=month, employee=employee, heads='Arrear')
+        # tiffin      = get_salary_details2(year=year, month=month, employee=employee, heads='Tifin Bill')
 
         #Deduction
-        loan    = get_salary_details(year=year, month=month, employee=employee, heads='Loan')
-        absent  = get_salary_details(year=year, month=month, employee=employee, heads='Absent')
-        others  = get_salary_details(year=year, month=month, employee=employee, heads='Others')
-        itds    = get_salary_details(year=year, month=month, employee=employee, heads='ITDS')
-        pf      = get_salary_details(year=year, month=month, employee=employee, heads='PF')
-
+        loan    = get_salary_details2(year=year, month=month, employee=employee, heads='Loan')
+        absent  = get_salary_details2(year=year, month=month, employee=employee, heads='Absent')
+        others  = get_salary_details2(year=year, month=month, employee=employee, heads='Others')
+        itds    = get_salary_details2(year=year, month=month, employee=employee, heads='ITDS')
+        pf      = get_salary_details2(year=year, month=month, employee=employee, heads='PF')
+        staff_security = get_salary_details2(year=year, month=month, employee=employee, heads='Staff Security')
+        staff_saving   = get_salary_details2(year=year, month=month, employee=employee, heads='Staff Saving')
+        pfl_principal  = get_salary_details2(year=year, month=month, employee=employee, heads='PFL Principal')
+        pfl_interest   = get_salary_details2(year=year, month=month, employee=employee, heads='PFL Interest')
+        pf_loan        = get_salary_details2(year=year, month=month, employee=employee, heads='PF Loan')
+        mcl_principal  = get_salary_details2(year=year, month=month, employee=employee, heads='MCL Principal')
+        mcl_interest   = get_salary_details2(year=year, month=month, employee=employee, heads='MCL Interest')
+        mc_loan        = get_salary_details2(year=year, month=month, employee=employee, heads='MC Loan')
+        bcl_principal  = get_salary_details2(year=year, month=month, employee=employee, heads='BCL Principal')
+        bcl_interest   = get_salary_details2(year=year, month=month, employee=employee, heads='BCL Interest')
+        bc_loan        = get_salary_details2(year=year, month=month, employee=employee, heads='BC Loan')
+        total_deduct   = pf+staff_saving+staff_security+pf_loan+mc_loan+bc_loan+itds+others
         deduction_days = absent_days - without_pay
         working_day, salary_days = total_days - holiday_n_weekends, 30 - deduction_days
         salary_payable  = employee.salary # - Decimal(deduction_days).quantize(Decimal('0.00')) * Decimal(employee.salary / 30).quantize(Decimal('0.00'))
-        total_payable   = salary_payable + ot + holiday + night + attendance + incentive + arrear + tiffin # + festival
+        # total_payable   = salary_payable + ot + holiday + night + attendance + incentive + arrear + tiffin # + festival 
+        total_payable   = salary_payable - total_deduct
         net_payable     = total_payable - loan - absent - others - itds - pf
         # for salary in HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee) :
         per_hr_amount   = round(basic / 206, 2) if basic else 0
-
-        data = [employee.employee_id, employee.branch.code+' '+employee.branch.name, employee.department.title, employee.designation.name,
-                employee.cost_center.short_name if employee.cost_center else '', employee.grade, employee.employee_category.value, 
-                employee.joining_date.strftime("%d/%m/%Y"), employee.salary, basic, hrent, medical, conveyance,
-                food, other, working_day, holiday_n_weekends, total_days, late, absent_days, with_pay, without_pay, 
-                round(ot / (per_hr_amount * 2), 0) if ot else 0, round(salary_payable, 0), ot, holiday, night, attendance,
-                incentive, arrear, tiffin, round(total_payable, 0), loan, absent, others, itds, pf, round(net_payable, 0)]
+        index += 1
+        data = [index, employee.employee_id, employee.name, employee.branch.code+' '+employee.branch.name, grade[0], grade[1], employee.designation.name,
+                employee.joining_date.strftime("%d/%m/%Y"), employee.joining_date.strftime("%d/%m/%Y"),employee.personal.status, employee.personal.gender, 
+                employee.bank_account_no(), '-', basic, hrent, medical, arrear,
+                employee.salary, pf, staff_security, staff_saving,
+                pfl_principal,pfl_interest,pf_loan,mcl_principal,mcl_interest,mc_loan,bcl_principal,bcl_interest,bc_loan,
+                itds,others,total_deduct,total_payable,pf,0]
         report_data += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
     if report_type == "pdf" :
         template = get_template('hr/salary/report_pdf.html')
@@ -674,3 +707,62 @@ def get_payslip_report(request):
             context = {'company':company, 'data':all_data, 'month':bn_month_list[str(month)], 'year':year}
             return render(request, 'hr/salary/pay_slip_print_bn.html', context)
     return JsonResponse({"report_data":report_data}, safe=False)
+
+
+
+@login
+def branch_wise_summary_report(request):
+    # chk_permission   = permission(request, reverse('hr:salary_process'))
+    # if chk_permission and chk_permission.view_action:
+    chk_permission = permission(request, reverse('hr:salary_process2'))
+    if chk_permission and chk_permission.insert_action:
+        year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
+        if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
+        elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
+        else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
+        companies = Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name')
+        employee_categories = CommonMaster.objects.filter(value_for=5)
+        department_list = Departments.objects.filter(status=True)
+        context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
+                   'employee_categories' : employee_categories, 'departments' : department_list }
+        # return render(request, 'hr/salary/report.html', context)
+        return render(request, 'hr/salary/branch_wise_summary.html', context)
+    else: return redirect('/access-denied')
+
+@login
+def branch_wise_deduct_summary_report(request):
+    # chk_permission   = permission(request, reverse('hr:salary_process'))
+    # if chk_permission and chk_permission.view_action:
+    chk_permission = permission(request, reverse('hr:salary_process2'))
+    if chk_permission and chk_permission.insert_action:
+        year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
+        if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
+        elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
+        else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
+        companies = Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name')
+        employee_categories = CommonMaster.objects.filter(value_for=5)
+        department_list = Departments.objects.filter(status=True)
+        context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
+                   'employee_categories' : employee_categories, 'departments' : department_list }
+        # return render(request, 'hr/salary/report.html', context)
+        return render(request, 'hr/salary/branch_wise_deduct_summary.html', context)
+    else: return redirect('/access-denied')
+
+@login
+def bank_format_report(request):
+    # chk_permission   = permission(request, reverse('hr:salary_process'))
+    # if chk_permission and chk_permission.view_action:
+    chk_permission = permission(request, reverse('hr:salary_process2'))
+    if chk_permission and chk_permission.insert_action:
+        year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
+        if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
+        elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
+        else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
+        companies = Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name')
+        employee_categories = CommonMaster.objects.filter(value_for=5)
+        department_list = Departments.objects.filter(status=True)
+        context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
+                   'employee_categories' : employee_categories, 'departments' : department_list }
+        # return render(request, 'hr/salary/report.html', context)
+        return render(request, 'hr/salary/bank_format.html', context)
+    else: return redirect('/access-denied')

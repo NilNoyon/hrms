@@ -325,6 +325,10 @@ class EmployeeDetails(CoreActionWithUpdate):
 
      def get_absolute_url(self):
           return reverse('hr:employee_view', kwargs={'employee_id':self.personal_id})
+     
+     def bank_account_no(self):
+          obj = EmployeeBankInfo.objects.filter(employee_id=self.id).last()
+          return obj.account_no if obj else 'N/A'
 
      @property
      def name(self):
@@ -374,13 +378,13 @@ class EmployeeDetails(CoreActionWithUpdate):
           super(EmployeeDetails, self).save(*args, **kwargs)
 
 class EmployeeNominee(CoreActionWithUpdate):
-     employee            = models.ForeignKey (EmployeeDetails, related_name='nominees', on_delete=models.CASCADE, blank=True, null=True, default=None)
-     nominee_name        = models.CharField (max_length=50, blank=True, null=True)
-     nominee_nid         = models.CharField (max_length=50, blank=True, null=True)
-     relation            = models.CharField (max_length=50, blank=True, null=True)
+     employee            = models.ForeignKey(EmployeeDetails, related_name='nominees', on_delete=models.CASCADE, blank=True, null=True, default=None)
+     nominee_name        = models.CharField(max_length=50, blank=True, null=True)
+     nominee_nid         = models.CharField(max_length=50, blank=True, null=True)
+     relation            = models.CharField(max_length=50, blank=True, null=True)
      nominee_mobile      = models.CharField(max_length=15, blank=True, null=True)
-     nominee_address     = models.CharField (max_length=1000, blank=True, null=True)
-     share_of_right      = models.CharField (max_length=100, blank=True, null=True)
+     nominee_address     = models.CharField(max_length=1000, blank=True, null=True)
+     share_of_right      = models.CharField(max_length=100, blank=True, null=True)
      nominee_photo       = models.ImageField(upload_to=upload_to("nominee_photo"), blank=True, null=True)
 
      class meta:
@@ -428,10 +432,10 @@ class EmployeeExperience(CoreActionWithUpdate):
           return '%s' % (self.company_name)
 
 class EmployeeBankInfo(CoreActionWithUpdate):
-     employee            = models.ForeignKey (EmployeeDetails, related_name='banks', on_delete=models.CASCADE, blank=True, null=True, default=None)
-     bank_name           = models.CharField (max_length=500, blank=True, null=True)
-     branch_name         = models.CharField (max_length=500, blank=True, null=True)
-     account_no          = models.CharField (max_length=50, blank=True, null=True)
+     employee            = models.ForeignKey(EmployeeDetails, related_name='banks', on_delete=models.CASCADE, blank=True, null=True, default=None)
+     bank_name           = models.CharField(max_length=500, blank=True, null=True)
+     branch_name         = models.CharField(max_length=500, blank=True, null=True)
+     account_no          = models.CharField(max_length=50, blank=True, null=True)
 
      class meta:
           db_table = 'hr_employee_bankinfo'
@@ -1631,7 +1635,7 @@ class HRSalaryGradeMaster(CoreActionWithUpdate):
           verbose_name_plural = "Salary Grades"
 
      def __str__(self):
-          return f"Range of {self.name} = {self.range_start}-{self.range_end}"
+          return f"Grade {self.name} = {self.range_start}-{self.range_end}"
      
 class HRSalaryGradeStep(CoreActionWithUpdate):
      name                = models.CharField(max_length=20,null=True,blank=True)

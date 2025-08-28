@@ -1,0 +1,169 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load general_filters %}
+{% load humanize %}
+
+{% block page_title %}Branch Wise Salary Summary Report{% endblock %}
+
+{% block add_css %}
+    <style>
+        table#salary-table tbody td:nth-child(n+9) {
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="card border-danger">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-md-12 align-self-center">
+        <h4 class="text-themecolor mb-0">Branch Wise Salary Summary Report</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
+    <form class="floating-labels mt-2" method="post" id="report_form" action="{% url "hr:get_salary_report" %}">
+      {% csrf_token %}
+      <input type="hidden" id="report_type" name="report_type" value="pdf" />
+      <div class="row">
+        <div class="col-md-1">
+            <button class="btn btn-block btn-outline-warning reset_button" type="button"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+        <div class="col-md">
+            <div class="form-group mb-0">
+                <label for="route_type">Year</label>
+                <select class="form-control select2" name="year" id="year" data-title="year" required />
+                    {% for y in years %}
+                        <option value="{{y}}">{{y}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-group mb-0">
+                <label for="month">Month</label>
+                <select class="form-control select2" name="month" id="month" data-title="Month" required />
+                    {% for m in months %}
+                        <option value="{{m.0}}">{{m.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div> 
+        <div class="col-md">
+          <div class="form-group mb-0">
+              <label for="company">Branch</label>
+              <select class="form-control select2" name="company" id="company" data-title="Branch" required />
+                  <option value="" disabled selected></option>
+                  {% for company in companies %}
+                  <option value="{{company.id}}">{{company.short_name}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-0">
+              <label for="company">Department</label>
+              <select class="form-control select2" name="department" id="department" data-title="Department" />
+                  <option value="" disabled selected></option>
+                  {% for department in departments %}
+                  <option value="{{department.id}}">{{department.title}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="form-group mb-0">
+              <label for="employee_category">Employee Category</label>
+              <select class="form-control select2" name="employee_category" id="employee_category" data-title="Employee Category" />
+                  <option value="" disabled selected></option>
+                  {% for ec in employee_categories %}
+                  <option value="{{ec.id}}">{{ec.value}}</option>
+                  {% endfor %}
+              </select>
+          </div>
+        </div>  
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-md">
+              <button class="btn btn-block btn-outline-success waves-effect waves-light submit_button" type="button">
+                <span class="btn-label"><i class="fas fa-search"></i></span> Search
+              </button>
+            </div>
+            <div class="col-md">
+              <button class="btn btn-block btn-outline-warning waves-effect waves-light export_button" type="button">
+                <span class="btn-label"><i class="ti-printer"></i> PDF</span>
+              </button>
+            </div> 
+            <div class="col-md">
+              <button class="btn btn-block btn-outline-info waves-effect waves-light excel_button" type="button">
+                <span class="btn-label"><i class="fas fa-download"></i> Excel</span>
+              </button>
+            </div>  
+          </div>  
+        </div>   
+      </div>   
+    </form>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered custom-table table-nowrap mb-0 mt-3 hide" id="salary-table">
+            <thead>
+              <tr class="text-center">
+                  <th class="">Branch Code & Name</th>
+                  <th class="">Cash Amount (A)</th>
+                  <th class="">Bank Salary (B)</th>
+                  <th class="">Deduct (C)</th>
+                  <th class="">Contributory Provident Fund(D)</th>
+                  <th class="">Gratuity (E)</th>
+                  <th class="">B+..+E</th>
+                  <th class="">Remarks</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>      
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'admin/js/table_to_excel.js' %}"></script>
+<script>
+    $("body").on("click", ".reset_button", function(){
+        $("#company").val('').trigger("change");
+        $("#department").val('').trigger("change");
+        $("#employee_category").val('').trigger("change");
+        $("#salary-table").hide();
+    });
+    $("body").on("click", ".submit_button, .excel_button", function(e){
+        $("#salary-table").hide();
+        let excel_button = $(this).hasClass("excel_button") ? $(this).hasClass("excel_button") : false;
+        let year = $("#year").val(), month = $("#month").val(), company = $("#company").val();
+        if (year && month && company){
+          $.ajax({
+            type : "POST", async : false,
+            url  : '{% url "hr:get_salary_report" %}',
+            data : { department : $("#department").val(),
+              year: year, month : month, company : company,
+              employee_category : $("#employee_category").val(),
+            }, success : function (data) { $("#salary-table").show();
+              $("#salary-table tbody").empty().html(data['report_data']);
+              if($('#salary-table tbody tr').length && excel_button){ 
+                TableToExcel.convert(document.getElementById("salary-table"), {
+                  name: `Salary_report.xlsx`, sheet: { name: 'Salary Report' }
+                });
+              }
+            }
+          });
+        } else { toasterMsg('warning', 'At least Search by Year, Month and Company!', 5000); }
+    });
+    
+    $("body").on("click", ".export_button", function(e){
+      let year = $("#year").val(), month = $("#month").val(), company = $("#company").val();
+      if (year && month && company){
+        $("#report_form").attr('target', '_blank');
+        validateForm($("#report_form"));
+        } else { toasterMsg('warning', 'At least Search by Year, Month and Company!', 5000); }
+    });
+</script>
+{% endblock %}

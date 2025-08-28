@@ -35,6 +35,8 @@ class EmployeeDetailsForm(forms.ModelForm):
         self.fields['skill_category'].required = False
         self.fields['provision_month'].required = False
         self.fields['reporting_to'].required = False
+        self.fields['unit'].required = False
+        self.fields['attendance_bonus'].required = False
 
 class EmployeeNomineeForm(forms.ModelForm):
     class Meta:
