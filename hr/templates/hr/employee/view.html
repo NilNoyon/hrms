@@ -525,6 +525,7 @@
                                             {% else %} N/A {% endif %}
                                         </h6>
                                     </div>
+                                    {% comment %}
                                     {% for s in details.hrsalarybreakdown_set.all|dictsort:"slab_heads.head.value" %}
                                         {% if s.amount %}
                                         <div class="col-md-3">
@@ -533,6 +534,19 @@
                                         </div>
                                         {% endif %}
                                     {% endfor %}
+                                    {% endcomment %}
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Basic</small> 
+                                        <h6>BDT {{ details.basic|floatformat:-2 }}</h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">House Rent</small> 
+                                        <h6>BDT {{ details.house_rent|floatformat:-2 }}</h6>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <small class="text-muted">Basic</small> 
+                                        <h6>BDT {{ details.medical_allowance|floatformat:-2 }}</h6>
+                                    </div>
                                 </div>
                             </div>
                             {% endif %}

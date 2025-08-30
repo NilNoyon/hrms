@@ -363,6 +363,24 @@ class EmployeeDetails(CoreActionWithUpdate):
      def user_info(self):
           return Users.objects.filter(employee_id=self.employee_id).order_by('-id').first()
 
+     @property
+     def basic(self):
+          if self.salary:
+               return round(self.salary * 0.5,0)
+          else: return 0
+
+     @property
+     def house_rent(self):
+          if self.salary:
+               return round(self.salary * 0.3,0)
+          else: return 0
+
+     @property
+     def medical_allowance(self):
+          if self.salary:
+               return round(self.salary * 0.3,0)
+          else: return 0
+
      def save(self, *args, **kwargs):
           if self.joining_date :
                try     : num_of_days = int(self.provision_month) * 30
