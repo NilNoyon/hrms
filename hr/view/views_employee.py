@@ -151,7 +151,7 @@ def employee_official_info(request):
     employee_type   = request.POST.get('employee_type', None)
     skill_category  = request.POST.get('skill_category', None)
     attendance_bonus= request.POST.get('attendance_bonus', None)
-    salary          = request.POST.get('salary', 0)
+    salary          = request.POST.get('gross', 0)
     pabx            = request.POST.get('pabx', '')
     grade           = request.POST.get('grade', '')
     joining_date    = request.POST.get('joining_date', '')
@@ -186,7 +186,6 @@ def employee_official_info(request):
     except          : 
         if skill_category: skill_category, created = CommonMaster.objects.get_or_create(value_for=46, value=skill_category)
         else : skill_category = None
-    print('attendance ::: ', attendance_bonus)
     data={'punch_id':punch_id, 'tin':tin, 'personal': personal_id, 'branch':company.id, 
           'department': department, 'designation': designation, 'division': division, 
           'sub_section': sub_section, 'section': section, 'building': building, 
@@ -201,7 +200,7 @@ def employee_official_info(request):
     if emp_official: 
         if EmployeeDetails.objects.filter(employee_id=employee_id).exclude(id=emp_official.id).exists():
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
-        data['salary'] = emp_official.salary
+        # data['salary'] = emp_official.salary
         data['attendance_bonus'] = None
         emp_official_form = EmployeeDetailsForm(data, instance=emp_official)
     else: 
@@ -225,7 +224,7 @@ def employee_official_info(request):
             if not user:
                 user_role = UserRoles.objects.filter(name = 'User').first()
                 if not user_role: user_role = UserRoles.objects.create(name = 'User')
-                try: Users.objects.create(company_id = official.company_id, department_id = official.department_id, designation_id = official.designation_id, password = encripted_pass, password_text = official.personal.employee_id, email = official.office_email, reporting_to_id = report_to, employee_id = official.personal.employee_id.strip(), name = official.personal.name, role_id = user_role.id, status = 1)  
+                try: Users.objects.create(branch_id = official.branch_id, department_id = official.department_id, designation_id = official.designation_id, password = encripted_pass, password_text = official.personal.employee_id, email = official.office_email, reporting_to_id = report_to, employee_id = official.personal.employee_id.strip(), name = official.personal.name, role_id = user_role.id, status = 1)  
                 except: pass
             else: 
                 user.designation_id = official.designation_id
