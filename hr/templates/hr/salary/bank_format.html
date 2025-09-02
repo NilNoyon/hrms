@@ -23,7 +23,7 @@
     </div>
   </div>
   <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
-    <form class="floating-labels mt-2" method="post" id="report_form" action="{% url "hr:get_salary_report" %}">
+    <form class="floating-labels mt-2" method="post" id="report_form" action="{% url "hr:get_bank_format_report" %}">
       {% csrf_token %}
       <input type="hidden" id="report_type" name="report_type" value="pdf" />
       <div class="row">
@@ -55,8 +55,9 @@
               <label for="company">Branch</label>
               <select class="form-control select2" name="company" id="company" data-title="Branch" required />
                   <option value="" disabled selected></option>
+                  <option value="all">All</option>
                   {% for company in companies %}
-                  <option value="{{company.id}}">{{company.short_name}}</option>
+                  <option value="{{company.id}}">{{company.name}}</option>
                   {% endfor %}
               </select>
           </div>
@@ -116,7 +117,6 @@
                   <th class="">A/C Open Date</th>
                   <th class="">Net Payment</th>
                   <th class="">Remarks</th>
-                  
               </tr>
             </thead>
             <tbody></tbody>
@@ -143,7 +143,7 @@
         if (year && month && company){
           $.ajax({
             type : "POST", async : false,
-            url  : '{% url "hr:get_salary_report" %}',
+            url  : '{% url "hr:get_bank_format_report" %}',
             data : { department : $("#department").val(),
               year: year, month : month, company : company,
               employee_category : $("#employee_category").val(),
@@ -151,7 +151,7 @@
               $("#salary-table tbody").empty().html(data['report_data']);
               if($('#salary-table tbody tr').length && excel_button){ 
                 TableToExcel.convert(document.getElementById("salary-table"), {
-                  name: `Salary_report.xlsx`, sheet: { name: 'Salary Report' }
+                  name: `bank_format_report.xlsx`, sheet: { name: 'Bank Format Report' }
                 });
               }
             }

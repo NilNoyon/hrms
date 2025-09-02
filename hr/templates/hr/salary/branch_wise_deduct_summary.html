@@ -3,7 +3,7 @@
 {% load general_filters %}
 {% load humanize %}
 
-{% block page_title %}Branch Wise Salary Deduct Summary Report{% endblock %}
+{% block page_title %}Branch Wise Deduct Summary Report{% endblock %}
 
 {% block add_css %}
     <style>
@@ -18,12 +18,12 @@
   <div class="card-header">
     <div class="row">
       <div class="col-md-12 align-self-center">
-        <h4 class="text-themecolor mb-0">Branch Wise Salary Deduct Summary Report</h4>
+        <h4 class="text-themecolor mb-0">Branch Wise Deduct Summary Report</h4>
       </div>
     </div>
   </div>
   <div class="card-body pt-0 custom-color rounded-lg p-3 custom-rl">
-    <form class="floating-labels mt-2" method="post" id="report_form" action="{% url "hr:get_salary_report" %}">
+    <form class="floating-labels mt-2" method="post" id="report_form" action="{% url "hr:get_branch_wise_deduct_summary_report" %}">
       {% csrf_token %}
       <input type="hidden" id="report_type" name="report_type" value="pdf" />
       <div class="row">
@@ -55,8 +55,9 @@
               <label for="company">Branch</label>
               <select class="form-control select2" name="company" id="company" data-title="Branch" required />
                   <option value="" disabled selected></option>
+                  <option value="all">All</option>
                   {% for company in companies %}
-                  <option value="{{company.id}}">{{company.short_name}}</option>
+                  <option value="{{company.id}}">{{company.name}}</option>
                   {% endfor %}
               </select>
           </div>
@@ -72,6 +73,7 @@
               </select>
           </div>
         </div>
+        {% comment %}
         <div class="col-md">
           <div class="form-group mb-0">
               <label for="employee_category">Employee Category</label>
@@ -83,6 +85,7 @@
               </select>
           </div>
         </div>  
+        {% endcomment %}
         <div class="col-md-3">
           <div class="row">
             <div class="col-md">
@@ -152,7 +155,7 @@
         if (year && month && company){
           $.ajax({
             type : "POST", async : false,
-            url  : '{% url "hr:get_salary_report" %}',
+            url  : '{% url "hr:get_branch_wise_deduct_summary_report" %}',
             data : { department : $("#department").val(),
               year: year, month : month, company : company,
               employee_category : $("#employee_category").val(),
@@ -160,7 +163,7 @@
               $("#salary-table tbody").empty().html(data['report_data']);
               if($('#salary-table tbody tr').length && excel_button){ 
                 TableToExcel.convert(document.getElementById("salary-table"), {
-                  name: `Salary_report.xlsx`, sheet: { name: 'Salary Report' }
+                  name: `salary_deduct_report.xlsx`, sheet: { name: 'Salary Deduct Report' }
                 });
               }
             }

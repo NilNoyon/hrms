@@ -329,6 +329,10 @@ class EmployeeDetails(CoreActionWithUpdate):
      def bank_account_no(self):
           obj = EmployeeBankInfo.objects.filter(employee_id=self.id).last()
           return obj.account_no if obj else 'N/A'
+          
+     def bank_account_obj(self):
+          obj = EmployeeBankInfo.objects.filter(employee_id=self.id).last()
+          return obj
 
      @property
      def name(self):

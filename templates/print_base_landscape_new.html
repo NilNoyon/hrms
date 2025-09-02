@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{% block page_title %}{% endblock %} || EBIT </title>
+        <title>{% block page_title %}{% endblock %} || HRMS </title>
         {% block add_css %}{% endblock %}
         <style type="text/css">
             body {
@@ -39,7 +39,7 @@
                 left: 50%;
                 height: 45px;
                 z-index: 1;
-                border-radius: 50%;
+                /* border-radius: 50%; */
                 background-color: #fcfcfc;
             }
 
@@ -101,15 +101,14 @@
         <table style="margin:0 auto;width:100;text-align: center!important;">
             <tr style="text-align: center!important;">
                 <td style="text-align:right;padding:4px;padding-top: 0px;padding-bottom: 0px;">
-                    <img class="logo" src="{% settings_value "DOMAIN_URL" %}assets/images/esquire-logo.png" alt="HRM Logo" />
+                    <img class="logo" src="{% settings_value "DOMAIN_URL" %}assets/images/hr-logo.png" alt="HRM Logo" />
                 </td>
                 <td style="text-align:left">
                     <h1 style="text-align: center; margin-bottom: 0px; padding-bottom: 0px;">{{company.name}}</h1>
                     <p style="text-align: center; margin-top: 0px; padding-top: 0px;">
                         {{company.address}} <br>
-                        {% if company.phone_no or company.fax %}
-                        Contact : {{ company.phone_no }} {% if company.phone_no and company.fax %} | {% endif %} 
-                        {{ company.fax }}
+                        {% if company.phone_no %}
+                        Contact : {{ company.phone_no }} 
                         {% endif %}
                     </p>
                 </td>

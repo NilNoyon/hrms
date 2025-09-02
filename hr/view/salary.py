@@ -592,7 +592,7 @@ def get_salary_report(request):
         report_data += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
     if report_type == "pdf" :
         template = get_template('hr/salary/report_pdf.html')
-        html = template.render({'company':company, 'data':report_data, 'month':month_list[str(month)], 'year':year})
+        html = template.render({'company':company.company, 'data':report_data, 'month':month_list[str(month)], 'year':year})
         pdf_file = HTML(string=html).write_pdf()
         response = HttpResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = 'Salary Report.pdf'
@@ -712,9 +712,7 @@ def get_payslip_report(request):
 
 @login
 def branch_wise_summary_report(request):
-    # chk_permission   = permission(request, reverse('hr:salary_process'))
-    # if chk_permission and chk_permission.view_action:
-    chk_permission = permission(request, reverse('hr:salary_process2'))
+    chk_permission = permission(request, reverse('hr:branch_wise_summary_report'))
     if chk_permission and chk_permission.insert_action:
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
@@ -725,15 +723,57 @@ def branch_wise_summary_report(request):
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
                    'employee_categories' : employee_categories, 'departments' : department_list }
-        # return render(request, 'hr/salary/report.html', context)
         return render(request, 'hr/salary/branch_wise_summary.html', context)
     else: return redirect('/access-denied')
 
+@csrf_exempt
+def get_branch_wise_salary_summary_report(request):
+    report_type, report_data, query  = request.POST.get('report_type', None), '', Q(status=Status.name("Active"))
+    company     = request.POST.get('company', None)
+    if company and company != 'all':
+        # query  &= Q(branch_id=company)
+        branches  = Branch.objects.filter(id=company)
+    else: branches= Branch.objects.filter(company_id=request.session.get('company_id')).order_by('code')
+    if department := request.POST.get('department', None) : query &= Q(department_id=department)
+    # if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
+    month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    index = 0
+    total_cash_amount,total_basic,total_deduct,total_cfd,total_gratuity,total_b_to_e = 0,0,0,0,0,0
+    for branch in branches:
+        cash_amount,basic,deduct,cfd,gratuity,b_to_e = 0,0,0,0,0,0
+        # cash_amount = a,basic=b,deduct=c,cfd=d,gratuity=d,b_to_e
+        branch_name = branch.code + ' ' +branch.name
+        for employee in EmployeeDetails.objects.filter(query).filter(branch_id=branch.id).order_by('personal__employee_id'):
+            cash_amount += 0
+            basic       += employee.basic
+            deduct      += 0
+            cfd         += 0
+            gratuity    += 0
+            b_to_e      += 0
+            remarks      = ''
+            total_cash_amount += 0
+            total_basic       += employee.basic
+            total_deduct      += 0
+            total_cfd         += 0
+            total_gratuity    += 0
+            total_b_to_e      += 0
+        data = [branch_name,cash_amount,basic,deduct,cfd,gratuity,b_to_e,remarks]
+        report_data += """<tr>""" + "".join("""<td class='text-center'>{}</td>""".format(d) for d in data) + """</tr>"""
+    total_data = ['Grand Total',total_cash_amount,total_basic,total_deduct,total_cfd,total_gratuity,total_b_to_e,'']
+    report_data += """<tr class='font-weight-bold'>""" + "".join("""<td class='text-center'>{}</td>""".format(d) for d in total_data) + """</tr>"""
+        
+    if report_type == "pdf" :
+        template = get_template('hr/salary/branch_wise_salary_summary_pdf.html')
+        html = template.render({'company':branches.first().company, 'data':report_data, 'month':month_list[str(month)], 'year':year})
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'Branch Wise Salary Summary Report.pdf'
+        return response
+    return JsonResponse({"report_data":report_data}, safe=False)
+
 @login
 def branch_wise_deduct_summary_report(request):
-    # chk_permission   = permission(request, reverse('hr:salary_process'))
-    # if chk_permission and chk_permission.view_action:
-    chk_permission = permission(request, reverse('hr:salary_process2'))
+    chk_permission = permission(request, reverse('hr:branch_wise_deduct_summary_report'))
     if chk_permission and chk_permission.insert_action:
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
@@ -744,15 +784,88 @@ def branch_wise_deduct_summary_report(request):
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
                    'employee_categories' : employee_categories, 'departments' : department_list }
-        # return render(request, 'hr/salary/report.html', context)
         return render(request, 'hr/salary/branch_wise_deduct_summary.html', context)
     else: return redirect('/access-denied')
 
+@csrf_exempt
+def get_branch_wise_deduct_summary_report(request):
+    report_type, report_data, query  = request.POST.get('report_type', None), '', Q(status=Status.name("Active"))
+    company     = request.POST.get('company', None)
+    if company and company != 'all':
+        # query  &= Q(branch_id=company)
+        branches  = Branch.objects.filter(id=company)
+    else: branches= Branch.objects.filter(company_id=request.session.get('company_id')).order_by('code')
+    if department := request.POST.get('department', None) : query &= Q(department_id=department)
+    # if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
+    month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    total_pf, total_cpf, total_gf, total_security, total_staff_saving = 0, 0, 0, 0, 0
+    total_pfl_principal,total_pfl_interest,total_pfl_loan = 0,0,0
+    total_bcl_principal,total_bcl_interest,total_bcl_loan = 0,0,0
+    total_mcl_principal,total_mcl_interest,total_mcl_loan = 0,0,0
+    total_income_tax,total_others,total_deduct            = 0,0,0
+    for branch in branches:
+        pf, cpf, gf, security, staff_saving = 0, 0, 0, 0, 0
+        pfl_principal,pfl_interest,pfl_loan = 0,0,0
+        bcl_principal,bcl_interest,bcl_loan = 0,0,0
+        mcl_principal,mcl_interest,mcl_loan = 0,0,0
+        income_tax,others,deduct            = 0,0,0
+        branch_name = branch.code + ' ' +branch.name
+        for employee in EmployeeDetails.objects.filter(query).filter(branch_id=branch.id).order_by('personal__employee_id'):
+            pf          += 0
+            cpf         += 0
+            gf          += 0
+            security    += 0
+            staff_saving+= 0
+            pfl_principal += 0
+            pfl_interest  += 0
+            pfl_loan      += 0
+            bcl_principal += 0
+            bcl_interest  += 0
+            bcl_loan      += 0
+            mcl_principal += 0
+            mcl_interest  += 0
+            mcl_loan      += 0
+            income_tax    += 0
+            others        += 0
+            deduct        += 0
+
+            total_pf          += 0
+            total_cpf         += 0
+            total_gf          += 0
+            total_security    += 0
+            total_staff_saving+= 0
+            total_pfl_principal += 0
+            total_pfl_interest  += 0
+            total_pfl_loan      += 0
+            total_bcl_principal += 0
+            total_bcl_interest  += 0
+            total_bcl_loan      += 0
+            total_mcl_principal += 0
+            total_mcl_interest  += 0
+            total_mcl_loan      += 0
+            total_income_tax    += 0
+            total_others        += 0
+            total_deduct        += 0
+
+        data = [branch_name,pf,cpf,gf,security,staff_saving,pfl_principal,pfl_interest,pfl_loan,
+                mcl_principal,mcl_interest,mcl_loan,bcl_principal,bcl_interest,bcl_loan,income_tax,others,deduct]
+        report_data += """<tr>""" + "".join("""<td class='text-center'>{}</td>""".format(d) for d in data) + """</tr>"""
+    total_data = ['Grand Total',total_pf,total_cpf,total_gf,total_security,total_staff_saving,total_pfl_principal,total_pfl_interest,total_pfl_loan,
+                total_mcl_principal,total_mcl_interest,total_mcl_loan,total_bcl_principal,total_bcl_interest,total_bcl_loan,total_income_tax,total_others,total_deduct]
+    report_data += """<tr class='font-weight-bold'>""" + "".join("""<td class='text-center'>{}</td>""".format(d) for d in total_data) + """</tr>"""
+        
+    if report_type == "pdf" :
+        template = get_template('hr/salary/branch_wise_deduct_summary_pdf.html')
+        html = template.render({'company':branches.first().company, 'data':report_data, 'month':month_list[str(month)], 'year':year})
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'Branch Wise Deduct Summary Report.pdf'
+        return response
+    return JsonResponse({"report_data":report_data}, safe=False)
+
 @login
 def bank_format_report(request):
-    # chk_permission   = permission(request, reverse('hr:salary_process'))
-    # if chk_permission and chk_permission.view_action:
-    chk_permission = permission(request, reverse('hr:salary_process2'))
+    chk_permission = permission(request, reverse('hr:bank_format_report'))
     if chk_permission and chk_permission.insert_action:
         year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
         if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
@@ -763,6 +876,147 @@ def bank_format_report(request):
         department_list = Departments.objects.filter(status=True)
         context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
                    'employee_categories' : employee_categories, 'departments' : department_list }
-        # return render(request, 'hr/salary/report.html', context)
         return render(request, 'hr/salary/bank_format.html', context)
     else: return redirect('/access-denied')
+
+@csrf_exempt
+def get_bank_format_report(request):
+    report_type, report_data, query  = request.POST.get('report_type', None), '', Q(status=Status.name("Active"))
+    company     = request.POST.get('company', None)
+    if company and company != 'all':
+        # query  &= Q(branch_id=company)
+        branches  = Branch.objects.filter(id=company)
+    else: branches= Branch.objects.filter(company_id=request.session.get('company_id')).order_by('code')
+    if department := request.POST.get('department', None) : query &= Q(department_id=department)
+    if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
+    month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    index = 0
+    for branch in branches:
+        for employee in EmployeeDetails.objects.filter(query).filter(branch_id=branch.id).order_by('personal__employee_id'):
+            index += 1
+            account_no = employee.bank_account_no()
+            emp_id     = employee.employee_id
+            acc_title  = employee.name
+            cust_id    = '-'
+            acc_opening_date = ''
+            net_payment = 0
+            remarks    = 'Active' if employee.status else 'Resigned'
+            data = [index, account_no,emp_id,acc_title,cust_id,acc_opening_date,net_payment,remarks]
+            report_data += """<tr>""" + "".join("""<td class='text-center'>{}</td>""".format(d) for d in data) + """</tr>"""
+        
+    if report_type == "pdf" :
+        template = get_template('hr/salary/bank_format_pdf.html')
+        html = template.render({'company':branches.first().company, 'data':report_data, 'month':month_list[str(month)], 'year':year})
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'Bank Format Report.pdf'
+        return response
+    return JsonResponse({"report_data":report_data}, safe=False)
+
+@login
+def branch_wise_details_report(request):
+    chk_permission = permission(request, reverse('hr:branch_wise_details_report'))
+    if chk_permission and chk_permission.insert_action:
+        year_list, month_list, current_month, current_year = [], HRMontlySalaryDetails.month_list, datetime.now().month, datetime.now().year
+        if current_month == 1 : year_list, month_list = [current_year - 1, current_year], [month_list[10], month_list[11], month_list[0]]
+        elif current_month == 2 : year_list, month_list = [current_year - 1, current_year], [month_list[11], month_list[0], month_list[1]]
+        else : year_list, month_list = [current_year], [month_list[current_month-3], month_list[current_month-2], month_list[current_month-1]]
+        companies = Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name')
+        employee_categories = CommonMaster.objects.filter(value_for=5)
+        department_list = Departments.objects.filter(status=True)
+        context = {'years' : year_list, 'months' : month_list, 'companies' : companies,
+                   'employee_categories' : employee_categories, 'departments' : department_list }
+        return render(request, 'hr/salary/branch_wise_details.html', context)
+    else: return redirect('/access-denied')
+
+@csrf_exempt
+def get_branch_wise_details_report(request):
+    from decimal import Decimal
+    report_type, report_data, query  = request.POST.get('report_type', None), '', Q(status=Status.name("Active"))
+    if company := request.POST.get('company', None)         : 
+        query  &= Q(branch_id=company)
+        company = Branch.objects.filter(id=company).first()
+    if department := request.POST.get('department', None) : query &= Q(department_id=department)
+    if employee_category := request.POST.get('employee_category', None) : query &= Q(employee_category_id=employee_category)
+    month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
+    index = 0
+    for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
+        basic       = employee.basic
+        hrent       = employee.house_rent
+        medical     = employee.medical_allowance
+        grade       = get_salary_grade(float(employee.salary) if employee.salary else 0)
+        late, absent_days, with_pay, without_pay, working_day, total_days, holiday_n_weekends = 0, 0, 0, 0, 0, 0, 0
+        if salary_cycle := HRSalaryCycle.objects.filter(branch=employee.branch, employee_category=employee.employee_category).first() :
+            weekend_query = Q(holiday__branch=company)
+            if salary_cycle.start_date != 1 : 
+                syear = year
+                if month == 1:
+                    month = 13
+                    syear -= 1
+                start_date      = date(syear, month-1, salary_cycle.start_date)
+                end_date        = date(year, month, salary_cycle.end_date)
+                total_days      = (end_date - start_date).days + 1
+                weekend_query  &= Q(holiday_date__gte=start_date, holiday_date__lte=end_date)
+                attendance_query= Q(calendar_day__gte=start_date, calendar_day__lte=end_date)
+            else : 
+                total_days      = monthrange(year, month)[1]
+                weekend_query  &= Q(holiday_date__month=month, holiday_date__year=year)
+                attendance_query= Q(calendar_day__month=month, calendar_day__year=year)
+            holiday_n_weekends  = HolidayIndividuals.objects.filter(weekend_query).count()
+            calendar_days       = EmployeeCalendar.objects.filter(attendance_query & Q(employee=employee))
+            absent_days         = calendar_days.filter(absent=True).count()
+            late                = calendar_days.filter(is_late=True).count()
+            with_pay            = calendar_days.filter(in_leave=True, leave_application__leave__payable=True).count()
+            without_pay         = calendar_days.filter(in_leave=True, leave_application__leave__payable=False).count()
+        
+        # Addition
+        # holiday     = get_salary_details2(year=year, month=month, employee=employee, heads='Holiday')
+        # ot          = get_salary_details2(year=year, month=month, employee=employee, heads='Over Time')
+        # night       = get_salary_details2(year=year, month=month, employee=employee, heads='Night')
+        # attendance  = get_salary_details2(year=year, month=month, employee=employee, heads='Attendance')
+        # incentive   = get_salary_details2(year=year, month=month, employee=employee, heads='Incentive')
+        # festival    = get_salary_details(year=year, month=month, employee=employee, heads='Festival')
+        arrear      = get_salary_details2(year=year, month=month, employee=employee, heads='Arrear')
+        # tiffin      = get_salary_details2(year=year, month=month, employee=employee, heads='Tifin Bill')
+
+        #Deduction
+        loan    = get_salary_details2(year=year, month=month, employee=employee, heads='Loan')
+        absent  = get_salary_details2(year=year, month=month, employee=employee, heads='Absent')
+        others  = get_salary_details2(year=year, month=month, employee=employee, heads='Others')
+        itds    = get_salary_details2(year=year, month=month, employee=employee, heads='ITDS')
+        pf      = get_salary_details2(year=year, month=month, employee=employee, heads='PF')
+        staff_security = get_salary_details2(year=year, month=month, employee=employee, heads='Staff Security')
+        staff_saving   = get_salary_details2(year=year, month=month, employee=employee, heads='Staff Saving')
+        pfl_principal  = get_salary_details2(year=year, month=month, employee=employee, heads='PFL Principal')
+        pfl_interest   = get_salary_details2(year=year, month=month, employee=employee, heads='PFL Interest')
+        pf_loan        = get_salary_details2(year=year, month=month, employee=employee, heads='PF Loan')
+        mcl_principal  = get_salary_details2(year=year, month=month, employee=employee, heads='MCL Principal')
+        mcl_interest   = get_salary_details2(year=year, month=month, employee=employee, heads='MCL Interest')
+        mc_loan        = get_salary_details2(year=year, month=month, employee=employee, heads='MC Loan')
+        bcl_principal  = get_salary_details2(year=year, month=month, employee=employee, heads='BCL Principal')
+        bcl_interest   = get_salary_details2(year=year, month=month, employee=employee, heads='BCL Interest')
+        bc_loan        = get_salary_details2(year=year, month=month, employee=employee, heads='BC Loan')
+        total_deduct   = pf+staff_saving+staff_security+pf_loan+mc_loan+bc_loan+itds+others
+        deduction_days = absent_days - without_pay
+        working_day, salary_days = total_days - holiday_n_weekends, 30 - deduction_days
+        salary_payable  = employee.salary # - Decimal(deduction_days).quantize(Decimal('0.00')) * Decimal(employee.salary / 30).quantize(Decimal('0.00'))
+        # total_payable   = salary_payable + ot + holiday + night + attendance + incentive + arrear + tiffin # + festival 
+        total_payable   = salary_payable - total_deduct
+        net_payable     = total_payable - loan - absent - others - itds - pf
+        # for salary in HRMontlySalaryDetails.objects.filter(year=year, month=month, employee=employee) :
+        per_hr_amount   = round(basic / 206, 2) if basic else 0
+        index += 1
+        data = [index, employee.employee_id, employee.name, employee.designation.name,
+                employee.joining_date.strftime("%d/%m/%Y"), employee.joining_date.strftime("%d/%m/%Y"),employee.personal.status, 
+                employee.bank_account_no(), '-', basic, hrent, medical, arrear,
+                employee.salary, pf, staff_security, staff_saving,
+                pf_loan,total_deduct,net_payable]
+        report_data += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
+    if report_type == "pdf" :
+        template = get_template('hr/salary/branch_wise_details_pdf.html')
+        html = template.render({'company':company.company, 'data':report_data, 'month':month_list[str(month)], 'year':year})
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'Salary Report Branch Print.pdf'
+        return response
+    return JsonResponse({"report_data":report_data}, safe=False)

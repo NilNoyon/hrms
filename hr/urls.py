@@ -103,8 +103,13 @@ urlpatterns = [
      # path('festival-bonus/', views.festival_bonus, name='festival_bonus'),
      # path('ajax/festival-report-data/', views.get_festival_report, name='get_festival_report'),
      path('salary/branch-wise-summary-report/', views.branch_wise_summary_report, name='branch_wise_summary_report'),
+     path('ajax/get-branch-wise-summary-report/', views.get_branch_wise_salary_summary_report, name='get_branch_wise_salary_summary_report'),
+     path('salary/branch-wise-details-report/', views.branch_wise_details_report, name='branch_wise_details_report'),
+     path('ajax/get-branch-wise-details-report/', views.get_branch_wise_details_report, name='get_branch_wise_details_report'),
      path('salary/branch-wise-deduct-summary-report/', views.branch_wise_deduct_summary_report, name='branch_wise_deduct_summary_report'),
+     path('ajax/get-branch-wise-deduct-summary-report/', views.get_branch_wise_deduct_summary_report, name='get_branch_wise_deduct_summary_report'),
      path('salary/bank-format/', views.bank_format_report, name='bank_format_report'),
+     path('ajax/get-bank-format/', views.get_bank_format_report, name='get_bank_format_report'),
 
 
      path('pay-slip/', views.pay_slip, name='pay_slip'),
