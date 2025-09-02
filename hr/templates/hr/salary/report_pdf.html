@@ -4,7 +4,6 @@
 {% block header_title %}Salary Report - {{month}}/{{year}}{% endblock %}
 
 {% block add_css %}
-{% comment %} <link href="{% static 'dist/css/style.css' %}?v=0.1" rel="stylesheet"> {% endcomment %}
 <style>
     table#salary-table{font-size:5.8px;border: 1px solid #111;border-collapse:collapse;margin-top: 20px;}
     #salary-table td,#salary-table th{border: 1px solid #111;text-align: center;}
@@ -19,54 +18,43 @@
 <div class="table-responsive">
     <table class="table" id="salary-table">
         <thead>
-          <tr class="text-center">
-              <th colspan="9">Personal Informations</th>
-              <th colspan="6">Salary Breakdowns</th>
-              <th colspan="8">Month Informations</th>
-              <th colspan="8">Payable Amounts (BDT)</th>
-              <th rowspan="2">Total Payable (BDT)</th>
-              <th colspan="5">Deduction Amounts (BDT)</th>
-              <th rowspan="2">Net Payable (BDT)</th>
-          </tr>
-          <tr class="text-center">
-              <th class="">Employee ID</th>
-              <th class="">Company</th>
-              <th class="">Department</th>
-              <th class="">Designation</th>
-              <th class="">Cost Center</th>
-              <th class="">Grade</th>
-              <th class="">Staff Category</th>
-              <th class="">DOJ</th>
-              <th class="">Gross Salary</th>
-              <th class="">Basic</th>
-              <th class="">House Rent</th>
-              <th class="">Medical</th>
-              <th class="">Conveyance</th>
-              <th class="">Food Allowance</th>
-              <th class="">Others Allowance</th>
-              <th class="">Working Day</th>
-              <th class="">Holiday/ Weekend</th>
-              <th class="">Total Days</th>
-              <th class="">Late</th>
-              <th class="">Absent</th>
-              <th class="">With Pay</th>
-              <th class="">W/Pay</th>
-              <th class="">OT Hours</th>
-              <th class="">Salary</th>
-              <th class="">Over Time</th>
-              <th class="">Holiday</th>
-              <th class="">Night</th>
-              <th class="">Attendance</th>
-              <th class="">Incentive</th>
-              {% comment %} <th class="">Festival</th> {% endcomment %}
-              <th class="">Arrear</th>
-              <th class="">Tifin Bill</th>
-              <th class="">Loan</th>
-              <th class="">Absent</th>
-              <th class="">Others</th>
-              <th class="">ITDS</th>
-              <th class="">PF</th>
-          </tr>
+            <th class="">SL No.</th>
+            <th class="">E. ID</th>
+            <th class="">Name</th>
+            <th class="">Branch Code & Name</th>
+            <th class="">Grade</th>
+            <th class="">Step</th>
+            <th class="">Designation</th>
+            <th class="">Joining Date</th>
+            <th class="">Permanent Date</th>
+            <th class="">Status</th>
+            <th class="">Gender</th>
+            <th class="">Bank A/C No</th>
+            <th class="">Fixed Salary</th>
+            <th class="">Basic</th>
+            <th class="">House Rent(60%)</th>
+            <th class="">Medical Allowance(40%)</th>
+            <th class="">Deduct/Arear</th>
+            <th class="">Gross Salary</th>
+            <th class="">Profident Fund(10%)</th>
+            <th class="">Staff Security</th>
+            <th class="">Staff Saving</th>
+            <th class="">PFL Principal</th>
+            <th class="">PFL Interest</th>
+            <th class="">PF Loan</th>
+            <th class="">MCL Principal</th>
+            <th class="">MCL Interest</th>
+            <th class="">MCy Loan</th>
+            <th class="">BCL Principal</th>
+            <th class="">BCL Interest</th>
+            <th class="">BiCy Loan</th>
+            <th class="">Income Tax</th>
+            <th class="">Others</th>
+            <th class="">Total Deduct</th>
+            <th class="">Arrear</th>
+            <th class="">Net Payment</th>
+            <th class="">CPF</th>
+            <th class="">GF</th>
         </thead>
         <tbody>{{data|safe}}</tbody>
     </table>

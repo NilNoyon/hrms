@@ -56,7 +56,7 @@
               <select class="form-control select2" name="company" id="company" data-title="Branch" required />
                   <option value="" disabled selected></option>
                   {% for company in companies %}
-                  <option value="{{company.id}}">{{company.short_name}}</option>
+                  <option value="{{company.id}}">{{company.name}}</option>
                   {% endfor %}
               </select>
           </div>

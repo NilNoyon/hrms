@@ -1,0 +1,36 @@
+{% extends "print_base_landscape_new.html" %}
+{% load static %}
+{% block page_title %}Branch Wise Salary Summary Report - {{month}}/{{year}}{% endblock %}
+{% block header_title %}Branch Wise Salary Summary - {{month}}/{{year}}{% endblock %}
+
+{% block add_css %}
+{% comment %} <link href="{% static 'dist/css/style.css' %}?v=0.1" rel="stylesheet"> {% endcomment %}
+<style>
+     table#salary-table{font-size:18px;border: 1px solid #111;border-collapse:collapse;margin-top: 20px;}
+     #salary-table td,#salary-table th{border: 1px solid #111;text-align: center;}
+     @page {
+          size:landscape;
+          margin: 0.2in 0.2in 0.2in 0.2in !important;
+     }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="table-responsive">
+     <table class="table" id="salary-table">
+          <thead>
+               <tr class="text-center">
+                    <th class="">SL NO</th>
+                    <th class="">Account No</th>
+                    <th class="">Employee ID</th>
+                    <th class="">Account Title</th>
+                    <th class="">Cust ID</th>
+                    <th class="">A/C Open Date</th>
+                    <th class="">Net Payment</th>
+                    <th class="">Remarks</th>
+               </tr>
+          </thead>
+          <tbody>{{data|safe}}</tbody>
+     </table>
+</div>  
+{% endblock %}

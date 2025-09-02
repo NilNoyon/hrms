@@ -1,0 +1,47 @@
+{% extends "print_base_landscape_new.html" %}
+{% load static %}
+{% block page_title %}Salary Report Branch Print- {{month}}/{{year}}{% endblock %}
+{% block header_title %}Salary Report Branch Print - {{month}}/{{year}}{% endblock %}
+
+{% block add_css %}
+<style>
+    table#salary-table{font-size:9px;border: 1px solid #111;border-collapse:collapse;margin-top: 20px;}
+    #salary-table td,#salary-table th{border: 1px solid #111;text-align: center;}
+    @page {
+        size:landscape;
+        margin: 0.2in 0.2in 0.2in 0.2in !important;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="table-responsive">
+     <table class="table" id="salary-table">
+          <thead>
+               <tr class="text-center">
+                    <th class="">SL No.</th>
+                    <th class="">E. ID</th>
+                    <th class="">Name</th>
+                    <th class="">Designation</th>
+                    <th class="">Joining Date</th>
+                    <th class="">Permanent Date</th>
+                    <th class="">Status</th>
+                    <th class="">Bank A/C No</th>
+                    <th class="">Fixed Salary</th>
+                    <th class="">Basic</th>
+                    <th class="">House Rent(60%)</th>
+                    <th class="">Medical Allowance(40%)</th>
+                    <th class="">Deduct/Arear</th>
+                    <th class="">Gross Salary</th>
+                    <th class="">Profident Fund(10%)</th>
+                    <th class="">Staff Security</th>
+                    <th class="">Staff Saving</th>
+                    <th class="">PF Loan</th>
+                    <th class="">Total Deduct</th>
+                    <th class="">Net Payment</th>
+               </tr>
+          </thead>
+          <tbody>{{data|safe}}</tbody>
+     </table>
+</div>  
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "print_base_landscape_new.html" %}
+{% load static %}
+{% block page_title %}Branch Wise Deduct Summary Report - {{month}}/{{year}}{% endblock %}
+{% block header_title %}Branch Wise Deduct Summary Report - {{month}}/{{year}}{% endblock %}
+
+{% block add_css %}
+{% comment %} <link href="{% static 'dist/css/style.css' %}?v=0.1" rel="stylesheet"> {% endcomment %}
+<style>
+     table#salary-table{font-size:10px;border: 1px solid #111;border-collapse:collapse;margin-top: 20px;}
+     #salary-table td,#salary-table th{border: 1px solid #111;text-align: center;}
+     @page {
+          size:landscape;
+          margin: 0.2in 0.2in 0.2in 0.2in !important;
+     }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="table-responsive">
+     <table class="table" id="salary-table">
+          <thead>
+               <tr class="text-center">
+                    <th class="">Branch Code & Name</th>
+                    <th class="">PF</th>
+                    <th class="">CPF</th>
+                    <th class="">GF</th>
+                    <th class="">Staff Security</th>
+                    <th class="">Staff Savings</th>
+                    <th class="">PFL Principal</th>
+                    <th class="">PFL Interest</th>
+                    <th class="">PF Loan</th>
+                    <th class="">MCL Principal</th>
+                    <th class="">MCL Interest</th>
+                    <th class="">Mcy Loan</th>
+                    <th class="">BCL Principal</th>
+                    <th class="">BCL Interest</th>
+                    <th class="">Bi.Cy Loan</th>
+                    <th class="">Income Tax</th>
+                    <th class="">Others</th>
+                    <th class="">Total Deduct</th>
+               </tr>
+          </thead>
+          <tbody>{{data|safe}}</tbody>
+     </table>
+</div>  
+{% endblock %}
