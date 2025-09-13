@@ -873,18 +873,18 @@
             {% if office %}
 
                 // Department wise Section
-                $.ajax({
-                    url : "{% url 'hr:get_department_wise_section' %}",
-                    type: "POST", dataType: 'json', data: { id:'{{office.department_id}}' },
-                    success: function (data) {
-                        $("#section").empty().select2({
-                            placeholder: "Section",
-                            allowClear: true,
-                            data: data.section,
-                        }).val('{{office.section_id}}').trigger("change");
-                        $("#section").parent().addClass("focused");
-                    },
-                });
+                // $.ajax({
+                //     url : "{% url 'hr:get_department_wise_section' %}",
+                //     type: "POST", dataType: 'json', data: { id:'{{office.department_id}}' },
+                //     success: function (data) {
+                //         $("#section").empty().select2({
+                //             placeholder: "Section",
+                //             allowClear: true,
+                //             data: data.section,
+                //         }).val('{{office.section_id}}').trigger("change");
+                //         $("#section").parent().addClass("focused");
+                //     },
+                // });
 
                 // Company wise Location
                 $("#location").val('{{office.location_id}}').trigger("change");
@@ -964,7 +964,7 @@
         
             $("#company").on('select2:select', function(){
                 {% comment %} companyLocationWiseShift(); {% endcomment %}
-                companyWiseLine(this.value);
+                // companyWiseLine(this.value);
                 $.ajax({
                     url : "{% url 'hr:get_company_wise_holidays' %}",
                     type: "POST", dataType: 'json', data: { id:this.value },
@@ -993,11 +993,11 @@
 
             $("#location").on('select2:select', function(){
                 {% comment %} companyLocationWiseShift(); {% endcomment %}
-                companyWiseBuilding(this.value);
+                // companyWiseBuilding(this.value);
             });
             
             $("#building").on('select2:select', function(){
-                buildingWiseFloor(this.value);
+                // buildingWiseFloor(this.value);
             });
 
             $("#reporting_to").select2({
