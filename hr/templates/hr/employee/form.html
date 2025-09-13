@@ -1232,8 +1232,8 @@
                         </div>
                         <div class="col-md">
                             <div class="form-group">
-                                <select class="form-control rcompany_field select2" data-title="Company" name="company">
-                                    <option value="" selected>Company</option>
+                                <select class="form-control rcompany_field select2" data-title="Branch" name="company">
+                                    <option value="" selected>Branch</option>
                                     {% for c in company_list %}
                                     <option value="{{c.id}}">{% strip_single_quote_tag c.short_name %}</option>
                                     {% endfor %}
@@ -1303,7 +1303,7 @@
                             <tr>
                                 <th>Employee ID</th>
                                 <th>Name</th>
-                                <th>Company</th>
+                                <th>Branch</th>
                                 <th>Designation</th>
                                 <th>DOJ</th>
                                 <th>Division</th>

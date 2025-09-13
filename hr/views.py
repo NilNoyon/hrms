@@ -120,7 +120,7 @@ def syncEmployees(request):
 def employee_add(request):
     chk_permission   = permission(request,"/hr/employee-add/")
     if chk_permission and chk_permission.insert_action:
-        search_roles, company_query = {"Admin", "Management"}, Q(status=True)
+        search_roles, company_query = {"Admin","Super Admin", "Management"}, Q(status=True)
         if not search_roles.intersection(request.session.get("user_roles")):
             company_query &= Q(id=request.session.get("branch_id"))
         context = {
@@ -212,13 +212,13 @@ def employee_update(request, employee_id):
                     form.save()
                     user = Users.objects.filter(employee_id = instance.employee_id)
                     if user:                     
-                        company = Company.objects.get(id = instance.company.id)
-                        department , created = Departments.objects.get_or_create(name = str(instance.department))
-                        designation, created = Designations.objects.get_or_create(name = str(instance.designation))
+                        company = Branch.objects.get(id = instance.emp_details_info.branch.id)
+                        department , created = Departments.objects.get_or_create(name = str(instance.emp_details_info.department))
+                        designation, created = Designations.objects.get_or_create(name = str(instance.emp_details_info.designation))
                         report_to = Users.objects.filter(employee_id = instance.employee_id)
                         report_to = report_to[0].id if report_to else None
                         user.update(
-                            status = instance.status, company_id = company.id,
+                            status = instance.status, branch_id = company.id,
                             department_id = department.id, 
                             designation_id = designation.id,
                             reporting_to_id = report_to, 
@@ -233,13 +233,13 @@ def employee_update(request, employee_id):
                                 break
                     employee_list = EmployeeInfo.objects.all()
                     dept_head_list = EmployeeInfo.objects.filter(status=True)
-                    company_list = Company.objects.filter(status=True)
+                    company_list = Brnach.objects.filter(status=True,company_id=request.session.get('company_id'))
                     department_list = Departments.objects.filter(status=True)
                     designation_list = Designations.objects.filter(status=True)
                     if request.session["role_text"] == "Admin" or request.session["role_text"] == "Super Admin":
-                           employee_list = EmployeeInfo.objects.all()
+                           employee_list = EmployeeDetails.objects.filter(branch__company_id=request.session.get('company_id'))
                     else:
-                        employee_list = EmployeeInfo.objects.filter(company_id = request.session.get('company_id')).exclude(employee_id = 'admin')
+                        employee_list = EmployeeDetails.objects.filter(branch_id = request.session.get('branch_id')).exclude(employee_id = 'admin')
                         
                     context = {
                         'option': "emp_list", 
