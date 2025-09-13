@@ -448,7 +448,7 @@ def employee_edit(request, id):
     else : nominee = bank = None
     user    = Users.objects.filter(employee_id=personal.employee_id).order_by('-id').first() if personal.employee_id else None
     template_name = "hr/employee/edit.html"
-    search_roles, company_query = {"Admin", "Management"}, Q(status=True)
+    search_roles, company_query = {"Admin", "Super Admin", "Management"}, Q(status=True)
     if not search_roles.intersection(request.session.get("user_roles")):
         company_query &= Q(company_id=request.session.get("company_id"))
     context = {
@@ -485,7 +485,7 @@ def get_employee_for_datatable(request):
 
     if company := request.POST.get('company', None) : query &= Q(branch_id=company)
     else :
-        search_roles = {"Admin", "Management"}
+        search_roles = {"Admin", "Super Admin", "Management"}
         if not search_roles.intersection(request.session.get("user_roles")):
             query &= Q(branch_id__in=request.session.get("branch_id_list"))
     if department  := request.POST.get('department', None)  : query &= Q(department_id=department)
@@ -532,7 +532,7 @@ def get_employee_for_datatable(request):
             view_url        = reverse('hr:employee_view', kwargs={'employee_id': i.personal_id})
             action          = ebs_bl_common.action_html(action_url=edit_url, color_text='text-success', icon='ti-pencil-alt', title_text='Edit Employee')
             action         += ebs_bl_common.action_html(action_url=view_url, color_text='text-info m-r-10', icon='icon-eye', title_text='View Employee')
-            data = [employee_id, name, company, designation, joining_date, division, sub_section, unit, department, section, employee_category, office_mobile, status, action]
+            data = [employee_id, name, branch, designation, joining_date, division, sub_section, unit, department, section, employee_category, office_mobile, status, action]
             content += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
     
     if 'true' == request.POST.get('reset', 'false') : reset_data = True

@@ -263,6 +263,13 @@ class EmployeeInfo(CoreActionWithUpdate):
      @property
      def emp_details_info(self):
           return EmployeeDetails.objects.filter(employee_id=self.employee_id).first()
+     
+     @property
+     def branch(self):
+          try:
+               return EmployeeDetails.objects.filter(employee_id=self.employee_id).first()
+          except Exception as e:
+               return 'N/A'
 
 class EmployeeDetails(CoreActionWithUpdate):
      employee_id         = models.CharField(max_length=20, blank=True, null=True)
