@@ -208,6 +208,7 @@ def employee_official_info(request):
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
         emp_official_form = EmployeeDetailsForm(data)
     if emp_official_form.is_valid():
+        print('in')
         personal = EmployeeInfo.objects.filter(id=int(personal_id)).last()
         personal.employee_id = employee_id
         personal.save()
@@ -228,7 +229,7 @@ def employee_official_info(request):
                 except: pass
             else: 
                 user.designation_id = official.designation_id
-                user.name = official.personal.name
+                user.name  = official.personal.name
                 user.email = official.office_email
                 user.status = 1
                 user.save()
