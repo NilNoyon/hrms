@@ -55,7 +55,7 @@
                                 <select class="form-control text-capitalize select2 company" id="company" name="company" multiple data-title="Select Branch">
                                     <option value="">Select Branch</option>
                                     {% for c in company_list %}
-                                    <option value="{{c.id}}">{{ c.name }}</option>
+                                    <option value="{{c.id}}">{{ c.branch_with_code }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

@@ -42,7 +42,7 @@
                             data-title="Branch">
                             <option value="" disabled selected></option>
                             {% for data in company_list %}
-                            <option value="{{data.id}}">{{data.short_name}}</option>
+                            <option value="{{data.id}}">{{data.branch_with_code}}</option>
                             {% endfor %}
                         </select>
                     </div>

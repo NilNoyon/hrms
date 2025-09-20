@@ -64,7 +64,11 @@ class Branch(models.Model):
         verbose_name_plural = "Branches" 
 
     def __str__(self):
-        return '%s' % (self.name)
+        return '%s %s' % (self.code, self.name)
+    
+    @property
+    def branch_with_code(self):
+        return self.code + ' ' + self.name
     
 class Designations(models.Model):
     name           = models.CharField(max_length = 200, unique=True)

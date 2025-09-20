@@ -108,7 +108,7 @@
                           <option value="" disabled selected></option>
                           {% for data in branch_list %}
                           <option value="{{data.id}}" {% if employee.branch == data.id %} selected {% endif %}>
-                            {{data.name}}</option>
+                            {{data.branch_with_code}}</option>
                           {% endfor %}
                         </select>
                       </div>
