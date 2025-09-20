@@ -61,7 +61,7 @@
         <select class="form-control text-capitalize" id="companys" name="company" >
             <option value="" >All Branch</option>
             {% for data in conpany_list %}
-                <option value="{{data.id}}" >{{data.name}}</option>
+                <option value="{{data.id}}" >{{data.branch_with_code}}</option>
             {% endfor %}
         </select>
       </div>

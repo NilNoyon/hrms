@@ -33,7 +33,7 @@
                                 {% for leave in object_list %}
                                 <tr>
                                     {% comment %} <td class="">{{ forloop.counter }}</td> {% endcomment %}
-                                    <td>{{ leave.branch.short_name }}</td>
+                                    <td>{{ leave.branch.branch_with_code }}</td>
                                     <td>{{ leave.leave_type.short_title }}</td>
                                     <td>{{ leave.employee_type.value }}</td>
                                     <td>{{ leave.employee_category.value }}</td>
@@ -97,7 +97,7 @@
                             <select class="form-control text-capitalize select2" name="company" id="company" data-title="Branch" required />
                                 <option value="" disabled selected></option>
                                 {% for company in companies %}
-                                <option value="{{company.id}}" {% if instance.branch_id == company.id %}selected{% endif%}>{{company.short_name}}</option>
+                                <option value="{{company.id}}" {% if instance.branch_id == company.id %}selected{% endif%}>{{company.branch_with_code}}</option>
                                 {% endfor %}
                             </select>
                         </div>

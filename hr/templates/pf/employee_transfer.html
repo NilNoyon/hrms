@@ -117,7 +117,7 @@
                       data-title="Branch" required>
                       <option value="" disabled selected></option>
                       {% for data in company_list %}
-                      <option value="{{data.id}}" {% if employee.branch_id == data.id %} selected {% endif %}>{{data.name}}
+                      <option value="{{data.id}}" {% if employee.branch_id == data.id %} selected {% endif %}>{{data.branch_with_code}}
                       </option>
                       {% endfor %}
                    </select>

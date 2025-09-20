@@ -766,7 +766,7 @@
                                             <select class="form-control  custom-select select2" id="company" name="company" data-title="Branch" placeholder="Branch" required>
                                                 <option value="" disabled selected></option>
                                                 {% for i in company_list %}
-                                                <option value="{{i.id}}">{{i.name}}</option>
+                                                <option value="{{i.id}}">{{i.branch_with_code}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -1235,7 +1235,7 @@
                                 <select class="form-control rcompany_field select2" data-title="Branch" name="company">
                                     <option value="" selected>Branch</option>
                                     {% for c in company_list %}
-                                    <option value="{{c.id}}">{% strip_single_quote_tag c.short_name %}</option>
+                                    <option value="{{c.id}}">{% strip_single_quote_tag c.branch_with_code %}</option>
                                     {% endfor %}
                                 </select>
                                 <span class="bar"></span>

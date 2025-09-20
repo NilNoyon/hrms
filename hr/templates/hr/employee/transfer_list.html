@@ -97,7 +97,7 @@
                                         name="to_branch" data-title="To Branch" required>
                                         <option value="" disabled selected></option>
                                         {% for branch in branch_list %}
-                                        <option value="{{ branch.id }}" {% if instance.to_branch_id == branch.id %} selected {% endif %}>{{branch.short_name}}</option>
+                                        <option value="{{ branch.id }}" {% if instance.to_branch_id == branch.id %} selected {% endif %}>{{branch.branch_with_code}}</option>
                                         {% endfor %}
                                    </select>
                               </div>

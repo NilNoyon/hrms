@@ -55,7 +55,7 @@
                 <select class="form-control text-capitalize select2" id="company" name="company" data-title="Branch" required>
                   <option value="" disabled selected></option>
                   {% for data in company_list %}
-                  <option value="{{data.id}}" {% if user.branch_id == data.id %} selected {% endif %}>{{data.name}}</option>
+                  <option value="{{data.id}}" {% if user.branch_id == data.id %} selected {% endif %}>{{data.branch_with_code}}</option>
                   {% endfor %}
                 </select>
               </div>

@@ -208,7 +208,6 @@ def employee_official_info(request):
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
         emp_official_form = EmployeeDetailsForm(data)
     if emp_official_form.is_valid():
-        print('in')
         personal = EmployeeInfo.objects.filter(id=int(personal_id)).last()
         personal.employee_id = employee_id
         personal.save()

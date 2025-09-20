@@ -407,7 +407,7 @@
                                     <select class="form-control  custom-select select2" id="company" name="company" data-title="Branch" placeholder="branch" required>
                                         <option value="" disabled selected></option>
                                         {% for i in company_list %}
-                                        <option value="{{i.id}}" {% if office.branch_id == i.id %} selected {% endif %}>{{i.name}}</option>
+                                        <option value="{{i.id}}" {% if office.branch_id == i.id %} selected {% endif %}>{{i.branch_with_code}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
