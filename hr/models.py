@@ -315,6 +315,10 @@ class EmployeeDetails(CoreActionWithUpdate):
      off_day_ot          = models.BooleanField(default = False)
      holiday_bonus       = models.BooleanField(default = False)
      income_tax          = models.BooleanField(default = False)
+     fixed_employee      = models.BooleanField(default = False)
+     monthly_security    = models.IntegerField(default=0)
+     total_security      = models.IntegerField(default=0)
+     staff_saving        = models.IntegerField(default=0)
 
      def reporting_to_name(self):
           emp = EmployeeDetails.objects.filter(id=self.reporting_to)
@@ -947,6 +951,9 @@ class HRMontlySalaryDetails(CoreActionWithUpdate):
           verbose_name        = "Monthly Salary Detail"
           verbose_name_plural = "Monthly Salary Details"
 
+     # class gross_salary(self):
+     #      return HRMontlySalaryDetails.objects.filter(month=self.month,employee=self.employee,heads__head__value__in=['House Rent','Medical Allowance','Basic'])
+
 class HRLeaveMaster(CoreActionWithUpdate):
      branch              = models.ForeignKey(Branch, on_delete=models.CASCADE, default="")
      leave_type          = models.ForeignKey(HRLeaveType, on_delete=models.CASCADE, related_name="hr_leave_type", null=True, blank=True, default=None)
@@ -1436,12 +1443,22 @@ class HRSalaryProcess(CoreActionWithUpdate):
           verbose_name_plural = "HR Salary Processes"
 
 class Loan(CoreActionWithUpdate):
-     employee            = models.ForeignKey (EmployeeDetails, related_name='loans', on_delete=models.CASCADE, blank=True, null=True, default=None)
+     employee            = models.ForeignKey(EmployeeDetails, related_name='loans', on_delete=models.CASCADE, blank=True, null=True, default=None)
      purpose             = models.TextField(blank=True, null=True)
+     loan_type_list      = (
+          ('1', 'PF Loan'),
+          ('2', 'Bicycle Loan'),
+          ('3', 'Motorcycle Loan'),
+          ('4', 'Basic Loan'),
+     )
+     loan_type           = models.CharField(max_length=15, choices=loan_type_list, blank=True,null=True)
      amount              = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
      amount_paid         = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+     interest            = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+     interest_paid       = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
      tenure_months       = models.PositiveIntegerField()
      monthly_installment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+     monthly_ir_installment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
      remarks             = models.TextField(blank=True, null=True)
      closed              = models.BooleanField(default = False)
 
@@ -1460,7 +1477,8 @@ class Loan(CoreActionWithUpdate):
 class LoanRepayment(CoreActionWithUpdate):
      loan                = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='repayments')
      payment_date        = models.DateField()
-     amount_paid         = models.DecimalField(max_digits=10, decimal_places=2)
+     amount_paid         = models.DecimalField(max_digits=10, decimal_places=2) #principal amount
+     ir_amount_paid      = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True) #interest amount 
      remarks             = models.TextField(blank=True, null=True)
 
      class Meta:

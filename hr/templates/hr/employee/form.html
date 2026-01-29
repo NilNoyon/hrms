@@ -900,6 +900,18 @@
                                     </div>
                                     <div class="col-md">
                                         <div class="form-group">
+                                            <label for="grade">Grade</label>
+                                            <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
+                                                <option value="" disabled selected></option>
+                                                {% for i in 7|times %}
+                                                <option value="{{ i|add:1 }}">{{i|add:1}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    {% comment %}
+                                    <div class="col-md">
+                                        <div class="form-group">
                                             <label for="skill_category">Skill Category</label>
                                             <select class="form-control custom-select select2" data-tags='True'
                                                 name="skill_category" data-title="Skill Category" id="skill_category">
@@ -910,15 +922,11 @@
                                             </select>
                                         </div>
                                     </div>
+                                    {% endcomment %}
                                     <div class="col-md">
                                         <div class="form-group">
-                                            <label for="grade">Grade</label>
-                                            <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
-                                                <option value="" disabled selected></option>
-                                                {% for i in 7|times %}
-                                                <option value="{{ i|add:1 }}">{{i|add:1}}</option>
-                                                {% endfor %}
-                                            </select>
+                                            <input type="number" class="form-control" id="total_security" name="total_security" />
+                                            <label for="total_security">Total Security</label>
                                         </div>
                                     </div>
                                 </div>
@@ -951,8 +959,14 @@
                                     </div>
                                     <div class="col-md">
                                         <div class="form-group">
-                                            <input type="email" class="form-control" id="pabx" name="pabx" />
-                                            <label for="pabx">PABX</label>
+                                            <input type="number" class="form-control" id="monthly_security" name="monthly_security" />
+                                            <label for="monthly_security">Monthly Security</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" id="staff_saving" name="staff_saving" />
+                                            <label for="staff_saving">Staff Saving</label>
                                         </div>
                                     </div>
                                 </div>
@@ -1038,8 +1052,8 @@
                                     </div>
                                     <div class="col-md">
                                         <div class="form-group mt-2">
-                                            <label class="switchery-label" for="tiffin_bill">Tiffin Bill
-                                                <input type="checkbox" id="tiffin_bill" class="js-switch" data-color="#009efb" data-size="mini" />
+                                            <label class="switchery-label" for="fixed_employee">Fixed Employee
+                                                <input type="checkbox" id="fixed_employee" class="js-switch" data-color="#009efb" data-size="mini" />
                                             </label>
                                         </div>
                                     </div>
@@ -1313,7 +1327,7 @@
                                 <th>Section</th>
                                 <th>Employee Category</th>
                                 <th>Phone</th>
-                                <th></th>
+                                <th>Action</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -1685,7 +1699,7 @@
                         },
                     });
                 } else if ($('#company_information').is(":visible")) {
-                    var tiffin_bill     = $("#tiffin_bill").is(':checked') ? 'true' : 'false';
+                    var fixed_employee  = $("#fixed_employee").is(':checked') ? 'true' : 'false';
                     var transportOff    = $("#transportOff").is(':checked') ? 'true' : 'false';
                     var overTimeOff     = $("#overTimeOff").is(':checked')  ? 'true' : 'false';
                     var off_day_ot      = $("#off_day_ot").is(':checked')   ? 'true' : 'false';
@@ -1721,14 +1735,16 @@
                             reporting_to  : $("#reporting_to").val(),
                             office_mobile : $("#office_phone").val(),
                             employee_type : $("#employeeType").val(),
-                            skill_category: $("#skill_category").val(),
+                            total_security: $("#total_security").val(),
+                            monthly_security: $("#monthly_security").val(),
+                            staff_saving    : $("#staff_saving").val(),
                             attendance_bonus  : $("#attendance_bonus").val(),
                             employee_category : $("#employeeCategory").val(),
                             provision_month   : $("#provision_month").val(),
                             transport_facility: transportOff,
                             holiday_bonus     : holiday_bonus,
                             income_tax  : income_tax,
-                            tiffin_bill : tiffin_bill,
+                            fixed_employee : fixed_employee,
                             overtime    : overTimeOff,
                             off_day_ot  : off_day_ot,
                             has_pf      : has_pf,

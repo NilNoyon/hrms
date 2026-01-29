@@ -125,6 +125,9 @@
                     <a class="nav-link" data-toggle="tab" href="#official_info" id="official_info_tab">Official  </a> 
                 </li>
                 <li class="nav-item" style="width: 180px;"> 
+                    <a class="nav-link" data-toggle="tab" href="#salary_info" id="salary_info_tab">Salary & Compensation  </a> 
+                </li>
+                <li class="nav-item" style="width: 180px;"> 
                     <a class="nav-link" data-toggle="tab" href="#nominee_info" id="nominee_info_tab">Nominee </a> 
                 </li>
                 <li class="nav-item" style="width: 180px;"> 
@@ -540,6 +543,19 @@
                                     </select>
                                 </div>
                             </div>
+                            
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="grade">Grade</label>
+                                    <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
+                                        <option value=""></option>
+                                        {% for i in 7|times %}
+                                        <option value="{{ i|add:1 }}" {% if office.grade == i|add:1|slugify %} selected {% endif %}>{{i|add:1}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% comment %}
                             <div class="col-md">
                                 <div class="form-group">
                                     <label for="skill_category">Skill Category</label>
@@ -552,15 +568,12 @@
                                     </select>
                                 </div>
                             </div>
+                            {% endcomment %}
+
                             <div class="col-md">
                                 <div class="form-group">
-                                    <label for="grade">Grade</label>
-                                    <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
-                                        <option value=""></option>
-                                        {% for i in 7|times %}
-                                        <option value="{{ i|add:1 }}" {% if office.grade == i|add:1|slugify %} selected {% endif %}>{{i|add:1}}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <input type="number" class="form-control" id="total_security" name="total_security" value="{{office.total_security|default_if_none:0}}" />
+                                    <label for="total_security">Total Security</label>
                                 </div>
                             </div>
                         </div>
@@ -593,12 +606,20 @@
                                     <label for="officialMail">Official Mail</label>
                                 </div>
                             </div>
+                            {% comment %}
                             <div class="col-md">
                                 <div class="form-group">
-                                    <input type="email" class="form-control" id="pabx" name="pabx" />
-                                    <label for="pabx">PABX</label>
+                                    <input type="number" class="form-control" id="staff_saving" name="staff_saving" value="{{office.staff_saving|default_if_none:0}}" />
+                                    <label for="staff_saving">Staff Saving</label>
                                 </div>
                             </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="monthly_security" name="monthly_security" value="{{office.monthly_security|default_if_none:0}}" />
+                                    <label for="monthly_security">Monthly Security</label>
+                                </div>
+                            </div>
+                            {% endcomment %}
                         </div>
                         <div class="row">
                             <div class="col-md">
@@ -647,6 +668,7 @@
                                     </select>
                                 </div>
                             </div>
+                            {% comment %}
                             <div class="col-md">
                                 <div class="form-group">
                                     <label for="attendance_bonus">Attendance Bonus</label>
@@ -663,6 +685,147 @@
                                     <input type="text" class="form-control" placeholder="" id="gross"
                                         name="gross" value="{{office.salary}}" required>
                                     <label for="gross">Gross</label>
+                                </div>
+                            </div>
+                            {% endcomment %}
+                        </div>
+                        {% comment %}
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="tin" name="tin" value="{{office.tin|default_if_none:""}}" >
+                                    <label for="tin">TIN</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="income_tax">Income Tax
+                                        <input type="checkbox" id="income_tax" class="js-switch" data-color="#009efb" data-size="mini" {% if office.income_tax %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="fixed_employee">Fixed Employee
+                                        <input type="checkbox" id="fixed_employee" class="js-switch" data-color="#009efb" data-size="mini" {% if office.fixed_employee %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="transportOff">Transport
+                                        <input type="checkbox" id="transportOff" class="js-switch" data-color="#009efb" data-size="mini" {% if office.transport_facility %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group mt-2">
+                                    <label class="switchery-label" for="pfFacilityOff">PF Facility
+                                        <input type="checkbox" id="pfFacilityOff" class="js-switch" data-color="#009efb" data-size="mini" {% if office.has_pf %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="overTimeOff">Over Time
+                                        <input type="checkbox" id="overTimeOff" class="js-switch" data-color="#009efb" data-size="mini" {% if office.overtime %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="off_day_ot">Off Day OT
+                                        <input type="checkbox" id="off_day_ot" class="js-switch" data-color="#009efb" data-size="mini" {% if office.off_day_ot %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="holiday_bonus">Holiday Bonus
+                                        <input type="checkbox" id="holiday_bonus" class="js-switch" data-color="#009efb" data-size="mini"  {% if office.holiday_bonus %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="is_user">Is User?
+                                        <input type="checkbox" id="is_user" class="js-switch" data-color="#009efb" data-size="mini"  {% if is_user %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label class="switchery-label" for="status">Status
+                                        <input type="checkbox" id="status" class="js-switch" data-color="#009efb" data-size="mini"  {% if office.status.title|lower == 'active' %} checked {% endif %} />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endcomment %}
+                        <div class="row mt-4">
+                            <div class="col-md-3 ml-auto mt-2">
+                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnOfficial">
+                                    <span class="btn-label"><i class="fa fa-check"></i></span> Submit
+                                </button>                 
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane p-20" id="salary_info" role="tabpanel">
+                    <form role="form" class="form-horizontal floating-labels mt-2" id="salary_form" enctype='multipart/form-data'>{% csrf_token %}
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="grade">Grade</label>
+                                    <select class="form-control custom-select select2" name="grade" data-title="Grade" id="grade">
+                                        <option value=""></option>
+                                        {% for i in 7|times %}
+                                        <option value="{{ i|add:1 }}" {% if office.grade == i|add:1|slugify %} selected {% endif %}>{{i|add:1}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="" id="gross"
+                                        name="gross" value="{{office.salary}}" required>
+                                    <label for="gross">Gross</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="total_security" name="total_security" value="{{office.total_security|default_if_none:0}}" />
+                                    <label for="total_security">Total Security</label>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <label for="attendance_bonus">Attendance Bonus</label>
+                                    <select class="form-control custom-select select2" name="attendance_bonus" data-title="Attendance Bonus" id="attendance_bonus">
+                                        <option value="" disabled selected></option>
+                                        {% for ab in ab_rule_list %}
+                                            <option value="{{ab.id}}" {% if office.attendance_bonus_id == ab.id %} selected {% endif %}>{{ab}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="staff_saving" name="staff_saving" value="{{office.staff_saving|default_if_none:0}}" />
+                                    <label for="staff_saving">Staff Saving</label>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="monthly_security" name="monthly_security" value="{{office.monthly_security|default_if_none:0}}" />
+                                    <label for="monthly_security">Monthly Security</label>
                                 </div>
                             </div>
                         </div>
@@ -682,8 +845,8 @@
                             </div>
                             <div class="col-md">
                                 <div class="form-group mt-2">
-                                    <label class="switchery-label" for="tiffin_bill">Tiffin Bill
-                                        <input type="checkbox" id="tiffin_bill" class="js-switch" data-color="#009efb" data-size="mini" {% if office.tiffin_bill %} checked {% endif %} />
+                                    <label class="switchery-label" for="fixed_employee">Fixed Employee
+                                        <input type="checkbox" id="fixed_employee" class="js-switch" data-color="#009efb" data-size="mini" {% if office.fixed_employee %} checked {% endif %} />
                                     </label>
                                 </div>
                             </div>
@@ -741,7 +904,7 @@
                         </div>
                         <div class="row mt-4">
                             <div class="col-md-3 ml-auto mt-2">
-                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnOfficial">
+                                <button type="button" class="btn btn-sm btn-block waves-effect waves-light btn-rounded btn-success next" id="btnSalary">
                                     <span class="btn-label"><i class="fa fa-check"></i></span> Submit
                                 </button>                 
                             </div>
@@ -1119,6 +1282,25 @@
                 'error':   'Ooops, something went wrong!'
             }
         });
+
+        function getValueByRange(inputValue) {
+            const value = parseFloat(inputValue);
+            
+            if (isNaN(value)) return 0;
+            
+            if (value <= 9000) return 500;
+            else if (value > 9000 && value < 11000) return 600;
+            else if (value > 11001 && value < 14000) return 800;
+            else if (value > 14001 && value < 17000) return 1000;
+            else if (value > 17001 && value <= 20000) return 1500;
+            else if (value > 20000) return 2000;
+            else return 5000;
+        }
+
+        $('#gross').on('blur', function() {
+            const result = getValueByRange($(this).val());
+            $('#staff_saving').val(result);
+        });
         
         $("#btnUpdatePersonal").on('click', function(){
             var data = new FormData();
@@ -1194,27 +1376,86 @@
                 office_email : $("#officialMail").val(),
                 punch_id : $("#punchcardno").val(),
                 employee_type : $("#employeeType").val(),
-                skill_category : $("#skill_category").val(),
+                // total_security : $("#total_security").val(),
                 employee_id : $("#employee_id").val(),
-                pabx : $("#pabx").val(),
+                // monthly_security : $("#monthly_security").val(),
+                // staff_saving : $("#staff_saving").val(),
                 initial_grade : $("#initialGrade").val(),
-                grade : $("#grade").val(),
+                // grade : $("#grade").val(),
                 holiday : JSON.stringify($("#weeklyOff").val()),
                 joining_date : $("#dateOfJoining").val(),
                 confirmation_date : $("#dateOfConfirmation").val(),
                 employee_category : $("#employeeCategory").val(),
                 provision_month : $("#provision_month").val(),
+                // gross : $("#gross").val(),
+                // income_tax : $("#income_tax").prop('checked'),
+                // fixed_employee : $("#fixed_employee").prop('checked'),
+                // transport_facility : $("#transportOff").prop('checked'),
+                // overtime : $("#overTimeOff").prop('checked'),
+                // off_day_ot : $("#off_day_ot").prop('checked'),
+                // holiday_bonus : $("#holiday_bonus").prop('checked'),
+                personal_id : $("#personal_id").val(),
+                // tin : $("#tin").val(),
+                // building : $("#building").val(),
+                // has_pf : $("#pfFacilityOff").prop('checked'),
+                // is_user : $("#is_user").prop('checked'),
+                // status : $("#status").prop('checked')},
+                dataType: 'json',
+                success: function (data) {
+                    $("#official_id").val(data.official_id);
+                    if(data.msg === "success"){
+                        toasterMsg("success", "Official information updated.", 5000);
+                    }else{
+                        toasterMsg("warning", data.msg, 5000);
+                    }
+                },
+            });
+        })
+        $("#btnSalary").on('click', function(){
+            $.ajax({
+                url: "{% url 'hr:employee_official_info' %}",
+                async:false,
+                type: "POST", // http method
+                data: { company : $("#company").val(),
+                // location : $("#location").val(),
+                // department : $("#department").val(),
+                // designation : $("#designation").val(),
+                // section : $("#section").val(),
+                // floor : $("#floor").val(),
+                // cost_center : $("#cost_center").val(),
+                // unit : $("#employee_unit").val(),
+                // line : $("#line").val(),
+                // shift : $("#shift").val(),
+                attendance_bonus : $("#attendance_bonus").val(),
+                // reporting_to : $("#reporting_to").val(),
+                // office_mobile : $("#office_phone").val(),
+                employee_id : $("#employee_id").val(),
+                official_id : official_id,
+                // office_email : $("#officialMail").val(),
+                // punch_id : $("#punchcardno").val(),
+                // employee_type : $("#employeeType").val(),
+                total_security : $("#total_security").val(),
+                employee_id : $("#employee_id").val(),
+                monthly_security : $("#monthly_security").val(),
+                staff_saving : $("#staff_saving").val(),
+                initial_grade : $("#initialGrade").val(),
+                grade : $("#grade").val(),
+                // holiday : JSON.stringify($("#weeklyOff").val()),
+                // joining_date : $("#dateOfJoining").val(),
+                // confirmation_date : $("#dateOfConfirmation").val(),
+                // employee_category : $("#employeeCategory").val(),
+                // provision_month : $("#provision_month").val(),
                 gross : $("#gross").val(),
                 income_tax : $("#income_tax").prop('checked'),
-                tiffin_bill : $("#tiffin_bill").prop('checked'),
+                fixed_employee : $("#fixed_employee").prop('checked'),
                 transport_facility : $("#transportOff").prop('checked'),
                 overtime : $("#overTimeOff").prop('checked'),
                 off_day_ot : $("#off_day_ot").prop('checked'),
                 holiday_bonus : $("#holiday_bonus").prop('checked'),
                 personal_id : $("#personal_id").val(),
                 tin : $("#tin").val(),
-                building : $("#building").val(),
-                has_pf : $("#overTimeOff").prop('checked'),
+                // building : $("#building").val(),
+                has_pf : $("#pfFacilityOff").prop('checked'),
                 is_user : $("#is_user").prop('checked'),
                 status : $("#status").prop('checked')},
                 dataType: 'json',

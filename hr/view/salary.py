@@ -3,6 +3,7 @@ from weasyprint import HTML
 from django.template.loader import get_template
 from calendar import monthrange, month_name
 from general.templatetags.data_load import is_role_assigned
+from django.db.models import Sum,F,Q, Count
 # from hr.tasks import process_salary
 
 month_list = {
@@ -66,7 +67,7 @@ def salary_process2(request):
         
         context = { 
             'years' : year_list, 'months' : month_list, 
-            'companies'     : Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('name'),
+            'companies'     : Branch.objects.filter(status = True, company_id=request.session.get('company_id')).order_by('code'),
             'categories'    : CommonMaster.objects.filter(value_for=5, status = True),
             'departments'   : Departments.objects.filter(status = True).order_by('name'), 
             'shifts'        : Shift.objects.filter(status=Status.name('active')) 
@@ -110,21 +111,45 @@ def process_salary_func(sp_id=None):
                 amount = round(per_day_amount * holidays * 2, 0)
                 salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="Holiday", head_type="AV", user=user)
             
+            # if has PF
+            if pf := employee.has_pf:
+                amount = round(employee.salary*0.1, 0)
+                salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="PF", head_type="AV", user=user)
+
+                amount = round(employee.salary*0.1, 0)
+                salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="CPF", head_type="AV", user=user)
+            
+            # if has Staff Security
+            if staff_security := employee.monthly_security:
+                total_security = HRMontlySalaryDetails.objects.filter(year=salary_process.year, month=salary_process.month, employee=employee, heads__head__value="Staff Security").aggregate(Sum('amount'))['amount__sum'] or 0
+                amount = employee.monthly_security
+                if total_security < employee.total_security:
+                    salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="Staff Security", head_type="AV", user=user)
+            
+            # if has Staff Saving
+            if staff_saving := employee.staff_saving:
+                amount = employee.staff_saving
+                salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="Staff Saving", head_type="AV", user=user)
+            
             # OT Payment
-            ot_hours_obj = EmployeeCalendar.objects.filter(employee=employee, employee__overtime=True, 
-                calendar_day__month=salary_process.month, calendar_day__year=salary_process.year).annotate(total_ot=Sum('attendance__ot_hours'))
-            if ot_hours_obj.count() :
-                ot_hours = sum(o.total_ot for o in ot_hours_obj if o.total_ot)
-                amount = round((basic / 206) * ot_hours * 2, 0) # 208 = 26 days * 8 hours per day
-                salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="Over Time", head_type="AV", user=user)
+            # ot_hours_obj = EmployeeCalendar.objects.filter(employee=employee, employee__overtime=True, 
+            #     calendar_day__month=salary_process.month, calendar_day__year=salary_process.year).annotate(total_ot=Sum('attendance__ot_hours'))
+            # if ot_hours_obj.count() :
+            #     ot_hours = sum(o.total_ot for o in ot_hours_obj if o.total_ot)
+            #     amount = round((basic / 206) * ot_hours * 2, 0) # 208 = 26 days * 8 hours per day
+            #     salary_details_entry(year=salary_process.year, month=salary_process.month, amount=amount, employee=employee, head_name="Over Time", head_type="AV", user=user)
 
             # Loan Deduction
             if employee.loans.filter(closed=False).count() > 0 :
                 loan_amount = 0
+                loan_ir_amount = 0
                 for loan_val in employee.loans.filter(closed=False):
                     loan_amount += int(loan_val.monthly_installment)
-                    LoanRepayment.objects.create(loan=loan_val, amount_paid=loan_val.monthly_installment, payment_date=datetime.now().date(), remarks="Paid from the Salary of " + salary_process.get_month_display() + " " + salary_process.year)
+                    loan_ir_amount += int(loan_val.monthly_ir_installment)
+                    LoanRepayment.objects.create(loan=loan_val, amount_paid=loan_val.monthly_installment, ir_amount_paid = loan_ir_amount,
+                                                 payment_date=datetime.now().date(), remarks="Paid from the Salary of " + salary_process.get_month_display() + " " + salary_process.year)
                     loan_val.amount_paid += int(loan_val.monthly_installment)
+                    loan_val.interest_paid += int(loan_val.monthly_ir_installment)
                     loan_val.save()
                 salary_details_entry(year=salary_process.year, month=salary_process.month, amount=loan_amount, employee=employee, head_name='Loan', head_type="DV", user=user)
                 
@@ -329,7 +354,7 @@ def get_employee_data_for_salary_process(request):
     if category_list := request.POST.getlist('category[]', None): query &= Q(employee_category_id__in=category_list)
     if employee_list := request.POST.getlist('employee[]', [])  : query &= Q(id__in=employee_list)
     for employee in EmployeeDetails.objects.filter(query).order_by('employee_id') :
-        company     = employee.branch.short_name if employee.branch else ''
+        company     = employee.branch.branch_with_code if employee.branch else ''
         department  = employee.department.title if employee.department_id else ''
         designation = employee.designation.title if employee.designation_id else ''
         employee_id = employee.personal.employee_id if employee.personal_id else ''
@@ -512,12 +537,17 @@ def get_salary_report(request):
     month, year     = int(request.POST.get("month", None)), int(request.POST.get("year", None))
     index = 0
     for employee in EmployeeDetails.objects.filter(query).order_by('personal__employee_id'):
-        basic       = get_salary_breakdown2(employee=employee, heads='Basic')
-        if basic: basic = round(employee.salary * (basic/100),0)
-        hrent       = get_salary_breakdown2(employee=employee, heads='House Rent')
-        if hrent: hrent = round(employee.salary * (hrent/100),0)
-        medical     = get_salary_breakdown2(employee=employee, heads='Medical Allowance')
-        if medical: medical = round(employee.salary * (medical/100),0)
+        if employee.fixed_employee:
+            basic, hrent, medical = 0, 0, 0
+            fixed_salary = employee.salary
+        else:
+            fixed_salary = '-'
+            basic       = get_salary_breakdown2(employee=employee, heads='Basic')
+            if basic: basic = round(employee.salary * (basic/100),0)
+            hrent       = get_salary_breakdown2(employee=employee, heads='House Rent')
+            if hrent: hrent = round(employee.salary * (hrent/100),0)
+            medical     = get_salary_breakdown2(employee=employee, heads='Medical Allowance')
+            if medical: medical = round(employee.salary * (medical/100),0)
         # conveyance  = get_salary_breakdown2(employee=employee, heads='Conveyance')
         # food        = get_salary_breakdown2(employee=employee, heads='Food Allowance')
         # other       = get_salary_breakdown2(employee=employee, heads='Other Allowance')
@@ -585,7 +615,7 @@ def get_salary_report(request):
         index += 1
         data = [index, employee.employee_id, employee.name, employee.branch.code+' '+employee.branch.name, grade[0], grade[1], employee.designation.name,
                 employee.joining_date.strftime("%d/%m/%Y"), employee.joining_date.strftime("%d/%m/%Y"),employee.personal.status, employee.personal.gender, 
-                employee.bank_account_no(), '-', basic, hrent, medical, arrear,
+                employee.bank_account_no(), fixed_salary, basic, hrent, medical, arrear,
                 employee.salary, pf, staff_security, staff_saving,
                 pfl_principal,pfl_interest,pf_loan,mcl_principal,mcl_interest,mc_loan,bcl_principal,bcl_interest,bc_loan,
                 itds,others,total_deduct,total_payable,pf,0]
@@ -635,7 +665,7 @@ def get_payslip_report(request):
         incentive   = get_salary_details(year=year, month=month, employee=employee, heads='Incentive')
         festival    = get_salary_details(year=year, month=month, employee=employee, heads='Festival')
         arrear      = get_salary_details(year=year, month=month, employee=employee, heads='Arrear')
-        tiffin      = get_salary_details(year=year, month=month, employee=employee, heads='Tifin Bill')
+        # tiffin      = get_salary_details(year=year, month=month, employee=employee, heads='Tifin Bill')
 
         #Deduction
         loan    = get_salary_details(year=year, month=month, employee=employee, heads='Loan')
@@ -648,7 +678,7 @@ def get_payslip_report(request):
         total_deduction = loan + absent + others + itds + pf
         net_payable     = employee.salary + total_payable + ot - total_deduction
 
-        if report_type == 'print': 
+        if report_type == 'print':
             basic       = get_salary_breakdown(employee=employee, heads='Basic')
             hrent       = get_salary_breakdown(employee=employee, heads='House Rent')
             medical     = get_salary_breakdown(employee=employee, heads='Medical Allowance')
@@ -1020,3 +1050,16 @@ def get_branch_wise_details_report(request):
         response['Content-Disposition'] = 'Salary Report Branch Print.pdf'
         return response
     return JsonResponse({"report_data":report_data}, safe=False)
+
+@login
+def hr_salary_history(request,id):
+    basic_salary_detail = HRMontlySalaryDetails.objects.filter(employee_id=id, heads__head__value__iexact='Basic')
+    house_salary_detail = HRMontlySalaryDetails.objects.filter(employee_id=id, heads__head__value__iexact='House Rent')
+    medal_salary_detail = HRMontlySalaryDetails.objects.filter(employee_id=id, heads__head__value__iexact='Medical Allowance')
+
+    context = { 
+        'basic_salary_detail'     : basic_salary_detail,
+        'house_salary_detail'     : house_salary_detail,
+        'medal_salary_detail'     : medal_salary_detail,
+    }
+    return render(request, "hr/salary/history.html", context)

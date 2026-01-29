@@ -9,7 +9,7 @@ from general.decorators import login, permission
 from django.views.decorators.csrf import csrf_exempt
 from general.models import *
 from hr.models import Building, EmployeeInfo,EmployeeDetails,EmployeeNominee,EmployeeBankInfo,EmployeeEducation,EmployeeExperience, Shift, HRSalaryBreakdown, HRSalarySlabMaster, HRFloor, EmployeeUpdateRequest, Location, HRAttendanceBonusRule, GEOLocation, Division, SubSection
-from hr.forms import EmployeeBankForm, EmployeeDetailsForm, EmployeeNomineeForm, ShiftForm, Pf_EmployeeForm
+from hr.forms import EmployeeBankForm, EmployeeDetailsForm, EmployeeNomineeForm, ShiftForm, Pf_EmployeeForm, EmployeeSalaryDetailsForm
 from django.urls import reverse, reverse_lazy
 from django.db.models import Q,F, Value
 from django.db.models.functions import Concat
@@ -139,9 +139,9 @@ def employee_official_info(request):
     division        = request.POST.get('division', None)
     sub_section     = request.POST.get('sub_section', None)
     section         = request.POST.get('section', None)
-    floor           = request.POST.get('floor', None)
-    line            = request.POST.get('line', None)
-    unit            = request.POST.get('unit', None)
+    # floor           = request.POST.get('floor', None)
+    # line            = request.POST.get('line', None)
+    # unit            = request.POST.get('unit', None)
     cost_center     = request.POST.get('cost_center', None)
     shift           = request.POST.get('shift', None)
     reporting_to    = request.POST.get('reporting_to', None)
@@ -149,10 +149,11 @@ def employee_official_info(request):
     office_email    = request.POST.get('office_email', '')
     punch_id        = request.POST.get('punch_id', 0)
     employee_type   = request.POST.get('employee_type', None)
-    skill_category  = request.POST.get('skill_category', None)
+    # total_security  = request.POST.get('total_security', 0)
     attendance_bonus= request.POST.get('attendance_bonus', None)
-    salary          = request.POST.get('gross', 0)
-    pabx            = request.POST.get('pabx', '')
+    # salary          = request.POST.get('gross', 0)
+    # monthly_security= request.POST.get('monthly_security', 0)
+    # staff_saving    = request.POST.get('staff_saving', 0)
     grade           = request.POST.get('grade', '')
     joining_date    = request.POST.get('joining_date', '')
     confirmation_date = request.POST.get('confirmation_date', '')
@@ -161,17 +162,17 @@ def employee_official_info(request):
     try             : provision_month = int(provision_month)
     except          : provision_month = ''
     employee_id     = request.POST.get('employee_id', '')
-    tin             = request.POST.get('tin', '')
-    building        = request.POST.get('building', None)
-    transport_facility  = True if request.POST.get('transport_facility') == 'true' else False
-    overtime            = True if request.POST.get('overtime') == 'true' else False
-    off_day_ot          = True if request.POST.get('off_day_ot') == 'true' else False
-    holiday_bonus       = True if request.POST.get('holiday_bonus') == 'true' else False
-    income_tax          = True if request.POST.get('income_tax') == 'true' else False
-    has_pf              = True if request.POST.get('has_pf') == 'true' else False
-    is_user             = True if request.POST.get('is_user') == 'true' else False
-    tiffin_bill         = True if request.POST.get('tiffin_bill') == 'true' else False
-    status              = Status.name('Active') if request.POST.get('status') == 'true' else Status.name('Inactive')
+    # tin             = request.POST.get('tin', '')
+    # building        = request.POST.get('building', None)
+    # transport_facility  = True if request.POST.get('transport_facility') == 'true' else False
+    # overtime            = True if request.POST.get('overtime') == 'true' else False
+    # off_day_ot          = True if request.POST.get('off_day_ot') == 'true' else False
+    # holiday_bonus       = True if request.POST.get('holiday_bonus') == 'true' else False
+    # income_tax          = True if request.POST.get('income_tax') == 'true' else False
+    # has_pf              = True if request.POST.get('has_pf') == 'true' else False
+    # is_user             = True if request.POST.get('is_user') == 'true' else False
+    # fixed_employee      = True if request.POST.get('fixed_employee') == 'true' else False
+    # status              = Status.name('Active') if request.POST.get('status') == 'true' else Status.name('Inactive')
     joining_date        = datetime.strptime(joining_date, "%d/%m/%Y").date() if joining_date else None
     confirmation_date   = joining_date + relativedelta(months=+int(provision_month)) if provision_month and provision_month == 'N/A' else None
     confirmation_date   = datetime.strptime(confirmation_date, "%d/%m/%Y").date() if confirmation_date else None
@@ -182,21 +183,21 @@ def employee_official_info(request):
     holidays = request.POST.get('holiday', '')
     if holidays : holiday = json.loads(holidays)
     if reporting_to and not EmployeeDetails.objects.filter(id=int(reporting_to)).exists(): reporting_to = None 
-    try             : skill_category = int(skill_category)
-    except          : 
-        if skill_category: skill_category, created = CommonMaster.objects.get_or_create(value_for=46, value=skill_category)
-        else : skill_category = None
-    data={'punch_id':punch_id, 'tin':tin, 'personal': personal_id, 'branch':company.id, 
-          'department': department, 'designation': designation, 'division': division, 
-          'sub_section': sub_section, 'section': section, 'building': building, 
-          'location':location,'cost_center': cost_center, 
-          'office_mobile': office_mobile, 'pabx':pabx,'office_email': office_email, 
-          'salary': salary, 'joining_date': joining_date, 'confirmation_date': confirmation_date,
-          'has_pf': has_pf, 'initial_grade': grade, 'grade': grade, 'reporting_to': reporting_to,
-          'employee_type': employee_type, 'employee_category': employee_category, 'skill_category': skill_category,
-          'provision_month': provision_month, 'holiday': holiday, 'overtime': overtime, 'off_day_ot': off_day_ot,'income_tax' : income_tax, 
-          'holiday_bonus': holiday_bonus, 'transport_facility': transport_facility,'created_by': request.session.get('id', None),
-          'status': status, 'attendance_bonus':attendance_bonus, 'tiffin_bill':tiffin_bill}
+    # try             : skill_category = int(skill_category)
+    # except          : 
+    #     if skill_category: skill_category, created = CommonMaster.objects.get_or_create(value_for=46, value=skill_category)
+    #     else : skill_category = None
+    data={'punch_id':punch_id, 'personal': personal_id, 'branch':company.id, 
+            'department': department, 'designation': designation, 'division': division, 
+            'sub_section': sub_section, 'section': section,  
+            'location':location,'cost_center': cost_center,
+            'office_mobile': office_mobile, 'office_email': office_email, 
+            'joining_date': joining_date, 'confirmation_date': confirmation_date,
+            'initial_grade': grade, 'grade': grade, 'reporting_to': reporting_to,
+            'employee_type': employee_type, 'employee_category': employee_category,
+            'provision_month': provision_month, 'holiday': holiday, 
+            'created_by': request.session.get('id', None),
+            'attendance_bonus':attendance_bonus}
     if emp_official: 
         if EmployeeDetails.objects.filter(employee_id=employee_id).exclude(id=emp_official.id).exists():
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
@@ -207,6 +208,83 @@ def employee_official_info(request):
         if EmployeeDetails.objects.filter(employee_id=employee_id).exists():
             return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
         emp_official_form = EmployeeDetailsForm(data)
+    if emp_official_form.is_valid():
+        personal = EmployeeInfo.objects.filter(id=int(personal_id)).last()
+        personal.employee_id = employee_id
+        personal.save()
+        official = emp_official_form.save()
+        official.employee_id = personal.employee_id
+        official.save()
+        official_id, msg = official.id, 'success'
+        if official and is_user:
+            md5_obj = hashlib.md5(str(personal.employee_id).encode())
+            encripted_pass, report_to = md5_obj.hexdigest(), None
+            user = Users.objects.filter(employee_id = official.personal.employee_id).last()
+            if official.reporting_to: report_to = Users.objects.filter(employee_id = official.reporting_to.personal.employee_id).first()
+            report_to = report_to.id if report_to else None
+            if not user:
+                user_role = UserRoles.objects.filter(name = 'User').first()
+                if not user_role: user_role = UserRoles.objects.create(name = 'User')
+                try: Users.objects.create(branch_id = official.branch_id, department_id = official.department_id, designation_id = official.designation_id, password = encripted_pass, password_text = official.personal.employee_id, email = official.office_email, reporting_to_id = report_to, employee_id = official.personal.employee_id.strip(), name = official.personal.name, role_id = user_role.id, status = 1)  
+                except: pass
+            else: 
+                user.designation_id = official.designation_id
+                user.name  = official.personal.name
+                user.email = official.office_email
+                user.status = 1
+                user.save()
+            personal.status = True
+            personal.employee_status = Status.name('Active')
+            personal.save()
+        elif official : Users.objects.filter(employee_id = official.personal.employee_id).update(status=0)
+    else:
+        official_id, msg = None, 'failed'
+        for field in emp_official_form:
+            for error in field.errors:
+                print(f"{field.name} : {error}")
+    return JsonResponse({'msg':msg, 'official_id':official_id}, safe=False)
+
+@csrf_exempt
+def employee_salary_info(request):
+    personal_id     = request.POST.get('personal_id', None)
+    official_id     = request.POST.get('official_id', None)
+    personal        = EmployeeInfo.objects.filter(id=int(personal_id)).last()
+    if not official_id: 
+        emp_official = EmployeeDetails.objects.filter(employee_id=personal.employee_id).last()
+    else : emp_official = EmployeeDetails.objects.filter(id=int(official_id)).last()
+
+    total_security  = request.POST.get('total_security', 0)
+    attendance_bonus= request.POST.get('attendance_bonus', None)
+    salary          = request.POST.get('gross', 0)
+    monthly_security= request.POST.get('monthly_security', 0)
+    staff_saving    = request.POST.get('staff_saving', 0)
+    grade           = request.POST.get('grade', '')
+    employee_id     = request.POST.get('employee_id', '')
+    tin             = request.POST.get('tin', '')
+    transport_facility  = True if request.POST.get('transport_facility') == 'true' else False
+    overtime            = True if request.POST.get('overtime') == 'true' else False
+    off_day_ot          = True if request.POST.get('off_day_ot') == 'true' else False
+    holiday_bonus       = True if request.POST.get('holiday_bonus') == 'true' else False
+    income_tax          = True if request.POST.get('income_tax') == 'true' else False
+    has_pf              = True if request.POST.get('has_pf') == 'true' else False
+    is_user             = True if request.POST.get('is_user') == 'true' else False
+    fixed_employee      = True if request.POST.get('fixed_employee') == 'true' else False
+    data={'tin':tin,  
+          'staff_saving':staff_saving,
+          'monthly_security':monthly_security, 
+          'salary': salary,
+          'has_pf': has_pf, 'initial_grade': grade, 'grade': grade,
+          'total_security': total_security,
+          'overtime': overtime, 'off_day_ot': off_day_ot,'income_tax' : income_tax, 
+          'holiday_bonus': holiday_bonus, 'transport_facility': transport_facility,'created_by': request.session.get('id', None),
+          'attendance_bonus':attendance_bonus, 'fixed_employee':fixed_employee}
+    if emp_official: 
+        data['attendance_bonus'] = None
+        emp_official_form = EmployeeSalaryDetailsForm(data, instance=emp_official)
+    else: 
+        # if EmployeeDetails.objects.filter(employee_id=employee_id).exists():
+        #     return JsonResponse({'msg':"Employee ID Already Exists!", 'official_id':official_id}, safe=False)
+        emp_official_form = EmployeeSalaryDetailsForm(data)
     if emp_official_form.is_valid():
         personal = EmployeeInfo.objects.filter(id=int(personal_id)).last()
         personal.employee_id = employee_id
@@ -322,10 +400,8 @@ def create_nominee_info(request, employee):
 def employee_bank_info(request):
     comparison_data, old_data, msg = {}, {}, ''
     employee = get_object_or_404(EmployeeInfo, id=request.POST.get('personal_id', 0))
-    print('request.P:::: ', request.POST)
     employee_details = get_object_or_404(EmployeeDetails, id=request.POST.get('official_id', 0))
     if request.POST.get('create', None) == 'true' : 
-        print('he')
         bank_data = create_bank_info(request, employee_details)
         return JsonResponse(bank_data, safe=False)
     data={
@@ -386,19 +462,21 @@ def get_department_wise_section(request):
 @csrf_exempt
 def get_company_wise_floor(request):
     id = request.POST.get('id')
-    floor_list = list(Floor.objects.filter(company_id=id).annotate(text=F('name')).values('id','text'))
+    floor_list = []
+    # floor_list = list(Floor.objects.filter(company_id=id).annotate(text=F('name')).values('id','text'))
     floor_list.insert(0, {'id':'','text':''})
     return JsonResponse({'floor':floor_list}, safe=False)
 
 @csrf_exempt
 def get_company_wise_holidays(request):
     id = request.POST.get('id')
-    company = Company.objects.filter(id=id).first()
+    company = Branch.objects.filter(id=id).first()
     return JsonResponse({'holidays':company.weekends}, safe=False)
 
 @csrf_exempt
 def get_building_wise_hrfloor(request):
-    floor_list = list(HRFloor.objects.filter(building_id=request.POST.get('id', 0)).annotate(text=F('name')).values('id','text'))
+    # floor_list = list(HRFloor.objects.filter(building_id=request.POST.get('id', 0)).annotate(text=F('name')).values('id','text'))
+    floor_list = []
     floor_list.insert(0, {'id':'','text':''})
     return JsonResponse({'floor':floor_list}, safe=False)
 
@@ -406,7 +484,8 @@ def get_building_wise_hrfloor(request):
 def get_company_and_floor_wise_line(request):
     company_id = request.POST.get('company_id')
     floor_id = request.POST.get('floor_id')
-    line_list = list(SewingLine.objects.filter(company_id=company_id,floor_id=floor_id).annotate(text=F('name')).values('id','text'))
+    # line_list = list(SewingLine.objects.filter(company_id=company_id,floor_id=floor_id).annotate(text=F('name')).values('id','text'))
+    line_list = []
     line_list.insert(0, {'id':'','text':''})
     return JsonResponse({'line':line_list}, safe=False)
 
@@ -434,7 +513,8 @@ def get_company_and_location_wise_shift(request):
 
 @csrf_exempt
 def get_company_and_location_wise_building(request):
-    building_list = list(Building.objects.filter(location_id=request.POST.get('location_id', 0)).annotate(text=F('name')).values('id','text'))
+    # building_list = list(Building.objects.filter(location_id=request.POST.get('location_id', 0)).annotate(text=F('name')).values('id','text'))
+    building_list = []
     building_list.insert(0, {'id':'','text':''})
     return JsonResponse({'building':building_list}, safe=False)
 
@@ -530,8 +610,10 @@ def get_employee_for_datatable(request):
                         </div>"""
             edit_url        = reverse('hr:employee_edit', kwargs={'id': i.personal_id})
             view_url        = reverse('hr:employee_view', kwargs={'employee_id': i.personal_id})
+            salary_url      = reverse('hr:hr_salary_history', kwargs={'id': i.id})
             action          = ebs_bl_common.action_html(action_url=edit_url, color_text='text-success', icon='ti-pencil-alt', title_text='Edit Employee')
             action         += ebs_bl_common.action_html(action_url=view_url, color_text='text-info m-r-10', icon='icon-eye', title_text='View Employee')
+            action         += ebs_bl_common.action_html(action_url=salary_url, color_text='text-warning m-r-10', icon='fas fa-dollar-sign', title_text='View Employee Salary History')
             data = [employee_id, name, branch, designation, joining_date, division, sub_section, unit, department, section, employee_category, office_mobile, status, action]
             content += """<tr>""" + "".join("""<td>{}</td>""".format(d) for d in data) + """</tr>"""
     

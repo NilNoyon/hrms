@@ -209,6 +209,7 @@ urlpatterns = [
      path('ajax/get-all-shift/', views.get_all_shift, name='get_all_shift'),
      path('ajax/get-company-and-location-wise-shift/', views.get_company_and_location_wise_shift, name='get_company_and_location_wise_shift'),
      path('ajax/employee-official-info/', views.employee_official_info, name='employee_official_info'),
+     path('ajax/employee-salary-info/', views.employee_salary_info, name='employee_salary_info'),
      path('ajax/get-company-and-location-wise-building/', views.get_company_and_location_wise_building, name='get_company_and_location_wise_building'),
      path('ajax/employee-nominee-info/', views.employee_nominee_info, name='employee_nominee_info'),
      path('ajax/employee-bank-info/', views.employee_bank_info, name='employee_bank_info'),
@@ -270,7 +271,7 @@ urlpatterns = [
      path('hr_salary_cycle/edit/<int:id>/', views.hr_salary_cycle_update, name='hr_salary_cycle_update'),
      path('hr_salary_cycle/delete/<int:id>/', views.hr_salary_cycle_delete, name='hr_salary_cycle_delete'),
      path('ajax-cycle-update-status/', views.cycle_update_status, name='cycle_update_status'),
-
+     path('hr-salary-history/<int:id>/', views.hr_salary_history, name='hr_salary_history'),
 
 
      # Company Unit

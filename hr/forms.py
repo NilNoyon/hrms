@@ -33,10 +33,24 @@ class EmployeeDetailsForm(forms.ModelForm):
         self.fields['employee_type'].required = False
         self.fields['employee_category'].required = False
         self.fields['skill_category'].required = False
+        self.fields['pabx'].required = False
         self.fields['provision_month'].required = False
         self.fields['reporting_to'].required = False
         self.fields['unit'].required = False
         self.fields['attendance_bonus'].required = False
+	   
+class EmployeeSalaryDetailsForm(forms.ModelForm):
+    class Meta:
+        model = EmployeeDetails
+        fields = ('salary','staff_saving','tin','monthly_security','total_security',
+			    'has_pf','initial_grade','grade','overtime','off_day_ot','income_tax','holiday_bonus','transport_facility',
+			    'transport_facility','created_by','fixed_employee')
+        def __init__(self, *args, **kwargs):
+            super(EmployeeSalaryDetailsForm, self).__init__(*args, **kwargs)
+            self.fields['income_tax'].required = False
+            self.fields['tin'].required = False
+            self.fields['initial_grade'].required = False
+            self.fields['grade'].required = False
 
 class EmployeeNomineeForm(forms.ModelForm):
     class Meta:
