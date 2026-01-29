@@ -443,6 +443,62 @@
         }
     }
 
+    .sub_menu_load {
+        background: #f5f7fa;
+        color: #2c3e50 !important;
+        padding: 10px 14px;
+        border-radius: 6px;
+        display: block;
+        margin-bottom: 6px;
+        border-left: 4px solid #2575fc;
+        transition: 0.25s;
+        font-weight: 500;
+    }
+    .sub_menu_load:hover {
+        background: #eaf0ff;
+        color: #1a56db !important;
+        text-decoration: none;
+    }
+
+    .sub_menu_load.active {
+        background: #eaf0ff;
+    }
+
+    .all_menu {
+        background: #ffffff;
+        padding: 10px 0;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 10px;
+    }
+
+    .all_menu li a.mega-link {
+        background: #f9fafb;
+        color: #374151;
+        padding: 7px 10px;
+        border-radius: 6px;
+        display: inline-block;
+        transition: 0.25s;
+        border: 1px solid #e5e7eb;
+    }
+    .all_menu li a.mega-link:hover {
+        background: #2575fc;
+        color: #fff;
+        border-color: #2575fc;
+    }
+
+    .access {
+        color: #9ca3af !important;
+    }
+
+    .arrow {
+        transition: 0.3s;
+        color: #6b7280;
+    }
+    .sub_menu_load.active .arrow {
+        transform: rotate(180deg);
+    }
+
 </style>
 <header class="topbar bg-color" style="position: fixed; width: 100%;">
     
@@ -465,7 +521,7 @@
             </ul>
             <div class="sidebar-nav mr-auto">
                 <ul class="menu_main navbar-nav mr-auto show-hide" id="sidebarnav">
-                    {% comment %}
+                    {% comment %} 
                         {% if request.session.is_head or request.session.role_text == "Admin" or request.session.role_text == "Super Admin" or request.session.hd_role == "2" or request.session.hd_role == "3" or request.session.hd_role == "4" %}
                         <li class="nav-item py-lg-2 pr-lg-2 align-items-center vertical-align" id="helpdesk">
                             <a class="nav-link" href="javascript:;" aria-expanded="false">
@@ -573,65 +629,104 @@
                         </div>
                     </li>
                     {% else %}
-                    <li class="nav-item dropdown mega-dropdown py-lg-2 pr-lg-2" style="position: initial;">
-                        <a class="nav-link dropdown-toggle" style="width:90%"
-                                href="#" aria-expanded="false" data-toggle="dropdown"
-                                aria-haspopup="true">            
-                            <div class="flex-container">
-                                <div class="flex-child magenta  pl-lg-2">
-                                    <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center ">
-                                        <i class="{{module_name.list.0.menu__menu_icon}} icon-size  "  style="margin: 0;line-height:33.59px;font-size:14px;"></i>
+                        <li class="nav-item dropdown mega-dropdown py-lg-2 pr-lg-2" style="position: initial;">
+                            <a class="nav-link dropdown-toggle" style="width:90%" href="#" aria-expanded="false" data-toggle="dropdown" aria-haspopup="true">            
+                                <div class="flex-container">
+                                    <div class="flex-child magenta  pl-lg-2">
+                                        <div style="height:auto;width:134.4%;" class="bg-gradient-fuchsia rounded-lg justify-center bg-white text-center ">
+                                            <i class="{{module_name.list.0.menu__menu_icon}} icon-size  "  style="margin: 0;line-height:33.59px;font-size:14px;"></i>
+                                        </div>
                                     </div>
-                                </div>                                        
-                                {% comment %} border {% endcomment %}
-                                <div class="flex-child green" >
-                                    <div style="height:auto;" class="justify-center text-center">
-                                        <span  style="margin: 0;line-height:33.59px;font-size:14px;"> {{module_name.grouper}}</span>
-                                    </div>
-                                </div>                                  
-                            </div>                                                                                    
-                        </a>
-                        <div class="dropdown-menu animated bounceInDown bg-color">
-                            <ul aria-expanded="false" class="accordion mega-dropdown-menu row">
-                                {% regroup module_name.list by menu__is_sub_menu as sub_menu_list %}
-                                {% for is_sub_menu in sub_menu_list %}
-                                    {% if is_sub_menu.grouper %}
-                                        {% regroup is_sub_menu.list by menu__sub_menu_name as sub_sub_menu_list %}
-                                        {% for sub_menu_name in sub_sub_menu_list %}
-                                        <li class="col-lg-12">                       
-                                            <a class="font-cl" href="javascript:void(0)" aria-expanded="false">
-                                                <span class="hide-menu text-capitalize" >{{sub_menu_name.grouper}}</span>
-                                            </a>
-                                            <ul class="row">
-                                                {% for data in sub_menu_name.list %}                                
-                                                    <li class="col-lg-3" style="float: left;">
-                                                        <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
-                                                    </li>
-                                                {% endfor %}
-                                                {% for data in sub_menu_name.list|unpermitted_menu_list:request.session.id %}
-                                                    <li class="col-lg-3" style="float: left;">
-                                                        <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </li>
-                                        {% endfor %}
-                                    {% else %}
-                                        {% for data in is_sub_menu.list %}                          
-                                            <li class="col-lg-3">
-                                                <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                    <div class="flex-child green" >
+                                        <div style="height:auto;" class="justify-center text-center">
+                                            <span  style="margin: 0;line-height:33.59px;font-size:14px;"> {{module_name.grouper}}</span>
+                                        </div>
+                                    </div>                                  
+                                </div>                                                                                    
+                            </a>
+                            {% comment %} <div class="dropdown-menu animated bounceInDown bg-color">
+                                <ul aria-expanded="false" class="accordion mega-dropdown-menu row">
+                                    {% regroup module_name.list by menu__is_sub_menu as sub_menu_list %}
+                                    {% for is_sub_menu in sub_menu_list %}
+                                        {% if is_sub_menu.grouper %}
+                                            {% regroup is_sub_menu.list by menu__sub_menu_name as sub_sub_menu_list %}
+                                            {% for sub_menu_name in sub_sub_menu_list %}
+                                            <li class="col-lg-12">                       
+                                                <a class="font-cl sub_menu_load" href="javascript:void(0)" aria-expanded="false">
+                                                    <span class="hide-menu text-capitalize" >{{sub_menu_name.grouper}}</span>
+                                                </a>
+                                                <ul class="row" id="all_menu">
+                                                    {% for data in sub_menu_name.list %}                                
+                                                        <li class="col-lg-3" style="float: left;">
+                                                            <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                    {% for data in sub_menu_name.list|unpermitted_menu_list:request.session.id %}
+                                                        <li class="col-lg-3" style="float: left;">
+                                                            <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
                                             </li>
-                                        {% endfor %}
-                                        {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
-                                            <li class="col-lg-3" style="float: left;">
-                                                <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for data in is_sub_menu.list %}                          
+                                                <li class="col-lg-3">
+                                                    <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                                </li>
+                                            {% endfor %}
+                                            {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
+                                                <li class="col-lg-3" style="float: left;">
+                                                    <a href="#" class="mega-a access" style="color:#b5a4a3 !important">{{data.menu_name}}</a>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div> {% endcomment %}
+
+                            <div class="dropdown-menu animated bounceInDown bg-color" style="background: #fbfbfb !important;">
+                                <ul aria-expanded="false" class="accordion mega-dropdown-menu row">
+                                    {% regroup module_name.list by menu__is_sub_menu as sub_menu_list %}
+                                    {% for is_sub_menu in sub_menu_list %}
+                                        {% if is_sub_menu.grouper %}
+                                            {% regroup is_sub_menu.list by menu__sub_menu_name as sub_sub_menu_list %}
+                                            {% for sub_menu_name in sub_sub_menu_list %}
+                                            <li class="col-lg-12">                       
+                                                <a class="font-cl sub_menu_load" href="javascript:void(0)">
+                                                    <span class="hide-menu text-capitalize">{{sub_menu_name.grouper}}</span>
+                                                    <span class="float-right arrow">▼</span>
+                                                </a>
+                                                <ul class="row all_menu" style="display:none;">
+                                                    {% for data in sub_menu_name.list %}                                
+                                                        <li class="col-lg-3" style="padding-bottom:5px;">
+                                                            <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                    {% for data in sub_menu_name.list|unpermitted_menu_list:request.session.id %}
+                                                        <li class="col-lg-3" style="padding-bottom:5px;">
+                                                            <a href="#" class="mega-a access">{{data.menu_name}}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
                                             </li>
-                                        {% endfor %}
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </li>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for data in is_sub_menu.list %}                          
+                                                <li class="col-lg-3">
+                                                    <a href="{{data.menu__menu_url}}" class="mega-link">{{data.menu__menu_name}}</a>
+                                                </li>
+                                            {% endfor %}
+                                            {% for data in is_sub_menu.list|unpermitted_menu_list:request.session.id %}
+                                                <li class="col-lg-3">
+                                                    <a href="#" class="mega-a access">{{data.menu_name}}</a>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
                     {% endif %}   
                     {% endfor %}
                     {% if module_list|length > 3 %}
@@ -782,6 +877,13 @@
         </div>
     </nav>
 </header>
+<script>
+$(document).on('click', '.sub_menu_load', function () {
+    $(this).toggleClass('active');
+    $(this).next('.all_menu').slideToggle(200);
+});
+</script>
+
 <!-- ============================================================== -->
 <!-- End Topbar header -->
 <!-- ============================================================== -->
